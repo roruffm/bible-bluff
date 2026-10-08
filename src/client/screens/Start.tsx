@@ -67,7 +67,7 @@ export function Home() {
       </section>
 
       <footer class="footnote">
-        Fragen aus allen 27 Büchern des Neuen Testaments · freikirchlich-pfingstliche Lernfassung
+        Fragen aus allen 27 Büchern des Neuen Testaments und ausgewählten Geschichten des Alten Testaments · freikirchlich-pfingstliche Lernfassung
       </footer>
     </main>
   );
