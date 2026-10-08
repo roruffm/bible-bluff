@@ -4,8 +4,8 @@
   "description": "Bluffs erfinden, die Wahrheit finden, die Bibel entdecken.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#efe7dc",
-  "theme_color": "#3d2e26",
+  "background_color": "#e8f0f3",
+  "theme_color": "#12324a",
   "lang": "de",
   "icons": [
     {

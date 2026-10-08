@@ -352,7 +352,7 @@ function Panel({ view, conn, onClose }: { view: RoomView; conn: RoomConnection; 
         </section>
 
         <section class="sheet-section">
-          <h3>Farben auf diesem Gerät</h3>
+          <h3>Farben</h3>
           <ThemePicker compact />
         </section>
 

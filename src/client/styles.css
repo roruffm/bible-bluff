@@ -1,8 +1,8 @@
 /* Bible Bluff – Gestaltung angelehnt an die NT-Lernblätter:
    warmes Papier, Dunkelbraun, Gold und die Farben der Buchgruppen.
 
-   Farbkonzepte: Alle Farben laufen über die Variablen in :root. Die Namen stammen aus dem
-   Lernblatt-Standard, stehen aber für Rollen: --brown ist die dunkle Leiste (Kopfzeile,
+   Farbkonzepte: Alle Farben laufen über die Variablen in :root (Lernblatt). Die Namen stammen aus
+   dem Lernblatt, stehen aber für Rollen: --brown ist die dunkle Leiste (Kopfzeile,
    Hero, Raumcode-Karte), --cream die Schrift darauf, --gold der Akzent, --olive „richtig“,
    --rust „Bluff“. Die weiteren Konzepte (html[data-theme]) stehen am Ende der Datei. */
 
@@ -79,7 +79,8 @@
   color-scheme: light;
 }
 
-/* Lernblatt folgt der Systemeinstellung; die anderen Farbkonzepte sind fest hell oder dunkel. */
+/* Lernblatt folgt der Systemeinstellung; die anderen Farbkonzepte sind fest hell oder dunkel.
+   Standard für neue Geräte ist See Genezareth (lib/theme.ts). */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme]) {
     --paper: #1b1512;
@@ -856,20 +857,10 @@ textarea {
   box-shadow: 0 0 0 2px var(--sw-paper);
 }
 
-.theme-hint {
-  margin: -4px 0 12px;
-}
-
 .theme-name {
   font-weight: 800;
   font-size: 0.95rem;
   line-height: 1.15;
-}
-
-.theme-text {
-  font-size: 0.8rem;
-  line-height: 1.3;
-  color: var(--ink-2);
 }
 
 /* ───────── Spielrahmen ───────── */
@@ -2601,7 +2592,7 @@ html.tv-mode body {
 }
 
 /* ───────── Farbkonzepte ─────────
-   Lernblatt ist der Standard oben in :root. Jedes weitere Konzept setzt nur Variablen;
+   Lernblatt steht oben in :root; Standard für neue Geräte ist See Genezareth. Jedes weitere Konzept setzt nur Variablen;
    die Auswahl steht in lib/theme.ts. */
 
 :root[data-theme='nacht'] {

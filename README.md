@@ -122,22 +122,22 @@ Räume werden 24 Stunden nach der letzten Änderung gelöscht.
 
 ### Farben
 
-Jede Person wählt auf der Startseite oder im Menü ihr eigenes Farbkonzept. Die Wahl gilt nur auf diesem Gerät und bleibt gespeichert.
+Jede Person wählt auf der Startseite oder im Menü ihr eigenes Farbkonzept. Die Wahl gilt nur auf diesem Gerät und bleibt gespeichert. Wer nichts wählt, sieht See Genezareth.
 
 | Farbkonzept | Wirkung |
 | --- | --- |
-| Lernblatt (Standard) | Warmes Papier, Dunkelbraun und Gold wie die Lernblätter. Folgt Hell und Dunkel des Geräts. |
+| See Genezareth (Standard) | Tiefes Blau, Türkis und Sand. |
+| Lernblatt | Warmes Papier, Dunkelbraun und Gold wie die Lernblätter. Folgt Hell und Dunkel des Geräts. |
 | Nachtquiz | Dunkel mit Neonfarben wie in einer Quizshow. Am stärksten auf dem Beamer im abgedunkelten Raum. |
 | Spieltisch | Filzgrün, Kartenrot und Chipgold auf hellem Leinen. |
 | Comic | Sonnengelb, Schwarz und Pink mit harten Schatten. |
-| See Genezareth | Tiefes Blau, Türkis und Sand. |
 | Klar | Viel Weiß, Indigo und Koralle. Schlicht und gut lesbar. |
 
 Der Link „Leinwand-Ansicht öffnen“ nimmt das Farbkonzept der Spielleitung mit (`/tv/RAUMCODE?farbe=nacht`).
 
 ![Die sechs Farbkonzepte beim Abstimmen](docs/screenshots/farben.png)
 
-Technisch setzt jedes Konzept nur CSS-Variablen (`html[data-theme]` am Ende von `src/client/styles.css`); Namen und Vorschaufarben stehen in `src/client/lib/theme.ts`.
+Technisch setzt jedes Konzept nur CSS-Variablen (`html[data-theme]` am Ende von `src/client/styles.css`). Lernblatt steht direkt in `:root` und braucht kein `data-theme`. Namen, Vorschaufarben und der Standard stehen in `src/client/lib/theme.ts`.
 
 ## Logo
 
