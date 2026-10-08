@@ -38,6 +38,7 @@
   --g-allgemein: #4e6577;
   --g-prophetie: #b2492c;
   --g-nt: #3d2e26;
+  --g-at: #2f6f6a;
 
   /* Rollen, die sich je Farbkonzept anpassen lassen */
   --primary: var(--brown);
@@ -2627,6 +2628,7 @@ html.tv-mode body {
   --g-allgemein: #2389d1;
   --g-prophetie: #e62f92;
   --g-nt: #6d5fd6;
+  --g-at: #1b8f96;
   --primary: #ff3ea5;
   --on-primary: #fff;
   --seg-on: #29e3ef;
@@ -2690,6 +2692,7 @@ html.tv-mode body {
   --g-allgemein: #2563c9;
   --g-prophetie: #c8322b;
   --g-nt: #1f1a17;
+  --g-at: #2c6f6a;
   --on-gold: #1f1a17;
   --chrome-soft: rgba(241, 194, 75, 0.2);
   --chrome-line: rgba(255, 248, 230, 0.42);
@@ -2738,6 +2741,7 @@ html.tv-mode body {
   --g-allgemein: #2f66e8;
   --g-prophetie: #e0337f;
   --g-nt: #161616;
+  --g-at: #0b8079;
   --primary: #161616;
   --on-primary: #ffd93d;
   --seg-on: #161616;
@@ -2799,6 +2803,7 @@ html.tv-mode body {
   --g-allgemein: #2a6f8f;
   --g-prophetie: #d4502f;
   --g-nt: #12324a;
+  --g-at: #8a5a2b;
   --on-gold: #10283a;
   --olive-text: #0d6e64;
   --rust-text: #b9432a;
@@ -2849,6 +2854,7 @@ html.tv-mode body {
   --g-allgemein: #2479c4;
   --g-prophetie: #e2432f;
   --g-nt: #4338ca;
+  --g-at: #0e7490;
   --on-gold: #14162b;
   --olive-text: #0b7e55;
   --rust-text: #c9321f;

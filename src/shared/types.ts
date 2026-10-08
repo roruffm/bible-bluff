@@ -19,7 +19,8 @@ export type BookGroup =
   | 'pastoral'
   | 'allgemein'
   | 'prophetie'
-  | 'nt';
+  | 'nt'
+  | 'at';
 
 export type Action =
   | { type: 'start' }

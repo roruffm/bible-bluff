@@ -53,6 +53,7 @@ export const GROUP_LABELS: Record<BookGroup, string> = {
   allgemein: 'Allgemeine Lehrschriften',
   prophetie: 'Prophetie & Apokalypse',
   nt: 'Neues Testament',
+  at: 'Altes Testament',
 };
 
 export const PLAYER_COLORS = [
