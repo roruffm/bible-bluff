@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { BLUFF_MAX } from '../src/shared/rules';
 import { QUESTIONS } from '../src/server/questions';
 import { isDuplicate, isTooCloseToTruth } from '../src/server/text';
+import { SAFE_BLUFFS } from '../e2e/bluffs';
 
 describe('Fragenpool', () => {
   it('hat eindeutige IDs und deckt alle 27 Bücher ab', () => {
@@ -34,5 +35,20 @@ describe('Fragenpool', () => {
     for (let i = 0; i < q.bluffs.length; i++) {
       for (let j = i + 1; j < q.bluffs.length; j++) expect(isDuplicate(q.bluffs[i], q.bluffs[j])).toBe(false);
     }
+  });
+
+  it('kollidiert nicht mit den Bluff-Texten der End-to-End-Tests', () => {
+    for (const text of Object.values(SAFE_BLUFFS)) {
+      for (const q of QUESTIONS) {
+        expect(isTooCloseToTruth(text, q), `${text} ↔ ${q.id}`).toBe(false);
+        for (const b of q.bluffs) expect(isDuplicate(text, b), `${text} ↔ ${b}`).toBe(false);
+      }
+    }
+  });
+
+  it('erkennt Schlüsselwörter nicht mitten in fremden Wörtern', () => {
+    const eselin = QUESTIONS.find((q) => q.id === '2petr-eselin')!;
+    expect(isTooCloseToTruth('Siebzehn polierte Kieselsteine', eselin)).toBe(false);
+    expect(isTooCloseToTruth('Bileams Esel', eselin)).toBe(true);
   });
 });

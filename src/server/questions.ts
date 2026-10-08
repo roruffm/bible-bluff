@@ -1260,7 +1260,7 @@ export const QUESTIONS: Question[] = [
     difficulty: 2,
     prompt: 'Wer wies laut 2. Petrus den Propheten Bileam zurecht?',
     answer: 'Seine Eselin',
-    accept: [['*esel']],
+    accept: [['esel'], ['*eselin']],
     bluffs: ['Ein Rabe', 'Seine Frau', 'Ein Hirtenjunge'],
     ref: '2. Petrus 2,15-16',
     discovery: 'Ein stummes Lasttier redet mit Menschenstimme: ein drastisches Bild gegen Verkündiger, die aus Gier handeln (4. Mose 22).',

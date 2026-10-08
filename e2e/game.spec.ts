@@ -1,4 +1,5 @@
 import { type Browser, type Page, expect, test } from '@playwright/test';
+import { SAFE_BLUFFS } from './bluffs';
 
 async function phone(browser: Browser, name: string): Promise<Page> {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
@@ -53,29 +54,30 @@ test('eine komplette Partie auf drei Handys und der Leinwand', async ({ browser 
   for (const p of [host, jonas, mirjam, tv]) await expect(p.getByText('Runde 1 von 4')).toBeVisible();
 
   // Bluffs schreiben – Jonas lässt sich einen Vorschlag geben
-  await host.getByLabel('Deine erfundene Antwort').fill('Ein Krug voller Honig');
+  await host.getByLabel('Deine erfundene Antwort').fill(SAFE_BLUFFS.host);
   await host.getByRole('button', { name: 'Bluff abgeben' }).click();
   await expect(host.getByText('Dein Bluff ist drin')).toBeVisible();
   await jonas.getByRole('button', { name: /Vorschlag/ }).click();
   await expect(jonas.getByLabel('Deine erfundene Antwort')).not.toHaveValue('');
   await jonas.getByRole('button', { name: 'Bluff abgeben' }).click();
-  await mirjam.getByLabel('Deine erfundene Antwort').fill('Drei Schriftrollen und Salz');
+  await expect(jonas.getByText('Dein Bluff ist drin')).toBeVisible();
+  await mirjam.getByLabel('Deine erfundene Antwort').fill(SAFE_BLUFFS.mirjam);
   await mirjam.getByRole('button', { name: 'Bluff abgeben' }).click();
 
   // Abstimmung beginnt, sobald alle abgegeben haben
   for (const p of [host, jonas, mirjam]) await expect(p.getByText('Welche Antwort stimmt?')).toBeVisible();
   await expect(host.locator('.option.is-mine')).toHaveCount(1);
-  await expect(host.locator('.option.is-mine')).toContainText('Ein Krug voller Honig');
+  await expect(host.locator('.option.is-mine')).toContainText(SAFE_BLUFFS.host);
   await expect(tv.locator('.option')).toHaveCount(await host.locator('.option').count());
 
   // Jonas und Mirjam fallen auf Rahels Bluff herein, Rahel wählt irgendeine andere Antwort
-  await jonas.locator('.option', { hasText: 'Ein Krug voller Honig' }).click();
-  await mirjam.locator('.option', { hasText: 'Ein Krug voller Honig' }).click();
+  await jonas.locator('.option', { hasText: SAFE_BLUFFS.host }).click();
+  await mirjam.locator('.option', { hasText: SAFE_BLUFFS.host }).click();
   await host.locator('button.option:not([disabled])').first().click();
 
   // Aufdeckung – synchron auf allen Geräten
   for (const p of [host, jonas, tv]) await expect(p.getByText('Aufdeckung').first()).toBeVisible();
-  await expect(jonas.locator('.reveal-text', { hasText: 'Ein Krug voller Honig' })).toBeVisible({ timeout: 30_000 });
+  await expect(jonas.locator('.reveal-text', { hasText: SAFE_BLUFFS.host })).toBeVisible({ timeout: 30_000 });
   await expect(jonas.getByText('Du bist darauf hereingefallen')).toBeVisible({ timeout: 10_000 });
   await expect(host.getByText(/Dein Bluff! 2 Personen reingelegt/)).toBeVisible({ timeout: 10_000 });
   await expect(tv.locator('.stamp-bluff')).toBeVisible();
@@ -132,10 +134,10 @@ test('Spielleitung am Beamer: Pause, Wiedereinstieg und Entfernen', async ({ bro
   await expect(anna.getByRole('dialog', { name: 'Pause' })).toHaveCount(0);
 
   // Neu laden kostet nichts: Anna ist sofort wieder im Spiel
-  await anna.getByLabel('Deine erfundene Antwort').fill('Eine Harfe aus Zedernholz');
+  await anna.getByLabel('Deine erfundene Antwort').fill(SAFE_BLUFFS.anna);
   await anna.getByRole('button', { name: 'Bluff abgeben' }).click();
   await anna.reload();
-  await expect(anna.getByText('„Eine Harfe aus Zedernholz“')).toBeVisible();
+  await expect(anna.getByText(`„${SAFE_BLUFFS.anna}“`)).toBeVisible();
 
   // Leere Eingaben lassen sich gar nicht erst abschicken
   await expect(ben.getByRole('button', { name: 'Bluff abgeben' })).toBeDisabled();
