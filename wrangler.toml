@@ -2,6 +2,10 @@ name = "bible-bluff"
 main = "src/worker.ts"
 compatibility_date = "2026-09-01"
 
+# Erreichbar unter bible-bluff.<subdomain>.workers.dev; Vorschauen je Pull-Request ebenfalls.
+workers_dev = true
+preview_urls = true
+
 # `wrangler deploy` (auch in Cloudflares Git-Anbindung „Workers Builds“) baut die App zuerst selbst.
 [build]
 command = "npm run build"
