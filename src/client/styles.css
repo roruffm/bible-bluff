@@ -1,5 +1,10 @@
 /* Bible Bluff – Gestaltung angelehnt an die NT-Lernblätter:
-   warmes Papier, Dunkelbraun, Gold und die Farben der Buchgruppen. */
+   warmes Papier, Dunkelbraun, Gold und die Farben der Buchgruppen.
+
+   Farbkonzepte: Alle Farben laufen über die Variablen in :root. Die Namen stammen aus dem
+   Lernblatt-Standard, stehen aber für Rollen: --brown ist die dunkle Leiste (Kopfzeile,
+   Hero, Raumcode-Karte), --cream die Schrift darauf, --gold der Akzent, --olive „richtig“,
+   --rust „Bluff“. Die weiteren Konzepte (html[data-theme]) stehen am Ende der Datei. */
 
 :root {
   --paper: #efe7dc;
@@ -34,15 +39,49 @@
   --g-prophetie: #b2492c;
   --g-nt: #3d2e26;
 
+  /* Rollen, die sich je Farbkonzept anpassen lassen */
+  --primary: var(--brown);
+  --on-primary: var(--cream);
+  --seg-on: var(--brown);
+  --on-seg-on: var(--cream);
+  --on-gold: #2b211c;
+  --on-olive: #fff;
+  --on-rust: #fff;
+  --on-ochre: #fff;
+  --on-group: #fff;
+  --olive-text: var(--olive);
+  --rust-text: var(--rust);
+  --plum-text: var(--plum);
+  --chrome-soft: rgba(242, 217, 160, 0.16);
+  --chrome-line: rgba(251, 243, 228, 0.38);
+  --overlay: rgba(27, 21, 18, 0.55);
+  --paper-gloss: rgba(255, 255, 255, 0.55);
+  --glow: rgba(226, 182, 92, 0.35);
+  --glow-strong: rgba(226, 182, 92, 0.9);
+  --online: #4f9d3a;
+  /* Leere Anzeigen: Schalter aus, offline, noch nicht aufgedeckt */
+  --track: var(--line);
+  --page-art: none;
+  --page-art-size: auto;
+
+  --logo-ink: #2b211c;
+  --logo-cover: #b2492c;
+  --logo-pages: #fbf3e4;
+  --logo-ribbon: #e2b65c;
+  --logo-mask: #f2d9a0;
+  --logo-spark: #f2d9a0;
+
   --radius: 18px;
   --radius-sm: 12px;
   --shadow: 0 1px 0 rgba(61, 46, 38, 0.06), 0 10px 28px -16px rgba(61, 46, 38, 0.45);
+  --shadow-lift: 0 18px 40px -22px rgba(61, 46, 38, 0.7);
   --font: 'Figtree', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   color-scheme: light;
 }
 
+/* Lernblatt folgt der Systemeinstellung; die anderen Farbkonzepte sind fest hell oder dunkel. */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme]) {
     --paper: #1b1512;
     --paper-2: #241c18;
     --card: #2a211c;
@@ -59,6 +98,15 @@
     --rust-soft: #4a261c;
     --plum-soft: #3c2532;
     --shadow: 0 10px 28px -16px rgba(0, 0, 0, 0.8);
+    --shadow-lift: 0 18px 40px -22px rgba(0, 0, 0, 0.85);
+    --primary: var(--cream);
+    --on-primary: #2b211c;
+    --seg-on: var(--gold);
+    --on-seg-on: #2b211c;
+    --olive-text: #b9c97c;
+    --rust-text: #ffb7a3;
+    --plum-text: #f3c6e2;
+    --paper-gloss: rgba(255, 255, 255, 0.05);
     color-scheme: dark;
   }
 }
@@ -75,7 +123,10 @@ html {
 body {
   margin: 0;
   min-height: 100dvh;
-  background: var(--paper);
+  background-color: var(--paper);
+  background-image: var(--page-art);
+  background-size: var(--page-art-size);
+  background-attachment: fixed;
   color: var(--ink);
   font-family: var(--font);
   font-size: 17px;
@@ -184,7 +235,7 @@ textarea {
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--rust);
+  color: var(--rust-text);
 }
 
 .lead {
@@ -198,6 +249,10 @@ textarea {
   border-radius: var(--radius);
   padding: 18px;
   box-shadow: var(--shadow);
+}
+
+.card > h2 {
+  margin-bottom: 12px;
 }
 
 .card-title {
@@ -217,7 +272,7 @@ textarea {
   padding: 0 0.4em;
   border-radius: 999px;
   background: var(--olive);
-  color: #fff;
+  color: var(--on-olive);
   font-size: 0.85rem;
 }
 
@@ -230,27 +285,63 @@ textarea {
 
 .error {
   background: var(--rust-soft);
-  color: var(--rust);
+  color: var(--rust-text);
   border-radius: var(--radius-sm);
   padding: 10px 12px;
   font-weight: 600;
-}
-
-@media (prefers-color-scheme: dark) {
-  .error {
-    color: #ffb7a3;
-  }
 }
 
 /* ───────── Logo & Startseite ───────── */
 
 .logo {
   display: inline-flex;
-  flex-direction: column;
-  line-height: 0.92;
+  align-items: center;
+  gap: 0.16em;
   font-weight: 800;
   letter-spacing: -0.03em;
   font-size: 3.6rem;
+}
+
+.logo-words {
+  display: inline-flex;
+  flex-direction: column;
+  line-height: 0.92;
+}
+
+.logo-mark {
+  flex: none;
+  width: 1.95em;
+  height: 1.95em;
+  overflow: visible;
+}
+
+/* Farben der Bildmarke folgen dem Farbkonzept */
+.logo-mark .lm-line {
+  stroke: var(--logo-ink);
+}
+.logo-mark .lm-cover {
+  fill: var(--logo-cover);
+}
+.logo-mark .lm-pages {
+  fill: var(--logo-pages);
+}
+.logo-mark .lm-ribbon {
+  fill: var(--logo-ribbon);
+}
+.logo-mark .lm-mask {
+  fill: var(--logo-mask);
+}
+.logo-mark .lm-shine {
+  stroke: var(--logo-pages);
+}
+.logo-mark .lm-pupil {
+  fill: var(--logo-ink);
+}
+.logo-mark .lm-glint {
+  fill: var(--logo-pages);
+}
+.logo-mark .logo-spark {
+  fill: var(--logo-spark);
 }
 
 .logo-top {
@@ -263,9 +354,35 @@ textarea {
 
 .logo-small {
   font-size: 1.05rem;
+  gap: 0.35em;
+}
+
+.logo-small .logo-words {
   flex-direction: row;
   gap: 0.25em;
   line-height: 1;
+}
+
+.logo-small .logo-mark {
+  width: 1.75em;
+  height: 1.75em;
+}
+
+/* Großes Logo: das Buch kippt leicht, der Stern funkelt, das Auge blinzelt ab und zu */
+.logo:not(.logo-small) .logo-mark {
+  transform: rotate(-6deg);
+}
+
+.logo:not(.logo-small) .logo-spark {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: twinkle 4.5s ease-in-out infinite;
+}
+
+.logo:not(.logo-small) .logo-eye {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: blink 7s ease-in-out infinite;
 }
 
 .page-head .logo-small .logo-top,
@@ -296,7 +413,7 @@ textarea {
   width: 160px;
   height: 160px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(242, 217, 160, 0.22), transparent 70%);
+  background: radial-gradient(circle, color-mix(in srgb, var(--gold) 24%, transparent), transparent 70%);
 }
 
 .tagline {
@@ -436,17 +553,9 @@ textarea {
 }
 
 .segmented button.is-on {
-  background: var(--brown);
-  color: var(--cream);
+  background: var(--seg-on);
+  color: var(--on-seg-on);
   box-shadow: 0 2px 6px -2px rgba(0, 0, 0, 0.4);
-}
-
-@media (prefers-color-scheme: dark) {
-  .segmented button.is-on {
-    background: var(--gold);
-    color: var(--ink);
-    color: #2b211c;
-  }
 }
 
 .toggle {
@@ -468,7 +577,7 @@ textarea {
   width: 52px;
   height: 32px;
   border-radius: 999px;
-  background: var(--line);
+  background: var(--track);
   position: relative;
   transition: background 0.2s;
 }
@@ -557,19 +666,19 @@ textarea {
 }
 
 .btn-primary {
-  background: var(--brown);
-  color: var(--cream);
+  background: var(--primary);
+  color: var(--on-primary);
 }
 
 .btn-gold {
   background: var(--gold);
-  color: #2b211c;
-  border-color: #2b211c;
-  box-shadow: 0 3px 0 #2b211c;
+  color: var(--on-gold);
+  border-color: var(--on-gold);
+  box-shadow: 0 3px 0 var(--on-gold);
 }
 
 .btn-gold:active:not(:disabled) {
-  box-shadow: 0 1px 0 #2b211c;
+  box-shadow: 0 1px 0 var(--on-gold);
   transform: translateY(2px);
 }
 
@@ -590,18 +699,11 @@ textarea {
 
 .btn-danger {
   background: var(--rust);
-  color: #fff;
+  color: var(--on-rust);
 }
 
 .btn.is-busy {
   opacity: 0.7;
-}
-
-@media (prefers-color-scheme: dark) {
-  .btn-primary {
-    background: var(--cream);
-    color: #2b211c;
-  }
 }
 
 /* ───────── Regeln ───────── */
@@ -647,7 +749,127 @@ textarea {
 }
 
 .points b {
-  color: var(--olive);
+  color: var(--olive-text);
+}
+
+/* ───────── Farbkonzept-Auswahl ───────── */
+
+.theme-picker {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.theme-picker.is-compact {
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 8px;
+}
+
+.theme-option {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 8px 8px 10px;
+  border-radius: 14px;
+  border: 2px solid var(--line);
+  background: var(--card);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    transform 0.08s;
+}
+
+.theme-option:active {
+  transform: scale(0.97);
+}
+
+.theme-option:focus-visible {
+  outline: 3px solid var(--gold-2);
+  outline-offset: 2px;
+}
+
+.theme-option.is-on {
+  border-color: var(--ink);
+  box-shadow: 0 0 0 2px var(--ink);
+}
+
+.theme-swatch {
+  position: relative;
+  width: 100%;
+  height: 54px;
+  border-radius: 9px;
+  overflow: hidden;
+  background: var(--sw-paper);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
+}
+
+.is-compact .theme-swatch {
+  height: 40px;
+}
+
+/* Leiste oben, darunter zwei Akzente und eine „Karte“ */
+.theme-swatch i {
+  position: absolute;
+  display: block;
+}
+
+.theme-swatch i:nth-child(1) {
+  inset: 0 0 auto 0;
+  height: 34%;
+  background: var(--sw-bar);
+}
+
+.theme-swatch i:nth-child(2) {
+  left: 10%;
+  bottom: 14%;
+  width: 22%;
+  height: 34%;
+  border-radius: 999px;
+  background: var(--sw-a);
+}
+
+.theme-swatch i:nth-child(3) {
+  left: 38%;
+  bottom: 14%;
+  width: 22%;
+  height: 34%;
+  border-radius: 999px;
+  background: var(--sw-b);
+}
+
+.theme-option.is-on .theme-swatch::after {
+  content: '✓';
+  position: absolute;
+  right: 6px;
+  bottom: 5px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 0.75rem;
+  font-weight: 800;
+  background: var(--sw-bar);
+  color: #fff;
+  box-shadow: 0 0 0 2px var(--sw-paper);
+}
+
+.theme-hint {
+  margin: -4px 0 12px;
+}
+
+.theme-name {
+  font-weight: 800;
+  font-size: 0.95rem;
+  line-height: 1.15;
+}
+
+.theme-text {
+  font-size: 0.8rem;
+  line-height: 1.3;
+  color: var(--ink-2);
 }
 
 /* ───────── Spielrahmen ───────── */
@@ -677,7 +899,7 @@ textarea {
   font-weight: 800;
   letter-spacing: 0.12em;
   font-size: 0.85rem;
-  background: rgba(242, 217, 160, 0.16);
+  background: var(--chrome-soft);
   color: var(--gold);
   border-radius: 8px;
   padding: 3px 8px;
@@ -697,7 +919,7 @@ textarea {
 }
 
 .topbar-menu {
-  border: 1.5px solid rgba(251, 243, 228, 0.35);
+  border: 1.5px solid var(--chrome-line);
   background: transparent;
   color: var(--cream);
   border-radius: 10px;
@@ -720,7 +942,7 @@ textarea {
   top: 54px;
   z-index: 19;
   background: var(--rust);
-  color: #fff;
+  color: var(--on-rust);
   text-align: center;
   font-weight: 700;
   font-size: 0.9rem;
@@ -786,7 +1008,7 @@ textarea {
 }
 
 .chip-note {
-  color: var(--olive);
+  color: var(--olive-text);
   font-weight: 800;
 }
 
@@ -798,7 +1020,7 @@ textarea {
   border-radius: 6px;
   padding: 2px 7px;
   background: var(--gold);
-  color: #2b211c;
+  color: var(--on-gold);
 }
 
 .badge.is-soft {
@@ -810,13 +1032,13 @@ textarea {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: var(--line);
+  background: var(--track);
   margin-left: auto;
 }
 
 .dot.is-on {
-  background: #4f9d3a;
-  box-shadow: 0 0 0 3px rgba(79, 157, 58, 0.18);
+  background: var(--online);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--online) 18%, transparent);
 }
 
 /* ───────── Lobby ───────── */
@@ -873,7 +1095,7 @@ textarea {
 .code-card .btn-secondary {
   background: transparent;
   color: var(--cream);
-  border-color: rgba(251, 243, 228, 0.4);
+  border-color: var(--chrome-line);
 }
 
 .qr {
@@ -1028,7 +1250,7 @@ textarea {
 }
 
 .timer.is-urgent .timer-num {
-  color: var(--rust);
+  color: var(--rust-text);
   animation: pulse 1s ease-in-out infinite;
 }
 
@@ -1062,7 +1284,7 @@ textarea {
 
 .book-chip {
   background: var(--g);
-  color: #fff;
+  color: var(--on-group);
   font-weight: 800;
   font-size: 0.8rem;
   border-radius: 8px;
@@ -1085,7 +1307,7 @@ textarea {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--line);
+  background: var(--track);
 }
 
 .difficulty i.on {
@@ -1124,7 +1346,7 @@ textarea {
 }
 
 .submitted .eyebrow {
-  color: var(--olive);
+  color: var(--olive-text);
 }
 
 .submitted-text {
@@ -1179,7 +1401,7 @@ textarea {
   height: 16px;
   border-radius: 50%;
   background: var(--olive);
-  color: #fff;
+  color: var(--on-olive);
   font-size: 0.65rem;
   display: grid;
   place-items: center;
@@ -1286,11 +1508,11 @@ textarea {
 
 .option.is-chosen .option-letter {
   background: var(--olive);
-  color: #fff;
+  color: var(--on-olive);
 }
 
 .option-tag.is-check {
-  color: var(--olive);
+  color: var(--olive-text);
 }
 
 /* ───────── Aufdeckung ───────── */
@@ -1334,12 +1556,12 @@ textarea {
   position: relative;
   width: 100%;
   background:
-    radial-gradient(120% 80% at 10% 0%, rgba(255, 255, 255, 0.55), transparent 60%),
+    radial-gradient(120% 80% at 10% 0%, var(--paper-gloss), transparent 60%),
     var(--card);
   border: 2.5px solid var(--line-strong);
   border-radius: 18px;
   padding: 30px 22px;
-  box-shadow: 0 18px 40px -22px rgba(61, 46, 38, 0.7);
+  box-shadow: var(--shadow-lift);
   transform: rotate(-1.2deg);
   animation: cardIn 0.6s cubic-bezier(0.2, 0.9, 0.3, 1.25) both;
 }
@@ -1387,7 +1609,7 @@ textarea {
 }
 
 .stamp-bluff {
-  color: var(--rust);
+  color: var(--rust-text);
 }
 
 .stamp-house {
@@ -1395,7 +1617,7 @@ textarea {
 }
 
 .stamp-truth {
-  color: var(--olive);
+  color: var(--olive-text);
 }
 
 .is-bluff.is-exposed .paper {
@@ -1412,8 +1634,8 @@ textarea {
   background: var(--gold-soft);
   border-color: var(--olive);
   box-shadow:
-    0 0 0 6px rgba(226, 182, 92, 0.35),
-    0 18px 40px -22px rgba(61, 46, 38, 0.7);
+    0 0 0 6px var(--glow),
+    var(--shadow-lift);
   animation:
     cardIn 0.6s cubic-bezier(0.2, 0.9, 0.3, 1.25) both,
     glow 1.2s ease-out both;
@@ -1441,7 +1663,7 @@ textarea {
   top: -14px;
   right: -10px;
   background: var(--olive);
-  color: #fff;
+  color: var(--on-olive);
   font-weight: 800;
   font-size: 0.85rem;
   border-radius: 999px;
@@ -1455,7 +1677,7 @@ textarea {
 .ref-line {
   font-weight: 800;
   font-size: 1.1rem;
-  color: var(--olive);
+  color: var(--olive-text);
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -1467,7 +1689,7 @@ textarea {
 
 .nobody {
   font-weight: 700;
-  color: var(--rust);
+  color: var(--rust-text);
 }
 
 .personal {
@@ -1479,18 +1701,12 @@ textarea {
 
 .personal.is-fooled {
   background: var(--plum-soft);
-  color: var(--plum);
+  color: var(--plum-text);
 }
 
 .personal.is-proud {
   background: var(--gold);
-  color: #2b211c;
-}
-
-@media (prefers-color-scheme: dark) {
-  .personal.is-fooled {
-    color: #f3c6e2;
-  }
+  color: var(--on-gold);
 }
 
 .sparks {
@@ -1624,7 +1840,7 @@ textarea {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--line);
+  background: var(--track);
   transition:
     transform 0.2s,
     background 0.2s;
@@ -1666,14 +1882,7 @@ textarea {
 .discovery-answer {
   font-size: 1.35rem;
   font-weight: 800;
-  color: var(--olive);
-}
-
-@media (prefers-color-scheme: dark) {
-  .discovery-answer,
-  .ref-line {
-    color: #b9c97c;
-  }
+  color: var(--olive-text);
 }
 
 .discovery-ref {
@@ -1681,7 +1890,7 @@ textarea {
   font-size: 0.95rem;
   align-self: flex-start;
   background: var(--olive);
-  color: #fff;
+  color: var(--on-olive);
   border-radius: 8px;
   padding: 3px 10px;
 }
@@ -1700,7 +1909,7 @@ textarea {
   writing-mode: vertical-rl;
   transform: rotate(180deg);
   background: var(--ochre);
-  color: #fff;
+  color: var(--on-ochre);
   font-size: 0.65rem;
   font-weight: 800;
   letter-spacing: 0.16em;
@@ -1770,21 +1979,12 @@ textarea {
 
 .delta.is-truth {
   background: var(--olive-soft);
-  color: var(--olive);
+  color: var(--olive-text);
 }
 
 .delta.is-bluff {
   background: var(--rust-soft);
-  color: var(--rust);
-}
-
-@media (prefers-color-scheme: dark) {
-  .delta.is-truth {
-    color: #b9c97c;
-  }
-  .delta.is-bluff {
-    color: #ffb7a3;
-  }
+  color: var(--rust-text);
 }
 
 .score-total {
@@ -1870,7 +2070,7 @@ textarea {
 .place-1 .podium-block {
   height: 120px;
   background: var(--gold);
-  color: #2b211c;
+  color: var(--on-gold);
 }
 
 .place-2 .podium-block {
@@ -1915,13 +2115,13 @@ textarea {
 }
 
 .award-bluffer .award-title {
-  color: var(--rust);
+  color: var(--rust-text);
 }
 .award-finder .award-title {
-  color: var(--olive);
+  color: var(--olive-text);
 }
 .award-trusting .award-title {
-  color: var(--plum);
+  color: var(--plum-text);
 }
 
 .discoveries ol {
@@ -1966,7 +2166,7 @@ textarea {
   display: grid;
   place-items: center;
   padding: 20px;
-  background: rgba(27, 21, 18, 0.55);
+  background: var(--overlay);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
 }
@@ -1993,7 +2193,7 @@ textarea {
   position: fixed;
   inset: 0;
   z-index: 50;
-  background: rgba(27, 21, 18, 0.5);
+  background: var(--overlay);
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -2087,7 +2287,7 @@ textarea {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  border: 4px solid var(--line);
+  border: 4px solid var(--track);
   border-top-color: var(--ochre);
   animation: spin 0.9s linear infinite;
 }
@@ -2291,13 +2491,13 @@ html.tv-mode body {
 @keyframes glow {
   0% {
     box-shadow:
-      0 0 0 0 rgba(226, 182, 92, 0.9),
-      0 18px 40px -22px rgba(61, 46, 38, 0.7);
+      0 0 0 0 var(--glow-strong),
+      var(--shadow-lift);
   }
   100% {
     box-shadow:
-      0 0 0 6px rgba(226, 182, 92, 0.35),
-      0 18px 40px -22px rgba(61, 46, 38, 0.7);
+      0 0 0 6px var(--glow),
+      var(--shadow-lift);
   }
 }
 
@@ -2359,6 +2559,31 @@ html.tv-mode body {
   }
 }
 
+@keyframes twinkle {
+  0%,
+  70%,
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+  80% {
+    transform: scale(1.4) rotate(25deg);
+  }
+  90% {
+    transform: scale(0.9) rotate(0deg);
+  }
+}
+
+@keyframes blink {
+  0%,
+  93%,
+  100% {
+    transform: scaleY(1);
+  }
+  96% {
+    transform: scaleY(0.12);
+  }
+}
+
 @keyframes spin {
   to {
     transform: rotate(360deg);
@@ -2373,4 +2598,281 @@ html.tv-mode body {
     animation-iteration-count: 1 !important;
     transition-duration: 1ms !important;
   }
+}
+
+/* ───────── Farbkonzepte ─────────
+   Lernblatt ist der Standard oben in :root. Jedes weitere Konzept setzt nur Variablen;
+   die Auswahl steht in lib/theme.ts. */
+
+:root[data-theme='nacht'] {
+  color-scheme: dark;
+  --paper: #140a33;
+  --paper-2: #1f1347;
+  --card: #1f1449;
+  --card-2: #190f3d;
+  --ink: #f4efff;
+  --ink-2: #c8bff0;
+  --ink-3: #8f85c4;
+  --line: #3b2e72;
+  --line-strong: #29e3ef;
+  --brown: #0b0520;
+  --brown-2: #4a3a8f;
+  --cream: #f4efff;
+  --gold: #ffd23f;
+  --gold-2: #ff9f1c;
+  --gold-soft: #35235f;
+  --olive: #8bff6a;
+  --olive-soft: #1d3a2e;
+  --rust: #ff3ea5;
+  --rust-soft: #4a1640;
+  --plum: #a77bff;
+  --plum-soft: #2f2160;
+  --slate: #29e3ef;
+  --ochre: #ffd23f;
+  --g-evangelien: #1fa463;
+  --g-geschichte: #f06a22;
+  --g-paulus: #b98400;
+  --g-pastoral: #b44fe0;
+  --g-allgemein: #2389d1;
+  --g-prophetie: #e62f92;
+  --g-nt: #6d5fd6;
+  --primary: #ff3ea5;
+  --on-primary: #fff;
+  --seg-on: #29e3ef;
+  --on-seg-on: #140a33;
+  --on-gold: #140a33;
+  --on-olive: #140a33;
+  --on-ochre: #140a33;
+  --olive-text: #8bff6a;
+  --rust-text: #ff7ac0;
+  --plum-text: #cdb6ff;
+  --chrome-soft: rgba(41, 227, 239, 0.14);
+  --chrome-line: rgba(41, 227, 239, 0.5);
+  --overlay: rgba(5, 2, 18, 0.72);
+  --paper-gloss: rgba(41, 227, 239, 0.08);
+  --glow: rgba(255, 210, 63, 0.35);
+  --glow-strong: rgba(255, 210, 63, 0.9);
+  --online: #8bff6a;
+  --track: #3b2e72;
+  --shadow: 0 12px 30px -16px rgba(0, 0, 0, 0.9);
+  --shadow-lift: 0 0 34px -8px rgba(255, 62, 165, 0.5), 0 18px 40px -22px rgba(0, 0, 0, 0.9);
+  --page-art:
+    radial-gradient(60vmax 40vmax at 0% 0%, rgba(255, 62, 165, 0.18), transparent 70%),
+    radial-gradient(60vmax 40vmax at 100% 60%, rgba(41, 227, 239, 0.12), transparent 70%);
+  --logo-ink: #140a33;
+  --logo-cover: #ff3ea5;
+  --logo-pages: #f6f1ff;
+  --logo-ribbon: #29e3ef;
+  --logo-mask: #ffd23f;
+  --logo-spark: #ffd23f;
+}
+
+:root[data-theme='spieltisch'] {
+  color-scheme: light;
+  --paper: #ebe5d3;
+  --paper-2: #e0d8c2;
+  --card: #fffdf6;
+  --card-2: #f6f0e1;
+  --ink: #1f1a17;
+  --ink-2: #4f463e;
+  --ink-3: #7d7163;
+  --line: #d5c9b0;
+  --line-strong: #1f1a17;
+  --brown: #1b5e40;
+  --brown-2: #2c7a55;
+  --cream: #fff8e6;
+  --gold: #f1c24b;
+  --gold-2: #d9a21b;
+  --gold-soft: #f8ecc6;
+  --olive: #1f7f4e;
+  --olive-soft: #d9eedf;
+  --rust: #c8322b;
+  --rust-soft: #f6dad6;
+  --plum: #6a3fa0;
+  --plum-soft: #e8def3;
+  --slate: #2563c9;
+  --ochre: #a8780a;
+  --g-evangelien: #1f7f4e;
+  --g-geschichte: #8a5a34;
+  --g-paulus: #a8780a;
+  --g-pastoral: #6a3fa0;
+  --g-allgemein: #2563c9;
+  --g-prophetie: #c8322b;
+  --g-nt: #1f1a17;
+  --on-gold: #1f1a17;
+  --chrome-soft: rgba(241, 194, 75, 0.2);
+  --chrome-line: rgba(255, 248, 230, 0.42);
+  --overlay: rgba(10, 30, 20, 0.55);
+  --glow: rgba(241, 194, 75, 0.4);
+  --glow-strong: rgba(241, 194, 75, 0.9);
+  --shadow: 0 1px 0 rgba(31, 26, 23, 0.06), 0 10px 26px -14px rgba(20, 50, 35, 0.5);
+  --shadow-lift: 0 18px 40px -20px rgba(20, 50, 35, 0.65);
+  --logo-ink: #1f1a17;
+  --logo-cover: #c8322b;
+  --logo-pages: #fffdf6;
+  --logo-ribbon: #f1c24b;
+  --logo-mask: #f2d9a0;
+  --logo-spark: #f1c24b;
+}
+
+:root[data-theme='comic'] {
+  color-scheme: light;
+  --paper: #ffd93d;
+  --paper-2: #ffe680;
+  --card: #ffffff;
+  --card-2: #fff6cc;
+  --ink: #161616;
+  --ink-2: #3a3528;
+  --ink-3: #5f573f;
+  --line: #161616;
+  --line-strong: #161616;
+  --brown: #161616;
+  --brown-2: #3d7bff;
+  --cream: #ffffff;
+  --gold: #ff4f9a;
+  --gold-2: #3d7bff;
+  --gold-soft: #ffe1ee;
+  --olive: #12b85f;
+  --olive-soft: #cdf7dd;
+  --rust: #e5262b;
+  --rust-soft: #ffd9d9;
+  --plum: #7c4dff;
+  --plum-soft: #e7defe;
+  --slate: #3d7bff;
+  --ochre: #2f66e8;
+  --g-evangelien: #0f9a50;
+  --g-geschichte: #e06a0c;
+  --g-paulus: #a87400;
+  --g-pastoral: #7c4dff;
+  --g-allgemein: #2f66e8;
+  --g-prophetie: #e0337f;
+  --g-nt: #161616;
+  --primary: #161616;
+  --on-primary: #ffd93d;
+  --seg-on: #161616;
+  --on-seg-on: #ffd93d;
+  --on-gold: #161616;
+  --on-olive: #161616;
+  --olive-text: #087a3a;
+  --rust-text: #c5161b;
+  --plum-text: #5a2fd0;
+  --chrome-soft: rgba(255, 79, 154, 0.2);
+  --chrome-line: rgba(255, 255, 255, 0.5);
+  --overlay: rgba(22, 22, 22, 0.55);
+  --paper-gloss: rgba(255, 255, 255, 0);
+  --glow: rgba(61, 123, 255, 0.35);
+  --glow-strong: rgba(61, 123, 255, 0.9);
+  --online: #12b85f;
+  --track: rgba(22, 22, 22, 0.2);
+  --shadow: 4px 4px 0 #161616;
+  --shadow-lift: 7px 7px 0 #161616;
+  --page-art: radial-gradient(rgba(0, 0, 0, 0.07) 1.5px, transparent 1.7px);
+  --page-art-size: 14px 14px;
+  --logo-ink: #161616;
+  --logo-cover: #ff4f9a;
+  --logo-pages: #ffffff;
+  --logo-ribbon: #3d7bff;
+  --logo-mask: #ffe066;
+  --logo-spark: #ffffff;
+}
+
+:root[data-theme='see'] {
+  color-scheme: light;
+  --paper: #e8f0f3;
+  --paper-2: #d9e6eb;
+  --card: #ffffff;
+  --card-2: #f2f7f9;
+  --ink: #10283a;
+  --ink-2: #3d586a;
+  --ink-3: #657d8d;
+  --line: #c6d6de;
+  --line-strong: #10283a;
+  --brown: #12324a;
+  --brown-2: #2a6f8f;
+  --cream: #f6efe0;
+  --gold: #f2c879;
+  --gold-2: #e0a43a;
+  --gold-soft: #fbefd5;
+  --olive: #12857a;
+  --olive-soft: #d3eeea;
+  --rust: #df5b3c;
+  --rust-soft: #fbe0d8;
+  --plum: #6b4c9a;
+  --plum-soft: #e7e0f2;
+  --slate: #2a6f8f;
+  --ochre: #b0760f;
+  --g-evangelien: #12857a;
+  --g-geschichte: #9a5f36;
+  --g-paulus: #b0760f;
+  --g-pastoral: #6b4c9a;
+  --g-allgemein: #2a6f8f;
+  --g-prophetie: #d4502f;
+  --g-nt: #12324a;
+  --on-gold: #10283a;
+  --olive-text: #0d6e64;
+  --rust-text: #b9432a;
+  --chrome-soft: rgba(242, 200, 121, 0.18);
+  --chrome-line: rgba(246, 239, 224, 0.42);
+  --overlay: rgba(8, 24, 36, 0.55);
+  --glow: rgba(242, 200, 121, 0.45);
+  --glow-strong: rgba(242, 200, 121, 0.95);
+  --shadow: 0 1px 0 rgba(16, 40, 58, 0.05), 0 10px 28px -16px rgba(16, 40, 58, 0.45);
+  --shadow-lift: 0 18px 40px -22px rgba(16, 40, 58, 0.7);
+  --logo-ink: #10283a;
+  --logo-cover: #2a6f8f;
+  --logo-pages: #fffaf0;
+  --logo-ribbon: #df5b3c;
+  --logo-mask: #f2c879;
+  --logo-spark: #f2c879;
+}
+
+:root[data-theme='klar'] {
+  color-scheme: light;
+  --paper: #f4f5fa;
+  --paper-2: #eaecf4;
+  --card: #ffffff;
+  --card-2: #f8f9fc;
+  --ink: #14162b;
+  --ink-2: #4a4f66;
+  --ink-3: #737891;
+  --line: #dfe2ec;
+  --line-strong: #c3c8db;
+  --brown: #4338ca;
+  --brown-2: #6366f1;
+  --cream: #ffffff;
+  --gold: #ffd166;
+  --gold-2: #f59e0b;
+  --gold-soft: #fff3d6;
+  --olive: #0f9e6c;
+  --olive-soft: #dcf5ea;
+  --rust: #ef4f3c;
+  --rust-soft: #ffe4df;
+  --plum: #9333ea;
+  --plum-soft: #f2e5fd;
+  --slate: #2a86d4;
+  --ochre: #4f46e5;
+  --g-evangelien: #0f9468;
+  --g-geschichte: #d0661f;
+  --g-paulus: #a87a06;
+  --g-pastoral: #9333ea;
+  --g-allgemein: #2479c4;
+  --g-prophetie: #e2432f;
+  --g-nt: #4338ca;
+  --on-gold: #14162b;
+  --olive-text: #0b7e55;
+  --rust-text: #c9321f;
+  --plum-text: #7e22ce;
+  --chrome-soft: rgba(255, 255, 255, 0.16);
+  --chrome-line: rgba(255, 255, 255, 0.42);
+  --overlay: rgba(20, 22, 43, 0.45);
+  --glow: rgba(255, 209, 102, 0.5);
+  --glow-strong: rgba(255, 209, 102, 0.95);
+  --shadow: 0 1px 2px rgba(20, 22, 43, 0.05), 0 10px 26px -14px rgba(20, 22, 43, 0.22);
+  --shadow-lift: 0 22px 44px -22px rgba(20, 22, 43, 0.35);
+  --logo-ink: #14162b;
+  --logo-cover: #4f46e5;
+  --logo-pages: #ffffff;
+  --logo-ribbon: #ef4f3c;
+  --logo-mask: #ffd166;
+  --logo-spark: #ffd166;
 }

@@ -1,0 +1,46 @@
+// Bildmarke: aufgeschlagene Bibel mit Maskenbrille, die verschmitzt zwinkert.
+// Gleiche Formen wie public/logo.svg – hier inline, damit Funkeln und Zwinkern animiert werden können
+// und die Farben dem gewählten Farbkonzept folgen (Klassen lm-* → Variablen --logo-* in styles.css).
+
+export function LogoMark({ class: className = '', title }: { class?: string; title?: string }) {
+  return (
+    <svg
+      class={`logo-mark ${className}`}
+      viewBox="0 0 120 120"
+      role={title ? 'img' : undefined}
+      aria-label={title}
+      aria-hidden={title ? undefined : 'true'}
+    >
+      <g class="lm-line" stroke="#2b211c" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+        <path class="lm-cover" d="M10 42 L10 98 C28 93 46 95 60 104 C74 95 92 93 110 98 L110 42 Z" fill="#b2492c" />
+        <path
+          class="lm-pages"
+          d="M16 37 C30 33 48 35 60 44 C72 35 90 33 104 37 L104 91 C90 87 72 89 60 98 C48 89 30 87 16 91 Z"
+          fill="#fbf3e4"
+        />
+        <path d="M60 87 L60 98" fill="none" stroke-width="3" />
+        <path class="lm-ribbon" d="M65 94 L65 113 L70.5 108 L76 113 L76 91" fill="#e2b65c" />
+        <path d="M45 77 C53 83 68 82 79 71" fill="none" stroke-width="4.5" />
+        <path d="M23 54 C13 52 7 58 3 66" fill="none" stroke-width="3.5" />
+        <path d="M97 54 C107 52 113 58 117 66" fill="none" stroke-width="3.5" />
+        <path
+          class="lm-mask"
+          d="M20 54 C20 42 40 37 60 46 C80 37 100 42 100 54 C100 67 85 73 72 68 C66 66 63 62 60 62 C57 62 54 66 48 68 C35 73 20 67 20 54 Z"
+          fill="#f2d9a0"
+        />
+        <path class="lm-shine" d="M27 50 C31 45 37 43 43 43" fill="none" stroke="#fbf3e4" stroke-width="2.5" opacity=".9" />
+        <g class="logo-eye">
+          <ellipse class="lm-pupil" cx="41" cy="55" rx="9" ry="6" fill="#2b211c" stroke="none" />
+          <circle class="lm-glint" cx="44" cy="53.2" r="2" fill="#fbf3e4" stroke="none" />
+        </g>
+        <path d="M70 56 Q79 48 88 56" fill="none" stroke-width="4.5" />
+        <path
+          class="logo-spark"
+          d="M101 9 L103.6 16.4 L111 19 L103.6 21.6 L101 29 L98.4 21.6 L91 19 L98.4 16.4 Z"
+          fill="#f2d9a0"
+          stroke-width="2.5"
+        />
+      </g>
+    </svg>
+  );
+}

@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'preact/hooks';
 import type { RoomView } from '../../shared/types';
+import { ThemePicker } from '../components/ThemePicker';
 import { Avatar, Button, ConfirmButton, Logo, Rules } from '../components/ui';
 import type { ApiError } from '../lib/api';
 import { type RoomConnection, useRoom, useWakeLock } from '../lib/hooks';
 import { navigate } from '../lib/router';
 import { type Session, clearSession, loadSession } from '../lib/session';
+import { THEME_PARAM, useTheme } from '../lib/theme';
 import { Lobby, RoomCodeCard, PlayerList } from './Lobby';
 import { VotePhase, WritePhase } from './Play';
 import { RevealPhase } from './Reveal';
@@ -243,6 +245,7 @@ function Panel({ view, conn, onClose }: { view: RoomView; conn: RoomConnection; 
   const [error, setError] = useState<string | null>(null);
   const isHost = Boolean(view.me?.isHost);
   const phase = view.status === 'playing' ? view.round?.phase : null;
+  const [theme] = useTheme();
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
@@ -315,7 +318,7 @@ function Panel({ view, conn, onClose }: { view: RoomView; conn: RoomConnection; 
               <Button block variant="secondary" onClick={run({ type: 'lock', locked: !view.locked }, false)}>
                 {view.locked ? 'Raum wieder öffnen' : 'Raum für Neue sperren'}
               </Button>
-              <a class="btn btn-ghost btn-block" href={`/tv/${view.code}`} target="_blank" rel="noopener">
+              <a class="btn btn-ghost btn-block" href={`/tv/${view.code}?${THEME_PARAM}=${theme}`} target="_blank" rel="noopener">
                 Leinwand-Ansicht öffnen ↗
               </a>
             </div>
@@ -346,6 +349,11 @@ function Panel({ view, conn, onClose }: { view: RoomView; conn: RoomConnection; 
               </li>
             ))}
           </ul>
+        </section>
+
+        <section class="sheet-section">
+          <h3>Farben auf diesem Gerät</h3>
+          <ThemePicker compact />
         </section>
 
         <section class="sheet-section">

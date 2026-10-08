@@ -1,3 +1,5 @@
+<p align="center"><img src="src/client/public/logo.svg" width="150" alt="Bible-Bluff-Logo: aufgeschlagene Bibel mit Maskenbrille, die zwinkert"></p>
+
 # Bible Bluff
 
 **Erfinde Bluffs. Finde die Wahrheit. Entdecke die Bibel.**
@@ -117,6 +119,29 @@ Handys / Leinwand ──(etwa jede Sekunde: GET /api/rooms/CODE)──▶ Cloudf
 Eine Partie mit 12 Handys erzeugt rund 40 000 Anfragen pro Stunde (in der Lobby und während der Aufdeckung weniger). Der kostenlose Workers-Tarif erlaubt 100 000 Anfragen pro Tag, also gut zwei Stunden Spiel mit voller Besetzung. Für regelmäßige Spieleabende empfiehlt sich Workers Paid (5 $/Monat, 10 Mio. Anfragen) oder der lokale Server. Die Preise bitte vor der Entscheidung in der aktuellen Cloudflare-Preisliste prüfen. Als nächster Ausbauschritt bieten sich Durable Objects mit WebSockets an: Sie ersetzen das Abfragen und senken die Last deutlich.
 
 Räume werden 24 Stunden nach der letzten Änderung gelöscht.
+
+### Farben
+
+Jede Person wählt auf der Startseite oder im Menü ihr eigenes Farbkonzept. Die Wahl gilt nur auf diesem Gerät und bleibt gespeichert.
+
+| Farbkonzept | Wirkung |
+| --- | --- |
+| Lernblatt (Standard) | Warmes Papier, Dunkelbraun und Gold wie die Lernblätter. Folgt Hell und Dunkel des Geräts. |
+| Nachtquiz | Dunkel mit Neonfarben wie in einer Quizshow. Am stärksten auf dem Beamer im abgedunkelten Raum. |
+| Spieltisch | Filzgrün, Kartenrot und Chipgold auf hellem Leinen. |
+| Comic | Sonnengelb, Schwarz und Pink mit harten Schatten. |
+| See Genezareth | Tiefes Blau, Türkis und Sand. |
+| Klar | Viel Weiß, Indigo und Koralle. Schlicht und gut lesbar. |
+
+Der Link „Leinwand-Ansicht öffnen“ nimmt das Farbkonzept der Spielleitung mit (`/tv/RAUMCODE?farbe=nacht`).
+
+![Die sechs Farbkonzepte beim Abstimmen](docs/screenshots/farben.png)
+
+Technisch setzt jedes Konzept nur CSS-Variablen (`html[data-theme]` am Ende von `src/client/styles.css`); Namen und Vorschaufarben stehen in `src/client/lib/theme.ts`.
+
+## Logo
+
+Die Bildmarke liegt als SVG in `src/client/public/logo.svg`: eine aufgeschlagene Bibel mit Maskenbrille, die verschmitzt zwinkert. In der App ist sie als Komponente `LogoMark` eingebaut; im großen Logo funkelt der Stern, und das Auge blinzelt ab und zu. Ihre Farben passen sich dem gewählten Farbkonzept an. Favicon und Homescreen-Icons entstehen aus der Bildmarke mit `node scripts/render-icons.mjs`.
 
 ## Fragen ergänzen
 

@@ -1,8 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
-  <rect width="120" height="120" rx="26" fill="#3d2e26"/>
-  <circle cx="60" cy="56" r="46" fill="#f2d9a0" opacity=".08"/>
-  <g transform="translate(60 61) scale(0.86) translate(-60 -61)">
-    <g stroke="#2b211c" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Bible Bluff">
+  <title>Bible Bluff</title>
+  <g stroke="#2b211c" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
     <path d="M10 42 L10 98 C28 93 46 95 60 104 C74 95 92 93 110 98 L110 42 Z" fill="#b2492c"/>
     <path d="M16 37 C30 33 48 35 60 44 C72 35 90 33 104 37 L104 91 C90 87 72 89 60 98 C48 89 30 87 16 91 Z" fill="#fbf3e4"/>
     <path d="M60 87 L60 98" fill="none" stroke-width="3"/>
@@ -16,6 +14,5 @@
     <circle cx="44" cy="53.2" r="2" fill="#fbf3e4" stroke="none"/>
     <path d="M70 56 Q79 48 88 56" fill="none" stroke-width="4.5"/>
     <path d="M101 9 L103.6 16.4 L111 19 L103.6 21.6 L101 29 L98.4 21.6 L91 19 L98.4 16.4 Z" fill="#f2d9a0" stroke-width="2.5"/>
-  </g>
   </g>
 </svg>
