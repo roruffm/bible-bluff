@@ -2,6 +2,15 @@ name = "bible-bluff"
 main = "src/worker.ts"
 compatibility_date = "2026-09-01"
 
+# Erreichbar unter bible-bluff.<subdomain>.workers.dev; Vorschauen je Pull-Request ebenfalls.
+workers_dev = true
+preview_urls = true
+
+# `wrangler deploy` (auch in Cloudflares Git-Anbindung „Workers Builds“) baut die App zuerst selbst.
+[build]
+command = "npm run build"
+watch_dir = "src/client"
+
 # Die gebaute App (vite build) wird als statische Assets ausgeliefert.
 # Unbekannte Pfade wie /r/LAMPE7 landen in der Single-Page-App.
 [assets]
@@ -10,12 +19,21 @@ binding = "ASSETS"
 not_found_handling = "single-page-application"
 run_worker_first = ["/api/*"]
 
-# Nach `npx wrangler d1 create bible-bluff` die ausgegebene database_id hier eintragen.
+# D1-Datenbank „bible-bluff“ (Region Westeuropa). Für ein eigenes Konto:
+# `npx wrangler d1 create bible-bluff` ausführen und die ausgegebene database_id hier eintragen.
 [[d1_databases]]
 binding = "DB"
 database_name = "bible-bluff"
-database_id = "00000000-0000-0000-0000-000000000000"
+database_id = "5f26ee8a-b917-453f-be71-9f23b2eba515"
 migrations_dir = "migrations"
 
 [observability]
 enabled = true
+
+# Worker Previews: Workers Builds baut zu jedem Pull-Request eine Vorschau (`wrangler preview`).
+# Vorschauen erben keine Produktions-Bindungen; sie spielen gegen eine eigene Datenbank,
+# damit Tests nie Räume der Produktion berühren.
+[[previews.d1_databases]]
+binding = "DB"
+database_name = "bible-bluff-preview"
+database_id = "76631abf-a2d3-460b-a90d-a822cee0ec11"

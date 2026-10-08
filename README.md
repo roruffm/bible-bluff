@@ -79,12 +79,21 @@ Alle Handys im selben WLAN öffnen diese Adresse. Am besten eröffnet die Spiell
 
 ### Veröffentlichen auf Cloudflare (Workers + D1)
 
+Die D1-Datenbank `bible-bluff` (Region Westeuropa) ist angelegt, das Schema ist eingespielt, und ihre ID steht in `wrangler.toml`. `npx wrangler deploy` baut die App selbst (`[build]` in `wrangler.toml`) und veröffentlicht Worker und Assets.
+
+**Empfohlen: automatisch bei jedem Push auf `main` (Workers Builds).** Im Cloudflare-Dashboard unter **Workers & Pages → bible-bluff → Settings → Builds → Connect** das GitHub-Repository `roruffm/bible-bluff` mit dem Branch `main` verbinden. Die Voreinstellungen passen: kein Build-Befehl nötig, Deploy-Befehl `npx wrangler deploy`. Danach löst jeder Merge in `main` die Veröffentlichung aus.
+
+**Oder von Hand:**
+
 ```bash
 npx wrangler login
-npx wrangler d1 create bible-bluff        # die ausgegebene database_id in wrangler.toml eintragen
-npm run db:migrate:remote                 # Tabellen anlegen
+npm run db:migrate:remote                 # neue Migrationen einspielen (aktuell nichts zu tun)
 npm run deploy                            # baut die App und veröffentlicht Worker + Assets
 ```
+
+**Vorschauen je Pull-Request:** Workers Builds baut zu jedem Pull-Request eine Vorschau mit eigener URL (`wrangler preview`). Vorschauen nutzen eine eigene Datenbank `bible-bluff-preview` (Block `previews` in `wrangler.toml`), damit Tests nie Räume der Produktion berühren. Neue Migrationen müssen deshalb in beide Datenbanken: `npm run db:migrate:remote` für die Produktion und `npx wrangler d1 execute bible-bluff-preview --remote --file migrations/<datei>.sql` für die Vorschau.
+
+Für ein anderes Cloudflare-Konto zuerst `npx wrangler d1 create bible-bluff` und `npx wrangler d1 create bible-bluff-preview` ausführen und beide `database_id`-Werte in `wrangler.toml` eintragen.
 
 Lokal lässt sich der echte Worker mit D1 so testen: `npm run dev:cf` (Port 8787).
 
