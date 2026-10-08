@@ -246,11 +246,24 @@ textarea {
 
 .logo {
   display: inline-flex;
-  flex-direction: column;
-  line-height: 0.92;
+  align-items: center;
+  gap: 0.16em;
   font-weight: 800;
   letter-spacing: -0.03em;
   font-size: 3.6rem;
+}
+
+.logo-words {
+  display: inline-flex;
+  flex-direction: column;
+  line-height: 0.92;
+}
+
+.logo-mark {
+  flex: none;
+  width: 1.95em;
+  height: 1.95em;
+  overflow: visible;
 }
 
 .logo-top {
@@ -263,9 +276,35 @@ textarea {
 
 .logo-small {
   font-size: 1.05rem;
+  gap: 0.35em;
+}
+
+.logo-small .logo-words {
   flex-direction: row;
   gap: 0.25em;
   line-height: 1;
+}
+
+.logo-small .logo-mark {
+  width: 1.75em;
+  height: 1.75em;
+}
+
+/* Großes Logo: das Buch kippt leicht, der Stern funkelt, das Auge blinzelt ab und zu */
+.logo:not(.logo-small) .logo-mark {
+  transform: rotate(-6deg);
+}
+
+.logo:not(.logo-small) .logo-spark {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: twinkle 4.5s ease-in-out infinite;
+}
+
+.logo:not(.logo-small) .logo-eye {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: blink 7s ease-in-out infinite;
 }
 
 .page-head .logo-small .logo-top,
@@ -2356,6 +2395,31 @@ html.tv-mode body {
   from {
     opacity: 0;
     transform: translateY(40px);
+  }
+}
+
+@keyframes twinkle {
+  0%,
+  70%,
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+  80% {
+    transform: scale(1.4) rotate(25deg);
+  }
+  90% {
+    transform: scale(0.9) rotate(0deg);
+  }
+}
+
+@keyframes blink {
+  0%,
+  93%,
+  100% {
+    transform: scaleY(1);
+  }
+  96% {
+    transform: scaleY(0.12);
   }
 }
 

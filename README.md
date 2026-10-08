@@ -1,3 +1,5 @@
+<p align="center"><img src="src/client/public/logo.svg" width="150" alt="Bible-Bluff-Logo: aufgeschlagene Bibel mit Maskenbrille, die zwinkert"></p>
+
 # Bible Bluff
 
 **Erfinde Bluffs. Finde die Wahrheit. Entdecke die Bibel.**
@@ -117,6 +119,10 @@ Handys / Leinwand ──(etwa jede Sekunde: GET /api/rooms/CODE)──▶ Cloudf
 Eine Partie mit 12 Handys erzeugt rund 40 000 Anfragen pro Stunde (in der Lobby und während der Aufdeckung weniger). Der kostenlose Workers-Tarif erlaubt 100 000 Anfragen pro Tag, also gut zwei Stunden Spiel mit voller Besetzung. Für regelmäßige Spieleabende empfiehlt sich Workers Paid (5 $/Monat, 10 Mio. Anfragen) oder der lokale Server. Die Preise bitte vor der Entscheidung in der aktuellen Cloudflare-Preisliste prüfen. Als nächster Ausbauschritt bieten sich Durable Objects mit WebSockets an: Sie ersetzen das Abfragen und senken die Last deutlich.
 
 Räume werden 24 Stunden nach der letzten Änderung gelöscht.
+
+## Logo
+
+Die Bildmarke liegt als SVG in `src/client/public/logo.svg`: eine aufgeschlagene Bibel mit Maskenbrille, die verschmitzt zwinkert. In der App ist sie als Komponente `LogoMark` eingebaut; im großen Logo funkelt der Stern, und das Auge blinzelt ab und zu. Favicon und Homescreen-Icons entstehen aus der Bildmarke mit `node scripts/render-icons.mjs`.
 
 ## Fragen ergänzen
 

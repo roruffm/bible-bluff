@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import { GROUP_LABELS } from '../../shared/rules';
 import type { PersonRef, PlayerView, QuestionView } from '../../shared/types';
 import { useServerNow } from '../lib/hooks';
+import { LogoMark } from './LogoMark';
 
 export function initials(name: string): string {
   const parts = name.trim().split(/\s+/);
@@ -231,8 +232,11 @@ export function Toast({ message, onDone }: { message: string | null; onDone: () 
 export function Logo({ small = false }: { small?: boolean }) {
   return (
     <div class={`logo${small ? ' logo-small' : ''}`}>
-      <span class="logo-top">Bible</span>
-      <span class="logo-bottom">Bluff</span>
+      <LogoMark />
+      <span class="logo-words">
+        <span class="logo-top">Bible</span>
+        <span class="logo-bottom">Bluff</span>
+      </span>
     </div>
   );
 }
