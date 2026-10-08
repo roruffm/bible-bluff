@@ -91,7 +91,9 @@ npm run db:migrate:remote                 # neue Migrationen einspielen (aktuell
 npm run deploy                            # baut die App und veröffentlicht Worker + Assets
 ```
 
-Für ein anderes Cloudflare-Konto zuerst `npx wrangler d1 create bible-bluff` ausführen und die ausgegebene `database_id` in `wrangler.toml` eintragen.
+**Vorschauen je Pull-Request:** Workers Builds baut zu jedem Pull-Request eine Vorschau mit eigener URL (`wrangler preview`). Vorschauen nutzen eine eigene Datenbank `bible-bluff-preview` (Block `previews` in `wrangler.toml`), damit Tests nie Räume der Produktion berühren. Neue Migrationen müssen deshalb in beide Datenbanken: `npm run db:migrate:remote` für die Produktion und `npx wrangler d1 execute bible-bluff-preview --remote --file migrations/<datei>.sql` für die Vorschau.
+
+Für ein anderes Cloudflare-Konto zuerst `npx wrangler d1 create bible-bluff` und `npx wrangler d1 create bible-bluff-preview` ausführen und beide `database_id`-Werte in `wrangler.toml` eintragen.
 
 Lokal lässt sich der echte Worker mit D1 so testen: `npm run dev:cf` (Port 8787).
 

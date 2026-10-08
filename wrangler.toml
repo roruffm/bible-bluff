@@ -25,3 +25,11 @@ migrations_dir = "migrations"
 
 [observability]
 enabled = true
+
+# Worker Previews: Workers Builds baut zu jedem Pull-Request eine Vorschau (`wrangler preview`).
+# Vorschauen erben keine Produktions-Bindungen; sie spielen gegen eine eigene Datenbank,
+# damit Tests nie Räume der Produktion berühren.
+[[previews.d1_databases]]
+binding = "DB"
+database_name = "bible-bluff-preview"
+database_id = "76631abf-a2d3-460b-a90d-a822cee0ec11"
