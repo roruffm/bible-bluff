@@ -9,6 +9,7 @@ import {
   normalizeCode,
 } from '../../shared/rules';
 import type { Settings } from '../../shared/types';
+import { ThemePicker } from '../components/ThemePicker';
 import { Button, Logo, Rules, Segmented, Toggle } from '../components/ui';
 import { ApiError, api } from '../lib/api';
 import { navigate } from '../lib/router';
@@ -59,6 +60,13 @@ export function Home() {
       <p class="muted center small">Du leitest die Partie – auf dem Handy oder am Beamer.</p>
 
       <Rules />
+
+      <section class="card">
+        <h2>Farben</h2>
+        <p class="muted small theme-hint">Wähle dein Farbkonzept. Es gilt nur auf diesem Gerät.</p>
+        <ThemePicker />
+      </section>
+
       <footer class="footnote">
         Fragen aus allen 27 Büchern des Neuen Testaments · freikirchlich-pfingstliche Lernfassung
       </footer>

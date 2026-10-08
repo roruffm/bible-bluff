@@ -12,6 +12,13 @@
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <title>Bible Bluff</title>
+    <script>
+      // Farbkonzept vor dem ersten Bild setzen, damit nichts aufblitzt (Prüfung und Rest: lib/theme.ts)
+      try {
+        var t = new URLSearchParams(location.search).get('farbe') || localStorage.getItem('bible-bluff:v1:theme');
+        if (t && t !== 'lernblatt') document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="app"></div>
