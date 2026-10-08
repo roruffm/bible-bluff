@@ -63,7 +63,6 @@ export function Home() {
 
       <section class="card">
         <h2>Farben</h2>
-        <p class="muted small theme-hint">Wähle dein Farbkonzept. Es gilt nur auf diesem Gerät.</p>
         <ThemePicker />
       </section>
 

@@ -22,7 +22,6 @@ export function ThemePicker({ compact = false }: { compact?: boolean }) {
               <i />
             </span>
             <span class="theme-name">{t.name}</span>
-            {!compact && <span class="theme-text">{t.text}</span>}
           </button>
         );
       })}

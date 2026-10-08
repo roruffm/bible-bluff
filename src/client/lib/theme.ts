@@ -2,15 +2,17 @@
 // Die Farben stehen in styles.css (html[data-theme]); hier stehen Namen, Vorschaufarben und die Umschaltung.
 import { useEffect, useState } from 'preact/hooks';
 
-export const THEME_IDS = ['lernblatt', 'nacht', 'spieltisch', 'comic', 'see', 'klar'] as const;
+export const THEME_IDS = ['see', 'lernblatt', 'nacht', 'spieltisch', 'comic', 'klar'] as const;
 export type ThemeId = (typeof THEME_IDS)[number];
 
-export const DEFAULT_THEME: ThemeId = 'lernblatt';
+/** Wer noch nichts gewählt hat, sieht See Genezareth. */
+export const DEFAULT_THEME: ThemeId = 'see';
+/** Lernblatt steht direkt in :root (styles.css) und braucht kein data-theme. */
+export const BASE_THEME: ThemeId = 'lernblatt';
 
 export interface ThemeInfo {
   id: ThemeId;
   name: string;
-  text: string;
   /** Vorschau: Leiste, Papier, zwei Akzente */
   preview: [string, string, string, string];
   /** Farbe der Browserleiste (meta theme-color) */
@@ -19,44 +21,38 @@ export interface ThemeInfo {
 
 export const THEMES: ThemeInfo[] = [
   {
+    id: 'see',
+    name: 'See Genezareth',
+    preview: ['#12324a', '#e8f0f3', '#f2c879', '#12857a'],
+    bar: '#12324a',
+  },
+  {
     id: 'lernblatt',
     name: 'Lernblatt',
-    text: 'Warmes Papier, Dunkelbraun und Gold. Hell oder dunkel wie dein Gerät.',
     preview: ['#3d2e26', '#efe7dc', '#f2d9a0', '#b2492c'],
     bar: '#3d2e26',
   },
   {
     id: 'nacht',
     name: 'Nachtquiz',
-    text: 'Dunkel mit Neonfarben wie in einer Quizshow. Stark auf dem Beamer.',
     preview: ['#0b0520', '#140a33', '#ff3ea5', '#29e3ef'],
     bar: '#0b0520',
   },
   {
     id: 'spieltisch',
     name: 'Spieltisch',
-    text: 'Filzgrün, Kartenrot und Chipgold auf hellem Leinen.',
     preview: ['#1b5e40', '#ebe5d3', '#f1c24b', '#c8322b'],
     bar: '#1b5e40',
   },
   {
     id: 'comic',
     name: 'Comic',
-    text: 'Sonnengelb, Schwarz und Pink mit harten Schatten.',
     preview: ['#161616', '#ffd93d', '#ff4f9a', '#3d7bff'],
     bar: '#161616',
   },
   {
-    id: 'see',
-    name: 'See Genezareth',
-    text: 'Tiefes Blau, Türkis und Sand. Frisch und ruhig.',
-    preview: ['#12324a', '#e8f0f3', '#f2c879', '#12857a'],
-    bar: '#12324a',
-  },
-  {
     id: 'klar',
     name: 'Klar',
-    text: 'Viel Weiß, Indigo und Koralle. Schlicht und gut lesbar.',
     preview: ['#4338ca', '#f4f5fa', '#ffd166', '#ef4f3c'],
     bar: '#4338ca',
   },
@@ -97,7 +93,7 @@ const listeners = new Set<(id: ThemeId) => void>();
 function apply(id: ThemeId) {
   current = id;
   const root = document.documentElement;
-  if (id === DEFAULT_THEME) root.removeAttribute('data-theme');
+  if (id === BASE_THEME) root.removeAttribute('data-theme');
   else root.setAttribute('data-theme', id);
   document.querySelector('meta[name="theme-color"]')?.setAttribute('content', themeInfo(id).bar);
 }

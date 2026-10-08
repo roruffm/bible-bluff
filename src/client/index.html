@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#3d2e26" />
+    <meta name="theme-color" content="#12324a" />
     <meta name="description" content="Bible Bluff – das Partyspiel fürs Handy: Bluffs erfinden, die Wahrheit finden, die Bibel entdecken." />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="Bible Bluff" />
@@ -13,11 +13,13 @@
     <link rel="manifest" href="/manifest.webmanifest" />
     <title>Bible Bluff</title>
     <script>
-      // Farbkonzept vor dem ersten Bild setzen, damit nichts aufblitzt (Prüfung und Rest: lib/theme.ts)
+      // Farbkonzept vor dem ersten Bild setzen, damit nichts aufblitzt (Prüfung und Rest: lib/theme.ts).
+      // Ohne Wahl gilt See Genezareth; Lernblatt braucht kein data-theme.
+      var t = 'see';
       try {
-        var t = new URLSearchParams(location.search).get('farbe') || localStorage.getItem('bible-bluff:v1:theme');
-        if (t && t !== 'lernblatt') document.documentElement.setAttribute('data-theme', t);
+        t = new URLSearchParams(location.search).get('farbe') || localStorage.getItem('bible-bluff:v1:theme') || t;
       } catch (e) {}
+      if (t !== 'lernblatt') document.documentElement.setAttribute('data-theme', t);
     </script>
   </head>
   <body>
