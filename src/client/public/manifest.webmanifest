@@ -1,0 +1,11 @@
+{
+  "name": "Bible Bluff",
+  "short_name": "Bible Bluff",
+  "description": "Bluffs erfinden, die Wahrheit finden, die Bibel entdecken.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#efe7dc",
+  "theme_color": "#3d2e26",
+  "lang": "de",
+  "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}

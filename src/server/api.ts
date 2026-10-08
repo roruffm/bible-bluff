@@ -1,0 +1,257 @@
+// HTTP-API (Web-Standard Request/Response) – läuft im Cloudflare Worker und im lokalen Node-Server.
+//
+//   POST /api/rooms                  Raum eröffnen
+//   POST /api/rooms/:code/join       beitreten
+//   GET  /api/rooms/:code            Spielstand (mit Token: persönliche Sicht, ohne: Leinwand)
+//   POST /api/rooms/:code/action     Aktion ausführen
+
+import { PRESENCE_TOUCH_MS, ROOM_TTL_MS, normalizeCode } from '../shared/rules';
+import type { Action, ApiErrorBody, SessionResponse, Settings, ViewResponse } from '../shared/types';
+import { randomCode } from './codes';
+import { createRoom, joinRoom, step, tick } from './engine';
+import { GameError, type Ctx, type PlayerRec, type RoomState } from './state';
+import type { RoomRecord, RoomStore } from './store';
+import { buildView } from './view';
+
+export interface ApiDeps {
+  store: RoomStore;
+  now?: () => number;
+  rng?: () => number;
+}
+
+const MAX_BODY = 8 * 1024;
+const MAX_ATTEMPTS = 10;
+
+const ACTION_TYPES = new Set<Action['type']>([
+  'start', 'settings', 'bluff', 'suggest', 'vote', 'pause', 'resume', 'skipPhase', 'swapQuestion',
+  'revealNext', 'next', 'kick', 'makeHost', 'lock', 'close', 'playAgain', 'leave',
+]);
+
+export function cryptoRng(): number {
+  const buf = new Uint32Array(1);
+  crypto.getRandomValues(buf);
+  return buf[0] / 2 ** 32;
+}
+
+function randomToken(bytes = 24): string {
+  const buf = new Uint8Array(bytes);
+  crypto.getRandomValues(buf);
+  let bin = '';
+  for (const b of buf) bin += String.fromCharCode(b);
+  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+function randomPlayerId(): string {
+  return 'p' + randomToken(9).replace(/[-_]/g, 'x').slice(0, 11);
+}
+
+export async function hashToken(token: string): Promise<string> {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(token));
+  return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+function json(body: unknown, status = 200): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: {
+      'content-type': 'application/json; charset=utf-8',
+      'cache-control': 'no-store',
+      'x-content-type-options': 'nosniff',
+    },
+  });
+}
+
+function errorResponse(err: unknown): Response {
+  if (err instanceof GameError) {
+    const body: ApiErrorBody = { error: { code: err.code, message: err.message } };
+    return json(body, err.status);
+  }
+  console.error('Unerwarteter Fehler', err);
+  const body: ApiErrorBody = { error: { code: 'internal', message: 'Da ist etwas schiefgelaufen. Bitte nochmal versuchen.' } };
+  return json(body, 500);
+}
+
+async function readJson(request: Request): Promise<Record<string, unknown>> {
+  const text = await request.text();
+  if (text.length > MAX_BODY) throw new GameError('too_large', 'Anfrage zu groß.', 413);
+  if (!text) return {};
+  try {
+    const parsed = JSON.parse(text) as unknown;
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) throw new Error('kein Objekt');
+    return parsed as Record<string, unknown>;
+  } catch {
+    throw new GameError('bad_json', 'Ungültige Anfrage.', 400);
+  }
+}
+
+function bearer(request: Request): string | null {
+  const header = request.headers.get('authorization') ?? '';
+  const match = /^Bearer\s+([A-Za-z0-9_-]{16,128})$/.exec(header.trim());
+  return match ? match[1] : null;
+}
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+export function createApi(deps: ApiDeps) {
+  const now = deps.now ?? (() => Date.now());
+  const rng = deps.rng ?? cryptoRng;
+  const { store } = deps;
+
+  const makeCtx = (presence: Record<string, number>): Ctx => ({ now: now(), rng, presence: { ...presence } });
+
+  async function loadRoom(code: string): Promise<RoomRecord> {
+    const rec = await store.load(code);
+    if (!rec) throw new GameError('not_found', 'Diesen Raum gibt es nicht (mehr). Prüfe den Code.', 404);
+    return rec;
+  }
+
+  /** Spieler zum Token suchen – entfernte Personen bekommen eine eigene Meldung. */
+  function identify(state: RoomState, tokenHash: string | null): PlayerRec | null {
+    if (!tokenHash) return null;
+    const p = state.players.find((x) => x.tokenHash === tokenHash);
+    if (p) return p;
+    if (state.kicked.some((k) => k.tokenHash === tokenHash)) {
+      throw new GameError('kicked', 'Die Spielleitung hat dich aus diesem Raum entfernt.', 403);
+    }
+    throw new GameError('unknown_session', 'Deine Sitzung ist abgelaufen. Bitte tritt erneut bei.', 401);
+  }
+
+  /**
+   * Lesen → Engine → bedingt schreiben. Bei Konflikt von vorn, damit kein Zug verloren geht.
+   */
+  async function mutate<T>(
+    code: string,
+    fn: (rec: RoomRecord, ctx: Ctx) => { next: RoomState | null; meId: string | null; extra?: T },
+  ) {
+    for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+      const rec = await loadRoom(code);
+      const ctx = makeCtx(rec.presence);
+      const out = fn(rec, ctx);
+      if (!out.next) return { state: rec.state, version: rec.version, ctx, ...out };
+      if (await store.update(code, out.next, rec.version, ctx.now)) {
+        return { state: out.next, version: rec.version + 1, ctx, ...out };
+      }
+      await sleep(3 + rng() * 15 * (attempt + 1));
+    }
+    throw new GameError('busy', 'Gerade ist viel los – bitte nochmal versuchen.', 503);
+  }
+
+  async function touchIfStale(code: string, playerId: string, presence: Record<string, number>, at: number) {
+    const last = presence[playerId];
+    if (last === undefined || at - last >= PRESENCE_TOUCH_MS) await store.touch(code, playerId, at);
+  }
+
+  async function createRoomRoute(request: Request): Promise<Response> {
+    const body = await readJson(request);
+    const token = randomToken();
+    const tokenHash = await hashToken(token);
+    const hostId = randomPlayerId();
+    const t = now();
+    if (rng() < 0.2) await store.cleanup(t - ROOM_TTL_MS);
+
+    for (let attempt = 0; attempt < 16; attempt++) {
+      const code = randomCode(rng, attempt < 8 ? 1 : 2);
+      const ctx: Ctx = { now: t, rng, presence: { [hostId]: t } };
+      const state = createRoom(
+        {
+          code,
+          hostId,
+          hostName: String(body.name ?? ''),
+          tokenHash,
+          plays: body.plays !== false,
+          settings: (body.settings && typeof body.settings === 'object' ? body.settings : undefined) as Partial<Settings> | undefined,
+        },
+        ctx,
+      );
+      if (await store.insert(code, state, t)) {
+        await store.touch(code, hostId, t);
+        const res: SessionResponse = { code, playerId: hostId, token, view: buildView(state, hostId, ctx, 1) };
+        return json(res, 201);
+      }
+    }
+    throw new GameError('busy', 'Kein freier Raumcode gefunden. Bitte nochmal versuchen.', 503);
+  }
+
+  async function joinRoute(request: Request, code: string): Promise<Response> {
+    const body = await readJson(request);
+    const token = randomToken();
+    const tokenHash = await hashToken(token);
+    const newId = randomPlayerId();
+    const result = await mutate(code, (rec, ctx) => {
+      const base = tick(rec.state, ctx) ?? rec.state;
+      const joined = joinRoom(base, { playerId: newId, name: String(body.name ?? ''), tokenHash, reclaim: body.reclaim === true }, ctx);
+      ctx.presence[joined.playerId] = ctx.now;
+      return { next: joined.state, meId: joined.playerId };
+    });
+    await store.touch(code, result.meId!, result.ctx.now);
+    const res: SessionResponse = {
+      code,
+      playerId: result.meId!,
+      token,
+      view: buildView(result.state, result.meId, result.ctx, result.version),
+    };
+    return json(res, 200);
+  }
+
+  async function stateRoute(request: Request, code: string): Promise<Response> {
+    const token = bearer(request);
+    const tokenHash = token ? await hashToken(token) : null;
+    const result = await mutate(code, (rec, ctx) => {
+      const me = identify(rec.state, tokenHash);
+      if (me) ctx.presence[me.id] = ctx.now;
+      return { next: tick(rec.state, ctx), meId: me?.id ?? null, extra: rec.presence };
+    });
+    if (result.meId) await touchIfStale(code, result.meId, result.extra ?? {}, result.ctx.now);
+    const res: ViewResponse = { view: buildView(result.state, result.meId, result.ctx, result.version) };
+    return json(res);
+  }
+
+  async function actionRoute(request: Request, code: string): Promise<Response> {
+    const token = bearer(request);
+    if (!token) throw new GameError('unknown_session', 'Bitte tritt dem Raum zuerst bei.', 401);
+    const tokenHash = await hashToken(token);
+    const body = await readJson(request);
+    if (typeof body.type !== 'string' || !ACTION_TYPES.has(body.type as Action['type'])) {
+      throw new GameError('bad_action', 'Unbekannte Aktion.', 400);
+    }
+    const action = body as unknown as Action;
+    const result = await mutate(code, (rec, ctx) => {
+      const me = identify(rec.state, tokenHash)!;
+      ctx.presence[me.id] = ctx.now;
+      const out = step(rec.state, me.id, action, ctx);
+      return { next: out.changed ? out.state : null, meId: me.id, extra: { suggestion: out.suggestion, presence: rec.presence } };
+    });
+    const meStillHere = result.state.players.some((p) => p.id === result.meId);
+    if (meStillHere) await touchIfStale(code, result.meId!, result.extra?.presence ?? {}, result.ctx.now);
+    const res: ViewResponse = {
+      view: buildView(result.state, meStillHere ? result.meId : null, result.ctx, result.version),
+    };
+    if (result.extra?.suggestion) res.suggestion = result.extra.suggestion;
+    return json(res);
+  }
+
+  return async function handleApi(request: Request): Promise<Response> {
+    const url = new URL(request.url);
+    const parts = url.pathname.replace(/\/+$/, '').split('/').filter(Boolean); // ['api', ...]
+    try {
+      if (parts[0] !== 'api') throw new GameError('not_found', 'Nicht gefunden.', 404);
+      const method = request.method.toUpperCase();
+
+      if (parts.length === 2 && parts[1] === 'health' && method === 'GET') return json({ ok: true });
+      if (parts.length === 2 && parts[1] === 'rooms' && method === 'POST') return await createRoomRoute(request);
+
+      if (parts[1] === 'rooms' && parts.length >= 3) {
+        const code = normalizeCode(decodeURIComponent(parts[2]));
+        if (!code) throw new GameError('not_found', 'Diesen Raum gibt es nicht.', 404);
+        if (parts.length === 3 && method === 'GET') return await stateRoute(request, code);
+        if (parts.length === 4 && parts[3] === 'join' && method === 'POST') return await joinRoute(request, code);
+        if (parts.length === 4 && parts[3] === 'action' && method === 'POST') return await actionRoute(request, code);
+      }
+      throw new GameError('not_found', 'Nicht gefunden.', 404);
+    } catch (err) {
+      return errorResponse(err);
+    }
+  };
+}

@@ -1,0 +1,21 @@
+name = "bible-bluff"
+main = "src/worker.ts"
+compatibility_date = "2026-09-01"
+
+# Die gebaute App (vite build) wird als statische Assets ausgeliefert.
+# Unbekannte Pfade wie /r/LAMPE7 landen in der Single-Page-App.
+[assets]
+directory = "./dist/client"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+run_worker_first = ["/api/*"]
+
+# Nach `npx wrangler d1 create bible-bluff` die ausgegebene database_id hier eintragen.
+[[d1_databases]]
+binding = "DB"
+database_name = "bible-bluff"
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "migrations"
+
+[observability]
+enabled = true
