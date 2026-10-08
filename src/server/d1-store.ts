@@ -1,5 +1,6 @@
 // Cloudflare-D1-Anbindung. Nur die Methoden, die wir wirklich brauchen, als schmale Schnittstelle.
 
+import type { RecapView } from '../shared/types';
 import type { RoomState } from './state';
 import type { RoomRecord, RoomStore } from './store';
 
@@ -13,6 +14,13 @@ export interface D1PreparedLike {
 export interface D1Like {
   prepare(sql: string): D1PreparedLike;
   batch<T = unknown>(statements: D1PreparedLike[]): Promise<{ results: T[]; meta?: { changes?: number } }[]>;
+}
+
+/** Gleicher Inhalt wie migrations/0002_recaps.sql */
+const CREATE_RECAPS = 'CREATE TABLE IF NOT EXISTS recaps (id TEXT PRIMARY KEY, data TEXT NOT NULL, created_at INTEGER NOT NULL)';
+
+function isMissingTable(err: unknown): boolean {
+  return /no such table/i.test(String((err as Error | null)?.message ?? err));
 }
 
 export class D1Store implements RoomStore {
@@ -64,5 +72,31 @@ export class D1Store implements RoomStore {
       this.db.prepare('DELETE FROM presence WHERE code IN (SELECT code FROM rooms WHERE updated_at < ?)').bind(updatedBefore),
       this.db.prepare('DELETE FROM rooms WHERE updated_at < ?').bind(updatedBefore),
     ]);
+  }
+
+  async saveRecap(recap: RecapView, now: number): Promise<void> {
+    const insert = () =>
+      this.db
+        .prepare('INSERT INTO recaps (id, data, created_at) VALUES (?, ?, ?) ON CONFLICT(id) DO NOTHING')
+        .bind(recap.id, JSON.stringify(recap), now)
+        .run();
+    try {
+      await insert();
+    } catch (err) {
+      // Migration noch nicht eingespielt (z. B. in der Vorschau-Datenbank) → Tabelle anlegen und nochmal
+      if (!isMissingTable(err)) throw err;
+      await this.db.prepare(CREATE_RECAPS).run();
+      await insert();
+    }
+  }
+
+  async loadRecap(id: string): Promise<RecapView | null> {
+    try {
+      const row = await this.db.prepare('SELECT data FROM recaps WHERE id = ?').bind(id).first<{ data: string }>();
+      return row ? (JSON.parse(row.data) as RecapView) : null;
+    } catch (err) {
+      if (isMissingTable(err)) return null;
+      throw err;
+    }
   }
 }

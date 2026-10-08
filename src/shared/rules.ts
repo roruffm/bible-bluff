@@ -26,6 +26,8 @@ export const BLUFF_MAX = 80;
 /** Punkte */
 export const POINTS_TRUTH = 2;
 export const POINTS_PER_FOOLED = 1;
+/** Lieblingsbluff: Extrapunkt für den Bluff mit den meisten Herzen einer Runde */
+export const POINTS_FAVORITE = 1;
 
 /** Aufdeckung: Dauer der einzelnen Schritte in ms */
 export const REVEAL_INTRO_MS = 2600;

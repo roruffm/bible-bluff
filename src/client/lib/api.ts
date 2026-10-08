@@ -1,4 +1,13 @@
-import type { Action, ApiErrorBody, RoomView, SessionResponse, Settings, ViewResponse } from '../../shared/types';
+import type {
+  Action,
+  ApiErrorBody,
+  RecapCreatedResponse,
+  RecapResponse,
+  RoomView,
+  SessionResponse,
+  Settings,
+  ViewResponse,
+} from '../../shared/types';
 import { clock } from './clock';
 
 export class ApiError extends Error {
@@ -55,6 +64,12 @@ export const api = {
   },
   action(code: string, token: string, action: Action) {
     return request<ViewResponse>('POST', `/api/rooms/${encodeURIComponent(code)}/action`, action, token);
+  },
+  createRecap(code: string) {
+    return request<RecapCreatedResponse>('POST', `/api/rooms/${encodeURIComponent(code)}/recap`);
+  },
+  recap(id: string) {
+    return request<RecapResponse>('GET', `/api/recaps/${encodeURIComponent(id)}`);
   },
 };
 

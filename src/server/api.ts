@@ -4,11 +4,22 @@
 //   POST /api/rooms/:code/join       beitreten
 //   GET  /api/rooms/:code            Spielstand (mit Token: persönliche Sicht, ohne: Leinwand)
 //   POST /api/rooms/:code/action     Aktion ausführen
+//   POST /api/rooms/:code/recap      Entdeckungen-Seite einer beendeten Partie anlegen (idempotent)
+//   GET  /api/recaps/:id             Entdeckungen-Seite lesen
 
 import { PRESENCE_TOUCH_MS, ROOM_TTL_MS, normalizeCode } from '../shared/rules';
-import type { Action, ApiErrorBody, SessionResponse, Settings, ViewResponse } from '../shared/types';
+import type {
+  Action,
+  ApiErrorBody,
+  RecapCreatedResponse,
+  RecapResponse,
+  SessionResponse,
+  Settings,
+  ViewResponse,
+} from '../shared/types';
 import { randomCode } from './codes';
 import { createRoom, joinRoom, step, tick } from './engine';
+import { buildRecap, isRecapId, randomRecapId } from './recap';
 import { GameError, type Ctx, type PlayerRec, type RoomState } from './state';
 import type { RoomRecord, RoomStore } from './store';
 import { buildView } from './view';
@@ -23,7 +34,7 @@ const MAX_BODY = 8 * 1024;
 const MAX_ATTEMPTS = 10;
 
 const ACTION_TYPES = new Set<Action['type']>([
-  'start', 'settings', 'bluff', 'suggest', 'vote', 'pause', 'resume', 'skipPhase', 'swapQuestion',
+  'start', 'settings', 'bluff', 'suggest', 'vote', 'like', 'pause', 'resume', 'skipPhase', 'swapQuestion',
   'revealNext', 'next', 'kick', 'makeHost', 'lock', 'close', 'playAgain', 'leave',
 ]);
 
@@ -50,12 +61,12 @@ export async function hashToken(token: string): Promise<string> {
   return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 
-function json(body: unknown, status = 200): Response {
+function json(body: unknown, status = 200, cache = 'no-store'): Response {
   return new Response(JSON.stringify(body), {
     status,
     headers: {
       'content-type': 'application/json; charset=utf-8',
-      'cache-control': 'no-store',
+      'cache-control': cache,
       'x-content-type-options': 'nosniff',
     },
   });
@@ -232,6 +243,34 @@ export function createApi(deps: ApiDeps) {
     return json(res);
   }
 
+  /**
+   * Entdeckungen-Seite anlegen. Erst die ID im Raum festschreiben, dann die Seite speichern:
+   * So entsteht pro Partie genau eine Seite, auch wenn mehrere Geräte gleichzeitig fragen.
+   */
+  async function recapRoute(code: string): Promise<Response> {
+    const fresh = randomRecapId();
+    const result = await mutate(code, (rec) => {
+      const g = rec.state.game;
+      if (rec.state.status !== 'finished' || !g) {
+        throw new GameError('not_finished', 'Die Entdeckungen gibt es, sobald die Partie beendet ist.');
+      }
+      if (g.recapId) return { next: null, meId: null };
+      return { next: { ...rec.state, game: { ...g, recapId: fresh } }, meId: null };
+    });
+    const id = result.state.game!.recapId!;
+    if (!(await store.loadRecap(id))) await store.saveRecap(buildRecap(result.state, id), result.ctx.now);
+    const res: RecapCreatedResponse = { id };
+    return json(res, 201);
+  }
+
+  async function readRecapRoute(id: string): Promise<Response> {
+    const recap = isRecapId(id) ? await store.loadRecap(id) : null;
+    if (!recap) throw new GameError('not_found', 'Diese Seite gibt es nicht. Prüfe den Link.', 404);
+    const res: RecapResponse = { recap };
+    // Die Seite ändert sich nie mehr
+    return json(res, 200, 'public, max-age=86400, immutable');
+  }
+
   return async function handleApi(request: Request): Promise<Response> {
     const url = new URL(request.url);
     const parts = url.pathname.replace(/\/+$/, '').split('/').filter(Boolean); // ['api', ...]
@@ -248,6 +287,10 @@ export function createApi(deps: ApiDeps) {
         if (parts.length === 3 && method === 'GET') return await stateRoute(request, code);
         if (parts.length === 4 && parts[3] === 'join' && method === 'POST') return await joinRoute(request, code);
         if (parts.length === 4 && parts[3] === 'action' && method === 'POST') return await actionRoute(request, code);
+        if (parts.length === 4 && parts[3] === 'recap' && method === 'POST') return await recapRoute(code);
+      }
+      if (parts[1] === 'recaps' && parts.length === 3 && method === 'GET') {
+        return await readRecapRoute(decodeURIComponent(parts[2]));
       }
       throw new GameError('not_found', 'Nicht gefunden.', 404);
     } catch (err) {

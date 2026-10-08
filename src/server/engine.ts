@@ -10,6 +10,7 @@ import {
   MIN_PLAYERS,
   ONLINE_WINDOW_MS,
   PLAYER_COLORS,
+  POINTS_FAVORITE,
   POINTS_PER_FOOLED,
   POINTS_TRUTH,
   REVEAL_BLUFF_MS,
@@ -28,6 +29,7 @@ import { QUESTIONS, getQuestion, type Question } from './questions';
 import {
   GameError,
   type Ctx,
+  type FavoriteRec,
   type GameRec,
   type OptionRec,
   type PlayerRec,
@@ -456,13 +458,51 @@ function startScores(s: RoomState, ctx: Ctx) {
   g.deadline = ctx.now + SCORES_SECONDS * 1000;
 }
 
+/** Herzen je Bluff der Mitspielenden (Options-ID → Anzahl) */
+export function likeCounts(round: RoundRec): Map<string, number> {
+  const counts = new Map<string, number>();
+  for (const optionId of Object.values(round.likes ?? {})) counts.set(optionId, (counts.get(optionId) ?? 0) + 1);
+  return counts;
+}
+
+/** Bluffs mit den meisten Herzen (mindestens einem) – bei Gleichstand alle */
+export function favoriteLeaders(round: RoundRec): OptionRec[] {
+  const counts = likeCounts(round);
+  const best = Math.max(0, ...counts.values());
+  if (best === 0) return [];
+  return (round.options ?? []).filter((o) => o.kind === 'player' && counts.get(o.id) === best);
+}
+
+/** Extrapunkt für den Lieblingsbluff gutschreiben und für den Endstand merken */
+function settleFavorites(s: RoomState) {
+  const g = s.game!;
+  const round = g.round;
+  const leaders = favoriteLeaders(round);
+  if (!leaders.length) return;
+  const counts = likeCounts(round);
+  const awarded = new Set<string>();
+  for (const o of leaders) {
+    for (const authorId of o.authorIds) {
+      const p = player(s, authorId);
+      if (!p || awarded.has(authorId)) continue;
+      p.score += POINTS_FAVORITE;
+      awarded.add(authorId);
+    }
+  }
+  const favorites: FavoriteRec[] = leaders.map((o) => ({ text: o.text, authorIds: o.authorIds, likes: counts.get(o.id) ?? 0 }));
+  const entry = g.history[g.history.length - 1];
+  if (entry && entry.questionId === round.questionId) entry.favorites = favorites;
+}
+
 function afterScores(s: RoomState, ctx: Ctx) {
   const g = s.game!;
+  settleFavorites(s);
   if (g.roundIndex + 1 < g.questionIds.length) {
     startRound(s, g.roundIndex + 1, ctx);
   } else {
     s.status = 'finished';
     g.deadline = null;
+    g.finishedAt = ctx.now;
     s.paused = null;
   }
 }
@@ -609,6 +649,21 @@ export function applyAction(state: RoomState, actorId: string, action: Action, c
       return { state: s };
     }
 
+    case 'like': {
+      const g = requireGame(s);
+      if (g.phase !== 'scores') throw new GameError('phase_over', 'Herzen gibt es nach der Aufdeckung.');
+      const option = g.round.options?.find((o) => o.id === action.optionId);
+      if (!option || option.kind !== 'player') throw new GameError('bad_option', 'Diesen Bluff gibt es nicht.', 400);
+      if (option.authorIds.includes(actorId)) {
+        throw new GameError('own_bluff', 'Deinem eigenen Bluff kannst du kein Herz geben.', 400);
+      }
+      const likes = (g.round.likes ??= {});
+      // Nochmal tippen nimmt das Herz zurück; ein anderer Bluff bekommt es stattdessen
+      if (likes[actorId] === option.id) delete likes[actorId];
+      else likes[actorId] = option.id;
+      return { state: s };
+    }
+
     case 'pause': {
       requireHost(s, actorId);
       requireGame(s);
@@ -743,6 +798,7 @@ function removePlayer(s: RoomState, id: string) {
   if (!round) return;
   if (s.game!.phase === 'write') delete round.bluffs[id];
   if (s.game!.phase === 'vote') delete round.votes[id];
+  if (s.game!.phase === 'scores' && round.likes) delete round.likes[id];
 }
 
 function resume(s: RoomState, ctx: Ctx) {

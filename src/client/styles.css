@@ -1979,6 +1979,103 @@ textarea {
   color: var(--rust-text);
 }
 
+.delta.is-favorite {
+  background: var(--plum-soft);
+  color: var(--plum-text);
+}
+
+/* Lieblingsbluff: Herzen in der Punkte-Phase */
+.favorites-hint {
+  margin: -6px 0 12px;
+}
+
+.fav-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fav {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    'text heart'
+    'by heart';
+  gap: 4px 12px;
+  align-items: center;
+  text-align: left;
+  padding: 10px 14px;
+  border-radius: 14px;
+  border: 2px solid var(--line);
+  background: var(--card);
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    background 0.15s,
+    transform 0.08s;
+}
+
+.fav:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.fav:disabled {
+  cursor: default;
+}
+
+.fav:focus-visible {
+  outline: 3px solid var(--gold-2);
+  outline-offset: 2px;
+}
+
+.fav-text {
+  grid-area: text;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.fav-by {
+  grid-area: by;
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--ink-2);
+  font-weight: 600;
+}
+
+.fav-heart {
+  grid-area: heart;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--ink-3);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.fav.is-mine {
+  border-style: dashed;
+  background: transparent;
+}
+
+.fav.is-leading {
+  border-color: var(--gold-2);
+}
+
+.fav.is-liked {
+  border-color: var(--rust);
+  background: var(--rust-soft);
+}
+
+.fav.is-liked .fav-heart {
+  color: var(--rust-text);
+}
+
 .score-total {
   font-weight: 800;
   font-size: 1.2rem;
@@ -2115,6 +2212,15 @@ textarea {
 .award-trusting .award-title {
   color: var(--plum-text);
 }
+.award-favorite .award-title {
+  color: var(--ochre);
+}
+
+.award-quote {
+  font-weight: 800;
+  font-size: 1.05rem;
+  margin: 4px 0 2px;
+}
 
 .discoveries ol {
   margin: 0;
@@ -2147,6 +2253,127 @@ textarea {
 
 .d-text {
   font-size: 0.92rem;
+}
+
+/* Entdeckungen zum Mitnehmen: Teilen im Endstand und eigene Seite /e/ID */
+
+.recap-share {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1.5px dashed var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.recap-share.is-display {
+  margin: 14px auto 0;
+  padding: 12px 16px 12px 12px;
+  max-width: 360px;
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
+  text-align: left;
+  background: var(--card);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.recap-share.is-display .qr {
+  flex: none;
+  width: clamp(110px, 11vw, 170px);
+  height: clamp(110px, 11vw, 170px);
+}
+
+.recap-share.is-display p {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.95rem;
+  color: var(--ink-2);
+}
+
+.recap-share.is-display b {
+  color: var(--ink);
+  font-size: 1.05rem;
+}
+
+.recap-hero h1 {
+  font-size: clamp(1.9rem, 8vw, 2.4rem);
+  margin-top: 4px;
+}
+
+.recap-eyebrow {
+  color: var(--gold);
+  margin-top: 18px;
+}
+
+.recap-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.recap-item {
+  --g: var(--g-nt);
+  position: relative;
+  background: var(--card);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius);
+  padding: 14px 16px 16px 24px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.recap-item::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 8px;
+  background: var(--g);
+}
+
+.recap-item .question-meta {
+  margin-bottom: 2px;
+}
+
+.recap-num {
+  margin-left: auto;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--ink-3);
+}
+
+.recap-q {
+  color: var(--ink-2);
+}
+
+.recap-a {
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.recap-ref {
+  font-weight: 800;
+  color: var(--ochre);
+  font-size: 0.88rem;
+}
+
+.recap-fav {
+  margin-top: 4px;
+  font-size: 0.88rem;
+  color: var(--ink-2);
+}
+
+.recap-fav span {
+  color: var(--rust);
 }
 
 /* ───────── Overlays ───────── */
@@ -2397,6 +2624,20 @@ html.tv-mode body {
 .tv .final-head,
 .tv .podium {
   grid-column: 1 / -1;
+}
+
+.tv .final-head {
+  position: relative;
+}
+
+@media (min-width: 761px) {
+  .tv .final-head .recap-share {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 0;
+    max-width: 340px;
+  }
 }
 
 .tv .next-bar {
