@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import {
-  HOST_TAKEOVER_MS,
   POINTS_FAVORITE,
   POINTS_PER_FOOLED,
   POINTS_TRUTH,
@@ -268,11 +267,25 @@ describe('Spielleitung', () => {
     expect(() => g.act('anna', { type: 'kick', playerId: 'host' })).toThrow(GameError);
   });
 
-  it('übergibt die Spielleitung, wenn sie lange nicht erreichbar ist', () => {
+  it('behält die Spielleitung, auch wenn ihr Handy lange nicht erreichbar ist', () => {
     const g = setup(['Host', 'Anna']);
-    g.clock.advance(HOST_TAKEOVER_MS + 1000);
-    const next = tick(g.state, { ...g.ctx(), presence: { anna: g.clock.now } });
-    expect(next!.hostId).toBe('anna');
+    // Zum Beispiel: Code per WhatsApp verschickt, Bildschirm gesperrt – eine halbe Stunde nichts gehört
+    g.clock.advance(30 * 60 * 1000);
+    expect(tick(g.state, { ...g.ctx(), presence: { anna: g.clock.now } })).toBeNull();
+    expect(() => g.act('anna', { type: 'start' })).toThrow(GameError);
+    g.act('host', { type: 'start' });
+    expect(g.state.status).toBe('playing');
+    expect(g.state.hostId).toBe('host');
+  });
+
+  it('gibt die Spielleitung nur bewusst ab', () => {
+    const g = setup(['Host', 'Anna', 'Ben']);
+    expect(() => g.act('anna', { type: 'makeHost', playerId: 'anna' })).toThrow(GameError);
+    g.act('host', { type: 'makeHost', playerId: 'ben' });
+    expect(g.state.hostId).toBe('ben');
+    g.clock.advance(30 * 60 * 1000);
+    expect(tick(g.state, { ...g.ctx(), presence: { host: g.clock.now } })).toBeNull();
+    expect(g.state.hostId).toBe('ben');
   });
 
   it('schließt den Raum', () => {
