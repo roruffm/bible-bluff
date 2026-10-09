@@ -61,6 +61,9 @@ test('eine komplette Partie auf drei Handys und der Leinwand', async ({ browser 
   await expect(host.getByText('Dein Bluff ist drin')).toBeVisible();
   await jonas.getByRole('button', { name: /Vorschlag/ }).click();
   await expect(jonas.getByLabel('Deine erfundene Antwort')).not.toHaveValue('');
+  // Nur ein Vorschlag pro Runde: Der Knopf verschwindet
+  await expect(jonas.getByRole('button', { name: /Vorschlag/ })).toHaveCount(0);
+  await expect(jonas.getByText('Den Vorschlag für diese Runde hast du schon bekommen.')).toBeVisible();
   await jonas.getByRole('button', { name: 'Bluff abgeben' }).click();
   await expect(jonas.getByText('Dein Bluff ist drin')).toBeVisible();
   await mirjam.getByLabel('Deine erfundene Antwort').fill(SAFE_BLUFFS.mirjam);

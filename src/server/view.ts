@@ -136,6 +136,7 @@ function buildRound(state: RoomState, meId: string | null): RoundView {
     deadline: g.deadline,
     question: { id: q.id, book: q.book, group: q.group, difficulty: q.difficulty, prompt: q.prompt },
     myBluff: meId ? round.bluffs[meId]?.text ?? null : null,
+    mySuggestion: phase === 'write' && meId ? round.suggestions?.[meId] ?? null : null,
     options:
       phase === 'write' || !round.options
         ? null

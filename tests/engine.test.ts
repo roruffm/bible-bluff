@@ -210,13 +210,33 @@ describe('Eine komplette Runde', () => {
     expect(g.state.game!.phase).toBe('reveal');
   });
 
-  it('bietet Vorschläge an, wenn jemandem nichts einfällt', () => {
-    const g = setup(['Host', 'Anna']);
+  it('gibt pro Person und Runde genau einen Vorschlag', () => {
+    const g = setup(['Host', 'Anna', 'Ben']);
     g.act('host', { type: 'start' });
     const q = question(g.state);
-    const res = applyAction(g.state, 'anna', { type: 'suggest', n: 0 }, g.ctx());
-    expect(q.bluffs).toContain(res.suggestion);
-    expect(res.state).toBe(g.state); // Vorschlag ändert nichts am Zustand
+    const first = step(g.state, 'anna', { type: 'suggest' }, g.ctx());
+    expect(q.bluffs).toContain(first.suggestion);
+    g.state = first.state;
+
+    // Nochmal tippen liefert denselben Vorschlag und ändert nichts mehr
+    for (let i = 0; i < 5; i++) {
+      const again = step(g.state, 'anna', { type: 'suggest' }, g.ctx());
+      expect(again.suggestion).toBe(first.suggestion);
+      expect(again.changed).toBe(false);
+    }
+    expect(buildView(g.state, 'anna', g.ctx(), 1).round!.mySuggestion).toBe(first.suggestion);
+    expect(buildView(g.state, 'ben', g.ctx(), 1).round!.mySuggestion).toBeNull();
+
+    // Andere bekommen möglichst einen anderen Vorschlag
+    const ben = step(g.state, 'ben', { type: 'suggest' }, g.ctx());
+    expect(q.bluffs).toContain(ben.suggestion);
+    expect(ben.suggestion).not.toBe(first.suggestion);
+    g.state = ben.state;
+
+    // Neue Runde, neuer Vorschlag
+    g.act('host', { type: 'swapQuestion' });
+    expect(g.state.game!.round.suggestions).toBeUndefined();
+    expect(buildView(g.state, 'anna', g.ctx(), 1).round!.mySuggestion).toBeNull();
   });
 });
 

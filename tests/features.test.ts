@@ -130,7 +130,7 @@ describe('Ruhige Minute', () => {
     expect(g.view('anna').me!.quiet).toBe('now');
     expect(g.view(null).players.find((p) => p.id === 'anna')!.quiet).toBe(true);
     expect(() => g.act('anna', { type: 'bluff', text: 'Doch noch etwas' })).toThrowError(expect.objectContaining({ code: 'quiet' }));
-    expect(() => g.act('anna', { type: 'suggest', n: 0 })).toThrowError(expect.objectContaining({ code: 'quiet' }));
+    expect(() => g.act('anna', { type: 'suggest' })).toThrowError(expect.objectContaining({ code: 'quiet' }));
 
     for (const id of ['host', 'ben', 'cleo']) g.act(id, { type: 'bluff', text: fake(id, 1) });
     // Alle anderen haben abgegeben – die Abstimmung beginnt, ohne auf Anna zu warten
@@ -332,12 +332,11 @@ describe('Frische Hausbluffs', () => {
     g.act('host', { type: 'start' });
     const qid = g.state.game!.round.questionId;
     const extraCtx = () => ({ ...g.ctx(), extraBluffs: { [qid]: [fresh] } });
-    const suggestions = new Set<string>();
-    for (let n = 0; n < 8; n++) {
-      suggestions.add(applyAction(g.state, 'anna', { type: 'suggest', n }, extraCtx()).suggestion!);
-    }
-    expect(suggestions.has(fresh)).toBe(true);
-    expect(suggestions.size).toBe(getQuestion(qid).bluffs.length + 1);
+    // Vorschläge gehen möglichst an niemanden doppelt: Sind alle Hausbluffs schon vergeben,
+    // ist der freigegebene Bluff an der Reihe.
+    const taken = structuredClone(g.state);
+    taken.game!.round.suggestions = Object.fromEntries(getQuestion(qid).bluffs.map((b, i) => [`x${i}`, b]));
+    expect(step(taken, 'anna', { type: 'suggest' }, extraCtx()).suggestion).toBe(fresh);
 
     // Mit nur einem Bluff wird aufgefüllt – irgendwann auch mit dem freigegebenen
     let seenFresh = false;
