@@ -60,11 +60,22 @@ export interface RoundRec {
   results: Record<string, ResultRec> | null;
   revealStartedAt: number | null;
   plan: StepRec[] | null;
+  /** Punkte-Phase: Herz je Person für einen Bluff der Mitspielenden (Personen-ID → Options-ID) */
+  likes?: Record<string, string>;
+}
+
+/** Bluff mit den meisten Herzen einer Runde */
+export interface FavoriteRec {
+  text: string;
+  authorIds: string[];
+  likes: number;
 }
 
 export interface HistoryRec {
   questionId: string;
   results: Record<string, ResultRec>;
+  /** bei Gleichstand mehrere */
+  favorites?: FavoriteRec[];
 }
 
 export interface GameRec {
@@ -76,6 +87,10 @@ export interface GameRec {
   deadline: number | null;
   round: RoundRec;
   history: HistoryRec[];
+  /** Zeitpunkt des Partie-Endes */
+  finishedAt?: number;
+  /** ID der Entdeckungen-Seite, sobald angelegt */
+  recapId?: string;
 }
 
 export interface RoomState {

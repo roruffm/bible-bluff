@@ -28,6 +28,7 @@ export type Action =
   | { type: 'bluff'; text: string }
   | { type: 'suggest'; n?: number }
   | { type: 'vote'; optionId: string }
+  | { type: 'like'; optionId: string }
   | { type: 'pause' }
   | { type: 'resume' }
   | { type: 'skipPhase' }
@@ -114,6 +115,20 @@ export interface RoundResultView {
   bluff: number;
   foundTruth: boolean;
   fooled: number;
+  /** Extrapunkt für den Lieblingsbluff – steht während der Punkte-Phase noch nicht fest */
+  favorite: number;
+}
+
+/** Punkte-Phase: ein Bluff der Mitspielenden, für den man ein Herz vergeben kann */
+export interface FavoriteOptionView {
+  optionId: string;
+  text: string;
+  authors: PersonRef[];
+  likes: number;
+  /** eigener Bluff – kein Herz möglich */
+  mine: boolean;
+  /** liegt gerade vorn (mindestens ein Herz) */
+  leading: boolean;
 }
 
 export interface RoundView {
@@ -133,14 +148,18 @@ export interface RoundView {
   reveal: { startedAt: number; steps: RevealStepView[]; total: number } | null;
   /** Punkte-Phase */
   results: RoundResultView[] | null;
+  favorites: FavoriteOptionView[] | null;
+  myLike: string | null;
 }
 
 export interface AwardView {
-  key: 'bluffer' | 'finder' | 'trusting';
+  key: 'bluffer' | 'finder' | 'trusting' | 'favorite';
   title: string;
   text: string;
   players: PersonRef[];
   value: number;
+  /** Lieblingsbluff: der Bluff selbst */
+  quote?: string;
 }
 
 export interface DiscoveryView {
@@ -154,6 +173,36 @@ export interface FinalView {
   ranking: (PersonRef & { score: number; rank: number })[];
   awards: AwardView[];
   discoveries: DiscoveryView[];
+  /** Dauerhafte Entdeckungen-Seite (/e/ID), sobald jemand sie angelegt hat */
+  recapId: string | null;
+}
+
+/** Eine Frage auf der Entdeckungen-Seite – bewusst ohne Namen der Mitspielenden */
+export interface RecapItem {
+  book: string;
+  group: BookGroup;
+  prompt: string;
+  answer: string;
+  ref: string;
+  discovery: string;
+  /** Lieblingsbluff der Runde (bei Gleichstand mehrere) */
+  favorites: string[];
+}
+
+export interface RecapView {
+  id: string;
+  /** Ende der Partie */
+  playedAt: number;
+  players: number;
+  items: RecapItem[];
+}
+
+export interface RecapResponse {
+  recap: RecapView;
+}
+
+export interface RecapCreatedResponse {
+  id: string;
 }
 
 export interface MeView {

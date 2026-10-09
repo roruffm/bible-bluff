@@ -16,6 +16,10 @@ Die Fragen stammen aus dem *Studienkonzept NT* (Lernblätter zu allen 27 Bücher
 | --- | --- | --- | --- |
 | ![Geblufft](docs/screenshots/aufdeckung-bluff.png) | ![Wahr](docs/screenshots/aufdeckung-wahrheit.png) | ![Entdeckung](docs/screenshots/entdeckung.png) | ![Endstand](docs/screenshots/endstand.png) |
 
+| Lieblingsbluff | Bester Bluff des Abends | Entdeckungen teilen | Entdeckungen zum Mitnehmen |
+| --- | --- | --- | --- |
+| ![Herzen für den Lieblingsbluff](docs/screenshots/lieblingsbluff.png) | ![Auszeichnung Bester Bluff des Abends](docs/screenshots/bester-bluff.png) | ![Teilen im Endstand](docs/screenshots/entdeckungen-teilen.png) | ![Dauerhafte Entdeckungen-Seite](docs/screenshots/entdeckungen-seite.png) |
+
 Leinwand-Ansicht (`/tv/RAUMCODE`):
 
 ![Leinwand während der Aufdeckung](docs/screenshots/tv-aufdeckung.png)
@@ -31,11 +35,19 @@ Leinwand-Ansicht (`/tv/RAUMCODE`):
 | Bluff schreiben (45–120 s) | Alle erfinden heimlich eine falsche Antwort. Wer keine Idee hat, nimmt einen vorbereiteten Vorschlag. |
 | Abstimmen (20–60 s) | Die Wahrheit steht anonym und gemischt zwischen den Bluffs. Den eigenen Bluff kann man nicht wählen. |
 | Aufdecken | Synchron auf allen Geräten: Wer hat was gewählt? Wer hat es erfunden? Am Ende kommt der Stempel „Wahr!“. |
-| Punkte & Entdeckung | Die Bibelstelle, ein überraschender Satz zur Auflösung und der Punktestand. |
+| Punkte & Entdeckung | Die Bibelstelle, ein überraschender Satz zur Auflösung und der Punktestand. Alle verteilen ein Herz an ihren Lieblingsbluff. |
 
-**Punkte:** +2 für das Erkennen der richtigen Antwort, +1 für jede Person, die auf den eigenen Bluff hereinfällt.
+**Punkte:** +2 für das Erkennen der richtigen Antwort, +1 für jede Person, die auf den eigenen Bluff hereinfällt, +1 für den Lieblingsbluff der Runde.
 
-Dadurch kann auch jemand mit wenig Bibelwissen gewinnen, denn gute Einfälle und Menschenkenntnis zählen mit. Am Ende gibt es ein Siegertreppchen und drei Auszeichnungen (Bluff-Meister, Wahrheitsfinder, Gutgläubigste Seele). Außerdem zeigt der Endstand alle Entdeckungen der Partie zum Nachlesen.
+Dadurch kann auch jemand mit wenig Bibelwissen gewinnen, denn gute Einfälle und Menschenkenntnis zählen mit. Am Ende gibt es ein Siegertreppchen und vier Auszeichnungen (Bluff-Meister, Wahrheitsfinder, Gutgläubigste Seele, Bester Bluff des Abends). Außerdem zeigt der Endstand alle Entdeckungen der Partie zum Nachlesen.
+
+### Lieblingsbluff
+
+Nach der Auflösung zeigt jedes Handy die Bluffs der Runde mit ihren Urhebern. Jede Person verteilt ein Herz an den Bluff, der ihr am besten gefallen hat. Nochmal tippen nimmt das Herz zurück, ein anderer Bluff bekommt es stattdessen. Für den eigenen Bluff gibt es kein Herz. Der Bluff mit den meisten Herzen bringt seinen Urhebern +1 Punkt, bei Gleichstand allen führenden. Der Punkt erscheint sofort im Punktestand und wird beim Weiterschalten gutgeschrieben. Im Endstand kürt das Spiel den **Besten Bluff des Abends**: den Bluff mit den meisten Herzen in einer Runde, im Wortlaut.
+
+### Entdeckungen zum Mitnehmen
+
+Nach der letzten Runde legt das Spiel eine dauerhafte Seite unter `/e/ID` an. Sie zeigt alle Fragen der Partie mit Antwort, Bibelstelle, Entdeckung und dem Lieblingsbluff jeder Runde. Auf den Handys steht im Endstand „Entdeckungen teilen“ (Teilen-Dialog oder Link kopieren), die Leinwand zeigt oben rechts einen QR-Code. Die Seite enthält keine Namen und keinen Raumcode. Sie bleibt erhalten, auch wenn der Raum längst gelöscht ist, und eignet sich zum Nachlesen in der Woche oder für die nächste Kleingruppe.
 
 ### Faire Runden
 
@@ -89,11 +101,13 @@ Die D1-Datenbank `bible-bluff` (Region Westeuropa) ist angelegt, das Schema ist 
 
 ```bash
 npx wrangler login
-npm run db:migrate:remote                 # neue Migrationen einspielen (aktuell nichts zu tun)
+npm run db:migrate:remote                 # neue Migrationen einspielen (aktuell 0002_recaps)
 npm run deploy                            # baut die App und veröffentlicht Worker + Assets
 ```
 
 **Vorschauen je Pull-Request:** Workers Builds baut zu jedem Pull-Request eine Vorschau mit eigener URL (`wrangler preview`). Vorschauen nutzen eine eigene Datenbank `bible-bluff-preview` (Block `previews` in `wrangler.toml`), damit Tests nie Räume der Produktion berühren. Neue Migrationen müssen deshalb in beide Datenbanken: `npm run db:migrate:remote` für die Produktion und `npx wrangler d1 execute bible-bluff-preview --remote --file migrations/<datei>.sql` für die Vorschau.
+
+Die Tabelle `recaps` für die Entdeckungen-Seiten legt der Worker beim ersten Bedarf auch selbst an. Fehlt die Migration also in einer Datenbank, funktioniert trotzdem alles.
 
 Für ein anderes Cloudflare-Konto zuerst `npx wrangler d1 create bible-bluff` und `npx wrangler d1 create bible-bluff-preview` ausführen und beide `database_id`-Werte in `wrangler.toml` eintragen.
 
@@ -105,6 +119,8 @@ Lokal lässt sich der echte Worker mit D1 so testen: `npm run dev:cf` (Port 8787
 Handys / Leinwand ──(etwa jede Sekunde: GET /api/rooms/CODE)──▶ Cloudflare Worker ──▶ D1
                   ◀── persönliche, gefilterte Sicht ──────────┘   rooms (JSON + Version)
                   ──(POST /api/rooms/CODE/action)─────────────▶   presence (zuletzt gesehen)
+Endstand          ──(POST /api/rooms/CODE/recap)──────────────▶   recaps (Entdeckungen-Seiten)
+Seite /e/ID       ──(GET /api/recaps/ID)──────────────────────▶
 ```
 
 - **Server entscheidet alles.** Zeitlimits, Phasenwechsel, Duplikat-Erkennung und Punkte werden zentral berechnet. Phasen schalten „im Vorbeigehen“ weiter, also bei der nächsten Anfrage nach Ablauf der Frist oder sobald alle Verbundenen abgegeben haben. So braucht es weder Cron noch Dauerprozess.
@@ -118,7 +134,7 @@ Handys / Leinwand ──(etwa jede Sekunde: GET /api/rooms/CODE)──▶ Cloudf
 
 Eine Partie mit 12 Handys erzeugt rund 40 000 Anfragen pro Stunde (in der Lobby und während der Aufdeckung weniger). Der kostenlose Workers-Tarif erlaubt 100 000 Anfragen pro Tag, also gut zwei Stunden Spiel mit voller Besetzung. Für regelmäßige Spieleabende empfiehlt sich Workers Paid (5 $/Monat, 10 Mio. Anfragen) oder der lokale Server. Die Preise bitte vor der Entscheidung in der aktuellen Cloudflare-Preisliste prüfen. Als nächster Ausbauschritt bieten sich Durable Objects mit WebSockets an: Sie ersetzen das Abfragen und senken die Last deutlich.
 
-Räume werden 24 Stunden nach der letzten Änderung gelöscht.
+Räume werden 24 Stunden nach der letzten Änderung gelöscht. Entdeckungen-Seiten bleiben dauerhaft; jede ist nur wenige Kilobyte groß.
 
 ### Farben
 
@@ -168,7 +184,7 @@ Schlüsselwörter werden ohne Umlaute geschrieben (`ae`, `oe`, `ue`, `ss`). Ein 
 
 ```bash
 npm run typecheck
-npm test             # Engine, Textvergleich, Fragenpool, API (Vitest)
+npm test             # Engine, Textvergleich, Fragenpool, API, Entdeckungen-Seiten (Vitest)
 npm run test:e2e     # komplette Partien mit mehreren Browsern (Playwright)
 ```
 

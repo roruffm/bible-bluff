@@ -1,4 +1,5 @@
 import { useRoute } from './lib/router';
+import { RecapPage } from './screens/Recap';
 import { RoomPage, TvPage } from './screens/Room';
 import { CreateRoom, Home } from './screens/Start';
 
@@ -11,6 +12,8 @@ export function App() {
       return <RoomPage key={route.code} code={route.code} />;
     case 'tv':
       return <TvPage key={route.code} code={route.code} />;
+    case 'recap':
+      return <RecapPage key={route.id} id={route.id} />;
     default:
       return <Home />;
   }

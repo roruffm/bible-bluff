@@ -90,6 +90,14 @@ test('eine komplette Partie auf drei Handys und der Leinwand', async ({ browser 
   await expect(rahelRow.locator('.score-total')).toHaveText(/^[2-4]$/);
   await expect(rahelRow.locator('.delta.is-bluff')).toHaveText('Bluff +2');
 
+  // Lieblingsbluff: Jonas schenkt Rahels Bluff ein Herz, das bringt Rahel einen Extrapunkt
+  await expect(host.locator('.fav.is-mine')).toContainText(SAFE_BLUFFS.host);
+  await expect(host.locator('.fav.is-mine')).toBeDisabled();
+  await jonas.locator('.fav', { hasText: SAFE_BLUFFS.host }).click();
+  await expect(jonas.locator('.fav.is-liked')).toContainText(SAFE_BLUFFS.host);
+  await expect(rahelRow.locator('.delta.is-favorite')).toHaveText('♥ +1');
+  await expect(tv.locator('.fav.is-leading')).toContainText(SAFE_BLUFFS.host);
+
   // Restliche Runden zügig über die Spielleitung durchschalten
   await host.getByRole('button', { name: 'Nächste Runde' }).click();
   for (let round = 2; round <= 4; round++) {
@@ -106,6 +114,20 @@ test('eine komplette Partie auf drei Handys und der Leinwand', async ({ browser 
   await expect(host.locator('.podium-place')).toHaveCount(3);
   await expect(host.locator('.discoveries li')).toHaveCount(4);
   await expect(host.getByText('Bluff-Meister')).toBeVisible();
+  await expect(host.locator('.award-favorite')).toContainText(SAFE_BLUFFS.host);
+
+  // Entdeckungen zum Mitnehmen: QR-Code auf der Leinwand, eigene Seite ohne Namen
+  await expect(tv.locator('.recap-share svg.qr')).toBeVisible({ timeout: 10_000 });
+  await mirjam.getByRole('button', { name: 'Ansehen' }).click();
+  await mirjam.waitForURL(/\/e\/[a-z2-9]{10}$/);
+  await expect(mirjam.getByRole('heading', { name: 'Unsere Entdeckungen' })).toBeVisible();
+  await expect(mirjam.locator('.recap-item')).toHaveCount(4);
+  await expect(mirjam.locator('.recap-fav').first()).toContainText(SAFE_BLUFFS.host);
+  await expect(mirjam.locator('main')).not.toContainText('Rahel');
+  const recapLink = mirjam.url();
+  await mirjam.reload();
+  await expect(mirjam.locator('.recap-item')).toHaveCount(4);
+  expect(mirjam.url()).toBe(recapLink);
 
   // Neue Partie mit denselben Leuten
   await host.getByRole('button', { name: 'Neue Partie mit allen' }).click();

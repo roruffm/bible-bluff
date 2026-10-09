@@ -1,6 +1,7 @@
 // Speicher-Schnittstelle. Raumzustand wird mit Versionsnummer gespeichert (optimistische Sperre):
 // Ein Update gelingt nur, wenn niemand dazwischen geschrieben hat.
 
+import type { RecapView } from '../shared/types';
 import type { RoomState } from './state';
 
 export interface RoomRecord {
@@ -17,12 +18,16 @@ export interface RoomStore {
   update(code: string, state: RoomState, expectedVersion: number, now: number): Promise<boolean>;
   touch(code: string, playerId: string, now: number): Promise<void>;
   cleanup(updatedBefore: number): Promise<void>;
+  /** Entdeckungen-Seite dauerhaft ablegen; eine schon vorhandene ID bleibt unverändert */
+  saveRecap(recap: RecapView, now: number): Promise<void>;
+  loadRecap(id: string): Promise<RecapView | null>;
 }
 
 /** Für Tests und den lokalen Node-Server (z. B. Spieleabend im eigenen WLAN). */
 export class MemoryStore implements RoomStore {
   private rooms = new Map<string, { json: string; version: number; updatedAt: number }>();
   private presence = new Map<string, Map<string, number>>();
+  private recaps = new Map<string, string>();
 
   async load(code: string): Promise<RoomRecord | null> {
     const row = this.rooms.get(code);
@@ -60,5 +65,14 @@ export class MemoryStore implements RoomStore {
         this.presence.delete(code);
       }
     }
+  }
+
+  async saveRecap(recap: RecapView): Promise<void> {
+    if (!this.recaps.has(recap.id)) this.recaps.set(recap.id, JSON.stringify(recap));
+  }
+
+  async loadRecap(id: string): Promise<RecapView | null> {
+    const json = this.recaps.get(id);
+    return json ? (JSON.parse(json) as RecapView) : null;
   }
 }

@@ -5,27 +5,13 @@ import { QRCode } from '../components/QR';
 import { Avatar, Button, Rules, Toast, Toggle } from '../components/ui';
 import type { RoomConnection } from '../lib/hooks';
 import { roomUrl } from '../lib/router';
+import { shareLink } from '../lib/share';
 import { SettingsFields } from './Start';
 
 export function RoomCodeCard({ code, big = false }: { code: string; big?: boolean }) {
   const [toast, setToast] = useState<string | null>(null);
   const url = roomUrl(code);
-  const share = async () => {
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: 'Bible Bluff', text: `Spiel mit! Raumcode ${code}`, url });
-        return;
-      }
-    } catch {
-      /* abgebrochen – dann eben kopieren */
-    }
-    try {
-      await navigator.clipboard.writeText(url);
-      setToast('Link kopiert');
-    } catch {
-      setToast(url);
-    }
-  };
+  const share = async () => setToast(await shareLink({ title: 'Bible Bluff', text: `Spiel mit! Raumcode ${code}`, url }));
   return (
     <section class={`code-card${big ? ' is-big' : ''}`}>
       <div class="code-card-head">

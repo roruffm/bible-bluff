@@ -4,13 +4,15 @@ export type Route =
   | { name: 'home' }
   | { name: 'create' }
   | { name: 'room'; code: string }
-  | { name: 'tv'; code: string };
+  | { name: 'tv'; code: string }
+  | { name: 'recap'; id: string };
 
 export function parseRoute(pathname: string): Route {
   const parts = pathname.split('/').filter(Boolean);
   if (parts[0] === 'neu') return { name: 'create' };
   if (parts[0] === 'r' && parts[1]) return { name: 'room', code: parts[1].toUpperCase() };
   if (parts[0] === 'tv' && parts[1]) return { name: 'tv', code: parts[1].toUpperCase() };
+  if (parts[0] === 'e' && parts[1]) return { name: 'recap', id: parts[1].toLowerCase() };
   return { name: 'home' };
 }
 
@@ -37,4 +39,9 @@ export function useRoute(): Route {
 
 export function roomUrl(code: string): string {
   return `${location.origin}/r/${code}`;
+}
+
+/** Dauerhafte Entdeckungen-Seite einer Partie */
+export function recapUrl(id: string): string {
+  return `${location.origin}/e/${id}`;
 }

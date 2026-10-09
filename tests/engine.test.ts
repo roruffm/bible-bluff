@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   HOST_TAKEOVER_MS,
+  POINTS_FAVORITE,
   POINTS_PER_FOOLED,
   POINTS_TRUTH,
   SCORES_SECONDS,
@@ -312,5 +313,131 @@ describe('Ganze Partie', () => {
     expect(g.state.status).toBe('lobby');
     expect(g.state.players.every((p) => p.score === 0)).toBe(true);
     expect(g.state.usedQuestionIds.length).toBe(4);
+  });
+});
+
+describe('Lieblingsbluff', () => {
+  /** Eine Runde bis zur Punkte-Phase: Anna und Ben bluffen getrennt, Cleo zusammen mit dem Host */
+  function toScores() {
+    const g = setup();
+    g.act('host', { type: 'start' });
+    g.act('anna', { type: 'bluff', text: 'Ein Sack voller Linsen' });
+    g.act('ben', { type: 'bluff', text: 'Sieben Krüge mit Öl' });
+    g.act('cleo', { type: 'bluff', text: 'Ein Mantel aus Kamelhaar' });
+    g.act('host', { type: 'bluff', text: 'ein Mantel aus Kamelhaar' });
+    const opts = g.state.game!.round.options!;
+    const truth = opts.find((o) => o.kind === 'truth')!;
+    const by = (id: string) => opts.find((o) => o.authorIds.includes(id))!;
+    for (const id of IDS) g.act(id, { type: 'vote', optionId: truth.id });
+    expect(() => g.act('anna', { type: 'like', optionId: by('ben').id })).toThrowError(
+      expect.objectContaining({ code: 'phase_over' }),
+    );
+    g.clock.advance(g.state.game!.deadline! - g.clock.now + 1);
+    g.run();
+    expect(g.state.game!.phase).toBe('scores');
+    return { g, truth, by };
+  }
+  const score = (state: RoomState, id: string) => state.players.find((p) => p.id === id)!.score;
+
+  it('vergibt Herzen nur an fremde Bluffs und nimmt sie beim zweiten Tippen zurück', () => {
+    const { g, truth, by } = toScores();
+    expect(() => g.act('anna', { type: 'like', optionId: by('anna').id })).toThrowError(
+      expect.objectContaining({ code: 'own_bluff' }),
+    );
+    expect(() => g.act('host', { type: 'like', optionId: by('cleo').id })).toThrowError(
+      expect.objectContaining({ code: 'own_bluff' }),
+    );
+    expect(() => g.act('anna', { type: 'like', optionId: truth.id })).toThrowError(
+      expect.objectContaining({ code: 'bad_option' }),
+    );
+
+    g.act('anna', { type: 'like', optionId: by('ben').id });
+    g.act('anna', { type: 'like', optionId: by('cleo').id });
+    expect(g.state.game!.round.likes).toEqual({ anna: by('cleo').id });
+    g.act('anna', { type: 'like', optionId: by('cleo').id });
+    expect(g.state.game!.round.likes).toEqual({});
+  });
+
+  it('zeigt den Extrapunkt vorläufig an und schreibt ihn beim Weiterschalten gut', () => {
+    const { g, by } = toScores();
+    const before = { anna: score(g.state, 'anna'), cleo: score(g.state, 'cleo'), host: score(g.state, 'host') };
+    g.act('anna', { type: 'like', optionId: by('cleo').id });
+    g.act('ben', { type: 'like', optionId: by('cleo').id });
+    g.act('cleo', { type: 'like', optionId: by('anna').id });
+
+    const view = buildView(g.state, 'anna', g.ctx(), 5);
+    const favs = view.round!.favorites!;
+    expect(favs).toHaveLength(3);
+    expect(favs.find((f) => f.optionId === by('cleo').id)).toMatchObject({ likes: 2, leading: true, mine: false });
+    expect(favs.find((f) => f.optionId === by('anna').id)).toMatchObject({ likes: 1, leading: false, mine: true });
+    expect(view.round!.myLike).toBe(by('cleo').id);
+    // Vorläufig: Cleo und der Host teilen sich den Bluff, beide bekommen den Punkt
+    expect(view.players.find((p) => p.id === 'cleo')!.score).toBe(before.cleo + POINTS_FAVORITE);
+    expect(view.players.find((p) => p.id === 'host')!.score).toBe(before.host + POINTS_FAVORITE);
+    expect(view.round!.results!.find((r) => r.playerId === 'host')!.favorite).toBe(POINTS_FAVORITE);
+    expect(view.round!.results!.find((r) => r.playerId === 'anna')!.favorite).toBe(0);
+    expect(score(g.state, 'cleo')).toBe(before.cleo);
+
+    g.act('host', { type: 'next' });
+    expect(score(g.state, 'cleo')).toBe(before.cleo + POINTS_FAVORITE);
+    expect(score(g.state, 'host')).toBe(before.host + POINTS_FAVORITE);
+    expect(score(g.state, 'anna')).toBe(before.anna);
+    expect(g.state.game!.history[0].favorites).toEqual([
+      { text: 'Ein Mantel aus Kamelhaar', authorIds: by('cleo').authorIds, likes: 2 },
+    ]);
+    // Neue Runde: keine Herzen, keine Liste
+    const next = buildView(g.state, 'anna', g.ctx(), 6);
+    expect(next.round!.favorites).toBeNull();
+    expect(next.players.find((p) => p.id === 'cleo')!.score).toBe(before.cleo + POINTS_FAVORITE);
+  });
+
+  it('belohnt bei Gleichstand alle führenden Bluffs und ohne Herzen niemanden', () => {
+    const { g, by } = toScores();
+    const before = Object.fromEntries(IDS.map((id) => [id, score(g.state, id)]));
+    g.act('cleo', { type: 'like', optionId: by('anna').id });
+    g.act('anna', { type: 'like', optionId: by('ben').id });
+    g.act('host', { type: 'next' });
+    expect(score(g.state, 'anna') - before.anna).toBe(POINTS_FAVORITE);
+    expect(score(g.state, 'ben') - before.ben).toBe(POINTS_FAVORITE);
+    expect(score(g.state, 'cleo') - before.cleo).toBe(0);
+
+    // Zweite Runde ganz ohne Herzen: kein Eintrag, kein Punkt
+    const round2 = Object.fromEntries(IDS.map((id) => [id, score(g.state, id)]));
+    g.state.game!.phase = 'scores';
+    g.act('host', { type: 'next' });
+    expect(IDS.map((id) => score(g.state, id))).toEqual(IDS.map((id) => round2[id]));
+  });
+
+  it('kürt am Ende den besten Bluff des Abends mit Zitat', () => {
+    const g = setup(['Host', 'Anna', 'Ben']);
+    g.act('host', { type: 'settings', settings: { rounds: 4 } });
+    g.act('host', { type: 'start' });
+    const likes: Record<string, string>[] = [{ anna: 'ben' }, { anna: 'ben', host: 'ben' }, { ben: 'anna', host: 'anna' }, {}];
+    for (let r = 0; r < 4; r++) {
+      g.act('host', { type: 'bluff', text: `Eine Posaune aus Messing ${r}` });
+      g.act('anna', { type: 'bluff', text: `Ein Korb voller Feigen ${r}` });
+      g.act('ben', { type: 'bluff', text: `Zwölf Fässer mit Wein ${r}` });
+      const opts = g.state.game!.round.options!;
+      const truth = opts.find((o) => o.kind === 'truth')!;
+      for (const id of ['host', 'anna', 'ben']) g.act(id, { type: 'vote', optionId: truth.id });
+      g.clock.advance(g.state.game!.deadline! - g.clock.now + 1);
+      g.run();
+      for (const [voter, author] of Object.entries(likes[r])) {
+        g.act(voter, { type: 'like', optionId: opts.find((o) => o.authorIds.includes(author))!.id });
+      }
+      g.act('host', { type: 'next' });
+    }
+    expect(g.state.status).toBe('finished');
+    const award = buildView(g.state, 'host', g.ctx(), 9).final!.awards.find((a) => a.key === 'favorite')!;
+    // Gleichstand mit je zwei Herzen → der frühere gewinnt
+    expect(award).toMatchObject({ title: 'Bester Bluff des Abends', value: 2, quote: 'Zwölf Fässer mit Wein 1' });
+    expect(award.players.map((p) => p.id)).toEqual(['ben']);
+  });
+
+  it('streicht das Herz einer entfernten Person', () => {
+    const { g, by } = toScores();
+    g.act('ben', { type: 'like', optionId: by('anna').id });
+    g.act('host', { type: 'kick', playerId: 'ben' });
+    expect(g.state.game!.round.likes).toEqual({});
   });
 });

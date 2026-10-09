@@ -1,8 +1,10 @@
 // Gefilterte Sicht auf den Raum: Jede Person bekommt nur, was sie gerade sehen darf.
 // Antworten, Bluff-Urheber und Stimmen bleiben bis zur Aufdeckung auf dem Server.
 
+import { POINTS_FAVORITE } from '../shared/rules';
 import type {
   AwardView,
+  FavoriteOptionView,
   FinalView,
   PersonRef,
   PlayerView,
@@ -10,7 +12,7 @@ import type {
   RoomView,
   RoundView,
 } from '../shared/types';
-import { isOnline, planLength, votersOf } from './engine';
+import { favoriteLeaders, isOnline, likeCounts, planLength, votersOf } from './engine';
 import { QUESTIONS, getQuestion } from './questions';
 import type { Ctx, RoomState, RoundRec } from './state';
 
@@ -25,6 +27,7 @@ export function buildView(state: RoomState, meId: string | null, ctx: Ctx, versi
   const me = meId ? state.players.find((p) => p.id === meId) ?? null : null;
   const g = state.game;
   const host = state.players.find((p) => p.id === state.hostId);
+  const bonus = favoriteBonus(state);
 
   const players: PlayerView[] = state.players.map((p) => {
     let done = false;
@@ -36,7 +39,7 @@ export function buildView(state: RoomState, meId: string | null, ctx: Ctx, versi
       id: p.id,
       name: p.name,
       color: p.color,
-      score: p.score,
+      score: p.score + (bonus.get(p.id) ?? 0),
       online: isOnline(ctx, p.id),
       plays: p.plays,
       isHost: p.id === state.hostId,
@@ -64,6 +67,35 @@ export function buildView(state: RoomState, meId: string | null, ctx: Ctx, versi
   };
 }
 
+/**
+ * Während der Punkte-Phase steht der Lieblingsbluff noch nicht fest: Die Sicht zeigt den
+ * Extrapunkt schon an, gutgeschrieben wird er erst beim Weiterschalten (engine: settleFavorites).
+ */
+function favoriteBonus(state: RoomState): Map<string, number> {
+  const bonus = new Map<string, number>();
+  const g = state.game;
+  if (state.status !== 'playing' || !g || g.phase !== 'scores') return bonus;
+  for (const o of favoriteLeaders(g.round)) {
+    for (const id of o.authorIds) if (state.players.some((p) => p.id === id)) bonus.set(id, POINTS_FAVORITE);
+  }
+  return bonus;
+}
+
+function buildFavorites(round: RoundRec, meId: string | null, person: (id: string) => PersonRef): FavoriteOptionView[] {
+  const counts = likeCounts(round);
+  const leading = new Set(favoriteLeaders(round).map((o) => o.id));
+  return (round.options ?? [])
+    .filter((o) => o.kind === 'player')
+    .map((o) => ({
+      optionId: o.id,
+      text: o.text,
+      authors: o.authorIds.map(person),
+      likes: counts.get(o.id) ?? 0,
+      mine: meId ? o.authorIds.includes(meId) : false,
+      leading: leading.has(o.id),
+    }));
+}
+
 function buildRound(state: RoomState, meId: string | null): RoundView {
   const g = state.game!;
   const round = g.round;
@@ -71,6 +103,8 @@ function buildRound(state: RoomState, meId: string | null): RoundView {
   const phase = g.phase;
   const afterVote = phase === 'reveal' || phase === 'scores';
   const person = personLookup(state);
+  const scores = phase === 'scores' && state.status === 'playing';
+  const bonus = favoriteBonus(state);
 
   return {
     index: g.roundIndex,
@@ -98,8 +132,11 @@ function buildRound(state: RoomState, meId: string | null): RoundView {
             bluff: r.bluff,
             foundTruth: r.foundTruth,
             fooled: r.fooled,
+            favorite: bonus.get(playerId) ?? 0,
           }))
         : null,
+    favorites: scores ? buildFavorites(round, meId, person) : null,
+    myLike: scores && meId ? round.likes?.[meId] ?? null : null,
   };
 }
 
@@ -179,6 +216,7 @@ function buildFinal(state: RoomState): FinalView {
     award('bluffer', 'Bluff-Meister', 'am meisten Leute reingelegt', (p) => p.stats.fooled),
     award('finder', 'Wahrheitsfinder', 'am häufigsten die Wahrheit erkannt', (p) => p.stats.found),
     award('trusting', 'Gutgläubigste Seele', 'am öftesten auf Bluffs hereingefallen', (p) => p.stats.fellFor),
+    favoriteAward(state),
   ].filter((a): a is AwardView => a !== null);
 
   const discoveries = (g?.history ?? []).map((h) => {
@@ -186,5 +224,23 @@ function buildFinal(state: RoomState): FinalView {
     return { prompt: q.prompt, answer: q.answer, ref: q.ref, discovery: q.discovery };
   });
 
-  return { ranking, awards, discoveries };
+  return { ranking, awards, discoveries, recapId: g?.recapId ?? null };
+}
+
+/** Bester Bluff des Abends: die meisten Herzen in einer Runde; bei Gleichstand der frühere */
+function favoriteAward(state: RoomState): AwardView | null {
+  let best: { text: string; authorIds: string[]; likes: number } | null = null;
+  for (const h of state.game?.history ?? []) {
+    for (const f of h.favorites ?? []) if (!best || f.likes > best.likes) best = f;
+  }
+  if (!best) return null;
+  const person = personLookup(state);
+  return {
+    key: 'favorite',
+    title: 'Bester Bluff des Abends',
+    text: 'die meisten Herzen bekommen',
+    players: best.authorIds.map(person),
+    value: best.likes,
+    quote: best.text,
+  };
 }
