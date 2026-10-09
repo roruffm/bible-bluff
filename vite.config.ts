@@ -17,7 +17,10 @@ function apiDevPlugin(): Plugin {
       const api = await server.ssrLoadModule(file('./src/server/api.ts'));
       const store = await server.ssrLoadModule(file('./src/server/store.ts'));
       const adapter = await server.ssrLoadModule(file('./src/server/node-adapter.ts'));
-      return { handle: api.createApi({ store: new store.MemoryStore() }) as Handler, adapter };
+      return {
+        handle: api.createApi({ store: new store.MemoryStore(), adminKey: process.env.ADMIN_KEY || undefined }) as Handler,
+        adapter,
+      };
     })());
 
   return {

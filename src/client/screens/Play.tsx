@@ -10,6 +10,7 @@ export function WritePhase({ view, conn, display = false }: { view: RoomView; co
   const round = view.round!;
   const me = view.me;
   const canWrite = Boolean(me?.plays) && !display;
+  const quiet = canWrite && me?.quiet === 'now';
   const [text, setText] = useState(round.myBluff ?? '');
   const [editing, setEditing] = useState(!round.myBluff);
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +31,7 @@ export function WritePhase({ view, conn, display = false }: { view: RoomView; co
 
   // Kurz vor Schluss: einen fertigen, aber noch nicht abgeschickten Entwurf retten
   useEffect(() => {
-    if (!canWrite || !editing || autoSent.current || view.paused || round.deadline === null) return;
+    if (!canWrite || quiet || !editing || autoSent.current || view.paused || round.deadline === null) return;
     const draft = text.trim();
     if (!draft || draft === round.myBluff || round.deadline - now > 1500) return;
     autoSent.current = true;
@@ -67,6 +68,8 @@ export function WritePhase({ view, conn, display = false }: { view: RoomView; co
       setError(err instanceof Error ? err.message : 'Kein Vorschlag verfügbar.');
     }
   };
+
+  if (quiet) return <QuietScreen view={view} conn={conn} />;
 
   return (
     <section class="phase write stack">
@@ -130,6 +133,7 @@ export function WritePhase({ view, conn, display = false }: { view: RoomView; co
         ))}
 
       <Progress players={view.players} label="Bluffs abgegeben" />
+      {canWrite && <QuietOffer conn={conn} />}
     </section>
   );
 }
@@ -139,6 +143,8 @@ export function VotePhase({ view, conn, display = false }: { view: RoomView; con
   const canVote = Boolean(view.me?.plays) && !display;
   const [pending, setPending] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  if (canVote && view.me?.quiet === 'now') return <QuietScreen view={view} conn={conn} />;
 
   const vote = async (optionId: string) => {
     setPending(optionId);
@@ -188,7 +194,81 @@ export function VotePhase({ view, conn, display = false }: { view: RoomView; con
         </p>
       )}
       <Progress players={view.players} label="Stimmen abgegeben" />
+      {canVote && <QuietOffer conn={conn} />}
     </section>
+  );
+}
+
+/** Gebetsimpulse für die ruhige Minute – je Runde ein anderer */
+const PRAYER_PROMPTS = [
+  'Danke Gott für etwas, das dich heute gefreut hat.',
+  'Bring einen Menschen vor Gott, der dir gerade am Herzen liegt.',
+  'Sag Gott ehrlich, was dich gerade beschäftigt.',
+  'Bitte um Frieden für jemanden, mit dem es gerade schwierig ist.',
+  'Danke für die Menschen hier im Raum – einzeln, mit Namen.',
+  'Sei einfach still und lass Gott Gott sein.',
+];
+
+/** „Ruhige Minute“: Diese Person setzt die Runde aus und nimmt sich Zeit zum Beten. */
+export function QuietScreen({ view, conn }: { view: RoomView; conn: RoomConnection }) {
+  const round = view.round!;
+  const [error, setError] = useState<string | null>(null);
+  const back = async () => {
+    setError(null);
+    try {
+      await conn.act({ type: 'quiet', on: false });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Das ging nicht.');
+    }
+  };
+  return (
+    <section class="phase quiet-screen stack" aria-live="polite">
+      <div class="quiet-breath" aria-hidden="true" />
+      <p class="eyebrow">
+        Runde {round.index + 1} von {round.total} · Ruhige Minute
+      </p>
+      <h1 class="quiet-title">Zeit für ein Gebet</h1>
+      <blockquote class="quiet-verse">
+        „Seid stille und erkennet, dass ich Gott bin!“
+        <cite>Psalm 46,11</cite>
+      </blockquote>
+      <p class="quiet-prompt">{PRAYER_PROMPTS[round.index % PRAYER_PROMPTS.length]}</p>
+      <p class="muted small">Die anderen spielen diese Runde ohne dich weiter. Zur Auflösung bist du wieder dabei.</p>
+      {error && (
+        <p class="error" role="alert">
+          {error}
+        </p>
+      )}
+      <Button variant="secondary" onClick={back}>
+        Zurück ins Spiel
+      </Button>
+    </section>
+  );
+}
+
+/** Dezentes Angebot am Ende der Spielphasen: eine Runde aussetzen, um zu beten */
+export function QuietOffer({ conn, next = false }: { conn: RoomConnection; next?: boolean }) {
+  const [error, setError] = useState<string | null>(null);
+  const start = async () => {
+    setError(null);
+    try {
+      await conn.act({ type: 'quiet', on: true });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Das ging nicht.');
+    }
+  };
+  return (
+    <div class="quiet-offer">
+      <Button variant="ghost" small onClick={start}>
+        Ruhige Minute
+      </Button>
+      <span class="muted small">{next ? 'Die nächste Runde aussetzen, um zu beten.' : 'Diese Runde aussetzen, um zu beten.'}</span>
+      {error && (
+        <p class="error" role="alert">
+          {error}
+        </p>
+      )}
+    </div>
   );
 }
 

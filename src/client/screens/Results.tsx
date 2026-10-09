@@ -1,12 +1,13 @@
-import { useEffect, useState } from 'preact/hooks';
-import { POINTS_FAVORITE } from '../../shared/rules';
-import type { RoomView } from '../../shared/types';
+import { useEffect, useRef, useState } from 'preact/hooks';
+import { POINTS_FAVORITE, POINTS_GIFT, TALK_STEPS } from '../../shared/rules';
+import type { RoomView, TalkNotes, TalkView } from '../../shared/types';
 import { QRCode } from '../components/QR';
 import { Avatar, Button, ConfirmButton, Toast, formatSeconds } from '../components/ui';
 import { api } from '../lib/api';
 import { type RoomConnection, useServerNow } from '../lib/hooks';
 import { navigate, recapUrl } from '../lib/router';
 import { shareLink } from '../lib/share';
+import { QuietOffer } from './Play';
 
 export function ScoresPhase({ view, conn, display = false }: { view: RoomView; conn: RoomConnection; display?: boolean }) {
   const round = view.round!;
@@ -19,6 +20,20 @@ export function ScoresPhase({ view, conn, display = false }: { view: RoomView; c
   const ranked = view.players
     .filter((p) => p.plays)
     .sort((a, b) => b.score - a.score || a.name.localeCompare(b.name, 'de'));
+  const me = display ? null : view.me;
+  // Wer nur leitet, zeigt die Punkte-Phase oft am Beamer – dann bleibt der Spickzettel erst zugeklappt
+  const presenter = Boolean(view.me && !view.me.plays);
+  const [toast, setToast] = useState<string | null>(null);
+
+  // „Liebe deinen Nächsten“: Beschenkte bekommen einen Hinweis
+  const giftsForMe = (me && results.get(me.id)?.giftsIn) || [];
+  const announced = useRef(new Set<string>());
+  useEffect(() => {
+    const fresh = giftsForMe.filter((p) => !announced.current.has(`${round.index}:${p.id}`));
+    if (!fresh.length) return;
+    fresh.forEach((p) => announced.current.add(`${round.index}:${p.id}`));
+    setToast(`${fresh.map((p) => p.name).join(' & ')} ${fresh.length === 1 ? 'hat' : 'haben'} dir einen Punkt geschenkt ♥`);
+  }, [giftsForMe.map((p) => p.id).join(','), round.index]);
 
   return (
     <section class={`phase scores stack${display ? ' is-display' : ''}`}>
@@ -37,6 +52,8 @@ export function ScoresPhase({ view, conn, display = false }: { view: RoomView; c
         </div>
       </article>
 
+      {round.talk && isHost && <TalkNotesCard notes={round.talk} open={!presenter} />}
+
       <FavoritesCard view={view} conn={conn} display={display} />
 
       <section class="card scoreboard">
@@ -48,23 +65,40 @@ export function ScoresPhase({ view, conn, display = false }: { view: RoomView; c
               <li class={`score-row pop${p.id === view.me?.id ? ' is-me' : ''}`} style={{ animationDelay: `${120 + i * 90}ms` }}>
                 <span class="rank">{1 + ranked.filter((o) => o.score > p.score).length}.</span>
                 <Avatar person={p} />
-                <span class="score-name">{p.name}</span>
-                <span class="deltas">
-                  {r && r.truth > 0 && (
-                    <span class="delta is-truth" title="Wahrheit erkannt">
-                      ✓ +{r.truth}
-                    </span>
-                  )}
-                  {r && r.bluff > 0 && (
-                    <span class="delta is-bluff" title="Mitspielende reingelegt">
-                      Bluff +{r.bluff}
-                    </span>
-                  )}
-                  {r && r.favorite > 0 && (
-                    <span class="delta is-favorite" title="Lieblingsbluff mit den meisten Herzen">
-                      ♥ +{r.favorite}
-                    </span>
-                  )}
+                <span class="score-main">
+                  <span class="score-name">{p.name}</span>
+                  <span class="deltas">
+                    {r && r.truth > 0 && (
+                      <span class="delta is-truth" title="Wahrheit erkannt">
+                        ✓ +{r.truth}
+                      </span>
+                    )}
+                    {r && r.bluff > 0 && (
+                      <span class="delta is-bluff" title="Mitspielende reingelegt">
+                        Bluff +{r.bluff}
+                      </span>
+                    )}
+                    {r && r.favorite > 0 && (
+                      <span class="delta is-favorite" title="Lieblingsbluff mit den meisten Herzen">
+                        ♥ +{r.favorite}
+                      </span>
+                    )}
+                    {r?.giftsIn.map((from) => (
+                      <span class="delta is-gift" title="Liebe deinen Nächsten">
+                        +{POINTS_GIFT} von {from.name}
+                      </span>
+                    ))}
+                    {r?.giftOut && (
+                      <span class="delta is-given" title="Liebe deinen Nächsten">
+                        −{POINTS_GIFT} an {r.giftOut.name}
+                      </span>
+                    )}
+                    {r?.quiet && (
+                      <span class="delta is-quiet" title="Hat diese Runde ausgesetzt, um zu beten">
+                        ☾ Ruhige Minute
+                      </span>
+                    )}
+                  </span>
                 </span>
                 <span class="score-total">{p.score}</span>
               </li>
@@ -72,6 +106,23 @@ export function ScoresPhase({ view, conn, display = false }: { view: RoomView; c
           })}
         </ol>
       </section>
+
+      {me?.plays && <GiftCard view={view} conn={conn} />}
+
+      {me?.plays &&
+        !last &&
+        (me.quiet === 'next' ? (
+          <div class="quiet-offer is-set">
+            <span>☾ Du setzt die nächste Runde aus, um zu beten.</span>
+            <Button variant="ghost" small onClick={() => conn.act({ type: 'quiet', on: false }).catch(() => {})}>
+              Doch mitspielen
+            </Button>
+          </div>
+        ) : (
+          <QuietOffer conn={conn} next />
+        ))}
+
+      <Toast message={toast} onDone={() => setToast(null)} />
 
       <footer class="next-bar">
         {isHost ? (
@@ -88,6 +139,100 @@ export function ScoresPhase({ view, conn, display = false }: { view: RoomView; c
         )}
       </footer>
     </section>
+  );
+}
+
+/** „Liebe deinen Nächsten“: einmal pro Runde einen eigenen Punkt verschenken */
+function GiftCard({ view, conn }: { view: RoomView; conn: RoomConnection }) {
+  const round = view.round!;
+  const me = view.me!;
+  const others = view.players.filter((p) => p.plays && p.id !== me.id);
+  const [choosing, setChoosing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  if (!others.length) return null;
+
+  const given = round.myGift ? view.players.find((p) => p.id === round.myGift) : null;
+  if (given) {
+    return (
+      <section class="gift is-done pop">
+        <p>
+          <span aria-hidden="true">♥</span> Du hast <b>{given.name}</b> einen Punkt geschenkt.
+        </p>
+        <p class="muted small">„Liebe deinen Nächsten wie dich selbst.“ Markus 12,31</p>
+      </section>
+    );
+  }
+
+  // Der vorläufige Lieblingsbluff-Punkt steht noch nicht fest und lässt sich nicht verschenken
+  const mine = round.results?.find((r) => r.playerId === me.id);
+  const own = (view.players.find((p) => p.id === me.id)?.score ?? 0) - (mine?.favorite ?? 0);
+  const give = async (playerId: string) => {
+    setError(null);
+    try {
+      await conn.act({ type: 'gift', playerId });
+      setChoosing(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Das Geschenk kam nicht an.');
+    }
+  };
+
+  return (
+    <section class="gift">
+      {choosing ? (
+        <>
+          <p class="gift-ask">Wem schenkst du einen Punkt?</p>
+          <div class="gift-people">
+            {others.map((p) => (
+              <button type="button" class="gift-person" onClick={() => give(p.id)}>
+                <Avatar person={p} size="sm" />
+                <span>{p.name}</span>
+              </button>
+            ))}
+          </div>
+          <Button variant="ghost" small onClick={() => setChoosing(false)}>
+            Doch nicht
+          </Button>
+        </>
+      ) : (
+        <>
+          <Button variant="secondary" block disabled={own < POINTS_GIFT} onClick={() => setChoosing(true)}>
+            ♥ Liebe deinen Nächsten
+          </Button>
+          <p class="muted small center">
+            {own < POINTS_GIFT
+              ? 'Sobald du einen Punkt hast, kannst du ihn verschenken.'
+              : 'Schenke einen deiner Punkte – einmal pro Runde.'}
+          </p>
+        </>
+      )}
+      {error && (
+        <p class="error" role="alert">
+          {error}
+        </p>
+      )}
+    </section>
+  );
+}
+
+/** Spickzettel nur für die Spielleitung: Hintergrund, eine Frage für die Gruppe, ein Querverweis */
+function TalkNotesCard({ notes, open }: { notes: TalkNotes; open: boolean }) {
+  return (
+    <details class="card talk-notes" open={open}>
+      <summary>
+        <span class="talk-notes-title">Spickzettel für die Leitung</span>
+        <span class="muted small">nur auf deinem Gerät</span>
+      </summary>
+      <dl>
+        <dt>Hintergrund</dt>
+        <dd>{notes.background}</dd>
+        <dt>Fragt doch mal</dt>
+        <dd>{notes.question}</dd>
+        <dt>Querverweis</dt>
+        <dd>
+          <b>{notes.crossRef.ref}</b> – {notes.crossRef.note}
+        </dd>
+      </dl>
+    </details>
   );
 }
 
@@ -163,6 +308,7 @@ export function FinalScreen({ view, conn, display = false }: { view: RoomView; c
   const isHost = Boolean(view.me?.isHost) && !display;
   const podium = final.ranking.slice(0, 3);
   const order = [podium[1], podium[0], podium[2]].filter(Boolean);
+  if (final.talk) return <TalkScreen view={view} conn={conn} talk={final.talk} display={display} />;
 
   return (
     <section class={`phase final stack-lg${display ? ' is-display' : ''}`}>
@@ -231,6 +377,18 @@ export function FinalScreen({ view, conn, display = false }: { view: RoomView; c
 
       {!display && (
         <footer class="stack">
+          {isHost && final.discoveries.length > 0 && (
+            <section class="card talk-invite">
+              <h2 class="card-title">Vom Spiel ins Gespräch</h2>
+              <p class="muted small">
+                Die Frage, bei der die meisten danebenlagen, in vier Schritten vertiefen: Lesen, Entdecken, Nachfragen,
+                Mitnehmen. Alle Handys und die Leinwand gehen mit.
+              </p>
+              <Button block onClick={() => conn.act({ type: 'talk' })}>
+                Weiter ins Gespräch
+              </Button>
+            </section>
+          )}
           {isHost ? (
             <>
               <Button variant="gold" block onClick={() => conn.act({ type: 'playAgain' })}>
@@ -326,5 +484,158 @@ function RecapShare({ view, display }: { view: RoomView; display: boolean }) {
       </div>
       <Toast message={toast} onDone={() => setToast(null)} />
     </div>
+  );
+}
+
+/** Inhalt der vier Gesprächsschritte – mit dem Spickzettel der Frage, falls vorhanden */
+function TalkStepBody({ index, talk }: { index: number; talk: TalkView }) {
+  const notes = talk.notes;
+  switch (index) {
+    case 0:
+      return (
+        <p>
+          Schlagt <b>{talk.ref}</b> auf. Eine Person liest den Abschnitt laut vor.
+        </p>
+      );
+    case 1:
+      return (
+        <>
+          <p>{TALK_STEPS[1].prompt}</p>
+          {notes && (
+            <p class="talk-extra">
+              <span>Zum Hintergrund</span>
+              {notes.background}
+            </p>
+          )}
+        </>
+      );
+    case 2:
+      return <p class="talk-big">{notes?.question ?? TALK_STEPS[2].prompt}</p>;
+    default:
+      return (
+        <>
+          <p>{TALK_STEPS[3].prompt}</p>
+          {notes && (
+            <p class="talk-extra">
+              <span>Zum Weiterlesen</span>
+              <b>{notes.crossRef.ref}</b> – {notes.crossRef.note}
+            </p>
+          )}
+        </>
+      );
+  }
+}
+
+/** Gespräch nach dem Spiel: Die Leitung führt, alle Handys und die Leinwand zeigen denselben Schritt. */
+function TalkScreen({ view, conn, talk, display }: { view: RoomView; conn: RoomConnection; talk: TalkView; display: boolean }) {
+  const isHost = Boolean(view.me?.isHost) && !display;
+  const [choosing, setChoosing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const lastStep = TALK_STEPS.length - 1;
+  const act = async (action: Parameters<RoomConnection['act']>[0]) => {
+    setError(null);
+    try {
+      await conn.act(action);
+      setChoosing(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Das ging nicht.');
+    }
+  };
+
+  return (
+    <section class={`phase talk stack-lg${display ? ' is-display' : ''}`}>
+      <header class="talk-head">
+        <p class="eyebrow">
+          Vom Spiel ins Gespräch · Schritt {talk.step + 1} von {TALK_STEPS.length}
+        </p>
+        <h1>{TALK_STEPS[talk.step].title}</h1>
+      </header>
+
+      <article class="talk-question" style={{ '--g': `var(--g-${talk.group})` }}>
+        <span class="book-chip">{talk.book}</span>
+        <p class="talk-prompt">{talk.prompt}</p>
+        <p class="talk-answer">
+          <span aria-hidden="true">✓</span> {talk.answer}
+        </p>
+        <p class="talk-ref">{talk.ref}</p>
+        {talk.voted > 0 && (
+          <p class="muted small">
+            {talk.missed} von {talk.voted} lagen beim Raten daneben.
+          </p>
+        )}
+      </article>
+
+      <ol class="talk-steps">
+        {TALK_STEPS.map((s, i) => (
+          <li class={`talk-step${i === talk.step ? ' is-current' : ''}${i < talk.step ? ' is-done' : ''}`}>
+            <span class="talk-step-num" aria-hidden="true">
+              {i < talk.step ? '✓' : i + 1}
+            </span>
+            <div class="talk-step-main">
+              <p class="talk-step-title">{s.title}</p>
+              {i === talk.step && (
+                <div class="talk-step-body">
+                  <TalkStepBody index={i} talk={talk} />
+                </div>
+              )}
+            </div>
+          </li>
+        ))}
+      </ol>
+
+      {error && (
+        <p class="error" role="alert">
+          {error}
+        </p>
+      )}
+
+      {isHost ? (
+        <footer class="talk-controls stack">
+          <div class="row">
+            <Button variant="secondary" disabled={talk.step === 0} onClick={() => act({ type: 'talkStep', step: talk.step - 1 })}>
+              Zurück
+            </Button>
+            {talk.step < lastStep ? (
+              <Button variant="gold" onClick={() => act({ type: 'talkStep', step: talk.step + 1 })}>
+                Weiter
+              </Button>
+            ) : (
+              <Button variant="gold" onClick={() => act({ type: 'talkEnd' })}>
+                Gespräch beenden
+              </Button>
+            )}
+          </div>
+          <Button variant="ghost" small onClick={() => setChoosing((c) => !c)}>
+            {choosing ? 'Bei dieser Frage bleiben' : 'Andere Frage besprechen'}
+          </Button>
+          {choosing && (
+            <ul class="talk-choices">
+              {view.final!.discoveries.map((d) => (
+                <li>
+                  <button
+                    type="button"
+                    class={`talk-choice${d.questionId === talk.questionId ? ' is-on' : ''}`}
+                    onClick={() => act({ type: 'talk', questionId: d.questionId })}
+                  >
+                    <span class="talk-choice-q">{d.prompt}</span>
+                    <span class="muted small">
+                      {d.ref}
+                      {d.voted > 0 ? ` · ${d.missed} von ${d.voted} daneben` : ''}
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+          {talk.step < lastStep && (
+            <Button variant="ghost" small onClick={() => act({ type: 'talkEnd' })}>
+              Zurück zum Endstand
+            </Button>
+          )}
+        </footer>
+      ) : (
+        !display && <p class="muted small center">Die Spielleitung führt durch das Gespräch.</p>
+      )}
+    </section>
   );
 }

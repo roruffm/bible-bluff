@@ -5,7 +5,8 @@ export type Route =
   | { name: 'create' }
   | { name: 'room'; code: string }
   | { name: 'tv'; code: string }
-  | { name: 'recap'; id: string };
+  | { name: 'recap'; id: string }
+  | { name: 'admin' };
 
 export function parseRoute(pathname: string): Route {
   const parts = pathname.split('/').filter(Boolean);
@@ -13,6 +14,7 @@ export function parseRoute(pathname: string): Route {
   if (parts[0] === 'r' && parts[1]) return { name: 'room', code: parts[1].toUpperCase() };
   if (parts[0] === 'tv' && parts[1]) return { name: 'tv', code: parts[1].toUpperCase() };
   if (parts[0] === 'e' && parts[1]) return { name: 'recap', id: parts[1].toLowerCase() };
+  if (parts[0] === 'admin') return { name: 'admin' };
   return { name: 'home' };
 }
 

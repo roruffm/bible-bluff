@@ -93,6 +93,9 @@ export function Lobby({ view, conn }: { view: RoomView; conn: RoomConnection }) 
         </h2>
         <PlayerList view={view} />
         {view.locked && <p class="notice small">Der Raum ist für neue Teilnehmende gesperrt.</p>}
+        <p class="fresh-note small" title="Fragen, die auf diesen Handys schon aufgelöst wurden, kommen erst später dran.">
+          <span aria-hidden="true">✦</span> Für alle neu: <b>{view.freshCount}</b> von {view.poolSize} Fragen
+        </p>
       </section>
 
       {isHost ? (

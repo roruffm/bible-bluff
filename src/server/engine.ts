@@ -11,6 +11,7 @@ import {
   ONLINE_WINDOW_MS,
   PLAYER_COLORS,
   POINTS_FAVORITE,
+  POINTS_GIFT,
   POINTS_PER_FOOLED,
   POINTS_TRUTH,
   REVEAL_BLUFF_MS,
@@ -19,24 +20,29 @@ import {
   REVEAL_TRUTH_MS,
   ROUND_OPTIONS,
   SCORES_SECONDS,
+  SEEN_SEND_MAX,
+  STRONG_BLUFF_MIN,
+  TALK_STEPS,
   VOTE_OPTIONS,
   WRITE_OPTIONS,
   cleanBluff,
   cleanName,
 } from '../shared/rules';
 import type { Action, Difficulty, Settings } from '../shared/types';
-import { QUESTIONS, getQuestion, type Question } from './questions';
+import { QUESTIONS, getQuestion, hasQuestion, type Question } from './questions';
 import {
   GameError,
   type Ctx,
   type FavoriteRec,
   type GameRec,
+  type HistoryRec,
   type OptionRec,
   type PlayerRec,
   type ResultRec,
   type RoomState,
   type RoundRec,
   type StepRec,
+  type StrongBluffRec,
 } from './state';
 import { isDuplicate, isTooCloseToTruth, normalize } from './text';
 
@@ -112,7 +118,39 @@ function requireGame(state: RoomState): GameRec {
 }
 
 function freshStats() {
-  return { found: 0, fooled: 0, fellFor: 0 };
+  return { found: 0, fooled: 0, fellFor: 0, gifted: 0 };
+}
+
+function requireFinished(state: RoomState): GameRec {
+  if (state.status !== 'finished' || !state.game) {
+    throw new GameError('bad_state', 'Das Gespräch gibt es nach der letzten Runde.');
+  }
+  return state.game;
+}
+
+/** „Ruhige Minute“: setzt diese Person die laufende Runde aus? */
+export function isQuiet(p: PlayerRec, g: GameRec | null | undefined): boolean {
+  return Boolean(g) && p.quietRound === g!.roundIndex;
+}
+
+function requireNotQuiet(p: PlayerRec, g: GameRec) {
+  if (isQuiet(p, g)) {
+    throw new GameError('quiet', 'Du machst gerade eine ruhige Minute. Tippe auf „Zurück ins Spiel“, um mitzumachen.');
+  }
+}
+
+/**
+ * „Neues für alle“: Ein Gerät meldet beim Eröffnen oder Beitreten, welche Fragen es schon kennt.
+ * Jede Person zählt einmal; gemerkt wird nur die Anzahl je Frage, keine Liste pro Person.
+ */
+function noteSeen(s: RoomState, playerId: string, seen: unknown) {
+  if (!Array.isArray(seen) || !seen.length) return;
+  const from = (s.seenFrom ??= []);
+  if (from.includes(playerId)) return;
+  from.push(playerId);
+  const counts = (s.seenCounts ??= {});
+  const ids = new Set(seen.slice(0, SEEN_SEND_MAX).filter((id): id is string => typeof id === 'string' && hasQuestion(id)));
+  for (const id of ids) counts[id] = (counts[id] ?? 0) + 1;
 }
 
 function nextColor(state: RoomState): string {
@@ -151,12 +189,14 @@ export interface NewRoomInput {
   tokenHash: string;
   plays: boolean;
   settings?: Partial<Settings>;
+  /** Fragen, die das Gerät schon kennt */
+  seen?: unknown;
 }
 
 export function createRoom(input: NewRoomInput, ctx: Ctx): RoomState {
   const name = cleanName(input.hostName);
   if (!name) throw new GameError('bad_name', 'Bitte gib einen Spitznamen ein.', 400);
-  return {
+  const state: RoomState = {
     v: 1,
     code: input.code,
     createdAt: ctx.now,
@@ -181,6 +221,8 @@ export function createRoom(input: NewRoomInput, ctx: Ctx): RoomState {
     usedQuestionIds: [],
     paused: null,
   };
+  noteSeen(state, input.hostId, input.seen);
+  return state;
 }
 
 export interface JoinInput {
@@ -189,6 +231,8 @@ export interface JoinInput {
   tokenHash: string;
   /** Wiedereinstieg unter einem bestehenden, gerade nicht verbundenen Namen */
   reclaim?: boolean;
+  /** Fragen, die das Gerät schon kennt */
+  seen?: unknown;
 }
 
 export function joinRoom(state: RoomState, input: JoinInput, ctx: Ctx): { state: RoomState; playerId: string } {
@@ -207,6 +251,7 @@ export function joinRoom(state: RoomState, input: JoinInput, ctx: Ctx): { state:
       throw new GameError('name_offline', `„${existing.name}“ ist gerade nicht verbunden. Bist du das?`);
     }
     existing.tokenHash = input.tokenHash;
+    noteSeen(s, existing.id, input.seen);
     return { state: s, playerId: existing.id };
   }
 
@@ -223,6 +268,7 @@ export function joinRoom(state: RoomState, input: JoinInput, ctx: Ctx): { state:
     score: 0,
     stats: freshStats(),
   });
+  noteSeen(s, input.playerId, input.seen);
   return { state: s, playerId: input.playerId };
 }
 
@@ -233,32 +279,42 @@ export function pickQuestions(
   used: Set<string>,
   count: number,
   rng: () => number,
+  /** „Neues für alle“: wie viele Personen im Raum eine Frage schon kennen */
+  seen: Record<string, number> = {},
 ): { main: string[]; spare: string[] } {
   const weights = DIFFICULTY_WEIGHTS[difficulty];
   let pool = QUESTIONS.filter((q) => !used.has(q.id));
   if (pool.length < count + SPARE_QUESTIONS) pool = [...QUESTIONS];
 
-  // Gewichtetes Ziehen ohne Zurücklegen (Efraimidis–Spirakis)
+  // Gewichtetes Ziehen ohne Zurücklegen (Efraimidis–Spirakis). Stufen davor: Fragen, die hier
+  // schon jemand kennt, kommen nach hinten – je mehr Leute sie kennen, desto weiter. Eine bekannte
+  // Antwort verdirbt jeden Bluff, darum zählt das mehr als die Abwechslung bei den Büchern.
   const ranked = pool
     .map((q) => {
       const w = weights[q.difficulty];
-      return { q, key: w > 0 ? Math.pow(rng(), 1 / w) : -1 - rng() };
+      return { q, tier: (w > 0 ? 0 : 1000) + (seen[q.id] ?? 0), key: w > 0 ? Math.pow(rng(), 1 / w) : -1 - rng() };
     })
-    .sort((a, b) => b.key - a.key)
-    .map((x) => x.q);
+    .sort((a, b) => a.tier - b.tier || b.key - a.key);
+  const tiers: Question[][] = [];
+  for (let i = 0; i < ranked.length; i++) {
+    if (i === 0 || ranked[i].tier !== ranked[i - 1].tier) tiers.push([]);
+    tiers[tiers.length - 1].push(ranked[i].q);
+  }
 
   const chosen: Question[] = [];
   const books = new Set<string>();
   let numbers = 0;
   const want = count + SPARE_QUESTIONS;
-  for (const strict of [true, false]) {
-    for (const q of ranked) {
-      if (chosen.length >= want) break;
-      if (chosen.includes(q)) continue;
-      if (strict && (books.has(q.book) || (q.number && numbers >= MAX_NUMBER_QUESTIONS))) continue;
-      chosen.push(q);
-      books.add(q.book);
-      if (q.number) numbers++;
+  for (const tier of tiers) {
+    for (const strict of [true, false]) {
+      for (const q of tier) {
+        if (chosen.length >= want) break;
+        if (chosen.includes(q)) continue;
+        if (strict && (books.has(q.book) || (q.number && numbers >= MAX_NUMBER_QUESTIONS))) continue;
+        chosen.push(q);
+        books.add(q.book);
+        if (q.number) numbers++;
+      }
     }
   }
 
@@ -286,10 +342,17 @@ function startGame(s: RoomState, ctx: Ctx) {
   if (players(s).length < MIN_PLAYERS) {
     throw new GameError('too_few', `Es braucht mindestens ${MIN_PLAYERS} Mitspielende.`);
   }
-  const { main, spare } = pickQuestions(s.settings.difficulty, new Set(s.usedQuestionIds), s.settings.rounds, ctx.rng);
+  const { main, spare } = pickQuestions(
+    s.settings.difficulty,
+    new Set(s.usedQuestionIds),
+    s.settings.rounds,
+    ctx.rng,
+    s.seenCounts,
+  );
   for (const p of s.players) {
     p.score = 0;
     p.stats = freshStats();
+    delete p.quietRound;
   }
   s.status = 'playing';
   s.paused = null;
@@ -316,6 +379,8 @@ function startRound(s: RoomState, index: number, ctx: Ctx) {
   const g = s.game!;
   const questionId = g.questionIds[index];
   markUsed(s, questionId);
+  // „Ruhige Minute“ vorbei: wer eine frühere Runde ausgesetzt hat, ist wieder dabei
+  for (const p of s.players) if (p.quietRound !== undefined && p.quietRound < index) delete p.quietRound;
   g.roundIndex = index;
   g.round = newRound(index, questionId);
   g.phase = 'write';
@@ -345,7 +410,7 @@ function startVote(s: RoomState, ctx: Ctx) {
   ];
 
   // Mit Hausbluffs auffüllen, damit es immer etwas zu raten gibt
-  for (const decoy of shuffle(q.bluffs, ctx.rng)) {
+  for (const decoy of shuffle(houseBluffs(q, ctx), ctx.rng)) {
     if (options.length >= MIN_OPTIONS) break;
     if (options.some((o) => isDuplicate(o.text, decoy))) continue;
     options.push({ id: '', text: formatAnswer(decoy), kind: 'house', authorIds: [] });
@@ -473,10 +538,40 @@ export function favoriteLeaders(round: RoundRec): OptionRec[] {
   return (round.options ?? []).filter((o) => o.kind === 'player' && counts.get(o.id) === best);
 }
 
-/** Extrapunkt für den Lieblingsbluff gutschreiben und für den Endstand merken */
-function settleFavorites(s: RoomState) {
+/** Hausbluffs einer Frage: die vorbereiteten plus freigegebene aus echten Partien */
+function houseBluffs(q: Question, ctx: Ctx): string[] {
+  const all = [...q.bluffs];
+  for (const text of ctx.extraBluffs?.[q.id] ?? []) if (!all.some((t) => isDuplicate(t, text))) all.push(text);
+  return all;
+}
+
+/** Kommt einer der Namen als ganzes Wort im Text vor – auch im Genitiv („Bens Esel“)? */
+function mentionsName(text: string, names: string[]): boolean {
+  const padded = ` ${normalize(text)} `;
+  return names.some((n) => padded.includes(` ${n} `) || padded.includes(` ${n}s `));
+}
+
+/**
+ * Starke Bluffs der Runde (viele reingelegt oder viele Herzen) – Kandidaten für frische Hausbluffs.
+ * Bluffs, die Namen aus dem Raum enthalten, bleiben draußen: Sie passen nur zu dieser Gruppe.
+ */
+function strongBluffs(s: RoomState, round: RoundRec): StrongBluffRec[] {
+  const likes = likeCounts(round);
+  const names = [...s.players, ...s.kicked].map((p) => normalize(p.name)).filter((n) => n.length >= 2);
+  return (round.options ?? [])
+    .filter((o) => o.kind === 'player')
+    .map((o) => ({ text: o.text, fooled: votersOf(round, o.id).length, likes: likes.get(o.id) ?? 0 }))
+    .filter((b) => (b.fooled >= STRONG_BLUFF_MIN || b.likes >= STRONG_BLUFF_MIN) && !mentionsName(b.text, names));
+}
+
+/** Runde abschließen: Lieblingsbluff gutschreiben, starke Bluffs für den Endstand merken */
+function settleRound(s: RoomState) {
   const g = s.game!;
   const round = g.round;
+  const entry = g.history[g.history.length - 1];
+  const current = entry && entry.questionId === round.questionId ? entry : null;
+  const strong = strongBluffs(s, round);
+  if (current && strong.length) current.strong = strong;
   const leaders = favoriteLeaders(round);
   if (!leaders.length) return;
   const counts = likeCounts(round);
@@ -490,13 +585,38 @@ function settleFavorites(s: RoomState) {
     }
   }
   const favorites: FavoriteRec[] = leaders.map((o) => ({ text: o.text, authorIds: o.authorIds, likes: counts.get(o.id) ?? 0 }));
-  const entry = g.history[g.history.length - 1];
-  if (entry && entry.questionId === round.questionId) entry.favorites = favorites;
+  if (current) current.favorites = favorites;
+}
+
+/** Wie viele haben bei dieser Frage abgestimmt, und wie viele davon sind auf einen Bluff hereingefallen? */
+export function missStats(h: HistoryRec): { voted: number; missed: number } {
+  let voted = 0;
+  let missed = 0;
+  for (const r of Object.values(h.results)) {
+    if (r.fellFor) {
+      voted++;
+      missed++;
+    } else if (r.foundTruth) {
+      voted++;
+    }
+  }
+  return { voted, missed };
+}
+
+/** Gespräch: die Frage, bei der die meisten danebenlagen (Anteil, dann Anzahl, dann die frühere) */
+export function mostMissedQuestion(g: GameRec): string | null {
+  let best: { id: string; rate: number; missed: number } | null = null;
+  for (const h of g.history) {
+    const { voted, missed } = missStats(h);
+    const rate = voted ? missed / voted : 0;
+    if (!best || rate > best.rate || (rate === best.rate && missed > best.missed)) best = { id: h.questionId, rate, missed };
+  }
+  return best?.id ?? null;
 }
 
 function afterScores(s: RoomState, ctx: Ctx) {
   const g = s.game!;
-  settleFavorites(s);
+  settleRound(s);
   if (g.roundIndex + 1 < g.questionIds.length) {
     startRound(s, g.roundIndex + 1, ctx);
   } else {
@@ -507,8 +627,9 @@ function afterScores(s: RoomState, ctx: Ctx) {
   }
 }
 
+/** Auf wen gewartet wird: wer mitspielt, verbunden ist und nicht gerade eine ruhige Minute macht */
 function eligibleOnline(s: RoomState, ctx: Ctx): PlayerRec[] {
-  return players(s).filter((p) => isOnline(ctx, p.id));
+  return players(s).filter((p) => isOnline(ctx, p.id) && !isQuiet(p, s.game));
 }
 
 function everyoneWrote(s: RoomState, ctx: Ctx): boolean {
@@ -614,6 +735,7 @@ export function applyAction(state: RoomState, actorId: string, action: Action, c
       const g = requireGame(s);
       if (g.phase !== 'write') throw new GameError('phase_over', 'Die Schreibzeit ist vorbei.');
       if (!actor.plays) throw new GameError('not_playing', 'Du leitest nur – mitschreiben geht nicht.');
+      requireNotQuiet(actor, g);
       const text = formatAnswer(typeof action.text === 'string' ? action.text : '');
       if (!text) throw new GameError('empty', 'Schreib zuerst einen Bluff.', 400);
       if (text.length > BLUFF_MAX) throw new GameError('too_long', `Höchstens ${BLUFF_MAX} Zeichen.`, 400);
@@ -633,13 +755,15 @@ export function applyAction(state: RoomState, actorId: string, action: Action, c
       const g = requireGame(s);
       if (g.phase !== 'write') throw new GameError('phase_over', 'Die Schreibzeit ist vorbei.');
       if (!actor.plays) throw new GameError('not_playing', 'Du leitest nur – mitschreiben geht nicht.');
-      return { state, suggestion: suggestBluff(s, actorId, Number(action.n) || 0) };
+      requireNotQuiet(actor, g);
+      return { state, suggestion: suggestBluff(s, actorId, Number(action.n) || 0, ctx) };
     }
 
     case 'vote': {
       const g = requireGame(s);
       if (g.phase !== 'vote') throw new GameError('phase_over', 'Die Abstimmung ist vorbei.');
       if (!actor.plays) throw new GameError('not_playing', 'Du leitest nur – abstimmen geht nicht.');
+      requireNotQuiet(actor, g);
       const option = g.round.options?.find((o) => o.id === action.optionId);
       if (!option) throw new GameError('bad_option', 'Diese Antwort gibt es nicht.', 400);
       if (option.authorIds.includes(actorId)) {
@@ -661,6 +785,71 @@ export function applyAction(state: RoomState, actorId: string, action: Action, c
       // Nochmal tippen nimmt das Herz zurück; ein anderer Bluff bekommt es stattdessen
       if (likes[actorId] === option.id) delete likes[actorId];
       else likes[actorId] = option.id;
+      return { state: s };
+    }
+
+    case 'gift': {
+      const g = requireGame(s);
+      if (g.phase !== 'scores') throw new GameError('phase_over', 'Punkte verschenken geht nach der Auflösung.');
+      if (!actor.plays) throw new GameError('not_playing', 'Du leitest nur – du hast keine Punkte zum Verschenken.');
+      const target = player(s, String(action.playerId));
+      if (!target || !target.plays) throw new GameError('bad_target', 'Diese Person spielt nicht mit.', 400);
+      if (target.id === actorId) throw new GameError('bad_target', 'Dir selbst kannst du nichts schenken.', 400);
+      const gifts = (g.round.gifts ??= {});
+      if (gifts[actorId]) throw new GameError('already_gifted', 'In dieser Runde hast du schon einen Punkt verschenkt.');
+      if (actor.score < POINTS_GIFT) throw new GameError('no_points', 'Du hast noch keinen Punkt zum Verschenken.');
+      actor.score -= POINTS_GIFT;
+      target.score += POINTS_GIFT;
+      actor.stats.gifted = (actor.stats.gifted ?? 0) + POINTS_GIFT;
+      gifts[actorId] = target.id;
+      return { state: s };
+    }
+
+    case 'quiet': {
+      const g = requireGame(s);
+      if (!actor.plays) throw new GameError('not_playing', 'Du leitest nur – aussetzen musst du nicht.');
+      if (!action.on) {
+        delete actor.quietRound;
+        return { state: s };
+      }
+      // Beim Schreiben und Abstimmen gilt die laufende Runde, danach die nächste
+      const target = g.phase === 'write' || g.phase === 'vote' ? g.roundIndex : g.roundIndex + 1;
+      if (target >= g.questionIds.length) throw new GameError('last_round', 'Das ist schon die letzte Runde.');
+      actor.quietRound = target;
+      if (target === g.roundIndex) {
+        if (g.phase === 'write') delete g.round.bluffs[actorId];
+        if (g.phase === 'vote') delete g.round.votes[actorId];
+      }
+      return { state: s };
+    }
+
+    case 'talk': {
+      requireHost(s, actorId);
+      const g = requireFinished(s);
+      const questionId = action.questionId ?? mostMissedQuestion(g);
+      if (!questionId || !g.history.some((h) => h.questionId === questionId)) {
+        throw new GameError('bad_question', 'Diese Frage kam in der Partie nicht vor.', 400);
+      }
+      g.talk = { questionId, step: 0 };
+      return { state: s };
+    }
+
+    case 'talkStep': {
+      requireHost(s, actorId);
+      const g = requireFinished(s);
+      if (!g.talk) throw new GameError('bad_state', 'Gerade läuft kein Gespräch.');
+      const next = Math.trunc(Number(action.step));
+      if (!Number.isFinite(next) || next < 0 || next >= TALK_STEPS.length) {
+        throw new GameError('bad_step', 'Diesen Schritt gibt es nicht.', 400);
+      }
+      g.talk.step = next;
+      return { state: s };
+    }
+
+    case 'talkEnd': {
+      requireHost(s, actorId);
+      const g = requireFinished(s);
+      g.talk = null;
       return { state: s };
     }
 
@@ -693,7 +882,7 @@ export function applyAction(state: RoomState, actorId: string, action: Action, c
       let next = g.spareIds.shift();
       if (!next) {
         const used = new Set([...s.usedQuestionIds, ...g.questionIds]);
-        next = pickQuestions(s.settings.difficulty, used, 1, ctx.rng).main[0];
+        next = pickQuestions(s.settings.difficulty, used, 1, ctx.rng, s.seenCounts).main[0];
       }
       g.questionIds[g.roundIndex] = next;
       startRound(s, g.roundIndex, ctx);
@@ -766,6 +955,7 @@ export function applyAction(state: RoomState, actorId: string, action: Action, c
       for (const p of s.players) {
         p.score = 0;
         p.stats = freshStats();
+        delete p.quietRound;
       }
       return { state: s };
     }
@@ -812,18 +1002,18 @@ function resume(s: RoomState, ctx: Ctx) {
   if (g.round.revealStartedAt !== null) g.round.revealStartedAt += delta;
 }
 
-function suggestBluff(s: RoomState, actorId: string, n: number): string {
+function suggestBluff(s: RoomState, actorId: string, n: number, ctx: Ctx): string {
   const g = s.game!;
-  const q = getQuestion(g.round.questionId);
+  const pool = houseBluffs(getQuestion(g.round.questionId), ctx);
   const position = Math.max(0, players(s).findIndex((p) => p.id === actorId));
   const others = Object.entries(g.round.bluffs)
     .filter(([id]) => id !== actorId)
     .map(([, b]) => b.text);
-  for (let i = 0; i < q.bluffs.length; i++) {
-    const candidate = q.bluffs[(position + n + i) % q.bluffs.length];
+  for (let i = 0; i < pool.length; i++) {
+    const candidate = pool[(position + n + i) % pool.length];
     if (!others.some((t) => isDuplicate(t, candidate))) return candidate;
   }
-  return q.bluffs[(position + n) % q.bluffs.length];
+  return pool[(position + n) % pool.length];
 }
 
 /**

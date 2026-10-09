@@ -20,6 +20,10 @@ Die Fragen stammen aus dem *Studienkonzept NT* (Lernblätter zu allen 27 Bücher
 | --- | --- | --- | --- |
 | ![Herzen für den Lieblingsbluff](docs/screenshots/lieblingsbluff.png) | ![Auszeichnung Bester Bluff des Abends](docs/screenshots/bester-bluff.png) | ![Teilen im Endstand](docs/screenshots/entdeckungen-teilen.png) | ![Dauerhafte Entdeckungen-Seite](docs/screenshots/entdeckungen-seite.png) |
 
+| Spickzettel der Leitung | Vom Spiel ins Gespräch | Liebe deinen Nächsten | Ruhige Minute |
+| --- | --- | --- | --- |
+| ![Spickzettel nur für die Spielleitung](docs/screenshots/spickzettel.png) | ![Gespräch nach dem Spiel](docs/screenshots/gespraech.png) | ![Einen Punkt verschenken](docs/screenshots/verschenken.png) | ![Eine Runde zum Beten aussetzen](docs/screenshots/ruhige-minute.png) |
+
 Leinwand-Ansicht (`/tv/RAUMCODE`):
 
 ![Leinwand während der Aufdeckung](docs/screenshots/tv-aufdeckung.png)
@@ -35,11 +39,11 @@ Leinwand-Ansicht (`/tv/RAUMCODE`):
 | Bluff schreiben (45–120 s) | Alle erfinden heimlich eine falsche Antwort. Wer keine Idee hat, nimmt einen vorbereiteten Vorschlag. |
 | Abstimmen (20–60 s) | Die Wahrheit steht anonym und gemischt zwischen den Bluffs. Den eigenen Bluff kann man nicht wählen. |
 | Aufdecken | Synchron auf allen Geräten: Wer hat was gewählt? Wer hat es erfunden? Am Ende kommt der Stempel „Wahr!“. |
-| Punkte & Entdeckung | Die Bibelstelle, ein überraschender Satz zur Auflösung und der Punktestand. Alle verteilen ein Herz an ihren Lieblingsbluff. |
+| Punkte & Entdeckung | Die Bibelstelle, ein überraschender Satz zur Auflösung und der Punktestand. Alle verteilen ein Herz an ihren Lieblingsbluff, und wer mag, verschenkt einen Punkt. |
 
 **Punkte:** +2 für das Erkennen der richtigen Antwort, +1 für jede Person, die auf den eigenen Bluff hereinfällt, +1 für den Lieblingsbluff der Runde.
 
-Dadurch kann auch jemand mit wenig Bibelwissen gewinnen, denn gute Einfälle und Menschenkenntnis zählen mit. Am Ende gibt es ein Siegertreppchen und vier Auszeichnungen (Bluff-Meister, Wahrheitsfinder, Gutgläubigste Seele, Bester Bluff des Abends). Außerdem zeigt der Endstand alle Entdeckungen der Partie zum Nachlesen.
+Dadurch kann auch jemand mit wenig Bibelwissen gewinnen, denn gute Einfälle und Menschenkenntnis zählen mit. Am Ende gibt es ein Siegertreppchen und fünf Auszeichnungen (Bluff-Meister, Wahrheitsfinder, Gutgläubigste Seele, Bester Bluff des Abends, Nächstenliebe). Außerdem zeigt der Endstand alle Entdeckungen der Partie zum Nachlesen, und die Leitung kann direkt ins Gespräch überleiten.
 
 ### Lieblingsbluff
 
@@ -48,6 +52,43 @@ Nach der Auflösung zeigt jedes Handy die Bluffs der Runde mit ihren Urhebern. J
 ### Entdeckungen zum Mitnehmen
 
 Nach der letzten Runde legt das Spiel eine dauerhafte Seite unter `/e/ID` an. Sie zeigt alle Fragen der Partie mit Antwort, Bibelstelle, Entdeckung und dem Lieblingsbluff jeder Runde. Auf den Handys steht im Endstand „Entdeckungen teilen“ (Teilen-Dialog oder Link kopieren), die Leinwand zeigt oben rechts einen QR-Code. Die Seite enthält keine Namen und keinen Raumcode. Sie bleibt erhalten, auch wenn der Raum längst gelöscht ist, und eignet sich zum Nachlesen in der Woche oder für die nächste Kleingruppe.
+
+### Liebe deinen Nächsten
+
+In der Punkte-Phase verschenkt jede Person einmal pro Runde einen eigenen Punkt an jemanden, den sie auswählt. Der Punktestand zeigt das sofort („+1 von Rahel“, „−1 an Mirjam“), und wer beschenkt wird, bekommt einen Hinweis aufs Handy. Verschenken lässt sich nur, was man schon hat; der vorläufige Lieblingsbluff-Punkt zählt erst nach dem Weiterschalten. Wer am meisten verschenkt hat, bekommt im Endstand die Auszeichnung **Nächstenliebe**.
+
+### Ruhige Minute
+
+Wer eine Pause zum Beten braucht, tippt auf „Ruhige Minute“. Beim Schreiben oder Abstimmen setzt die Person die laufende Runde aus, nach der Auflösung die nächste. Das Spiel wartet nicht auf sie, ein schon geschriebener Bluff oder eine Stimme wird zurückgenommen. Ihr Handy zeigt stattdessen eine ruhige Seite mit einem Psalmvers und einem kurzen Gebetsimpuls; die anderen sehen nur ein ☾ neben dem Namen. „Zurück ins Spiel“ geht jederzeit, spätestens zur nächsten Runde ist sie automatisch wieder dabei.
+
+### Vom Spiel ins Gespräch
+
+Zu jeder der 142 Fragen gibt es einen **Spickzettel** mit Hintergrundwissen, einer offenen Gesprächsfrage und einem Querverweis auf eine andere Bibelstelle. Er erscheint nach jeder Auflösung nur auf dem Gerät der Spielleitung (am Beamer zunächst zugeklappt).
+
+Nach dem Endstand führt „Weiter ins Gespräch“ zu der Frage, bei der die meisten danebenlagen; jede andere Frage der Partie lässt sich ebenso wählen. Die Leitung blättert durch vier Schritte, und alle Handys und die Leinwand gehen mit:
+
+1. **Lesen:** die Bibelstelle aufschlagen und laut vorlesen.
+2. **Entdecken:** Was fällt auf, was hat überrascht? Dazu der Hintergrund vom Spickzettel.
+3. **Nachfragen:** die Gesprächsfrage zur Stelle.
+4. **Mitnehmen:** Was nehmen wir mit, wofür danken oder beten wir? Dazu der Querverweis zum Weiterlesen.
+
+So wird aus einem Spieleabend ein Hauskreis-Abend ohne Vorbereitung. Das Gespräch ist freiwillig: „Zurück zum Endstand“ beendet es jederzeit. Die Texte (`src/server/talk.ts`) sind mit KI-Hilfe geschrieben und gegengeprüft; Querverweise sind mit eigenen Worten wiedergegeben, ohne geschützte Bibelübersetzungen zu zitieren. Eine Durchsicht durch jemanden aus eurer Gemeinde lohnt sich trotzdem.
+
+![Gespräch auf der Leinwand](docs/screenshots/tv-gespraech.png)
+
+### Neues für alle
+
+Bei einem Bluff-Spiel verdirbt eine bekannte Frage die Runde: Wer die Antwort noch weiß, tippt sofort richtig. Darum merkt sich jedes Handy, welche Fragen es schon aufgelöst gesehen hat (nur die Frage-IDs, nur auf dem Gerät), und meldet sie beim Eröffnen oder Beitreten. Der Server zählt pro Raum, wie viele Leute eine Frage kennen, und zieht zuerst Fragen, die niemand kennt, dann die, die am wenigsten Leute kennen. Die Lobby zeigt, wie viele Fragen „für alle neu“ sind.
+
+### Frische Hausbluffs
+
+Jede Frage hat drei vorbereitete Hausbluffs, die auch der Vorschlagsknopf liefert. Wer öfter spielt, erkennt sie irgendwann. Deshalb sammelt das Spiel nach jeder Partie Bluffs, die mindestens zwei Leute reingelegt oder zwei Herzen bekommen haben, als Kandidaten: ohne Namen, und ohne Bluffs, in denen ein Name aus dem Raum vorkommt.
+
+Auf **`/admin`** prüfst du die Kandidaten, korrigierst bei Bedarf den Text und nimmst sie auf oder lehnst sie ab. Erst aufgenommene Bluffs ergänzen die Hausbluffs und Vorschläge ihrer Frage. Das Spiel lehnt ab, was zu nah an der richtigen Antwort liegt oder schon ein Hausbluff ist.
+
+Die Seite braucht einen Schlüssel: Lege im Cloudflare-Dashboard unter **Workers & Pages → bible-bluff → Settings → Variables and Secrets** ein Secret `ADMIN_KEY` an, am besten eine lange Zufallsfolge. Ohne diesen Schlüssel ist die Freigabe abgeschaltet. Lokal geht es mit `ADMIN_KEY=… npm start`.
+
+![Freigabe-Seite für frische Hausbluffs](docs/screenshots/freigabe.png)
 
 ### Faire Runden
 
@@ -101,13 +142,13 @@ Die D1-Datenbank `bible-bluff` (Region Westeuropa) ist angelegt, das Schema ist 
 
 ```bash
 npx wrangler login
-npm run db:migrate:remote                 # neue Migrationen einspielen (aktuell 0002_recaps)
+npm run db:migrate:remote                 # neue Migrationen einspielen (aktuell bis 0003_bluff_pool)
 npm run deploy                            # baut die App und veröffentlicht Worker + Assets
 ```
 
 **Vorschauen je Pull-Request:** Workers Builds baut zu jedem Pull-Request eine Vorschau mit eigener URL (`wrangler preview`). Vorschauen nutzen eine eigene Datenbank `bible-bluff-preview` (Block `previews` in `wrangler.toml`), damit Tests nie Räume der Produktion berühren. Neue Migrationen müssen deshalb in beide Datenbanken: `npm run db:migrate:remote` für die Produktion und `npx wrangler d1 execute bible-bluff-preview --remote --file migrations/<datei>.sql` für die Vorschau.
 
-Die Tabelle `recaps` für die Entdeckungen-Seiten legt der Worker beim ersten Bedarf auch selbst an. Fehlt die Migration also in einer Datenbank, funktioniert trotzdem alles.
+Die Tabellen `recaps` (Entdeckungen-Seiten) und `bluff_pool` (frische Hausbluffs) legt der Worker beim ersten Bedarf auch selbst an. Fehlt eine Migration in einer Datenbank, funktioniert trotzdem alles.
 
 Für ein anderes Cloudflare-Konto zuerst `npx wrangler d1 create bible-bluff` und `npx wrangler d1 create bible-bluff-preview` ausführen und beide `database_id`-Werte in `wrangler.toml` eintragen.
 
@@ -121,6 +162,7 @@ Handys / Leinwand ──(etwa jede Sekunde: GET /api/rooms/CODE)──▶ Cloudf
                   ──(POST /api/rooms/CODE/action)─────────────▶   presence (zuletzt gesehen)
 Endstand          ──(POST /api/rooms/CODE/recap)──────────────▶   recaps (Entdeckungen-Seiten)
 Seite /e/ID       ──(GET /api/recaps/ID)──────────────────────▶
+Freigabe /admin   ──(GET/POST /api/admin/bluffs, ADMIN_KEY)───▶   bluff_pool (Kandidaten, freigegebene Bluffs)
 ```
 
 - **Server entscheidet alles.** Zeitlimits, Phasenwechsel, Duplikat-Erkennung und Punkte werden zentral berechnet. Phasen schalten „im Vorbeigehen“ weiter, also bei der nächsten Anfrage nach Ablauf der Frist oder sobald alle Verbundenen abgegeben haben. So braucht es weder Cron noch Dauerprozess.
@@ -184,7 +226,7 @@ Schlüsselwörter werden ohne Umlaute geschrieben (`ae`, `oe`, `ue`, `ss`). Ein 
 
 ```bash
 npm run typecheck
-npm test             # Engine, Textvergleich, Fragenpool, API, Entdeckungen-Seiten (Vitest)
+npm test             # Engine, Textvergleich, Fragenpool, Gesprächsstoff, API, Freigabe (Vitest)
 npm run test:e2e     # komplette Partien mit mehreren Browsern (Playwright)
 ```
 
