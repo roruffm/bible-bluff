@@ -217,3 +217,24 @@ test('Spielleitung am Beamer: Pause, Wiedereinstieg und Entfernen', async ({ bro
   await host.getByRole('button', { name: /Für alle schließen/ }).click();
   await expect(anna.getByRole('heading', { name: 'Raum geschlossen' })).toBeVisible();
 });
+
+test('Impressum und Datenschutz sind von der Startseite und im Raum erreichbar', async ({ browser }) => {
+  const page = await phone(browser, 'gast');
+  await page.goto('/');
+  await page.getByRole('navigation', { name: 'Rechtliches' }).getByRole('link', { name: 'Impressum' }).click();
+  await expect(page).toHaveURL(/\/impressum$/);
+  await expect(page.getByRole('heading', { name: 'Impressum', level: 1 })).toBeVisible();
+  await expect(page.getByText('Steinlestr. 22')).toBeVisible();
+  await page.getByRole('navigation', { name: 'Rechtliches' }).getByRole('link', { name: 'Datenschutz' }).click();
+  await expect(page).toHaveURL(/\/datenschutz$/);
+  await expect(page.getByRole('heading', { name: 'Hosting bei Cloudflare' })).toBeVisible();
+  // Direkt aufrufbar (Single-Page-App)
+  await page.goto('/impressum');
+  await expect(page.getByRole('heading', { name: 'Impressum', level: 1 })).toBeVisible();
+
+  // Im Raum öffnen die Links einen neuen Tab, damit niemand aus der Partie fällt
+  await createRoom(page, 'Rahel');
+  await page.locator('.topbar-menu').click();
+  const link = page.locator('.sheet').getByRole('link', { name: 'Datenschutz' });
+  await expect(link).toHaveAttribute('target', '_blank');
+});

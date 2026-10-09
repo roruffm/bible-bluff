@@ -13,6 +13,7 @@ import { ThemePicker } from '../components/ThemePicker';
 import { Button, Logo, Rules, Segmented, Toggle } from '../components/ui';
 import { ApiError, api } from '../lib/api';
 import { navigate } from '../lib/router';
+import { LegalLinks } from './Legal';
 import { type Session, lastRoom, loadSession, rememberedName, saveSession } from '../lib/session';
 
 export function Home() {
@@ -69,6 +70,7 @@ export function Home() {
       <footer class="footnote">
         Fragen aus allen 27 Büchern des Neuen Testaments und ausgewählten Geschichten des Alten Testaments · freikirchlich-pfingstliche Lernfassung
       </footer>
+      <LegalLinks />
     </main>
   );
 }
@@ -243,6 +245,7 @@ export function CreateRoom() {
           {busy ? 'Raum wird eröffnet …' : 'Raum eröffnen'}
         </Button>
       </form>
+      <LegalLinks />
     </main>
   );
 }
