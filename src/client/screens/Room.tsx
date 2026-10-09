@@ -12,6 +12,7 @@ import { Lobby, RoomCodeCard, PlayerList } from './Lobby';
 import { VotePhase, WritePhase } from './Play';
 import { RevealPhase } from './Reveal';
 import { FinalScreen, ScoresPhase } from './Results';
+import { LegalLinks } from './Legal';
 import { JoinForm } from './Start';
 
 export function RoomPage({ code }: { code: string }) {
@@ -36,6 +37,7 @@ export function RoomPage({ code }: { code: string }) {
           <JoinForm code={code} onJoined={setSession} />
         </section>
         <Rules compact />
+        <LegalLinks />
       </main>
     );
   }
@@ -386,6 +388,7 @@ function Panel({ view, conn, onClose }: { view: RoomView; conn: RoomConnection; 
           </div>
         </section>
         <Rules compact />
+        <LegalLinks newTab />
       </aside>
     </div>
   );

@@ -5,6 +5,7 @@ import { Button, Logo, Toast } from '../components/ui';
 import { ApiError, api } from '../lib/api';
 import { navigate, recapUrl } from '../lib/router';
 import { shareLink } from '../lib/share';
+import { LegalLinks } from './Legal';
 
 const DATE = new Intl.DateTimeFormat('de-DE', { day: 'numeric', month: 'long', year: 'numeric' });
 
@@ -117,6 +118,7 @@ export function RecapPage({ id }: { id: string }) {
         </Button>
       </section>
       <p class="footnote">Diese Seite bleibt erhalten, auch wenn der Spielraum längst geschlossen ist.</p>
+      <LegalLinks />
       <Toast message={toast} onDone={() => setToast(null)} />
     </main>
   );
