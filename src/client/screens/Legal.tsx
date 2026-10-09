@@ -5,7 +5,7 @@ import { Button, Logo } from '../components/ui';
 import { navigate } from '../lib/router';
 
 const ANBIETER = {
-  name: 'Kubbe',
+  name: 'Anne Kubbe',
   strasse: 'Steinlestr. 22',
   ort: '60595 Frankfurt am Main',
   email: 'roruffm@gmail.com',
