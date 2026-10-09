@@ -125,13 +125,13 @@ describe('Eine komplette Runde', () => {
     // Anna und Ben schreiben (fast) dasselbe → wird zusammengeführt
     g.act('anna', { type: 'bluff', text: 'Ein goldener Leuchter' });
     g.act('ben', { type: 'bluff', text: 'ein goldener leuchter.' });
-    g.act('cleo', { type: 'bluff', text: 'Drei Kamele und ein Zelt' });
+    g.act('cleo', { type: 'bluff', text: 'Ein Kaktus im Iglu' });
     expect(g.state.game!.phase).toBe('write');
 
     // Die Antwort darf während der Schreibphase nicht in der Ansicht stehen
     const writeView = JSON.stringify(buildView(g.state, 'anna', g.ctx(), 1));
     expect(writeView).not.toContain(q.answer);
-    expect(writeView).not.toContain('Drei Kamele');
+    expect(writeView).not.toContain('Kaktus');
 
     g.act('host', { type: 'bluff', text: 'Eine Harfe aus Zedernholz' });
     // Alle online haben abgegeben → Abstimmung beginnt sofort

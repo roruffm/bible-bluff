@@ -39,6 +39,66 @@ export const TALK: Record<string, TalkNotes> = {
     question: 'Wie sieht es konkret aus, Gottes Reich zuerst zu suchen – im Terminkalender, beim Geld, in Beziehungen?',
     crossRef: { ref: 'Römer 14,17', note: 'Paulus beschreibt Gottes Reich: Es geht nicht ums Essen und Trinken, sondern um Gerechtigkeit, Frieden und Freude im Heiligen Geist.' },
   },
+  'mt-sanftmut': {
+    background: 'Das griechische Wort meint keine Schwäche, sondern Stärke, die sich beherrscht und auf Gewalt verzichtet. Jesus nennt sich selbst sanftmütig (11,29) und zieht auf einem Esel in Jerusalem ein (21,5).',
+    question: 'Wo erlebt ihr, dass Sanftmut am Ende mehr bewirkt als Durchsetzungskraft?',
+    crossRef: { ref: 'Galater 5,22-23', note: 'Paulus zählt Sanftmut zur Frucht des Geistes – sie wächst, statt erkämpft zu werden.' },
+  },
+  'mt-salz': {
+    background: 'Salz würzte nicht nur, es machte Fleisch und Fisch haltbar und gehörte zu jedem Speisopfer (3. Mose 2,13). Jesus sagt nicht „Ihr sollt Salz werden“, sondern „Ihr seid das Salz der Erde“.',
+    question: 'Woran merkt euer Umfeld, dass ihr Salz seid – und was hilft, nicht fade zu werden?',
+    crossRef: { ref: 'Kolosser 4,6', note: 'Paulus wünscht, dass unsere Rede immer freundlich und mit Salz gewürzt ist – Salz zeigt sich auch im Reden.' },
+  },
+  'mt-sonne': {
+    background: 'Im Alten Testament gilt Regen als Segen, den Gott zur rechten Zeit schenkt (5. Mose 11,14). Jesus macht daraus ein Vorbild: So vollkommen wie der Vater sollen auch seine Kinder lieben (5,48).',
+    question: 'Warum fällt es so schwer, Menschen Gutes zu gönnen, die uns schaden – und was hilft dabei?',
+    crossRef: { ref: 'Lukas 6,35-36', note: 'Bei Lukas heißt es: Gott ist gütig zu den Undankbaren und Bösen – darum seid barmherzig wie euer Vater.' },
+  },
+  'mt-posaune': {
+    background: 'Almosen galten im Judentum als selbstverständliche Pflicht der Gerechtigkeit. Ob wirklich Posaunen erklangen, ist unklar; vielleicht spielt Jesus auf die trichterförmigen Opferkästen im Tempel an.',
+    question: 'Wie kann man Gutes tun, ohne dass es ums eigene Ansehen geht – gerade in Zeiten von Social Media?',
+    crossRef: { ref: 'Markus 12,41-44', note: 'Jesus beobachtet die Spenden am Tempel und lobt eine arme Witwe, die unbemerkt alles gab, was sie hatte.' },
+  },
+  'mt-plappern': {
+    background: 'Im antiken Gebet zählte oft die richtige Formel: Man reihte möglichst viele Götternamen aneinander, um keinen zu verpassen. Jesus setzt dagegen das Vertrauen zu einem Vater, der seine Kinder kennt.',
+    question: 'Was verändert sich am Beten, wenn man es als Gespräch mit einem Vater versteht statt als Pflicht?',
+    crossRef: { ref: '1. Könige 18,26-29', note: 'Die Propheten Baals riefen stundenlang und immer lauter – doch es kam keine Antwort.' },
+  },
+  'mt-unkraut': {
+    background: 'Gemeint ist vermutlich der Taumellolch, ein giftiges Gras, das jungem Weizen zum Verwechseln ähnlich sieht. Erst wenn die Ähren reifen, erkennt man den Unterschied.',
+    question: 'Wo neigen wir dazu, Menschen vorschnell als „Unkraut“ abzustempeln – und was lehrt uns die Geduld des Bauern?',
+    crossRef: { ref: '1. Korinther 4,5', note: 'Paulus rät: Richtet nicht vor der Zeit – erst wenn der Herr kommt, wird das Verborgene offenbar.' },
+  },
+  'mt-oel': {
+    background: 'Bei Hochzeiten holte der Bräutigam die Braut aus ihrem Elternhaus ab; der Festzug begann oft erst spät am Abend. Die Brautjungfern begleiteten ihn mit Fackeln oder Lampen, die regelmäßig Öl brauchten.',
+    question: 'Was lässt sich im Glauben nicht von anderen ausleihen – und wie „füllt“ man sein eigenes Öl auf?',
+    crossRef: { ref: 'Lukas 12,35-36', note: 'Jesus ruft: Lasst eure Lampen brennen und wartet wie Knechte auf ihren Herrn, der von der Hochzeit heimkommt.' },
+  },
+  'mt-zoellner': {
+    background: 'Zöllner arbeiteten für die Besatzer und galten als Betrüger, Prostituierte als unrein und ausgestoßen. Ausgerechnet sie glaubten Johannes, während die Frommen zwar Ja sagten, aber nicht umkehrten.',
+    question: 'Wen würde Jesus heute als Beispiel nennen, um fromme Menschen aufzurütteln?',
+    crossRef: { ref: 'Lukas 7,29-30', note: 'Das Volk und die Zöllner ließen sich von Johannes taufen; Pharisäer und Gesetzeslehrer lehnten Gottes Ruf ab.' },
+  },
+  'mt-kamele': {
+    background: 'Getränke wurden durch ein Tuch gesiebt, denn Mücken galten als unrein (3. Mose 11,41). Kamele waren ebenfalls unrein – und das größte Tier im Land. Auf Aramäisch klingen „galma“ und „gamla“ fast gleich.',
+    question: 'Wo verlieren wir uns in Kleinigkeiten und übersehen dabei Recht, Barmherzigkeit und Treue?',
+    crossRef: { ref: 'Micha 6,8', note: 'Micha fasst zusammen, was Gott wirklich will: Recht tun, Güte lieben und demütig mit Gott gehen.' },
+  },
+  'mt-markt': {
+    background: 'Kinder spielten auf dem Marktplatz Hochzeit und Beerdigung: Die einen pfiffen zum Tanz, die anderen stimmten Klagelieder an. Wer nie mitmacht, verdirbt jedes Spiel.',
+    question: 'Welche Ausreden nutzen Menschen heute, um sich Gottes Einladung vom Leib zu halten?',
+    crossRef: { ref: 'Lukas 7,31-35', note: 'Lukas erzählt dasselbe Bild und schließt: Die Weisheit wird gerechtfertigt von allen ihren Kindern.' },
+  },
+  'mt-meile': {
+    background: 'Eine römische Meile maß knapp anderthalb Kilometer. Für viele Juden war der Tragedienst für die Besatzer eine Demütigung. Jesus verlangt keine Unterwerfung, sondern die freie Entscheidung, mehr zu geben.',
+    question: 'Wie könnte heute eine „zweite Meile“ aussehen – bei Menschen, die uns etwas abverlangen?',
+    crossRef: { ref: 'Markus 15,21', note: 'Simon von Kyrene wurde gezwungen, Jesu Kreuz zu tragen – genau diese Art von Zwangsdienst meint Jesus.' },
+  },
+  'mt-jesus': {
+    background: 'Jeschua war zur Zeit Jesu ein häufiger Name – der Geschichtsschreiber Josephus erwähnt zahlreiche Männer, die so hießen. Seine Bedeutung bekam er durch den, der ihn trug.',
+    question: 'Wovon brauchen Menschen heute Rettung – und was bedeutet es, dass Gott selbst rettet?',
+    crossRef: { ref: 'Apostelgeschichte 4,12', note: 'Petrus bekennt vor dem Hohen Rat: In keinem anderen ist das Heil, auch kein anderer Name ist uns gegeben.' },
+  },
   'mk-leinentuch': {
     background: 'Unmittelbar davor heißt es, dass alle Jünger Jesus im Stich ließen und flohen (14,50). Auffällig: Das Wort für das Leinentuch verwendet Markus sonst nur noch beim Begräbnis Jesu (15,46).',
     question: 'Warum erzählt die Bibel so ungeschönt, wie Jesu Begleiter davonliefen – und was gibt das Menschen, die selbst versagt haben?',
@@ -78,6 +138,41 @@ export const TALK: Record<string, TalkNotes> = {
     background: 'Zum Passafest war Jerusalem voller Pilger, und das Passalamm musste innerhalb der Stadt gegessen werden. Vielleicht hielt Jesus den Ort bewusst geheim, damit der Verrat das Mahl nicht verhindern konnte.',
     question: 'Wie gelingt es, Jesus zu folgen, wenn man nur den nächsten Schritt kennt und nicht den ganzen Weg?',
     crossRef: { ref: 'Hebräer 11,8', note: 'Abraham folgt Gottes Ruf und bricht auf, ohne zu wissen, wohin er kommen wird – Vertrauen Schritt für Schritt.' },
+  },
+  'mk-arzt': {
+    background: 'Levi saß am Zoll in Kapernaum, an einer wichtigen Handelsstraße. Ein gemeinsames Essen bedeutete im Orient Gemeinschaft und Annahme – darum empörten sich die Schriftgelehrten so.',
+    question: 'Wer hat es heute schwer, in unseren Gemeinden willkommen zu sein – und was würde Jesus tun?',
+    crossRef: { ref: 'Hosea 6,6', note: 'Bei Matthäus zitiert Jesus den Propheten Hosea: Gott will Barmherzigkeit und nicht Opfer.' },
+  },
+  'mk-groesste': {
+    background: 'Kurz zuvor hatte Jesus zum zweiten Mal sein Leiden angekündigt (9,31). Die Jünger verstehen es nicht und streiten stattdessen über ihren Rang. Kinder hatten damals kaum Rechte und kein Ansehen.',
+    question: 'Woran misst unsere Gesellschaft Größe – und wie sähe Größe nach Jesu Maßstab heute aus?',
+    crossRef: { ref: 'Markus 10,43-45', note: 'Jesus sagt: Wer groß sein will, soll Diener sein – denn auch der Menschensohn kam, um zu dienen.' },
+  },
+  'mk-unrein': {
+    background: 'Die Pharisäer wuschen sich die Hände nicht aus Hygiene, sondern nach der Überlieferung der Ältesten, um rituell rein zu sein (7,3). Jesus wirft ihnen vor, über Menschensatzungen Gottes Gebot zu vergessen.',
+    question: 'Wo legen wir mehr Wert auf äußere Regeln als auf ein ehrliches Herz?',
+    crossRef: { ref: 'Psalm 51,12', note: 'David bittet: Schaffe in mir, Gott, ein reines Herz – Reinheit beginnt innen.' },
+  },
+  'mk-bartimaeus': {
+    background: 'Bartimäus saß bettelnd am Weg vor Jericho, auf dem Pilger nach Jerusalem zogen. Er ruft Jesus als Erster im Markusevangelium „Sohn Davids“ – und wirft seinen Mantel ab, als Jesus ihn ruft.',
+    question: 'Warum ist es wichtig, Gott seine Bitten konkret zu sagen, obwohl er sie schon kennt?',
+    crossRef: { ref: 'Philipper 4,6', note: 'Paulus rät: Sorgt euch um nichts, sondern bringt eure Anliegen mit Dank vor Gott.' },
+  },
+  'mk-kruemel': {
+    background: 'Die Frau war Griechin aus der Gegend von Tyrus, also keine Jüdin. Jesus spricht von „Hündlein“, kleinen Haushunden, nicht von Straßenhunden – sie nimmt das Bild auf und wendet es zu ihren Gunsten.',
+    question: 'Was können wir von der Hartnäckigkeit dieser Mutter für unser eigenes Beten lernen?',
+    crossRef: { ref: 'Matthäus 15,28', note: 'Bei Matthäus sagt Jesus zu ihr: Frau, dein Glaube ist groß! Dir geschehe, wie du willst.' },
+  },
+  'mk-abba': {
+    background: 'Markus überliefert das aramäische Wort und übersetzt es gleich für seine griechischen Leser. In Gethsemane ringt Jesus mit seinem Tod – und spricht Gott trotzdem so vertraut an.',
+    question: 'Was verändert es am Beten in schweren Zeiten, Gott als liebenden Vater anzusprechen?',
+    crossRef: { ref: 'Galater 4,6', note: 'Paulus schreibt: Gott hat den Geist seines Sohnes in unsere Herzen gesandt, der ruft: Abba, lieber Vater!' },
+  },
+  'mk-hosianna': {
+    background: 'Psalm 118 gehörte zu den Liedern, die beim Passafest gesungen wurden. Die Menge breitet Kleider und Zweige auf den Weg – so begrüßte man einen König (2. Könige 9,13).',
+    question: 'Wie können Lob und Hilferuf im Gebet zusammengehören?',
+    crossRef: { ref: 'Sacharja 9,9', note: 'Sacharja kündigt einen gerechten König an, der arm auf einem Esel in Jerusalem einzieht.' },
   },
   'lk-zachaeus': {
     background: 'Jericho war eine reiche Oasenstadt an einer wichtigen Handelsstraße – ein einträglicher Ort für Zolleinnahmen. Der Maulbeerfeigenbaum hat einen kurzen Stamm und tief ansetzende, weit ausladende Äste.',
@@ -123,6 +218,61 @@ export const TALK: Record<string, TalkNotes> = {
     background: 'Gemeint ist Herodes Antipas, Sohn Herodes des Großen und Landesfürst über Galiläa. Er hatte bereits Johannes den Täufer hinrichten lassen – die Warnung war also ernst zu nehmen.',
     question: 'Was hilft, den eigenen Auftrag nicht aufzugeben, wenn Druck oder Drohungen kommen?',
     crossRef: { ref: 'Lukas 23,8-11', note: 'Als Herodes Jesus endlich vor sich hat, hofft er auf ein Wunder – doch Jesus schweigt, und Herodes verspottet ihn.' },
+  },
+  'lk-wehe': {
+    background: 'Lukas stellt den vier Seligpreisungen (6,20-23) vier Weherufe gegenüber. „Wehe“ ist dabei kein Fluch, sondern ein Ausruf der Klage und Warnung, voller Sorge um die Angesprochenen.',
+    question: 'Warum kann Beliebtheit gefährlich werden – und wie geht man ehrlich mit Lob um?',
+    crossRef: { ref: 'Galater 1,10', note: 'Paulus fragt: Suche ich Menschen zu gefallen? Wollte er das, wäre er nicht mehr Christi Knecht.' },
+  },
+  'lk-diener': {
+    background: 'Zum Dienen schürzte man das lange Gewand hoch und band es mit dem Gürtel fest. Normalerweise tat das der Knecht für seinen Herrn (17,7-8) – Jesus dreht das Bild um.',
+    question: 'Was bedeutet es für unseren Glauben, dass Gott sich nicht zu schade ist, uns zu dienen?',
+    crossRef: { ref: 'Lukas 22,27', note: 'Beim letzten Mahl fragt Jesus: Wer ist größer, der zu Tisch sitzt oder der dient? Ich bin unter euch wie ein Diener.' },
+  },
+  'lk-tageloehner': {
+    background: 'Tagelöhner standen noch unter den Knechten des Hauses: Sie wurden nur für einen Tag angeheuert und hatten keinerlei Sicherheit. Der Sohn will nicht mehr Sohn sein, nur noch irgendwie überleben.',
+    question: 'Warum fällt es manchmal leichter, sich Gottes Liebe zu „verdienen“, als sie sich einfach schenken zu lassen?',
+    crossRef: { ref: 'Galater 4,7', note: 'Paulus schreibt: Du bist nicht mehr Knecht, sondern Kind – und als Kind auch Erbe durch Gott.' },
+  },
+  'lk-pharisaeer': {
+    background: 'Pharisäer nahmen das Gesetz sehr ernst und taten oft mehr als verlangt; viele Menschen bewunderten sie. Zöllner dagegen galten als Kollaborateure und Betrüger. Jesus erzählt eine Geschichte mit Schock-Ende.',
+    question: 'Warum vergleichen wir uns so gern mit anderen – und was macht das mit unserem Gebet?',
+    crossRef: { ref: 'Psalm 51,19', note: 'David betet: Die Opfer, die Gott gefallen, sind ein geängsteter Geist und ein zerschlagenes Herz.' },
+  },
+  'lk-simon': {
+    background: 'Bei Gastmählern lag man auf Polstern, die Füße vom Tisch weg – so konnte die Frau von hinten an Jesu Füße kommen. Fußwasser, Kuss und Öl gehörten zur höflichen Begrüßung eines Gastes.',
+    question: 'Was hat Dankbarkeit mit Vergebung zu tun – und warum lieben manche Menschen Gott so überschwänglich?',
+    crossRef: { ref: '1. Johannes 4,19', note: 'Johannes schreibt: Wir lieben, weil Gott uns zuerst geliebt hat.' },
+  },
+  'lk-scheunen': {
+    background: 'Anlass ist ein Erbstreit: Jemand will, dass Jesus seinen Bruder zum Teilen bringt (12,13). Jesus lehnt ab und warnt vor Habgier – denn niemand lebt davon, dass er viele Güter hat (12,15).',
+    question: 'Was heißt es konkret, „reich bei Gott“ zu sein – und wie viel Vorsorge ist gesund?',
+    crossRef: { ref: 'Jakobus 4,13-15', note: 'Jakobus warnt vor Plänen ohne Gott: Ihr wisst nicht, was morgen ist – sagt lieber: Wenn der Herr will.' },
+  },
+  'lk-pflug': {
+    background: 'Ein Pflug wurde mit einer Hand geführt, die andere trieb die Ochsen an; wer nicht nach vorn schaute, zog krumme Furchen. Elia erlaubte Elisa noch, sich von seinen Eltern zu verabschieden (1. Könige 19,20).',
+    question: 'Was zieht Menschen beim Glauben zurück – und was hilft, den Blick nach vorn zu richten?',
+    crossRef: { ref: 'Philipper 3,13-14', note: 'Paulus vergisst, was hinter ihm liegt, und streckt sich nach dem aus, was vor ihm ist.' },
+  },
+  'lk-raben': {
+    background: 'Raben haben weder Vorratskeller noch Scheune – das greift die Geschichte vom reichen Kornbauern direkt davor auf (12,16-21). Schon Psalm 147,9 sagt, dass Gott die jungen Raben versorgt.',
+    question: 'Welche Sorgen rauben Menschen heute am meisten Kraft – und was kann Vertrauen daran ändern?',
+    crossRef: { ref: '1. Petrus 5,7', note: 'Petrus ermutigt: Werft alle eure Sorge auf Gott, denn er sorgt für euch.' },
+  },
+  'lk-martha': {
+    background: 'Martha nimmt Jesus in ihr Haus auf – Gastfreundschaft war Ehrensache. Maria sitzt zu seinen Füßen, die übliche Haltung eines Schülers bei seinem Lehrer; für eine Frau war das damals ungewöhnlich.',
+    question: 'Wie findet man zwischen Tun und Hören eine gute Balance – im Alltag und in der Gemeinde?',
+    crossRef: { ref: 'Apostelgeschichte 22,3', note: 'Paulus erzählt, er sei zu den Füßen Gamaliels unterrichtet worden – so saßen Schüler bei ihrem Lehrer.' },
+  },
+  'lk-fischzug': {
+    background: 'Petrus hatte die ganze Nacht nichts gefangen; tagsüber zu fischen galt als sinnlos. Trotzdem fährt er auf Jesu Wort hinaus. Erst angesichts des Wunders erkennt er, wer da in seinem Boot sitzt.',
+    question: 'Warum fühlen sich Menschen in Gottes Nähe oft klein – und wie geht Jesus damit um?',
+    crossRef: { ref: 'Jesaja 6,5-8', note: 'Jesaja sieht Gottes Herrlichkeit und ruft: Weh mir, ich bin unreiner Lippen – dann wird er gereinigt und gesandt.' },
+  },
+  'lk-zelot': {
+    background: 'Matthäus und Markus nennen ihn Kananäus, nach dem aramäischen Wort für Eiferer. Ob Simon gegen Rom kämpfte oder vor allem für das Gesetz eiferte, ist in der Forschung umstritten.',
+    question: 'Was hält eine Gruppe zusammen, in der Menschen mit ganz gegensätzlichen Überzeugungen sind?',
+    crossRef: { ref: 'Epheser 2,14', note: 'Paulus schreibt: Christus ist unser Friede, er hat die trennende Wand der Feindschaft niedergerissen.' },
   },
   'joh-kana': {
     background: 'Die Krüge waren aus Stein, weil Stein nach jüdischem Verständnis nicht unrein werden konnte; sie dienten der rituellen Reinigung (2,6). Hochzeiten dauerten bis zu einer Woche, fehlender Wein war eine Blamage.',
@@ -173,6 +323,66 @@ export const TALK: Record<string, TalkNotes> = {
     background: 'Judas schätzt den Wert auf 300 Denare – etwa ein Jahreslohn eines Tagelöhners; Nardenöl wurde aus dem Himalaya-Gebiet eingeführt. Jesus deutet die Salbung als Vorbereitung auf sein Begräbnis (12,7).',
     question: 'Wie kann Hingabe an Jesus heute aussehen, die – wie bei Maria – nicht zuerst nach dem Nutzen fragt?',
     crossRef: { ref: 'Markus 14,3-9', note: 'Markus erzählt eine ähnliche Salbung in Betanien – und Jesus sagt, überall auf der Welt werde man von dieser Tat erzählen.' },
+  },
+  'joh-fuesse': {
+    background: 'Füße zu waschen galt als niedrigste Arbeit, meist für Sklaven. Jesus tut es kurz vor seinem Tod und sagt: Ich habe euch ein Beispiel gegeben, damit ihr tut, wie ich getan habe (13,15).',
+    question: 'Warum fällt es oft schwerer, sich dienen zu lassen, als selbst zu dienen?',
+    crossRef: { ref: 'Philipper 2,5-7', note: 'Paulus beschreibt, wie Christus sich selbst erniedrigte und Knechtsgestalt annahm.' },
+  },
+  'joh-folge': {
+    background: 'Kurz zuvor hatte Jesus Petrus angedeutet, dass er einen gewaltsamen Tod sterben wird (21,18-19). Daraus entstand das Gerücht, der andere Jünger werde nicht sterben – Johannes stellt das richtig (21,23).',
+    question: 'Wo vergleichen wir unseren Weg mit dem anderer – und was hilft, beim eigenen Ruf zu bleiben?',
+    crossRef: { ref: 'Galater 6,4', note: 'Paulus rät: Jeder prüfe sein eigenes Werk, statt sich mit anderen zu vergleichen.' },
+  },
+  'joh-speise': {
+    background: 'Juden und Samaritaner mieden einander, und ein Rabbi sprach öffentlich nicht mit einer fremden Frau – darum wundern sich die Jünger (4,27). Danach kommen viele aus dem Ort, um Jesus zu hören.',
+    question: 'Was nährt einen Menschen mehr als Essen – und wie erlebt man das im Alltag?',
+    crossRef: { ref: '5. Mose 8,3', note: 'Mose erinnert Israel: Der Mensch lebt nicht vom Brot allein, sondern von allem, was aus Gottes Mund kommt.' },
+  },
+  'joh-wind': {
+    background: 'Nikodemus war ein Lehrer Israels und Mitglied des Hohen Rates. Jesus spricht mit ihm über eine Geburt „von oben“ – das griechische Wort kann auch „von neuem“ heißen, und Nikodemus versteht es wörtlich.',
+    question: 'Woran erkennt man das Wirken des Heiligen Geistes, wenn man ihn selbst nicht sieht?',
+    crossRef: { ref: 'Apostelgeschichte 2,2', note: 'An Pfingsten kommt der Geist mit einem Brausen vom Himmel, wie von einem gewaltigen Wind.' },
+  },
+  'joh-weizenkorn': {
+    background: 'Anlass ist die Bitte einiger Griechen, Jesus zu sehen (12,20-21). Jesus antwortet mit dem Bild vom Korn: Seine Stunde ist gekommen, und durch seinen Tod wird er alle zu sich ziehen (12,32).',
+    question: 'Wo erlebt man, dass Loslassen oder Verzicht neues Leben möglich macht?',
+    crossRef: { ref: '1. Korinther 15,36-38', note: 'Paulus erklärt die Auferstehung: Was du säst, wird nicht lebendig, wenn es nicht stirbt – Gott gibt ihm einen neuen Leib.' },
+  },
+  'joh-gaertner': {
+    background: 'Maria kam früh am Morgen, als es noch dunkel war (20,1). Sie sucht den Leichnam und rechnet nicht mit einem Lebenden – darum erkennt sie Jesus nicht, obwohl er vor ihr steht.',
+    question: 'Warum erkennen wir Gottes Wirken manchmal nicht, obwohl es direkt vor uns liegt?',
+    crossRef: { ref: 'Lukas 24,15-16', note: 'Auch die Emmaus-Jünger gehen neben Jesus her, doch ihre Augen werden gehalten, sodass sie ihn nicht erkennen.' },
+  },
+  'joh-name': {
+    background: '„Rabbuni“ ist eine besonders ehrerbietige, persönliche Form von Rabbi. Maria wird die erste Zeugin der Auferstehung – Jesus schickt sie zu den Jüngern, die er hier „meine Brüder“ nennt (20,17).',
+    question: 'Was bedeutet es, dass Gott jeden Menschen persönlich beim Namen kennt?',
+    crossRef: { ref: 'Jesaja 43,1', note: 'Gott spricht zu Israel: Fürchte dich nicht, ich habe dich erlöst; ich habe dich bei deinem Namen gerufen.' },
+  },
+  'joh-vier-tage': {
+    background: 'Nach späterer jüdischer Überlieferung blieb die Seele drei Tage beim Leichnam; am vierten Tag galt der Tod als endgültig. Jesus wartet bewusst noch zwei Tage, bevor er aufbricht (11,6).',
+    question: 'Wie geht man mit Situationen um, in denen Gott scheinbar zu spät kommt?',
+    crossRef: { ref: 'Römer 4,17', note: 'Paulus beschreibt Gott als den, der die Toten lebendig macht und ins Dasein ruft, was nicht ist.' },
+  },
+  'joh-weinte': {
+    background: 'Maria und die Trauergäste klagen laut (11,33). Für Jesus steht ein anderes Wort, das leise Tränen meint. Die Umstehenden sagen: Seht, wie lieb er ihn gehabt hat (11,36).',
+    question: 'Was bedeutet es für unsere Trauer, dass Jesus selbst geweint hat?',
+    crossRef: { ref: 'Römer 12,15', note: 'Paulus ermutigt: Freut euch mit den Fröhlichen und weint mit den Weinenden.' },
+  },
+  'joh-sand': {
+    background: 'Die Ankläger stellen eine Falle: Spricht Jesus die Frau frei, bricht er das Gesetz des Mose; verurteilt er sie, verliert er seinen Ruf der Barmherzigkeit und gerät mit dem römischen Recht in Konflikt.',
+    question: 'Warum fällt es so leicht, über die Fehler anderer zu urteilen – und was hilft dagegen?',
+    crossRef: { ref: 'Römer 2,1', note: 'Paulus warnt: Worin du den anderen richtest, verurteilst du dich selbst, weil du dasselbe tust.' },
+  },
+  'joh-malchus': {
+    background: 'Jesus befiehlt Petrus sofort, das Schwert wegzustecken (18,11). Wenig später fragt ausgerechnet ein Verwandter des Malchus Petrus, ob er ihn nicht im Garten gesehen habe (18,26).',
+    question: 'Wie reagiert man, wenn man selbst angegriffen wird – und was zeigt uns Jesus dabei?',
+    crossRef: { ref: 'Matthäus 26,52', note: 'Jesus sagt Petrus: Stecke dein Schwert weg, denn wer das Schwert nimmt, wird durchs Schwert umkommen.' },
+  },
+  'joh-thomas': {
+    background: 'Thomas ist bei Johannes kein Zweifler von Natur: In 11,16 will er sogar mit Jesus sterben. Nach der Auferstehung will er nur sehen, was die anderen Jünger schon gesehen haben – die Wunden (20,20).',
+    question: 'Welchen Platz haben ehrliche Zweifel im Glauben – und wie geht eine Gemeinde gut damit um?',
+    crossRef: { ref: 'Judas 1,22', note: 'Judas schreibt: Erbarmt euch derer, die zweifeln.' },
   },
   'apg-eutychus': {
     background: 'Die Gemeinde in Troas traf sich am ersten Tag der Woche zum Brotbrechen – einer der frühesten Hinweise auf christliche Treffen am Sonntag. Der Name Eutychus bedeutet übrigens „Glückskind“.',
@@ -248,6 +458,16 @@ export const TALK: Record<string, TalkNotes> = {
     background: 'Verhaftet wurden sie, weil Paulus eine Magd von einem Wahrsagegeist befreit hatte und ihre Besitzer Einnahmen verloren. Als römische Bürger hätten sie nicht ohne Urteil geschlagen werden dürfen (16,37).',
     question: 'Wie kann Gotteslob in schweren Zeiten aussehen, ohne Schmerz und Not zu überspielen?',
     crossRef: { ref: 'Habakuk 3,17-18', note: 'Habakuk will sich an Gott freuen, auch wenn Feigenbaum, Weinstock und Felder nichts tragen und die Ställe leer sind.' },
+  },
+  'apg-beroea': {
+    background: 'Paulus musste nachts aus Thessalonich fliehen und kam nach Beröa (17,10). Dort lasen die Juden die Schriftrollen der Synagoge – das Neue Testament gab es noch nicht. Viele kamen zum Glauben.',
+    question: 'Wie kann man offen für Neues sein und trotzdem alles prüfen?',
+    crossRef: { ref: '1. Thessalonicher 5,21', note: 'Paulus rät der Gemeinde in Thessalonich: Prüft alles und das Gute behaltet.' },
+  },
+  'apg-barnabas': {
+    background: 'Barnabas war Levit und stammte aus Zypern. Er verkaufte einen Acker und legte den Erlös den Aposteln zu Füßen (4,37) – ein Vorbild für das Teilen in der ersten Gemeinde.',
+    question: 'Was macht einen Menschen zu einem echten Ermutiger – und wie kann man das lernen?',
+    crossRef: { ref: 'Hebräer 10,24', note: 'Der Hebräerbrief ruft dazu auf, aufeinander zu achten und einander zur Liebe und zu guten Werken anzuspornen.' },
   },
   'roem-tertius': {
     background: 'Tertius ist lateinisch und heißt „der Dritte“ – im nächsten Vers grüßt passenderweise ein Quartus, „der Vierte“. Entstanden ist der Brief wahrscheinlich in Korinth (vgl. 16,23).',

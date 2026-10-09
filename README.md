@@ -6,7 +6,7 @@
 
 Bible Bluff ist ein Partyspiel für den Browser: Jede Person spielt auf dem eigenen Handy, ein Fernseher oder Beamer kann zusätzlich die gemeinsame Ansicht zeigen. Alle sehen dieselbe Bibelfrage und erfinden heimlich eine glaubwürdige, aber falsche Antwort. Danach steht die echte Antwort anonym zwischen den Bluffs, und alle tippen auf die vermeintlich richtige. Bei der Aufdeckung zeigt sich, wer worauf hereingefallen ist und was wirklich stimmt.
 
-Die Fragen stammen aus dem *Studienkonzept NT* (Lernblätter zu allen 27 Büchern des Neuen Testaments, freikirchlich-pfingstliche Lernfassung). Dazu kommen geprüfte Fragen aus einem eigenen Fragenpool, auch zu ausgewählten Geschichten des Alten Testaments. Der Pool umfasst 142 kuratierte Fragen mit Bibelstelle und einer kurzen Entdeckung.
+Die Fragen stammen aus dem *Studienkonzept NT* (Lernblätter zu allen 27 Büchern des Neuen Testaments, freikirchlich-pfingstliche Lernfassung). Dazu kommen geprüfte Fragen aus einem eigenen Fragenpool, auch zu ausgewählten Geschichten des Alten Testaments. Hinzu kommen die in der Fragenwerkstatt freigegebenen Fragen, darunter 30 zu Jesu Botschaft. Der Pool umfasst 186 kuratierte Fragen mit Bibelstelle und einer kurzen Entdeckung.
 
 | Start | Lobby | Bluff schreiben | Abstimmen |
 | --- | --- | --- | --- |
@@ -63,7 +63,7 @@ Wer eine Pause zum Beten braucht, tippt auf „Ruhige Minute“. Beim Schreiben 
 
 ### Vom Spiel ins Gespräch
 
-Zu jeder der 142 Fragen gibt es einen **Spickzettel** mit Hintergrundwissen, einer offenen Gesprächsfrage und einem Querverweis auf eine andere Bibelstelle. Er erscheint nach jeder Auflösung nur auf dem Gerät der Spielleitung (am Beamer zunächst zugeklappt).
+Zu jeder der 186 Fragen gibt es einen **Spickzettel** mit Hintergrundwissen, einer offenen Gesprächsfrage und einem Querverweis auf eine andere Bibelstelle. Er erscheint nach jeder Auflösung nur auf dem Gerät der Spielleitung (am Beamer zunächst zugeklappt).
 
 Nach dem Endstand führt „Weiter ins Gespräch“ zu der Frage, bei der die meisten danebenlagen; jede andere Frage der Partie lässt sich ebenso wählen. Die Leitung blättert durch vier Schritte, und alle Handys und die Leinwand gehen mit:
 
