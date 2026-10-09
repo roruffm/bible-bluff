@@ -60,7 +60,6 @@ export const SCORES_SECONDS = 40;
 /** Präsenz */
 export const ONLINE_WINDOW_MS = 15_000;
 export const PRESENCE_TOUCH_MS = 5_000;
-export const HOST_TAKEOVER_MS = 90_000;
 /** Räume verfallen nach dieser Zeit ohne Änderung */
 export const ROOM_TTL_MS = 24 * 60 * 60 * 1000;
 

@@ -108,7 +108,7 @@ Das Menü „Leitung“ bietet:
 - die Spielleitung übergeben
 - den Raum schließen
 
-Ist die Spielleitung länger als 90 Sekunden nicht erreichbar, übernimmt automatisch die Person, die am längsten dabei ist. Die Punkte-Phase läuft nach 40 Sekunden von selbst weiter.
+Die Spielleitung bleibt bei der Person, die den Raum eröffnet hat, auch wenn ihr Handy zwischendurch gesperrt ist oder sie kurz in eine andere App wechselt, etwa um den Code zu verschicken. Abgeben lässt sie sich nur bewusst über „Spielleitung übergeben“. Wer als Leitung das Gerät wechselt, gibt denselben Spitznamen wieder ein und leitet weiter. Die Punkte-Phase läuft nach 40 Sekunden von selbst weiter.
 
 ### Verbindungsabbrüche
 
@@ -168,7 +168,7 @@ Freigabe /admin   ──(GET/POST /api/admin/bluffs, ADMIN_KEY)───▶   bl
 - **Server entscheidet alles.** Zeitlimits, Phasenwechsel, Duplikat-Erkennung und Punkte werden zentral berechnet. Phasen schalten „im Vorbeigehen“ weiter, also bei der nächsten Anfrage nach Ablauf der Frist oder sobald alle Verbundenen abgegeben haben. So braucht es weder Cron noch Dauerprozess.
 - **Optimistische Sperre.** Der Raumzustand liegt als JSON mit Versionsnummer in D1. Ein Update gilt nur, wenn niemand dazwischen geschrieben hat; sonst wird neu gelesen und wiederholt. Getestet ist das mit zwölf gleichzeitigen Abgaben gegen lokale D1.
 - **Synchrone Aufdeckung.** Der Server legt Ablauf und Startzeit fest. Jedes Gerät gleicht seine Uhr mit dem Server ab und rechnet den aktuellen Schritt selbst aus. Darum stehen alle Handys im selben Moment beim selben Bluff.
-- **Präsenz** wird gedrosselt in einer eigenen Tabelle festgehalten (höchstens alle 5 s pro Gerät). Sie bestimmt, auf wen gewartet wird und wer die Leitung übernehmen kann.
+- **Präsenz** wird gedrosselt in einer eigenen Tabelle festgehalten (höchstens alle 5 s pro Gerät). Sie bestimmt, auf wen gewartet wird.
 - **Spiel-Engine als reine Funktionen** (`src/server/engine.ts`): Zeit, Zufall und Präsenz kommen von außen. Das macht sie vollständig testbar. Dieselbe API läuft im Worker, im Vite-Dev-Server und im lokalen Node-Server.
 - **Frontend:** Preact und Vite, etwa 25 kB JavaScript (gzip). Die Schrift Figtree ist selbst gehostet, es gibt keine externen Dienste und keine Cookies. Das Design ist an die Lernblätter angelehnt: Papier, Dunkelbraun, Gold und die Farben der Buchgruppen.
 

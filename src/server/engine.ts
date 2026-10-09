@@ -5,7 +5,6 @@ import {
   BLUFF_MAX,
   DEFAULT_SETTINGS,
   DIFFICULTY_OPTIONS,
-  HOST_TAKEOVER_MS,
   MAX_PLAYERS,
   MIN_PLAYERS,
   ONLINE_WINDOW_MS,
@@ -661,27 +660,14 @@ function advancePhase(s: RoomState, ctx: Ctx) {
 // ───────────────────────── Takt ─────────────────────────
 
 /**
- * Wird bei jedem Abruf ausgeführt: Zeitlimits prüfen, Phasen weiterschalten,
- * verwaiste Spielleitung übergeben. Gibt null zurück, wenn sich nichts ändert.
+ * Wird bei jedem Abruf ausgeführt: Zeitlimits prüfen und Phasen weiterschalten.
+ * Die Spielleitung wechselt hier nie: Sie bleibt bei der Person, die den Raum eröffnet hat,
+ * auch wenn deren Handy gesperrt ist oder sie kurz in einer anderen App ist. Abgeben geht
+ * nur bewusst über „makeHost“. Gibt null zurück, wenn sich nichts ändert.
  */
 export function tick(state: RoomState, ctx: Ctx): RoomState | null {
   const s = clone(state);
   let changed = false;
-
-  if (s.status !== 'closed') {
-    const host = player(s, s.hostId);
-    const hostSeen = ctx.presence[s.hostId];
-    const hostGone = !host || hostSeen === undefined || ctx.now - hostSeen > HOST_TAKEOVER_MS;
-    if (hostGone && s.players.length) {
-      const byAge = [...s.players].sort((a, b) => a.joinedAt - b.joinedAt);
-      const candidate =
-        byAge.find((p) => p.id !== s.hostId && isOnline(ctx, p.id)) ?? (host ? undefined : byAge[0]);
-      if (candidate && candidate.id !== s.hostId) {
-        s.hostId = candidate.id;
-        changed = true;
-      }
-    }
-  }
 
   if (s.status === 'playing' && s.game && !s.paused) {
     for (let guard = 0; guard < 6 && s.status === 'playing'; guard++) {
