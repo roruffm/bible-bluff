@@ -742,7 +742,13 @@ export function applyAction(state: RoomState, actorId: string, action: Action, c
       if (g.phase !== 'write') throw new GameError('phase_over', 'Die Schreibzeit ist vorbei.');
       if (!actor.plays) throw new GameError('not_playing', 'Du leitest nur – mitschreiben geht nicht.');
       requireNotQuiet(actor, g);
-      return { state, suggestion: suggestBluff(s, actorId, Number(action.n) || 0, ctx) };
+      // Ein Vorschlag pro Person und Runde: Wer noch einmal fragt, bekommt denselben –
+      // sonst ließen sich durch wiederholtes Tippen alle Hausbluffs abrufen.
+      const earlier = g.round.suggestions?.[actorId];
+      if (earlier) return { state, suggestion: earlier };
+      const suggestion = suggestBluff(s, actorId, ctx);
+      g.round.suggestions = { ...g.round.suggestions, [actorId]: suggestion };
+      return { state: s, suggestion };
     }
 
     case 'vote': {
@@ -988,18 +994,23 @@ function resume(s: RoomState, ctx: Ctx) {
   if (g.round.revealStartedAt !== null) g.round.revealStartedAt += delta;
 }
 
-function suggestBluff(s: RoomState, actorId: string, n: number, ctx: Ctx): string {
+/** Hausbluff als Vorschlag – möglichst einer, den noch niemand geschrieben oder vorgeschlagen bekommen hat */
+function suggestBluff(s: RoomState, actorId: string, ctx: Ctx): string {
   const g = s.game!;
   const pool = houseBluffs(getQuestion(g.round.questionId), ctx);
   const position = Math.max(0, players(s).findIndex((p) => p.id === actorId));
   const others = Object.entries(g.round.bluffs)
     .filter(([id]) => id !== actorId)
     .map(([, b]) => b.text);
-  for (let i = 0; i < pool.length; i++) {
-    const candidate = pool[(position + n + i) % pool.length];
-    if (!others.some((t) => isDuplicate(t, candidate))) return candidate;
+  const taken = Object.values(g.round.suggestions ?? {});
+  const free = (c: string) => !others.some((t) => isDuplicate(t, c));
+  for (const avoidTaken of [true, false]) {
+    for (let i = 0; i < pool.length; i++) {
+      const candidate = pool[(position + i) % pool.length];
+      if (free(candidate) && !(avoidTaken && taken.includes(candidate))) return candidate;
+    }
   }
-  return pool[(position + n) % pool.length];
+  return pool[position % pool.length];
 }
 
 /**

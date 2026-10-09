@@ -125,10 +125,16 @@ describe('API', () => {
     const t = setup();
     const { host, others, code } = await roomWithPlayers(t, ['Rahel', 'Jonas']);
     await t.call('POST', `/api/rooms/${code}/action`, { type: 'start' }, host.token);
-    const res = await t.call('POST', `/api/rooms/${code}/action`, { type: 'suggest', n: 0 }, others[0].token);
+    const res = await t.call('POST', `/api/rooms/${code}/action`, { type: 'suggest' }, others[0].token);
     expect(res.status).toBe(200);
     expect(typeof res.body.suggestion).toBe('string');
     expect(res.body.view.round.myBluff).toBeNull();
+    expect(res.body.view.round.mySuggestion).toBe(res.body.suggestion);
+    // Ein Vorschlag pro Runde – auch alte Clients, die weiterzählen, bekommen denselben
+    const again = await t.call('POST', `/api/rooms/${code}/action`, { type: 'suggest', n: 5 }, others[0].token);
+    expect(again.body.suggestion).toBe(res.body.suggestion);
+    const hostView = (await t.call('GET', `/api/rooms/${code}`, undefined, host.token)).body.view;
+    expect(hostView.round.mySuggestion).toBeNull();
   });
 
   it('weist zu große Anfragen ab', async () => {

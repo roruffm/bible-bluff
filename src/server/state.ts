@@ -68,6 +68,8 @@ export interface RoundRec {
   likes?: Record<string, string>;
   /** „Liebe deinen Nächsten“: verschenkter Punkt je Person (Schenkende → Beschenkte) */
   gifts?: Record<string, string>;
+  /** „Keine Idee?“: der eine Bluff-Vorschlag je Person in dieser Runde (Personen-ID → Text) */
+  suggestions?: Record<string, string>;
 }
 
 /** Bluff mit den meisten Herzen einer Runde */

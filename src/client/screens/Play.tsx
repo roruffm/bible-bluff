@@ -15,7 +15,6 @@ export function WritePhase({ view, conn, display = false }: { view: RoomView; co
   const [editing, setEditing] = useState(!round.myBluff);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const suggestCount = useRef(0);
   const autoSent = useRef(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const now = useServerNow(500);
@@ -25,7 +24,6 @@ export function WritePhase({ view, conn, display = false }: { view: RoomView; co
     setText(round.myBluff ?? '');
     setEditing(!round.myBluff);
     setError(null);
-    suggestCount.current = 0;
     autoSent.current = false;
   }, [round.index, round.question.id]);
 
@@ -58,7 +56,7 @@ export function WritePhase({ view, conn, display = false }: { view: RoomView; co
   const suggest = async () => {
     setError(null);
     try {
-      const res = await conn.act({ type: 'suggest', n: suggestCount.current++ });
+      const res = await conn.act({ type: 'suggest' });
       if (res.suggestion) {
         setText(res.suggestion);
         setEditing(true);
@@ -116,9 +114,13 @@ export function WritePhase({ view, conn, display = false }: { view: RoomView; co
               <Button type="submit" block disabled={busy || !text.trim()}>
                 {round.myBluff ? 'Änderung abgeben' : 'Bluff abgeben'}
               </Button>
-              <Button variant="ghost" small onClick={suggest}>
-                Keine Idee? Vorschlag nehmen
-              </Button>
+              {round.mySuggestion ? (
+                <p class="muted small suggest-used">Den Vorschlag für diese Runde hast du schon bekommen.</p>
+              ) : (
+                <Button variant="ghost" small onClick={suggest}>
+                  Keine Idee? Vorschlag nehmen
+                </Button>
+              )}
             </div>
             <p class="muted small">Jede Person, die auf deinen Bluff hereinfällt, bringt dir einen Punkt.</p>
           </form>

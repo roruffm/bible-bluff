@@ -1325,6 +1325,10 @@ textarea {
 .bluff-actions .btn-ghost {
   align-self: center;
 }
+.bluff-actions .suggest-used {
+  text-align: center;
+  margin: 6px 0 0;
+}
 
 .submitted {
   background: var(--olive-soft);

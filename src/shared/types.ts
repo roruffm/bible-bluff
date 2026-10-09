@@ -26,7 +26,7 @@ export type Action =
   | { type: 'start' }
   | { type: 'settings'; settings?: Partial<Settings>; hostPlays?: boolean }
   | { type: 'bluff'; text: string }
-  | { type: 'suggest'; n?: number }
+  | { type: 'suggest' }
   | { type: 'vote'; optionId: string }
   | { type: 'like'; optionId: string }
   /** „Liebe deinen Nächsten“: einen eigenen Punkt verschenken (einmal pro Runde) */
@@ -163,6 +163,8 @@ export interface RoundView {
   question: QuestionView;
   /** Schreibphase */
   myBluff: string | null;
+  /** mein Bluff-Vorschlag dieser Runde – höchstens einer, danach gibt es keinen weiteren */
+  mySuggestion: string | null;
   /** Abstimmung + Aufdeckung */
   options: OptionView[] | null;
   myVote: string | null;
