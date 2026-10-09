@@ -1984,6 +1984,27 @@ textarea {
   color: var(--plum-text);
 }
 
+/* Viele Plaketten (Wahrheit, Bluff, Herz, Geschenk, ruhige Minute) laufen unter dem Namen weiter,
+   statt ihn aus der Zeile zu drängen */
+.score-row {
+  grid-template-columns: 1.8em auto minmax(0, 1fr) auto;
+}
+
+.score-main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.score-main .deltas {
+  justify-content: flex-start;
+}
+
+.deltas:empty {
+  display: none;
+}
+
 /* Lieblingsbluff: Herzen in der Punkte-Phase */
 .favorites-hint {
   margin: -6px 0 12px;
@@ -2374,6 +2395,451 @@ textarea {
 
 .recap-fav span {
   color: var(--rust);
+}
+
+/* ───────── Neues für alle ───────── */
+
+.fresh-note {
+  margin-top: 12px;
+  color: var(--ink-2);
+}
+
+.fresh-note span {
+  color: var(--ochre);
+  margin-right: 4px;
+}
+
+/* ───────── Ruhige Minute ───────── */
+
+.quiet-screen {
+  align-items: center;
+  text-align: center;
+  padding: 28px 18px 32px;
+  background: var(--card);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.quiet-breath {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--gold-soft) 0%, var(--gold) 55%, transparent 72%);
+  animation: breathe 8s ease-in-out infinite;
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(0.72);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.quiet-title {
+  font-size: 1.6rem;
+}
+
+.quiet-verse {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.quiet-verse cite {
+  display: block;
+  margin-top: 4px;
+  font-style: normal;
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--ochre);
+}
+
+.quiet-prompt {
+  max-width: 30ch;
+  font-size: 1.05rem;
+  color: var(--ink-2);
+}
+
+.quiet-offer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  text-align: center;
+}
+
+.quiet-offer.is-set {
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  color: var(--ink-2);
+  background: var(--card-2);
+  border: 1.5px dashed var(--line);
+  border-radius: var(--radius);
+}
+
+.progress-person.is-quiet {
+  opacity: 0.75;
+}
+
+.progress-person .tick.is-quiet {
+  background: var(--slate);
+  color: #fff;
+}
+
+/* ───────── Liebe deinen Nächsten ───────── */
+
+.delta.is-gift {
+  background: var(--gold-soft);
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--gold-2);
+}
+
+.delta.is-given {
+  background: transparent;
+  color: var(--ink-2);
+  border: 1px dashed var(--line);
+}
+
+.delta.is-quiet {
+  background: transparent;
+  color: var(--ink-3);
+  border: 1px solid var(--line);
+}
+
+.gift {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.gift.is-done {
+  text-align: center;
+  padding: 12px 14px;
+  background: var(--gold-soft);
+  border-radius: var(--radius);
+}
+
+.gift.is-done span {
+  color: var(--rust);
+}
+
+.gift-ask {
+  font-weight: 800;
+  text-align: center;
+}
+
+.gift-people {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.gift-person {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px 6px 6px;
+  border-radius: 999px;
+  border: 1.5px solid var(--line-strong);
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.gift-person:active {
+  transform: scale(0.97);
+}
+
+.gift-person:focus-visible,
+.talk-choice:focus-visible {
+  outline: 3px solid var(--gold-2);
+  outline-offset: 2px;
+}
+
+/* ───────── Vom Spiel ins Gespräch ───────── */
+
+.talk-notes summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  font-weight: 800;
+  list-style: none;
+  cursor: pointer;
+}
+
+.talk-notes summary::-webkit-details-marker {
+  display: none;
+}
+
+.talk-notes summary::before {
+  content: '▸';
+  color: var(--ochre);
+  transition: transform 0.2s;
+}
+
+.talk-notes[open] summary::before {
+  transform: rotate(90deg);
+}
+
+.talk-notes dl {
+  margin: 12px 0 0;
+  display: grid;
+  gap: 4px;
+}
+
+.talk-notes dt {
+  margin-top: 6px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ochre);
+}
+
+.talk-notes dd {
+  margin: 0;
+}
+
+.talk-invite .btn {
+  margin-top: 10px;
+}
+
+.talk-head {
+  text-align: center;
+}
+
+.talk-head h1 {
+  font-size: 2.2rem;
+}
+
+.talk-question {
+  --g: var(--g-nt);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px 16px 24px;
+  background: var(--card);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.talk-question::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 8px;
+  background: var(--g);
+}
+
+.talk-question .book-chip {
+  align-self: flex-start;
+}
+
+.talk-prompt {
+  font-weight: 700;
+  color: var(--ink-2);
+}
+
+.talk-answer {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--olive-text);
+}
+
+.talk-ref {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--ochre);
+}
+
+.talk-steps,
+.talk-choices,
+.admin-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.talk-step {
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  gap: 12px;
+  align-items: start;
+  padding: 10px 12px;
+  color: var(--ink-3);
+  background: var(--card-2);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.talk-step.is-current {
+  color: var(--ink);
+  background: var(--card);
+  border-color: var(--line-strong);
+  box-shadow: var(--shadow);
+  animation: cardIn 0.4s both;
+}
+
+.talk-step.is-done {
+  color: var(--ink-2);
+}
+
+.talk-step-num {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  font-weight: 800;
+  color: var(--ink-2);
+  background: var(--paper);
+}
+
+.talk-step.is-current .talk-step-num {
+  background: var(--gold);
+  color: var(--on-gold);
+}
+
+.talk-step.is-done .talk-step-num {
+  background: var(--olive-soft);
+  color: var(--olive-text);
+}
+
+.talk-step-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  line-height: 34px;
+}
+
+.talk-step-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 2px;
+  font-size: 1.02rem;
+}
+
+.talk-big {
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.talk-extra {
+  padding: 10px 12px;
+  font-size: 0.95rem;
+  background: var(--gold-soft);
+  border-radius: 12px;
+}
+
+.talk-extra span {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ochre);
+}
+
+.talk-controls .row > .btn {
+  flex: 1 1 40%;
+}
+
+.talk-choice {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px;
+  text-align: left;
+  color: var(--ink);
+  background: var(--card);
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.talk-choice.is-on {
+  border-color: var(--gold-2);
+  background: var(--gold-soft);
+}
+
+.talk-choice-q {
+  font-weight: 700;
+}
+
+.tv .talk {
+  max-width: 1100px;
+}
+
+.talk.is-display .talk-head h1 {
+  font-size: clamp(2.4rem, 5vw, 4rem);
+}
+
+.talk.is-display .talk-prompt {
+  font-size: clamp(1.1rem, 1.8vw, 1.5rem);
+}
+
+.talk.is-display .talk-answer {
+  font-size: clamp(1.3rem, 2.2vw, 1.9rem);
+}
+
+.talk.is-display .talk-step-body {
+  font-size: clamp(1.2rem, 2.2vw, 1.8rem);
+}
+
+.talk.is-display .talk-big {
+  font-size: clamp(1.5rem, 3vw, 2.4rem);
+}
+
+/* ───────── Freigabe frischer Hausbluffs (/admin) ───────── */
+
+.admin-head {
+  justify-content: space-between;
+}
+
+.admin-list {
+  gap: 12px;
+}
+
+.admin-item {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.admin-prompt {
+  font-weight: 700;
+}
+
+.admin-answer {
+  font-weight: 800;
+  color: var(--olive-text);
+}
+
+.admin-stats {
+  color: var(--ink-2);
 }
 
 /* ───────── Overlays ───────── */

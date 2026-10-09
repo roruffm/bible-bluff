@@ -5,6 +5,7 @@ import { Avatar, Button, ConfirmButton, Logo, Rules } from '../components/ui';
 import type { ApiError } from '../lib/api';
 import { type RoomConnection, useRoom, useWakeLock } from '../lib/hooks';
 import { navigate } from '../lib/router';
+import { markSeen } from '../lib/seen';
 import { type Session, clearSession, loadSession } from '../lib/session';
 import { THEME_PARAM, useTheme } from '../lib/theme';
 import { Lobby, RoomCodeCard, PlayerList } from './Lobby';
@@ -101,6 +102,12 @@ function GameShell({ view, conn }: { view: RoomView; conn: RoomConnection }) {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [phaseKey]);
+
+  // „Neues für alle“: Sobald die Antwort aufgedeckt ist, kennt dieses Gerät die Frage
+  const solved = view.round && (view.round.phase === 'reveal' || view.round.phase === 'scores') ? view.round.question.id : null;
+  useEffect(() => {
+    if (solved && view.me) markSeen(solved);
+  }, [solved]);
 
   return (
     <div class={`shell${display ? ' is-presenter' : ''}`}>

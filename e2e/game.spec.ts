@@ -44,6 +44,8 @@ test('eine komplette Partie auf drei Handys und der Leinwand', async ({ browser 
   const mirjam = await phone(browser, 'mirjam');
   await join(jonas, code, 'Jonas');
   await join(mirjam, code, 'Mirjam');
+  // Neues für alle: Die Lobby zeigt, wie viele Fragen hier noch niemand kennt
+  await expect(host.locator('.fresh-note')).toContainText('Für alle neu');
 
   const tvContext = await browser.newContext({ viewport: { width: 1280, height: 720 } });
   const tv = await tvContext.newPage();
@@ -86,7 +88,9 @@ test('eine komplette Partie auf drei Handys und der Leinwand', async ({ browser 
   // Punkte und Entdeckung
   await expect(host.getByText('Punktestand')).toBeVisible({ timeout: 30_000 });
   await expect(host.locator('.merksatz')).toBeVisible();
-  const rahelRow = host.locator('.score-row', { hasText: 'Rahel' });
+  const row = (page: Page, name: string) =>
+    page.locator('.score-row').filter({ has: page.locator('.score-name', { hasText: new RegExp(`^${name}$`) }) });
+  const rahelRow = row(host, 'Rahel');
   await expect(rahelRow.locator('.score-total')).toHaveText(/^[2-4]$/);
   await expect(rahelRow.locator('.delta.is-bluff')).toHaveText('Bluff +2');
 
@@ -98,15 +102,38 @@ test('eine komplette Partie auf drei Handys und der Leinwand', async ({ browser 
   await expect(rahelRow.locator('.delta.is-favorite')).toHaveText('♥ +1');
   await expect(tv.locator('.fav.is-leading')).toContainText(SAFE_BLUFFS.host);
 
+  // Spickzettel: nur die Leitung sieht Hintergrund, Gesprächsfrage und Querverweis
+  await expect(host.locator('.talk-notes')).toContainText('Spickzettel für die Leitung');
+  await expect(host.locator('.talk-notes dt').first()).toHaveText('Hintergrund');
+  await expect(jonas.locator('.talk-notes')).toHaveCount(0);
+  await expect(tv.locator('.talk-notes')).toHaveCount(0);
+
+  // Liebe deinen Nächsten: Rahel schenkt Mirjam einen ihrer Punkte
+  await host.getByRole('button', { name: /Liebe deinen Nächsten/ }).click();
+  await host.locator('.gift-person', { hasText: 'Mirjam' }).click();
+  await expect(host.locator('.gift.is-done')).toContainText('Du hast Mirjam einen Punkt geschenkt');
+  await expect(row(host, 'Mirjam').locator('.delta.is-gift')).toHaveText('+1 von Rahel');
+  await expect(rahelRow.locator('.delta.is-given')).toHaveText('−1 an Mirjam');
+  await expect(mirjam.locator('.toast')).toContainText('Rahel hat dir einen Punkt geschenkt');
+
   // Restliche Runden zügig über die Spielleitung durchschalten
   await host.getByRole('button', { name: 'Nächste Runde' }).click();
   for (let round = 2; round <= 4; round++) {
     await expect(host.getByText(`Runde ${round} von 4`)).toBeVisible();
+    if (round === 2) {
+      // Ruhige Minute: Mirjam setzt diese Runde aus, um zu beten – niemand wartet auf sie
+      await mirjam.getByRole('button', { name: 'Ruhige Minute' }).click();
+      await expect(mirjam.getByRole('heading', { name: 'Zeit für ein Gebet' })).toBeVisible();
+      await expect(tv.locator('.progress-person.is-quiet')).toHaveCount(1);
+    }
+    if (round === 3) await expect(mirjam.getByLabel('Deine erfundene Antwort')).toBeVisible();
     await hostAction(host, 'Schreibzeit jetzt beenden');
     await expect(host.getByText('Welche Antwort stimmt?')).toBeVisible();
+    if (round === 2) await expect(mirjam.getByRole('heading', { name: 'Zeit für ein Gebet' })).toBeVisible();
     await hostAction(host, 'Abstimmung jetzt beenden');
     await hostAction(host, 'Aufdeckung überspringen');
     await expect(host.getByText('Punktestand')).toBeVisible();
+    if (round === 2) await expect(row(host, 'Mirjam').locator('.delta.is-quiet')).toBeVisible();
     await host.getByRole('button', { name: round === 4 ? 'Zum Endstand' : 'Nächste Runde' }).click();
   }
 
@@ -115,6 +142,17 @@ test('eine komplette Partie auf drei Handys und der Leinwand', async ({ browser 
   await expect(host.locator('.discoveries li')).toHaveCount(4);
   await expect(host.getByText('Bluff-Meister')).toBeVisible();
   await expect(host.locator('.award-favorite')).toContainText(SAFE_BLUFFS.host);
+  await expect(host.locator('.award-neighbor')).toContainText('Rahel');
+
+  // Vom Spiel ins Gespräch: Die Leitung führt, alle Geräte gehen mit
+  await host.getByRole('button', { name: 'Weiter ins Gespräch' }).click();
+  for (const p of [host, jonas, mirjam, tv]) await expect(p.getByRole('heading', { name: 'Lesen' })).toBeVisible();
+  await expect(tv.locator('.talk-step.is-current')).toContainText('Schlagt');
+  await host.getByRole('button', { name: 'Weiter', exact: true }).click();
+  for (const p of [jonas, tv]) await expect(p.getByRole('heading', { name: 'Entdecken' })).toBeVisible();
+  await expect(tv.locator('.talk-extra')).toContainText('Zum Hintergrund');
+  await host.getByRole('button', { name: 'Zurück zum Endstand' }).click();
+  for (const p of [host, jonas, mirjam, tv]) await expect(p.getByRole('heading', { name: 'Endstand' })).toBeVisible();
 
   // Entdeckungen zum Mitnehmen: QR-Code auf der Leinwand, eigene Seite ohne Namen
   await expect(tv.locator('.recap-share svg.qr')).toBeVisible({ timeout: 10_000 });

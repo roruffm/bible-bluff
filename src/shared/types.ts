@@ -29,6 +29,14 @@ export type Action =
   | { type: 'suggest'; n?: number }
   | { type: 'vote'; optionId: string }
   | { type: 'like'; optionId: string }
+  /** „Liebe deinen Nächsten“: einen eigenen Punkt verschenken (einmal pro Runde) */
+  | { type: 'gift'; playerId: string }
+  /** „Ruhige Minute“: diese (beim Schreiben/Abstimmen) oder die nächste Runde aussetzen */
+  | { type: 'quiet'; on: boolean }
+  /** Gespräch nach dem Spiel (nur Spielleitung) */
+  | { type: 'talk'; questionId?: string }
+  | { type: 'talkStep'; step: number }
+  | { type: 'talkEnd' }
   | { type: 'pause' }
   | { type: 'resume' }
   | { type: 'skipPhase' }
@@ -52,6 +60,8 @@ export interface PlayerView {
   isHost: boolean;
   /** Schreibphase: hat einen Bluff abgegeben. Abstimmung: hat gewählt. */
   done: boolean;
+  /** setzt die laufende Runde aus („Ruhige Minute“) */
+  quiet: boolean;
 }
 
 export interface QuestionView {
@@ -117,6 +127,19 @@ export interface RoundResultView {
   fooled: number;
   /** Extrapunkt für den Lieblingsbluff – steht während der Punkte-Phase noch nicht fest */
   favorite: number;
+  /** „Liebe deinen Nächsten“: wer dieser Person in dieser Runde einen Punkt geschenkt hat */
+  giftsIn: PersonRef[];
+  /** an wen diese Person in dieser Runde einen Punkt verschenkt hat */
+  giftOut: PersonRef | null;
+  /** hat die Runde ausgesetzt („Ruhige Minute“) */
+  quiet: boolean;
+}
+
+/** Spickzettel der Leitung und Stoff für das Gespräch nach dem Spiel */
+export interface TalkNotes {
+  background: string;
+  question: string;
+  crossRef: { ref: string; note: string };
 }
 
 /** Punkte-Phase: ein Bluff der Mitspielenden, für den man ein Herz vergeben kann */
@@ -150,10 +173,14 @@ export interface RoundView {
   results: RoundResultView[] | null;
   favorites: FavoriteOptionView[] | null;
   myLike: string | null;
+  /** an wen ich in dieser Runde einen Punkt verschenkt habe (Personen-ID) */
+  myGift: string | null;
+  /** Spickzettel – nur für die Spielleitung, ab der Punkte-Phase */
+  talk: TalkNotes | null;
 }
 
 export interface AwardView {
-  key: 'bluffer' | 'finder' | 'trusting' | 'favorite';
+  key: 'bluffer' | 'finder' | 'trusting' | 'favorite' | 'neighbor';
   title: string;
   text: string;
   players: PersonRef[];
@@ -163,10 +190,30 @@ export interface AwardView {
 }
 
 export interface DiscoveryView {
+  questionId: string;
   prompt: string;
   answer: string;
   ref: string;
   discovery: string;
+  /** wie viele abgestimmt haben und wie viele davon auf einen Bluff hereingefallen sind */
+  voted: number;
+  missed: number;
+}
+
+/** Gespräch nach dem Spiel: eine Frage der Partie in vier Schritten vertiefen */
+export interface TalkView {
+  questionId: string;
+  /** 0 … TALK_STEPS.length - 1 */
+  step: number;
+  book: string;
+  group: BookGroup;
+  prompt: string;
+  answer: string;
+  ref: string;
+  discovery: string;
+  notes: TalkNotes | null;
+  voted: number;
+  missed: number;
 }
 
 export interface FinalView {
@@ -175,6 +222,8 @@ export interface FinalView {
   discoveries: DiscoveryView[];
   /** Dauerhafte Entdeckungen-Seite (/e/ID), sobald jemand sie angelegt hat */
   recapId: string | null;
+  /** läuft gerade das Gespräch nach dem Spiel? */
+  talk: TalkView | null;
 }
 
 /** Eine Frage auf der Entdeckungen-Seite – bewusst ohne Namen der Mitspielenden */
@@ -211,6 +260,8 @@ export interface MeView {
   color: string;
   isHost: boolean;
   plays: boolean;
+  /** „Ruhige Minute“: setzt die laufende oder die nächste Runde aus */
+  quiet: 'now' | 'next' | null;
 }
 
 export interface RoomView {
@@ -228,6 +279,27 @@ export interface RoomView {
   round: RoundView | null;
   final: FinalView | null;
   poolSize: number;
+  /** Fragen, die in diesem Raum noch niemand kennt („Neues für alle“) */
+  freshCount: number;
+}
+
+/** Freigabe-Seite: ein starker Bluff aus echten Partien */
+export type BluffStatus = 'new' | 'approved' | 'rejected';
+
+export interface BluffCandidateView {
+  questionId: string;
+  key: string;
+  text: string;
+  fooled: number;
+  likes: number;
+  times: number;
+  status: BluffStatus;
+  updatedAt: number;
+  question: { prompt: string; answer: string; ref: string; houseBluffs: string[] } | null;
+}
+
+export interface BluffListResponse {
+  items: BluffCandidateView[];
 }
 
 export interface ApiErrorBody {

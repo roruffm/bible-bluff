@@ -33,7 +33,7 @@ if (!existsSync(join(ROOT, 'index.html'))) {
   process.exit(1);
 }
 
-const handleApi = createApi({ store: new MemoryStore() });
+const handleApi = createApi({ store: new MemoryStore(), adminKey: process.env.ADMIN_KEY || undefined });
 
 const server = http.createServer(async (req, res) => {
   try {

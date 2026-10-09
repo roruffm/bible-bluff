@@ -191,20 +191,26 @@ export function QuestionCard({ question, big = false }: { question: QuestionView
 
 export function Progress({ players, label }: { players: PlayerView[]; label: string }) {
   const relevant = players.filter((p) => p.plays);
-  const done = relevant.filter((p) => p.done).length;
+  // Wer eine ruhige Minute macht, zählt nicht mit – auf diese Person wird nicht gewartet
+  const counted = relevant.filter((p) => !p.quiet);
+  const done = counted.filter((p) => p.done).length;
   return (
     <section class="progress" aria-live="polite">
       <div class="progress-head">
         <span>{label}</span>
         <strong>
-          {done} / {relevant.length}
+          {done} / {counted.length}
         </strong>
       </div>
       <div class="progress-people">
         {relevant.map((p) => (
-          <span class={`progress-person${p.done ? ' is-done' : ''}${p.online ? '' : ' is-offline'}`} title={p.name}>
+          <span
+            class={`progress-person${p.done ? ' is-done' : ''}${p.online ? '' : ' is-offline'}${p.quiet ? ' is-quiet' : ''}`}
+            title={p.quiet ? `${p.name} – ruhige Minute` : p.name}
+          >
             <Avatar person={p} size="sm" dim={!p.done} />
             {p.done && <span class="tick" aria-hidden="true">✓</span>}
+            {p.quiet && <span class="tick is-quiet" aria-hidden="true">☾</span>}
             <span class="progress-name">{p.name}</span>
           </span>
         ))}

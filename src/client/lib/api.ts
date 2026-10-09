@@ -1,6 +1,8 @@
 import type {
   Action,
   ApiErrorBody,
+  BluffListResponse,
+  BluffStatus,
   RecapCreatedResponse,
   RecapResponse,
   RoomView,
@@ -9,6 +11,7 @@ import type {
   ViewResponse,
 } from '../../shared/types';
 import { clock } from './clock';
+import { seenQuestions } from './seen';
 
 export class ApiError extends Error {
   constructor(
@@ -54,10 +57,10 @@ async function request<T>(method: string, path: string, body?: unknown, token?: 
 
 export const api = {
   createRoom(name: string, plays: boolean, settings: Settings) {
-    return request<SessionResponse>('POST', '/api/rooms', { name, plays, settings });
+    return request<SessionResponse>('POST', '/api/rooms', { name, plays, settings, seen: seenQuestions() });
   },
   join(code: string, name: string, reclaim = false) {
-    return request<SessionResponse>('POST', `/api/rooms/${encodeURIComponent(code)}/join`, { name, reclaim });
+    return request<SessionResponse>('POST', `/api/rooms/${encodeURIComponent(code)}/join`, { name, reclaim, seen: seenQuestions() });
   },
   state(code: string, token: string | null) {
     return request<ViewResponse>('GET', `/api/rooms/${encodeURIComponent(code)}`, undefined, token);
@@ -70,6 +73,12 @@ export const api = {
   },
   recap(id: string) {
     return request<RecapResponse>('GET', `/api/recaps/${encodeURIComponent(id)}`);
+  },
+  adminBluffs(key: string, status: BluffStatus) {
+    return request<BluffListResponse>('GET', `/api/admin/bluffs?status=${status}`, undefined, key);
+  },
+  adminDecide(key: string, decision: { questionId: string; key: string; status: BluffStatus; text: string }) {
+    return request<{ ok: true }>('POST', '/api/admin/bluffs', decision, key);
   },
 };
 

@@ -6,11 +6,15 @@
 //   POST /api/rooms/:code/action     Aktion ausführen
 //   POST /api/rooms/:code/recap      Entdeckungen-Seite einer beendeten Partie anlegen (idempotent)
 //   GET  /api/recaps/:id             Entdeckungen-Seite lesen
+//   GET  /api/admin/bluffs           Kandidaten für frische Hausbluffs (nur mit ADMIN_KEY)
+//   POST /api/admin/bluffs           Kandidaten freigeben oder ablehnen (nur mit ADMIN_KEY)
 
-import { PRESENCE_TOUCH_MS, ROOM_TTL_MS, normalizeCode } from '../shared/rules';
+import { BLUFF_MAX, PRESENCE_TOUCH_MS, ROOM_TTL_MS, normalizeCode } from '../shared/rules';
 import type {
   Action,
   ApiErrorBody,
+  BluffListResponse,
+  BluffStatus,
   RecapCreatedResponse,
   RecapResponse,
   SessionResponse,
@@ -18,24 +22,33 @@ import type {
   ViewResponse,
 } from '../shared/types';
 import { randomCode } from './codes';
-import { createRoom, joinRoom, step, tick } from './engine';
+import { candidatesFromGame, candidateView } from './bluff-pool';
+import { createRoom, formatAnswer, joinRoom, step, tick } from './engine';
+import { getQuestion, hasQuestion } from './questions';
 import { buildRecap, isRecapId, randomRecapId } from './recap';
 import { GameError, type Ctx, type PlayerRec, type RoomState } from './state';
 import type { RoomRecord, RoomStore } from './store';
+import { isDuplicate, isTooCloseToTruth } from './text';
 import { buildView } from './view';
 
 export interface ApiDeps {
   store: RoomStore;
   now?: () => number;
   rng?: () => number;
+  /** Schlüssel für die Freigabe-Seite /admin; ohne ihn ist die Freigabe abgeschaltet */
+  adminKey?: string;
 }
 
 const MAX_BODY = 8 * 1024;
 const MAX_ATTEMPTS = 10;
+/** Freigegebene Bluffs werden je Worker-Instanz so lange zwischengespeichert */
+const APPROVED_TTL_MS = 5 * 60 * 1000;
+const BLUFF_STATUSES: BluffStatus[] = ['new', 'approved', 'rejected'];
 
 const ACTION_TYPES = new Set<Action['type']>([
-  'start', 'settings', 'bluff', 'suggest', 'vote', 'like', 'pause', 'resume', 'skipPhase', 'swapQuestion',
-  'revealNext', 'next', 'kick', 'makeHost', 'lock', 'close', 'playAgain', 'leave',
+  'start', 'settings', 'bluff', 'suggest', 'vote', 'like', 'gift', 'quiet', 'talk', 'talkStep', 'talkEnd',
+  'pause', 'resume', 'skipPhase', 'swapQuestion', 'revealNext', 'next', 'kick', 'makeHost', 'lock', 'close',
+  'playAgain', 'leave',
 ]);
 
 export function cryptoRng(): number {
@@ -110,7 +123,35 @@ export function createApi(deps: ApiDeps) {
   const rng = deps.rng ?? cryptoRng;
   const { store } = deps;
 
-  const makeCtx = (presence: Record<string, number>): Ctx => ({ now: now(), rng, presence: { ...presence } });
+  const makeCtx = (presence: Record<string, number>, extraBluffs?: Record<string, string[]>): Ctx => ({
+    now: now(),
+    rng,
+    presence: { ...presence },
+    extraBluffs,
+  });
+
+  // Freigegebene Bluffs aus echten Partien – selten geändert, darum zwischengespeichert
+  let approved: { at: number; data: Record<string, string[]> } | null = null;
+  async function approvedBluffs(): Promise<Record<string, string[]>> {
+    const t = now();
+    if (approved && t - approved.at < APPROVED_TTL_MS) return approved.data;
+    try {
+      approved = { at: t, data: await store.approvedBluffs() };
+    } catch (err) {
+      console.error('Freigegebene Bluffs nicht lesbar', err);
+      approved = { at: t, data: approved?.data ?? {} };
+    }
+    return approved.data;
+  }
+
+  /** Nach einer Partie: starke Bluffs (ohne Namen) als Kandidaten für frische Hausbluffs ablegen */
+  async function collectBluffs(state: RoomState, at: number) {
+    try {
+      await store.addBluffCandidates(candidatesFromGame(state), at);
+    } catch (err) {
+      console.error('Bluff-Kandidaten nicht gespeichert', err);
+    }
+  }
 
   async function loadRoom(code: string): Promise<RoomRecord> {
     const rec = await store.load(code);
@@ -136,12 +177,15 @@ export function createApi(deps: ApiDeps) {
     code: string,
     fn: (rec: RoomRecord, ctx: Ctx) => { next: RoomState | null; meId: string | null; extra?: T },
   ) {
+    const extraBluffs = await approvedBluffs();
     for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
       const rec = await loadRoom(code);
-      const ctx = makeCtx(rec.presence);
+      const ctx = makeCtx(rec.presence, extraBluffs);
       const out = fn(rec, ctx);
       if (!out.next) return { state: rec.state, version: rec.version, ctx, ...out };
       if (await store.update(code, out.next, rec.version, ctx.now)) {
+        // Genau ein Schreibvorgang beendet die Partie – dann die starken Bluffs einsammeln
+        if (out.next.status === 'finished' && rec.state.status !== 'finished') await collectBluffs(out.next, ctx.now);
         return { state: out.next, version: rec.version + 1, ctx, ...out };
       }
       await sleep(3 + rng() * 15 * (attempt + 1));
@@ -173,6 +217,7 @@ export function createApi(deps: ApiDeps) {
           tokenHash,
           plays: body.plays !== false,
           settings: (body.settings && typeof body.settings === 'object' ? body.settings : undefined) as Partial<Settings> | undefined,
+          seen: body.seen,
         },
         ctx,
       );
@@ -192,7 +237,11 @@ export function createApi(deps: ApiDeps) {
     const newId = randomPlayerId();
     const result = await mutate(code, (rec, ctx) => {
       const base = tick(rec.state, ctx) ?? rec.state;
-      const joined = joinRoom(base, { playerId: newId, name: String(body.name ?? ''), tokenHash, reclaim: body.reclaim === true }, ctx);
+      const joined = joinRoom(
+        base,
+        { playerId: newId, name: String(body.name ?? ''), tokenHash, reclaim: body.reclaim === true, seen: body.seen },
+        ctx,
+      );
       ctx.presence[joined.playerId] = ctx.now;
       return { next: joined.state, meId: joined.playerId };
     });
@@ -271,6 +320,52 @@ export function createApi(deps: ApiDeps) {
     return json(res, 200, 'public, max-age=86400, immutable');
   }
 
+  /** Freigabe-Seite: nur mit dem Schlüssel aus der Umgebungsvariable ADMIN_KEY */
+  async function requireAdmin(request: Request) {
+    if (!deps.adminKey) throw new GameError('admin_off', 'Die Freigabe ist noch nicht eingerichtet.', 404);
+    const header = (request.headers.get('authorization') ?? '').trim();
+    const given = header.startsWith('Bearer ') ? header.slice(7).trim() : '';
+    // Über Hashes vergleichen, damit die Laufzeit nichts über den Schlüssel verrät
+    if (!given || given.length > 200 || (await hashToken(given)) !== (await hashToken(deps.adminKey))) {
+      throw new GameError('admin_denied', 'Dieser Schlüssel passt nicht.', 401);
+    }
+  }
+
+  async function listBluffsRoute(request: Request, url: URL): Promise<Response> {
+    await requireAdmin(request);
+    const status = (url.searchParams.get('status') ?? 'new') as BluffStatus;
+    if (!BLUFF_STATUSES.includes(status)) throw new GameError('bad_status', 'Unbekannter Status.', 400);
+    const rows = await store.listBluffs(status, 200);
+    const res: BluffListResponse = { items: rows.map(candidateView) };
+    return json(res);
+  }
+
+  async function decideBluffRoute(request: Request): Promise<Response> {
+    await requireAdmin(request);
+    const body = await readJson(request);
+    const questionId = String(body.questionId ?? '');
+    const key = String(body.key ?? '');
+    const status = body.status as BluffStatus;
+    if (!BLUFF_STATUSES.includes(status)) throw new GameError('bad_status', 'Unbekannter Status.', 400);
+    if (!hasQuestion(questionId) || !key) throw new GameError('not_found', 'Diesen Kandidaten gibt es nicht.', 404);
+    const text = formatAnswer(typeof body.text === 'string' ? body.text : '');
+    if (!text || text.length > BLUFF_MAX) throw new GameError('bad_text', `Der Bluff braucht 1 bis ${BLUFF_MAX} Zeichen.`, 400);
+    if (status === 'approved') {
+      const q = getQuestion(questionId);
+      if (isTooCloseToTruth(text, q)) {
+        throw new GameError('too_close', 'Das ist zu nah an der richtigen Antwort – so würde der Bluff die Wahrheit verraten.', 422);
+      }
+      if (q.bluffs.some((house) => isDuplicate(house, text))) {
+        throw new GameError('duplicate', 'Diesen Bluff gibt es schon als Hausbluff.', 409);
+      }
+    }
+    if (!(await store.decideBluff(questionId, key, status, text, now()))) {
+      throw new GameError('not_found', 'Diesen Kandidaten gibt es nicht.', 404);
+    }
+    approved = null; // gleich mit der neuen Liste spielen
+    return json({ ok: true });
+  }
+
   return async function handleApi(request: Request): Promise<Response> {
     const url = new URL(request.url);
     const parts = url.pathname.replace(/\/+$/, '').split('/').filter(Boolean); // ['api', ...]
@@ -291,6 +386,10 @@ export function createApi(deps: ApiDeps) {
       }
       if (parts[1] === 'recaps' && parts.length === 3 && method === 'GET') {
         return await readRecapRoute(decodeURIComponent(parts[2]));
+      }
+      if (parts[1] === 'admin' && parts[2] === 'bluffs' && parts.length === 3) {
+        if (method === 'GET') return await listBluffsRoute(request, url);
+        if (method === 'POST') return await decideBluffRoute(request);
       }
       throw new GameError('not_found', 'Nicht gefunden.', 404);
     } catch (err) {

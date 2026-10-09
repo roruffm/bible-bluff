@@ -6,15 +6,18 @@ import type {
   AwardView,
   FavoriteOptionView,
   FinalView,
+  MeView,
   PersonRef,
   PlayerView,
   RevealStepView,
   RoomView,
   RoundView,
+  TalkView,
 } from '../shared/types';
-import { favoriteLeaders, isOnline, likeCounts, planLength, votersOf } from './engine';
+import { favoriteLeaders, isOnline, isQuiet, likeCounts, missStats, planLength, votersOf } from './engine';
 import { QUESTIONS, getQuestion } from './questions';
-import type { Ctx, RoomState, RoundRec } from './state';
+import type { Ctx, GameRec, PlayerRec, RoomState, RoundRec } from './state';
+import { talkNotes } from './talk';
 
 function personLookup(state: RoomState) {
   const map = new Map<string, PersonRef>();
@@ -29,11 +32,12 @@ export function buildView(state: RoomState, meId: string | null, ctx: Ctx, versi
   const host = state.players.find((p) => p.id === state.hostId);
   const bonus = favoriteBonus(state);
 
+  const playing = state.status === 'playing' && g ? g : null;
   const players: PlayerView[] = state.players.map((p) => {
     let done = false;
-    if (state.status === 'playing' && g) {
-      if (g.phase === 'write') done = Boolean(g.round.bluffs[p.id]);
-      if (g.phase === 'vote') done = Boolean(g.round.votes[p.id]);
+    if (playing) {
+      if (playing.phase === 'write') done = Boolean(playing.round.bluffs[p.id]);
+      if (playing.phase === 'vote') done = Boolean(playing.round.votes[p.id]);
     }
     return {
       id: p.id,
@@ -44,6 +48,7 @@ export function buildView(state: RoomState, meId: string | null, ctx: Ctx, versi
       plays: p.plays,
       isHost: p.id === state.hostId,
       done,
+      quiet: playing ? isQuiet(p, playing) : false,
     };
   });
 
@@ -52,9 +57,7 @@ export function buildView(state: RoomState, meId: string | null, ctx: Ctx, versi
     serverNow: ctx.now,
     version,
     status: state.status,
-    me: me
-      ? { id: me.id, name: me.name, color: me.color, isHost: me.id === state.hostId, plays: me.plays }
-      : null,
+    me: me ? meView(state, me, playing) : null,
     hostId: state.hostId,
     locked: state.locked,
     paused: state.paused,
@@ -64,7 +67,24 @@ export function buildView(state: RoomState, meId: string | null, ctx: Ctx, versi
     round: g && (state.status === 'playing' || state.status === 'finished') ? buildRound(state, meId) : null,
     final: state.status === 'finished' ? buildFinal(state) : null,
     poolSize: QUESTIONS.length,
+    freshCount: freshCount(state),
   };
+}
+
+function meView(state: RoomState, me: PlayerRec, playing: GameRec | null): MeView {
+  let quiet: MeView['quiet'] = null;
+  if (playing && me.quietRound !== undefined) {
+    if (me.quietRound === playing.roundIndex) quiet = 'now';
+    else if (me.quietRound === playing.roundIndex + 1) quiet = 'next';
+  }
+  return { id: me.id, name: me.name, color: me.color, isHost: me.id === state.hostId, plays: me.plays, quiet };
+}
+
+/** „Neues für alle“: Fragen, die in diesem Raum noch nicht vorkamen und die niemand hier kennt */
+function freshCount(state: RoomState): number {
+  const used = new Set(state.usedQuestionIds);
+  const seen = state.seenCounts ?? {};
+  return QUESTIONS.filter((q) => !used.has(q.id) && !seen[q.id]).length;
 }
 
 /**
@@ -105,6 +125,8 @@ function buildRound(state: RoomState, meId: string | null): RoundView {
   const person = personLookup(state);
   const scores = phase === 'scores' && state.status === 'playing';
   const bonus = favoriteBonus(state);
+  const gifts = round.gifts ?? {};
+  const quietIds = new Set(state.players.filter((p) => p.quietRound === round.index).map((p) => p.id));
 
   return {
     index: g.roundIndex,
@@ -133,10 +155,18 @@ function buildRound(state: RoomState, meId: string | null): RoundView {
             foundTruth: r.foundTruth,
             fooled: r.fooled,
             favorite: bonus.get(playerId) ?? 0,
+            giftsIn: Object.entries(gifts)
+              .filter(([, to]) => to === playerId)
+              .map(([from]) => person(from)),
+            giftOut: gifts[playerId] ? person(gifts[playerId]) : null,
+            quiet: quietIds.has(playerId),
           }))
         : null,
     favorites: scores ? buildFavorites(round, meId, person) : null,
     myLike: scores && meId ? round.likes?.[meId] ?? null : null,
+    myGift: scores && meId ? gifts[meId] ?? null : null,
+    // Spickzettel: nur die Spielleitung, erst nach der Auflösung
+    talk: scores && meId !== null && meId === state.hostId ? talkNotes(q.id) : null,
   };
 }
 
@@ -217,14 +247,35 @@ function buildFinal(state: RoomState): FinalView {
     award('finder', 'Wahrheitsfinder', 'am häufigsten die Wahrheit erkannt', (p) => p.stats.found),
     award('trusting', 'Gutgläubigste Seele', 'am öftesten auf Bluffs hereingefallen', (p) => p.stats.fellFor),
     favoriteAward(state),
+    award('neighbor', 'Nächstenliebe', 'die meisten Punkte verschenkt', (p) => p.stats.gifted ?? 0),
   ].filter((a): a is AwardView => a !== null);
 
   const discoveries = (g?.history ?? []).map((h) => {
     const q = getQuestion(h.questionId);
-    return { prompt: q.prompt, answer: q.answer, ref: q.ref, discovery: q.discovery };
+    return { questionId: q.id, prompt: q.prompt, answer: q.answer, ref: q.ref, discovery: q.discovery, ...missStats(h) };
   });
 
-  return { ranking, awards, discoveries, recapId: g?.recapId ?? null };
+  return { ranking, awards, discoveries, recapId: g?.recapId ?? null, talk: g ? buildTalk(g) : null };
+}
+
+/** Gespräch nach dem Spiel – für alle sichtbar, die Leitung führt durch die Schritte */
+function buildTalk(g: GameRec): TalkView | null {
+  if (!g.talk) return null;
+  const entry = g.history.find((h) => h.questionId === g.talk!.questionId);
+  if (!entry) return null;
+  const q = getQuestion(entry.questionId);
+  return {
+    questionId: q.id,
+    step: g.talk.step,
+    book: q.book,
+    group: q.group,
+    prompt: q.prompt,
+    answer: q.answer,
+    ref: q.ref,
+    discovery: q.discovery,
+    notes: talkNotes(q.id),
+    ...missStats(entry),
+  };
 }
 
 /** Bester Bluff des Abends: die meisten Herzen in einer Runde; bei Gleichstand der frühere */

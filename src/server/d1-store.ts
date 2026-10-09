@@ -1,8 +1,8 @@
 // Cloudflare-D1-Anbindung. Nur die Methoden, die wir wirklich brauchen, als schmale Schnittstelle.
 
-import type { RecapView } from '../shared/types';
+import type { BluffStatus, RecapView } from '../shared/types';
 import type { RoomState } from './state';
-import type { RoomRecord, RoomStore } from './store';
+import type { BluffCandidateInput, BluffRow, RoomRecord, RoomStore } from './store';
 
 export interface D1PreparedLike {
   bind(...values: unknown[]): D1PreparedLike;
@@ -18,6 +18,24 @@ export interface D1Like {
 
 /** Gleicher Inhalt wie migrations/0002_recaps.sql */
 const CREATE_RECAPS = 'CREATE TABLE IF NOT EXISTS recaps (id TEXT PRIMARY KEY, data TEXT NOT NULL, created_at INTEGER NOT NULL)';
+
+/** Gleicher Inhalt wie migrations/0003_bluff_pool.sql */
+const CREATE_BLUFF_POOL = [
+  "CREATE TABLE IF NOT EXISTS bluff_pool (question_id TEXT NOT NULL, norm TEXT NOT NULL, text TEXT NOT NULL, fooled INTEGER NOT NULL DEFAULT 0, likes INTEGER NOT NULL DEFAULT 0, times INTEGER NOT NULL DEFAULT 1, status TEXT NOT NULL DEFAULT 'new', created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL, PRIMARY KEY (question_id, norm))",
+  'CREATE INDEX IF NOT EXISTS bluff_pool_status ON bluff_pool (status, updated_at)',
+];
+
+interface BluffDbRow {
+  question_id: string;
+  norm: string;
+  text: string;
+  fooled: number;
+  likes: number;
+  times: number;
+  status: BluffStatus;
+  created_at: number;
+  updated_at: number;
+}
 
 function isMissingTable(err: unknown): boolean {
   return /no such table/i.test(String((err as Error | null)?.message ?? err));
@@ -98,5 +116,73 @@ export class D1Store implements RoomStore {
       if (isMissingTable(err)) return null;
       throw err;
     }
+  }
+
+  /** Führt `fn` aus; fehlt die Tabelle bluff_pool noch, wird sie angelegt und `fn` wiederholt. */
+  private async withBluffPool<T>(fn: () => Promise<T>): Promise<T> {
+    try {
+      return await fn();
+    } catch (err) {
+      if (!isMissingTable(err)) throw err;
+      await this.db.batch(CREATE_BLUFF_POOL.map((sql) => this.db.prepare(sql)));
+      return fn();
+    }
+  }
+
+  async addBluffCandidates(items: BluffCandidateInput[], now: number): Promise<void> {
+    if (!items.length) return;
+    await this.withBluffPool(() =>
+      this.db.batch(
+        items.map((i) =>
+          this.db
+            .prepare(
+              "INSERT INTO bluff_pool (question_id, norm, text, fooled, likes, times, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, 1, 'new', ?, ?) " +
+                'ON CONFLICT(question_id, norm) DO UPDATE SET fooled = fooled + excluded.fooled, likes = likes + excluded.likes, times = times + 1, updated_at = excluded.updated_at',
+            )
+            .bind(i.questionId, i.key, i.text, i.fooled, i.likes, now, now),
+        ),
+      ),
+    );
+  }
+
+  async listBluffs(status: BluffStatus, limit: number): Promise<BluffRow[]> {
+    const res = await this.withBluffPool(() =>
+      this.db
+        .prepare(
+          'SELECT question_id, norm, text, fooled, likes, times, status, created_at, updated_at FROM bluff_pool WHERE status = ? ORDER BY (fooled + likes) DESC, updated_at DESC LIMIT ?',
+        )
+        .bind(status, limit)
+        .all<BluffDbRow>(),
+    );
+    return res.results.map((r) => ({
+      questionId: r.question_id,
+      key: r.norm,
+      text: r.text,
+      fooled: Number(r.fooled),
+      likes: Number(r.likes),
+      times: Number(r.times),
+      status: r.status,
+      createdAt: Number(r.created_at),
+      updatedAt: Number(r.updated_at),
+    }));
+  }
+
+  async decideBluff(questionId: string, key: string, status: BluffStatus, text: string | null, now: number): Promise<boolean> {
+    const res = await this.withBluffPool(() =>
+      this.db
+        .prepare('UPDATE bluff_pool SET status = ?, text = COALESCE(?, text), updated_at = ? WHERE question_id = ? AND norm = ?')
+        .bind(status, text, now, questionId, key)
+        .run(),
+    );
+    return (res.meta.changes ?? 0) === 1;
+  }
+
+  async approvedBluffs(): Promise<Record<string, string[]>> {
+    const res = await this.withBluffPool(() =>
+      this.db.prepare("SELECT question_id, text FROM bluff_pool WHERE status = 'approved'").all<{ question_id: string; text: string }>(),
+    );
+    const out: Record<string, string[]> = {};
+    for (const r of res.results) (out[r.question_id] ??= []).push(r.text);
+    return out;
   }
 }

@@ -28,6 +28,23 @@ export const POINTS_TRUTH = 2;
 export const POINTS_PER_FOOLED = 1;
 /** Lieblingsbluff: Extrapunkt für den Bluff mit den meisten Herzen einer Runde */
 export const POINTS_FAVORITE = 1;
+/** „Liebe deinen Nächsten“: so viele eigene Punkte verschenkt man (einmal pro Runde) */
+export const POINTS_GIFT = 1;
+
+/** „Neues für alle“: so viele zuletzt gesehene Fragen merkt sich bzw. meldet ein Gerät */
+export const SEEN_STORE_MAX = 300;
+export const SEEN_SEND_MAX = 200;
+
+/** Frische Hausbluffs: ab so vielen Reingelegten oder Herzen wird ein Bluff zum Kandidaten */
+export const STRONG_BLUFF_MIN = 2;
+
+/** Gespräch nach dem Spiel: vier einfache Schritte */
+export const TALK_STEPS = [
+  { key: 'lesen', title: 'Lesen', prompt: 'Schlagt die Stelle auf. Eine Person liest den Abschnitt laut vor.' },
+  { key: 'entdecken', title: 'Entdecken', prompt: 'Was fällt euch auf? Was hat euch überrascht – vielleicht schon beim Raten?' },
+  { key: 'nachfragen', title: 'Nachfragen', prompt: 'Warum, meint ihr, erzählt die Bibel davon?' },
+  { key: 'mitnehmen', title: 'Mitnehmen', prompt: 'Was nehmt ihr mit in die Woche? Wofür wollt ihr danken oder beten?' },
+] as const;
 
 /** Aufdeckung: Dauer der einzelnen Schritte in ms */
 export const REVEAL_INTRO_MS = 2600;

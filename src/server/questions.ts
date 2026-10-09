@@ -1839,6 +1839,10 @@ export const QUESTIONS: Question[] = [
 
 const BY_ID = new Map(QUESTIONS.map((q) => [q.id, q]));
 
+export function hasQuestion(id: string): boolean {
+  return BY_ID.has(id);
+}
+
 export function getQuestion(id: string): Question {
   const q = BY_ID.get(id);
   if (!q) throw new Error(`Unbekannte Frage: ${id}`);

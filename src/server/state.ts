@@ -9,6 +9,8 @@ export interface PlayerStats {
   fooled: number;
   /** wie oft selbst auf einen Bluff hereingefallen */
   fellFor: number;
+  /** „Liebe deinen Nächsten“: wie viele Punkte verschenkt (fehlt in älteren Räumen) */
+  gifted?: number;
 }
 
 export interface PlayerRec {
@@ -20,6 +22,8 @@ export interface PlayerRec {
   plays: boolean;
   score: number;
   stats: PlayerStats;
+  /** „Ruhige Minute“: diese Runde (Index) setzt die Person aus */
+  quietRound?: number;
 }
 
 export interface KickedRec {
@@ -62,6 +66,8 @@ export interface RoundRec {
   plan: StepRec[] | null;
   /** Punkte-Phase: Herz je Person für einen Bluff der Mitspielenden (Personen-ID → Options-ID) */
   likes?: Record<string, string>;
+  /** „Liebe deinen Nächsten“: verschenkter Punkt je Person (Schenkende → Beschenkte) */
+  gifts?: Record<string, string>;
 }
 
 /** Bluff mit den meisten Herzen einer Runde */
@@ -71,11 +77,26 @@ export interface FavoriteRec {
   likes: number;
 }
 
+/** Bluff, der viele reingelegt oder viele Herzen bekommen hat – Kandidat für frische Hausbluffs */
+export interface StrongBluffRec {
+  text: string;
+  fooled: number;
+  likes: number;
+}
+
 export interface HistoryRec {
   questionId: string;
   results: Record<string, ResultRec>;
   /** bei Gleichstand mehrere */
   favorites?: FavoriteRec[];
+  /** starke Bluffs der Runde, ohne Namen der Urheber */
+  strong?: StrongBluffRec[];
+}
+
+/** Gespräch nach dem Spiel */
+export interface TalkRec {
+  questionId: string;
+  step: number;
 }
 
 export interface GameRec {
@@ -91,6 +112,8 @@ export interface GameRec {
   finishedAt?: number;
   /** ID der Entdeckungen-Seite, sobald angelegt */
   recapId?: string;
+  /** läuft gerade das Gespräch nach dem Spiel? */
+  talk?: TalkRec | null;
 }
 
 export interface RoomState {
@@ -106,6 +129,10 @@ export interface RoomState {
   game: GameRec | null;
   usedQuestionIds: string[];
   paused: { at: number } | null;
+  /** „Neues für alle“: wie viele Personen im Raum eine Frage schon kennen (Frage-ID → Anzahl) */
+  seenCounts?: Record<string, number>;
+  /** wessen Liste schon mitgezählt ist (Personen-IDs) */
+  seenFrom?: string[];
 }
 
 /** Laufzeit-Kontext für alle Zustandsübergänge – macht die Engine testbar. */
@@ -114,6 +141,8 @@ export interface Ctx {
   rng: () => number;
   /** Zeitpunkt der letzten Aktivität je Spieler-ID */
   presence: Record<string, number>;
+  /** freigegebene Bluffs aus echten Partien, ergänzen die Hausbluffs (Frage-ID → Texte) */
+  extraBluffs?: Record<string, string[]>;
 }
 
 export class GameError extends Error {
