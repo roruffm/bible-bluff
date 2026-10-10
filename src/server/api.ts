@@ -1,6 +1,7 @@
 // HTTP-API (Web-Standard Request/Response) – läuft im Cloudflare Worker und im lokalen Node-Server.
 //
 //   POST /api/rooms                  Raum eröffnen
+//   GET  /api/rooms                  offene Räume für die Startseite (nur öffentlich angezeigte)
 //   POST /api/rooms/:code/join       beitreten
 //   GET  /api/rooms/:code            Spielstand (mit Token: persönliche Sicht, ohne: Leinwand)
 //   POST /api/rooms/:code/action     Aktion ausführen
@@ -15,6 +16,7 @@ import type {
   ApiErrorBody,
   BluffListResponse,
   BluffStatus,
+  PublicRoomsResponse,
   RecapCreatedResponse,
   RecapResponse,
   SessionResponse,
@@ -29,7 +31,7 @@ import { buildRecap, isRecapId, randomRecapId } from './recap';
 import { GameError, type Ctx, type PlayerRec, type RoomState } from './state';
 import type { RoomRecord, RoomStore } from './store';
 import { isDuplicate, isTooCloseToTruth } from './text';
-import { buildView } from './view';
+import { buildView, publicRoom } from './view';
 
 export interface ApiDeps {
   store: RoomStore;
@@ -44,10 +46,13 @@ const MAX_ATTEMPTS = 10;
 /** Freigegebene Bluffs werden je Worker-Instanz so lange zwischengespeichert */
 const APPROVED_TTL_MS = 5 * 60 * 1000;
 const BLUFF_STATUSES: BluffStatus[] = ['new', 'approved', 'rejected'];
+/** Liste offener Räume: so lange je Worker-Instanz zwischengespeichert, damit viele Besucher wenig kosten */
+const PUBLIC_TTL_MS = 4000;
+const PUBLIC_MAX = 12;
 
 const ACTION_TYPES = new Set<Action['type']>([
   'start', 'settings', 'bluff', 'suggest', 'vote', 'like', 'gift', 'quiet', 'talk', 'talkStep', 'talkEnd',
-  'pause', 'resume', 'skipPhase', 'swapQuestion', 'revealNext', 'next', 'kick', 'makeHost', 'lock', 'close',
+  'pause', 'resume', 'skipPhase', 'swapQuestion', 'revealNext', 'next', 'kick', 'makeHost', 'lock', 'listed', 'close',
   'playAgain', 'leave',
 ]);
 
@@ -196,6 +201,22 @@ export function createApi(deps: ApiDeps) {
   async function touchIfStale(code: string, playerId: string, presence: Record<string, number>, at: number) {
     const last = presence[playerId];
     if (last === undefined || at - last >= PRESENCE_TOUCH_MS) await store.touch(code, playerId, at);
+  }
+
+  // Offene Räume für die Startseite – wartende Räume zuerst, dann laufende Partien
+  let publicCache: { at: number; data: PublicRoomsResponse } | null = null;
+  async function publicRoomsRoute(): Promise<Response> {
+    const t = now();
+    if (!publicCache || t - publicCache.at >= PUBLIC_TTL_MS) {
+      const records = await store.listedRooms(PUBLIC_MAX * 3);
+      const rooms = records
+        .map((rec) => publicRoom(rec.state, { now: t, rng, presence: rec.presence }))
+        .filter((r) => r !== null)
+        .sort((a, b) => Number(a.status === 'playing') - Number(b.status === 'playing') || (a.round ?? 0) - (b.round ?? 0))
+        .slice(0, PUBLIC_MAX);
+      publicCache = { at: t, data: { rooms } };
+    }
+    return json(publicCache.data);
   }
 
   async function createRoomRoute(request: Request): Promise<Response> {
@@ -375,6 +396,7 @@ export function createApi(deps: ApiDeps) {
 
       if (parts.length === 2 && parts[1] === 'health' && method === 'GET') return json({ ok: true });
       if (parts.length === 2 && parts[1] === 'rooms' && method === 'POST') return await createRoomRoute(request);
+      if (parts.length === 2 && parts[1] === 'rooms' && method === 'GET') return await publicRoomsRoute();
 
       if (parts[1] === 'rooms' && parts.length >= 3) {
         const code = normalizeCode(decodeURIComponent(parts[2]));

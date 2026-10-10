@@ -238,3 +238,53 @@ test('Impressum und Datenschutz sind von der Startseite und im Raum erreichbar',
   const link = page.locator('.sheet').getByRole('link', { name: 'Datenschutz' });
   await expect(link).toHaveAttribute('target', '_blank');
 });
+
+/** Startseite öffnen und warten, bis sie die offenen Räume abgefragt hat */
+async function homeWithOpenRooms(page: Page): Promise<string[]> {
+  const response = page.waitForResponse((r) => new URL(r.url()).pathname === '/api/rooms' && r.request().method() === 'GET');
+  await page.goto('/');
+  const body = (await (await response).json()) as { rooms: { code: string }[] };
+  return body.rooms.map((r) => r.code);
+}
+
+test('Öffentliche Räume stehen auf der Startseite, auch mitten in der Partie', async ({ browser }) => {
+  const host = await phone(browser, 'host');
+  const code = await createRoom(host, 'Rahel');
+  const visitor = await phone(browser, 'gast');
+  // Privat ist der Normalfall: kein Bereich „Offene Räume“
+  expect(await homeWithOpenRooms(visitor)).toEqual([]);
+  await expect(visitor.locator('.open-rooms')).toHaveCount(0);
+
+  await host.getByText('Öffentlich zeigen', { exact: true }).click();
+  await expect(host.getByText('Der Raum steht auf der Startseite')).toBeVisible();
+  const jonas = await phone(browser, 'jonas');
+  await join(jonas, code, 'Jonas');
+  await expect(jonas.getByText('Öffentlicher Raum')).toBeVisible();
+  await host.getByRole('button', { name: 'Partie starten' }).click();
+  await expect(host.getByText('Runde 1 von 4')).toBeVisible();
+
+  // Die Startseite fragt regelmäßig nach; neu laden geht schneller (der Server hält die Liste kurz vor)
+  await expect(async () => {
+    expect(await homeWithOpenRooms(visitor)).toEqual([code]);
+  }).toPass({ timeout: 20_000 });
+  const entry = visitor.locator('.open-room', { hasText: code });
+  await expect(entry).toBeVisible();
+  await expect(entry).toContainText('Runde 1 von 4 läuft');
+  await expect(visitor.locator('.open-rooms')).not.toContainText('Rahel');
+
+  await entry.click();
+  await visitor.waitForURL(`**/r/${code}`);
+  await visitor.getByLabel('Dein Spitzname').fill('Hanna');
+  await visitor.getByRole('button', { name: 'Beitreten' }).click();
+  await expect(visitor.getByText('Runde 1 von 4')).toBeVisible();
+
+  // Die Leitung nimmt den Raum wieder von der Startseite
+  await host.locator('.topbar-menu').click();
+  await host.locator('.sheet').getByRole('button', { name: 'Nicht mehr öffentlich zeigen' }).click();
+  await expect(host.locator('.sheet').getByRole('button', { name: 'Öffentlich auf der Startseite zeigen' })).toBeVisible();
+  const later = await phone(browser, 'später');
+  await expect(async () => {
+    expect(await homeWithOpenRooms(later)).toEqual([]);
+  }).toPass({ timeout: 20_000 });
+  await expect(later.locator('.open-rooms')).toHaveCount(0);
+});

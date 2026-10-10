@@ -1,7 +1,7 @@
 // Gefilterte Sicht auf den Raum: Jede Person bekommt nur, was sie gerade sehen darf.
 // Antworten, Bluff-Urheber und Stimmen bleiben bis zur Aufdeckung auf dem Server.
 
-import { POINTS_FAVORITE } from '../shared/rules';
+import { MAX_PLAYERS, POINTS_FAVORITE } from '../shared/rules';
 import type {
   AwardView,
   FavoriteOptionView,
@@ -9,6 +9,7 @@ import type {
   MeView,
   PersonRef,
   PlayerView,
+  PublicRoom,
   RevealStepView,
   RoomView,
   RoundView,
@@ -24,6 +25,29 @@ function personLookup(state: RoomState) {
   for (const k of state.kicked) map.set(k.id, { id: k.id, name: k.name, color: k.color });
   for (const p of state.players) map.set(p.id, { id: p.id, name: p.name, color: p.color });
   return (id: string): PersonRef => map.get(id) ?? { id, name: 'Unbekannt', color: '#888888' };
+}
+
+/**
+ * Eintrag für die Liste offener Räume auf der Startseite – oder null, wenn der Raum dort nicht
+ * hingehört: nicht freigegeben, gesperrt, voll, vorbei oder gerade niemand verbunden.
+ * Enthält keine Spitznamen und keinen anderen Freitext.
+ */
+export function publicRoom(state: RoomState, ctx: Ctx): PublicRoom | null {
+  if (!state.listed || state.locked) return null;
+  if (state.status !== 'lobby' && state.status !== 'playing') return null;
+  const free = MAX_PLAYERS - state.players.filter((p) => p.plays).length;
+  if (free <= 0) return null;
+  if (!state.players.some((p) => isOnline(ctx, p.id))) return null;
+  const g = state.status === 'playing' ? state.game : null;
+  return {
+    code: state.code,
+    people: state.players.length,
+    free,
+    status: state.status,
+    round: g ? g.roundIndex + 1 : null,
+    rounds: g ? g.questionIds.length : state.settings.rounds,
+    difficulty: state.settings.difficulty,
+  };
 }
 
 export function buildView(state: RoomState, meId: string | null, ctx: Ctx, version: number): RoomView {
@@ -60,6 +84,7 @@ export function buildView(state: RoomState, meId: string | null, ctx: Ctx, versi
     me: me ? meView(state, me, playing) : null,
     hostId: state.hostId,
     locked: state.locked,
+    listed: Boolean(state.listed),
     paused: state.paused,
     settings: state.settings,
     hostPlays: host?.plays ?? true,

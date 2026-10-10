@@ -46,6 +46,7 @@ export type Action =
   | { type: 'kick'; playerId: string }
   | { type: 'makeHost'; playerId: string }
   | { type: 'lock'; locked: boolean }
+  | { type: 'listed'; listed: boolean }
   | { type: 'close' }
   | { type: 'playAgain' }
   | { type: 'leave' };
@@ -274,6 +275,8 @@ export interface RoomView {
   me: MeView | null;
   hostId: string;
   locked: boolean;
+  /** steht der Raum öffentlich auf der Startseite? */
+  listed: boolean;
   paused: { at: number } | null;
   settings: Settings;
   hostPlays: boolean;
@@ -318,4 +321,22 @@ export interface SessionResponse {
 export interface ViewResponse {
   view: RoomView;
   suggestion?: string;
+}
+
+/** Öffentlicher Raum auf der Startseite – bewusst ohne Spitznamen oder anderen Freitext */
+export interface PublicRoom {
+  code: string;
+  /** Personen im Raum (Mitspielende und eine nur leitende Person) */
+  people: number;
+  /** freie Plätze für Mitspielende */
+  free: number;
+  status: 'lobby' | 'playing';
+  /** laufende Runde (ab 1), nur während der Partie */
+  round: number | null;
+  rounds: number;
+  difficulty: Difficulty;
+}
+
+export interface PublicRoomsResponse {
+  rooms: PublicRoom[];
 }

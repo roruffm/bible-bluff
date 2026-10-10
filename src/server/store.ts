@@ -30,6 +30,8 @@ export interface RoomRecord {
 
 export interface RoomStore {
   load(code: string): Promise<RoomRecord | null>;
+  /** Räume, die die Leitung öffentlich anzeigt (jüngste zuerst), samt Präsenz */
+  listedRooms(limit: number): Promise<RoomRecord[]>;
   /** false, wenn der Code schon vergeben ist */
   insert(code: string, state: RoomState, now: number): Promise<boolean>;
   /** false bei Versionskonflikt */
@@ -68,6 +70,19 @@ export class MemoryStore implements RoomStore {
       version: row.version,
       presence: Object.fromEntries(this.presence.get(code) ?? []),
     };
+  }
+
+  async listedRooms(limit: number): Promise<RoomRecord[]> {
+    const out: (RoomRecord & { at: number })[] = [];
+    for (const [code, row] of this.rooms) {
+      const state = JSON.parse(row.json) as RoomState;
+      if (!state.listed) continue;
+      out.push({ state, version: row.version, presence: Object.fromEntries(this.presence.get(code) ?? []), at: row.updatedAt });
+    }
+    return out
+      .sort((a, b) => b.at - a.at)
+      .slice(0, limit)
+      .map(({ at: _at, ...rec }) => rec);
   }
 
   async insert(code: string, state: RoomState, now: number): Promise<boolean> {

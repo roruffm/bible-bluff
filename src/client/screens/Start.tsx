@@ -1,4 +1,4 @@
-import { useState } from 'preact/hooks';
+import { useEffect, useState } from 'preact/hooks';
 import {
   DEFAULT_SETTINGS,
   DIFFICULTY_OPTIONS,
@@ -8,7 +8,7 @@ import {
   WRITE_OPTIONS,
   normalizeCode,
 } from '../../shared/rules';
-import type { Settings } from '../../shared/types';
+import type { PublicRoom, Settings } from '../../shared/types';
 import { ThemePicker } from '../components/ThemePicker';
 import { Button, Logo, Rules, Segmented, Toggle } from '../components/ui';
 import { ApiError, api } from '../lib/api';
@@ -40,6 +40,8 @@ export function Home() {
           Zurück zu Raum <b>{lastSession.code}</b> als {lastSession.name} →
         </a>
       )}
+
+      <OpenRooms />
 
       <section class="card">
         <h2>Mitspielen</h2>
@@ -73,6 +75,70 @@ export function Home() {
       <LegalLinks />
     </main>
   );
+}
+
+/** So oft fragt die Startseite nach offenen Räumen, solange sie sichtbar ist */
+const OPEN_ROOMS_POLL_MS = 10_000;
+
+/** Räume, deren Leitung sie öffentlich zeigt. Erscheint nur, wenn es gerade welche gibt. */
+function OpenRooms() {
+  const [rooms, setRooms] = useState<PublicRoom[]>([]);
+
+  useEffect(() => {
+    let alive = true;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const load = async () => {
+      if (!document.hidden) {
+        try {
+          const res = await api.publicRooms();
+          if (alive) setRooms(res.rooms);
+        } catch {
+          // Die Liste ist nur ein Angebot – ohne sie funktioniert die Startseite trotzdem
+        }
+      }
+      if (alive) timer = setTimeout(load, OPEN_ROOMS_POLL_MS);
+    };
+    load();
+    return () => {
+      alive = false;
+      clearTimeout(timer);
+    };
+  }, []);
+
+  if (rooms.length === 0) return null;
+  return (
+    <section class="card open-rooms" aria-labelledby="open-rooms-title">
+      <h2 id="open-rooms-title">Offene Räume</h2>
+      <p class="muted small">Hier wird gerade gespielt, und neue Leute sind willkommen.</p>
+      <ul class="open-room-list">
+        {rooms.map((r) => (
+          <li key={r.code}>
+            <a
+              class="open-room"
+              href={`/r/${r.code}`}
+              onClick={(e) => {
+                e.preventDefault();
+                navigate(`/r/${r.code}`);
+              }}
+            >
+              <span class="open-room-text">
+                <b>Raum {r.code}</b>
+                <small>{r.status === 'lobby' ? 'Wartet auf den Start' : `Runde ${r.round} von ${r.rounds} läuft`}</small>
+                <small>
+                  {r.people} {r.people === 1 ? 'Person' : 'Personen'} · {difficultyLabel(r.difficulty)}
+                </small>
+              </span>
+              <span class="open-room-go">Mitspielen</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+function difficultyLabel(value: PublicRoom['difficulty']) {
+  return DIFFICULTY_OPTIONS.find((o) => o.value === value)?.label ?? value;
 }
 
 export function JoinForm(props: {

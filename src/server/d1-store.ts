@@ -37,12 +37,46 @@ interface BluffDbRow {
   updated_at: number;
 }
 
+/** Gleicher Inhalt wie migrations/0004_listed_rooms.sql: findet öffentliche Räume ohne alle Räume zu lesen */
+const CREATE_LISTED_INDEX = "CREATE INDEX IF NOT EXISTS rooms_listed ON rooms (json_extract(state, '$.listed'))";
+const LISTED = "json_extract(state, '$.listed') = 1";
+
 function isMissingTable(err: unknown): boolean {
   return /no such table/i.test(String((err as Error | null)?.message ?? err));
 }
 
 export class D1Store implements RoomStore {
+  /** Index für öffentliche Räume einmal je Worker-Instanz anlegen (falls die Migration fehlt) */
+  private listedIndex: Promise<void> | null = null;
+
   constructor(private db: D1Like) {}
+
+  async listedRooms(limit: number): Promise<RoomRecord[]> {
+    this.listedIndex ??= this.db
+      .prepare(CREATE_LISTED_INDEX)
+      .run()
+      .then(
+        () => undefined,
+        // Ohne Index geht es auch, nur langsamer
+        (err: unknown) => console.error('Index für öffentliche Räume nicht angelegt', err),
+      );
+    await this.listedIndex;
+    const [roomRes, presenceRes] = await this.db.batch<Record<string, unknown>>([
+      this.db.prepare(`SELECT code, state, version FROM rooms WHERE ${LISTED} ORDER BY updated_at DESC LIMIT ?`).bind(limit),
+      this.db.prepare(`SELECT code, player_id, last_seen FROM presence WHERE code IN (SELECT code FROM rooms WHERE ${LISTED})`),
+    ]);
+    const presence = new Map<string, Record<string, number>>();
+    for (const p of presenceRes.results as { code: string; player_id: string; last_seen: number }[]) {
+      let map = presence.get(p.code);
+      if (!map) presence.set(p.code, (map = {}));
+      map[p.player_id] = Number(p.last_seen);
+    }
+    return (roomRes.results as { code: string; state: string; version: number }[]).map((row) => ({
+      state: JSON.parse(row.state) as RoomState,
+      version: Number(row.version),
+      presence: presence.get(row.code) ?? {},
+    }));
+  }
 
   async load(code: string): Promise<RoomRecord | null> {
     const [roomRes, presenceRes] = await this.db.batch<Record<string, unknown>>([

@@ -202,6 +202,7 @@ export function createRoom(input: NewRoomInput, ctx: Ctx): RoomState {
     status: 'lobby',
     hostId: input.hostId,
     locked: false,
+    listed: false,
     settings: sanitizeSettings(input.settings),
     players: [
       {
@@ -928,6 +929,12 @@ export function applyAction(state: RoomState, actorId: string, action: Action, c
     case 'lock': {
       requireHost(s, actorId);
       s.locked = Boolean(action.locked);
+      return { state: s };
+    }
+
+    case 'listed': {
+      requireHost(s, actorId);
+      s.listed = Boolean(action.listed);
       return { state: s };
     }
 

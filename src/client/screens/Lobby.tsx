@@ -74,6 +74,15 @@ export function Lobby({ view, conn }: { view: RoomView; conn: RoomConnection }) 
     }
   };
 
+  const setListed = async (listed: boolean) => {
+    setError(null);
+    try {
+      await conn.act({ type: 'listed', listed });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Das ging nicht.');
+    }
+  };
+
   const start = async () => {
     setError(null);
     try {
@@ -93,6 +102,9 @@ export function Lobby({ view, conn }: { view: RoomView; conn: RoomConnection }) 
         </h2>
         <PlayerList view={view} />
         {view.locked && <p class="notice small">Der Raum ist für neue Teilnehmende gesperrt.</p>}
+        {view.listed && !isHost && (
+          <p class="notice small">Öffentlicher Raum: Er steht auf der Startseite, und alle können beitreten.</p>
+        )}
         <p class="fresh-note small" title="Fragen, die auf diesen Handys schon aufgelöst wurden, kommen erst später dran.">
           <span aria-hidden="true">✦</span> Für alle neu: <b>{view.freshCount}</b> von {view.poolSize} Fragen
         </p>
@@ -106,6 +118,18 @@ export function Lobby({ view, conn }: { view: RoomView; conn: RoomConnection }) 
             onChange={(hostPlays) => change({ hostPlays })}
             label="Ich spiele mit"
             hint={view.hostPlays ? 'Du leitest und spielst.' : 'Du leitest nur – dieses Gerät zeigt die gemeinsame Ansicht.'}
+          />
+          <Toggle
+            checked={view.listed}
+            onChange={setListed}
+            label="Öffentlich zeigen"
+            hint={
+              !view.listed
+                ? 'Nur wer den Code oder Link hat, kommt herein.'
+                : view.locked
+                  ? 'Solange der Raum gesperrt ist, erscheint er nicht auf der Startseite.'
+                  : 'Der Raum steht auf der Startseite, und alle können beitreten. Schalte das nur ein, wenn Fremde willkommen sind.'
+            }
           />
           <SettingsFields settings={view.settings} onChange={(settings) => change({ settings })} />
         </section>

@@ -119,6 +119,7 @@ export function DatenschutzPage() {
         <li>Zum Mitspielen brauchst du kein Konto, nur einen Spitznamen.</li>
         <li>Es gibt keine Cookies, keine Analyse- oder Werbedienste und keine Weitergabe deiner Daten für Werbung.</li>
         <li>Spielräume werden gelöscht, wenn sie 24 Stunden lang nicht mehr genutzt wurden.</li>
+        <li>Ein Raum ist nur dann öffentlich, wenn die Spielleitung ihn bewusst auf der Startseite zeigt.</li>
       </ul>
 
       <h2>Verantwortlich</h2>
@@ -153,6 +154,16 @@ export function DatenschutzPage() {
         Diese Daten dienen nur dem Spiel. Rechtsgrundlage ist die Bereitstellung des Spiels, das du nutzen möchtest
         (Art. 6 Abs. 1 lit. b DSGVO). Spielräume werden gelöscht, wenn sie 24 Stunden lang nicht mehr genutzt wurden.
         Bitte verwende einen Spitznamen und schreibe keine persönlichen Angaben über dich oder andere in Bluffs.
+      </p>
+
+      <h2>Öffentliche Räume</h2>
+      <p>
+        Die Spielleitung kann ihren Raum öffentlich zeigen. Dann steht er auf der Startseite mit Raumcode, Zahl der
+        Personen, Stand der Partie und Schwierigkeit, aber ohne Spitznamen. Alle, die die Startseite besuchen, können
+        dann beitreten und sehen im Raum wie alle anderen die Spitznamen und Bluffs der Runde. Wer in einem öffentlichen
+        Raum ist, sieht das im Warteraum. Der Raum verschwindet von der Startseite, sobald die Leitung die Anzeige
+        ausschaltet oder den Raum sperrt, die Partie endet oder niemand mehr verbunden ist. Rechtsgrundlage ist die
+        Bereitstellung des Spiels (Art. 6 Abs. 1 lit. b DSGVO).
       </p>
 
       <h2>Entdeckungen-Seiten</h2>

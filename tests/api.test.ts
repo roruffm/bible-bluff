@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { createApi } from '../src/server/api';
 import { MemoryStore } from '../src/server/store';
-import type { RoomView, SessionResponse, ViewResponse } from '../src/shared/types';
+import type { PublicRoom, RoomView, SessionResponse, ViewResponse } from '../src/shared/types';
 import { Clock, seeded } from './helpers';
 
 function setup() {
@@ -141,5 +141,88 @@ describe('API', () => {
     const t = setup();
     const res = await t.call('POST', '/api/rooms', { name: 'x'.repeat(10_000) });
     expect(res.status).toBe(413);
+  });
+});
+
+describe('Öffentliche Räume', () => {
+  /** Liste der Startseite lesen – nach Ablauf des Zwischenspeichers */
+  async function publicList(t: ReturnType<typeof setup>) {
+    t.clock.advance(5000);
+    const res = await t.call('GET', '/api/rooms');
+    expect(res.status).toBe(200);
+    return res.body.rooms as PublicRoom[];
+  }
+  const act = (t: ReturnType<typeof setup>, code: string, token: string, action: unknown) =>
+    t.call('POST', `/api/rooms/${code}/action`, action, token);
+
+  it('zeigt Räume erst, wenn die Leitung sie freigibt – und ohne Namen', async () => {
+    const t = setup();
+    const { host, others, code } = await roomWithPlayers(t, ['Rahel', 'Jonas']);
+    expect(await publicList(t)).toEqual([]);
+
+    const denied = await act(t, code, others[0].token, { type: 'listed', listed: true });
+    expect(denied.status).toBe(403);
+
+    const res = await act(t, code, host.token, { type: 'listed', listed: true });
+    expect(res.status).toBe(200);
+    expect((res.body as ViewResponse).view.listed).toBe(true);
+    const mine = await t.call('GET', `/api/rooms/${code}`, undefined, others[0].token);
+    expect((mine.body as ViewResponse).view.listed).toBe(true);
+
+    t.clock.advance(5000); // Zwischenspeicher der Liste abgelaufen
+    const raw = await t.call('GET', '/api/rooms');
+    expect(raw.body.rooms).toEqual([
+      { code, people: 2, free: 10, status: 'lobby', round: null, rounds: 4, difficulty: 'gemischt' },
+    ]);
+    expect(JSON.stringify(raw.body)).not.toMatch(/Rahel|Jonas/);
+
+    await act(t, code, host.token, { type: 'listed', listed: false });
+    expect(await publicList(t)).toEqual([]);
+  });
+
+  it('blendet gesperrte, volle, beendete und verlassene Räume aus', async () => {
+    const t = setup();
+    const { host, code } = await roomWithPlayers(t, ['Rahel', 'Jonas']);
+    await act(t, code, host.token, { type: 'listed', listed: true });
+
+    await act(t, code, host.token, { type: 'lock', locked: true });
+    expect(await publicList(t)).toEqual([]);
+    await act(t, code, host.token, { type: 'lock', locked: false });
+    expect((await publicList(t)).map((r) => r.code)).toEqual([code]);
+
+    // Niemand mehr verbunden → verschwindet, bis wieder jemand da ist
+    t.clock.advance(20_000);
+    expect(await publicList(t)).toEqual([]);
+    await t.call('GET', `/api/rooms/${code}`, undefined, host.token);
+    expect((await publicList(t)).map((r) => r.code)).toEqual([code]);
+
+    for (let i = 3; i <= 12; i++) {
+      expect((await t.call('POST', `/api/rooms/${code}/join`, { name: `Gast ${i}` })).status).toBe(200);
+    }
+    expect(await publicList(t)).toEqual([]);
+
+    const other = await roomWithPlayers(t, ['Mirjam', 'Silas']);
+    await act(t, other.code, other.host.token, { type: 'listed', listed: true });
+    expect((await publicList(t)).map((r) => r.code)).toEqual([other.code]);
+    await act(t, other.code, other.host.token, { type: 'close' });
+    expect(await publicList(t)).toEqual([]);
+  });
+
+  it('zeigt laufende Partien mit Runde, und man kann mitten hinein beitreten', async () => {
+    const t = setup();
+    const waiting = await roomWithPlayers(t, ['Rahel', 'Jonas']);
+    const running = await roomWithPlayers(t, ['Mirjam', 'Silas']);
+    await act(t, waiting.code, waiting.host.token, { type: 'listed', listed: true });
+    await act(t, running.code, running.host.token, { type: 'listed', listed: true });
+    expect((await act(t, running.code, running.host.token, { type: 'start' })).status).toBe(200);
+
+    const rooms = await publicList(t);
+    // Wartende Räume stehen vorn
+    expect(rooms.map((r) => r.code)).toEqual([waiting.code, running.code]);
+    expect(rooms[1]).toMatchObject({ status: 'playing', round: 1, rounds: 4, people: 2 });
+
+    const late = await t.call('POST', `/api/rooms/${running.code}/join`, { name: 'Hanna' });
+    expect(late.status).toBe(200);
+    expect((late.body as SessionResponse).view.status).toBe('playing');
   });
 });
