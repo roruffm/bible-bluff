@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { SAFE_BLUFFS } from '../e2e/bluffs';
-import { BOT_NAME, BOT_SETTINGS } from '../src/shared/rules';
+import { BOT_COLOR, BOT_NAME, BOT_SETTINGS } from '../src/shared/rules';
 import { BOT_ID, applyAction, createRoom, joinRoom, step, tick } from '../src/server/engine';
 import { getQuestion } from '../src/server/questions';
 import type { Ctx, RoomState } from '../src/server/state';
@@ -48,6 +48,8 @@ describe('Joseph spielt mit', () => {
       ['Hanna', false, true],
       [BOT_NAME, true, true],
     ]);
+    // Immer dieselbe Farbe, damit die Startseite ihn genauso zeigt wie im Raum
+    expect(g.state.players.find((p) => p.id === BOT_ID)!.color).toBe(BOT_COLOR);
     expect(publicRoom(g.state, g.ctx())).toBeNull();
     g.act('host', { type: 'start' });
     expect(g.state.status).toBe('playing');

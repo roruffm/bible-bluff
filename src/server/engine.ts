@@ -3,6 +3,8 @@
 
 import {
   BLUFF_MAX,
+  BOT_COLOR,
+  BOT_ID,
   BOT_NAME,
   BOT_TRUTH_RATE,
   DEFAULT_SETTINGS,
@@ -225,7 +227,7 @@ export function createRoom(input: NewRoomInput, ctx: Ctx): RoomState {
     usedQuestionIds: [],
     paused: null,
   };
-  if (input.withBot) state.players.push(botPlayer(nextColor(state), ctx));
+  if (input.withBot) state.players.push(botPlayer(BOT_COLOR, ctx));
   noteSeen(state, input.hostId, input.seen);
   return state;
 }
@@ -693,7 +695,7 @@ export function tick(state: RoomState, ctx: Ctx): RoomState | null {
 
 // ───────────────────────── Joseph, der Bot ─────────────────────────
 
-export const BOT_ID = 'bot-joseph';
+export { BOT_ID };
 /** Kein echter Token-Hash (die sind 64 Hex-Zeichen) – so kann sich niemand als Joseph ausgeben */
 const BOT_TOKEN = 'bot';
 

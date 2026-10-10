@@ -1,5 +1,5 @@
 import { useState } from 'preact/hooks';
-import { MIN_PLAYERS, RECOMMENDED_MIN_PLAYERS } from '../../shared/rules';
+import { BOT_NAME, MIN_PLAYERS, RECOMMENDED_MIN_PLAYERS } from '../../shared/rules';
 import type { RoomView, Settings } from '../../shared/types';
 import { QRCode } from '../components/QR';
 import { Avatar, Button, Rules, Toast, Toggle } from '../components/ui';
@@ -69,6 +69,7 @@ export function PlayerList({ view, showScore = false }: { view: RoomView; showSc
 export function Lobby({ view, conn }: { view: RoomView; conn: RoomConnection }) {
   const isHost = Boolean(view.me?.isHost);
   const playing = view.players.filter((p) => p.plays).length;
+  const withBot = view.players.some((p) => p.bot);
   const [error, setError] = useState<string | null>(null);
 
   const change = async (patch: { settings?: Partial<Settings>; hostPlays?: boolean }) => {
@@ -163,9 +164,11 @@ export function Lobby({ view, conn }: { view: RoomView; conn: RoomConnection }) 
           <p class="muted small center">
             {playing < MIN_PLAYERS
               ? `Warte auf Mitspielende – mindestens ${MIN_PLAYERS}.`
-              : playing < RECOMMENDED_MIN_PLAYERS
-                ? `Startklar. Am meisten Spaß macht es ab ${RECOMMENDED_MIN_PLAYERS} Personen.`
-                : 'Alle da? Dann los!'}
+              : withBot && playing < RECOMMENDED_MIN_PLAYERS
+                ? `Startklar – ${BOT_NAME} ist bereit.`
+                : playing < RECOMMENDED_MIN_PLAYERS
+                  ? `Startklar. Am meisten Spaß macht es ab ${RECOMMENDED_MIN_PLAYERS} Personen.`
+                  : 'Alle da? Dann los!'}
           </p>
         </div>
       ) : (

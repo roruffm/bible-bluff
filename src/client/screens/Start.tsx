@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'preact/hooks';
 import {
+  BOT_COLOR,
+  BOT_ID,
   BOT_NAME,
   BOT_SETTINGS,
   DEFAULT_SETTINGS,
@@ -11,8 +13,9 @@ import {
   normalizeCode,
 } from '../../shared/rules';
 import type { PublicRoom, Settings } from '../../shared/types';
+import { EnterIcon, FriendsIcon } from '../components/Icons';
 import { ThemePicker } from '../components/ThemePicker';
-import { Button, Logo, Rules, Segmented, Toggle } from '../components/ui';
+import { Avatar, Button, Logo, Rules, Segmented, Toggle } from '../components/ui';
 import { ApiError, api } from '../lib/api';
 import { navigate } from '../lib/router';
 import { LegalLinks } from './Legal';
@@ -45,8 +48,16 @@ export function Home() {
 
       <OpenRooms />
 
-      <section class="card">
-        <h2>Mitspielen</h2>
+      <section class="card choice" aria-labelledby="join-title">
+        <div class="choice-head">
+          <span class="choice-icon is-join">
+            <EnterIcon />
+          </span>
+          <div>
+            <h2 id="join-title">Mitspielen</h2>
+            <p class="muted small">Du hast einen Raumcode bekommen? Gib ihn hier ein.</p>
+          </div>
+        </div>
         <JoinForm
           code={code}
           onCode={setCode}
@@ -56,30 +67,44 @@ export function Home() {
       </section>
 
       <div class="or">
-        <span>oder</span>
+        <span>oder selbst starten</span>
       </div>
 
-      <Button variant="gold" block onClick={() => navigate('/neu')}>
-        Raum eröffnen
-      </Button>
-      <p class="muted center small">Du leitest die Partie – auf dem Handy oder am Beamer.</p>
+      <section class="card choice" aria-labelledby="create-title">
+        <div class="choice-head">
+          <span class="choice-icon is-create">
+            <FriendsIcon />
+          </span>
+          <div>
+            <h2 id="create-title">Mit Freunden</h2>
+            <p class="muted small">Du eröffnest einen Raum und leitest die Partie – auf dem Handy oder am Beamer.</p>
+          </div>
+        </div>
+        <Button variant="gold" block onClick={() => navigate('/neu')}>
+          Raum eröffnen
+        </Button>
+      </section>
 
-      <section class="card joseph-card">
-        <h2>Allein spielen?</h2>
-        <p class="muted small">
-          Joseph ist ein Bot und hat immer Zeit. Er erfindet Bluffs, rät mit und ist schlagbar. Du bekommst einen eigenen
-          Raum mit ihm.
-        </p>
-        <Button variant="secondary" block onClick={() => navigate('/joseph')}>
+      <section class="card choice" aria-labelledby="joseph-title">
+        <div class="choice-head">
+          <JosephPortrait />
+          <div>
+            <h2 id="joseph-title">Allein gegen {BOT_NAME}</h2>
+            <p class="muted small">
+              {BOT_NAME} ist ein Bot und hat immer Zeit. Er erfindet Bluffs, rät mit – und ist schlagbar.
+            </p>
+          </div>
+        </div>
+        <Button block onClick={() => navigate('/joseph')}>
           Gegen {BOT_NAME} spielen
         </Button>
       </section>
 
       <Rules />
 
-      <section class="card">
+      <section class="side-card">
         <h2>Farben</h2>
-        <ThemePicker />
+        <ThemePicker compact />
       </section>
 
       <footer class="footnote">
@@ -88,6 +113,11 @@ export function Home() {
       <LegalLinks />
     </main>
   );
+}
+
+/** Josephs Gesicht für die Startseite und den Anfang einer Partie mit ihm */
+function JosephPortrait() {
+  return <Avatar person={{ id: BOT_ID, name: BOT_NAME, color: BOT_COLOR }} size="lg" />;
 }
 
 /** So oft fragt die Startseite nach offenen Räumen, solange sie sichtbar ist */
@@ -292,10 +322,13 @@ export function CreateRoom({ bot = false }: { bot?: boolean }) {
       </header>
       <h1>{bot ? `Gegen ${BOT_NAME} spielen` : 'Raum eröffnen'}</h1>
       {bot && (
-        <p class="lead">
-          {BOT_NAME} schreibt Bluffs und rät mit. Der Raum gehört dir: Du startest, wann du willst, und kannst auch Freunde
-          einladen.
-        </p>
+        <div class="bot-intro">
+          <JosephPortrait />
+          <p class="lead">
+            {BOT_NAME} schreibt Bluffs und rät mit. Der Raum gehört dir: Du startest, wann du willst, und kannst auch Freunde
+            einladen.
+          </p>
+        </div>
       )}
       <form
         class="stack"
@@ -324,7 +357,19 @@ export function CreateRoom({ bot = false }: { bot?: boolean }) {
           />
         )}
 
-        <SettingsFields settings={settings} onChange={set} />
+        {bot ? (
+          <details class="more-settings">
+            <summary>
+              <span>Einstellungen</span>
+              <span class="muted small">
+                {settings.rounds} Runden · {settings.difficulty} · {settings.writeSeconds} s bluffen
+              </span>
+            </summary>
+            <SettingsFields settings={settings} onChange={set} />
+          </details>
+        ) : (
+          <SettingsFields settings={settings} onChange={set} />
+        )}
 
         {error && (
           <p class="error" role="alert">

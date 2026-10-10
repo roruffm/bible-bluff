@@ -69,6 +69,8 @@ export const LISTED_ALIVE_MS = 15 * 60 * 1000;
 
 /** Joseph: ein Bot, mit dem man jederzeit allein spielen kann (eigener Raum je Person) */
 export const BOT_NAME = 'Joseph';
+/** Josephs Spieler-ID – auch die App erkennt ihn daran und zeigt sein Gesicht statt Initialen */
+export const BOT_ID = 'bot-joseph';
 /** Vorschlag für eine Partie gegen Joseph: etwas kürzer als sonst */
 export const BOT_SETTINGS: Settings = { rounds: 6, difficulty: 'gemischt', writeSeconds: 60, voteSeconds: 30 };
 /** Josephs Trefferquote: so oft wählt er die richtige Antwort */
@@ -103,6 +105,9 @@ export const PLAYER_COLORS = [
   '#7c3f2c', // ziegel
   '#53606b', // grau
 ];
+
+/** Josephs Farbe: die zweite – die erste bekommt immer, wer den Raum eröffnet */
+export const BOT_COLOR = PLAYER_COLORS[1];
 
 export function normalizeCode(input: string): string {
   return input.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10);

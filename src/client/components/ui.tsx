@@ -1,8 +1,9 @@
 import type { ComponentChildren } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
-import { GROUP_LABELS } from '../../shared/rules';
+import { BOT_ID, GROUP_LABELS } from '../../shared/rules';
 import type { PersonRef, PlayerView, QuestionView } from '../../shared/types';
 import { useServerNow } from '../lib/hooks';
+import { BotFace } from './Icons';
 import { LogoMark } from './LogoMark';
 
 export function initials(name: string): string {
@@ -12,9 +13,10 @@ export function initials(name: string): string {
 }
 
 export function Avatar({ person, size = 'md', dim = false }: { person: PersonRef; size?: 'sm' | 'md' | 'lg'; dim?: boolean }) {
+  const bot = person.id === BOT_ID;
   return (
-    <span class={`avatar avatar-${size}${dim ? ' is-dim' : ''}`} style={{ '--c': person.color }} aria-hidden="true">
-      {initials(person.name)}
+    <span class={`avatar avatar-${size}${bot ? ' is-bot' : ''}${dim ? ' is-dim' : ''}`} style={{ '--c': person.color }} aria-hidden="true">
+      {bot ? <BotFace /> : initials(person.name)}
     </span>
   );
 }
