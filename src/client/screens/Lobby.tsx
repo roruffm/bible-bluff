@@ -168,15 +168,6 @@ export function Lobby({ view, conn }: { view: RoomView; conn: RoomConnection }) 
                 : 'Alle da? Dann los!'}
           </p>
         </div>
-      ) : view.botRoom ? (
-        <div class="sticky-action">
-          <Button variant="gold" block disabled={playing < MIN_PLAYERS} onClick={start}>
-            Partie gegen {view.players.find((p) => p.bot)?.name ?? 'den Bot'} starten
-          </Button>
-          <p class="muted small center">
-            {view.players.find((p) => p.bot)?.name ?? 'Der Bot'} schreibt Bluffs und rät mit. Andere können jederzeit dazukommen.
-          </p>
-        </div>
       ) : (
         <p class="waiting">
           <span class="pulse" aria-hidden="true" />

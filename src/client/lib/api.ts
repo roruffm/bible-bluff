@@ -57,8 +57,8 @@ async function request<T>(method: string, path: string, body?: unknown, token?: 
 }
 
 export const api = {
-  createRoom(name: string, plays: boolean, settings: Settings) {
-    return request<SessionResponse>('POST', '/api/rooms', { name, plays, settings, seen: seenQuestions() });
+  createRoom(name: string, plays: boolean, settings: Settings, bot = false) {
+    return request<SessionResponse>('POST', '/api/rooms', { name, plays, settings, bot, seen: seenQuestions() });
   },
   join(code: string, name: string, reclaim = false) {
     return request<SessionResponse>('POST', `/api/rooms/${encodeURIComponent(code)}/join`, { name, reclaim, seen: seenQuestions() });

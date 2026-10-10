@@ -129,7 +129,7 @@ export interface RoomState {
   locked: boolean;
   /** öffentlich auf der Startseite anzeigen (fehlt bei älteren Räumen = nein) */
   listed?: boolean;
-  /** Dauerraum mit Bot: Menschen dürfen starten und weiterschalten, der Raum räumt sich selbst auf */
+  /** nur im früheren gemeinsamen Raum JOSEPH gesetzt – solche Räume sind abgeschaltet */
   botRoom?: true;
   settings: Settings;
   players: PlayerRec[];

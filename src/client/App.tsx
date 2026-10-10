@@ -9,7 +9,7 @@ export function App() {
   const route = useRoute();
   switch (route.name) {
     case 'create':
-      return <CreateRoom />;
+      return <CreateRoom key={route.bot ? 'bot' : 'room'} bot={route.bot} />;
     case 'room':
       return <RoomPage key={route.code} code={route.code} />;
     case 'tv':

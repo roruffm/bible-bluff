@@ -279,8 +279,6 @@ export interface RoomView {
   locked: boolean;
   /** steht der Raum öffentlich auf der Startseite? */
   listed: boolean;
-  /** Dauerraum mit Bot: alle Menschen dürfen starten, weiterschalten und neu beginnen */
-  botRoom: boolean;
   paused: { at: number } | null;
   settings: Settings;
   hostPlays: boolean;
@@ -339,8 +337,6 @@ export interface PublicRoom {
   round: number | null;
   rounds: number;
   difficulty: Difficulty;
-  /** Name des Bots, der hier dauerhaft wartet (sonst null) */
-  bot: string | null;
 }
 
 export interface PublicRoomsResponse {

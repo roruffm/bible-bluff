@@ -4,10 +4,6 @@
 import {
   BLUFF_MAX,
   BOT_NAME,
-  BOT_ROOM_AWAY_MS,
-  BOT_ROOM_FINISHED_MS,
-  BOT_ROOM_IDLE_MS,
-  BOT_SETTINGS,
   BOT_TRUTH_RATE,
   DEFAULT_SETTINGS,
   DIFFICULTY_OPTIONS,
@@ -115,12 +111,6 @@ function requireHost(state: RoomState, actorId: string) {
   }
 }
 
-/** Starten, weiterschalten, neu beginnen: die Leitung – im Bot-Raum jeder Mensch */
-function requireLead(state: RoomState, actorId: string) {
-  if (state.botRoom && !player(state, actorId)?.bot) return;
-  requireHost(state, actorId);
-}
-
 function requireGame(state: RoomState): GameRec {
   if (state.status !== 'playing' || !state.game) {
     throw new GameError('not_playing', 'Gerade läuft keine Runde.');
@@ -202,6 +192,8 @@ export interface NewRoomInput {
   settings?: Partial<Settings>;
   /** Fragen, die das Gerät schon kennt */
   seen?: unknown;
+  /** Joseph (Bot) spielt von Anfang an mit – zum Spielen ohne Gruppe */
+  withBot?: boolean;
 }
 
 export function createRoom(input: NewRoomInput, ctx: Ctx): RoomState {
@@ -233,6 +225,7 @@ export function createRoom(input: NewRoomInput, ctx: Ctx): RoomState {
     usedQuestionIds: [],
     paused: null,
   };
+  if (input.withBot) state.players.push(botPlayer(nextColor(state), ctx));
   noteSeen(state, input.hostId, input.seen);
   return state;
 }
@@ -682,8 +675,6 @@ export function tick(state: RoomState, ctx: Ctx): RoomState | null {
   const s = clone(state);
   let changed = false;
 
-  if (s.botRoom && tidyBotRoom(s, ctx)) changed = true;
-
   if (s.status === 'playing' && s.game && !s.paused) {
     for (let guard = 0; guard < 6 && s.status === 'playing'; guard++) {
       if (botMoves(s, ctx)) changed = true;
@@ -706,82 +697,24 @@ export const BOT_ID = 'bot-joseph';
 /** Kein echter Token-Hash (die sind 64 Hex-Zeichen) – so kann sich niemand als Joseph ausgeben */
 const BOT_TOKEN = 'bot';
 
-/** Dauerraum, in dem Joseph immer wartet. Joseph leitet ihn, damit niemand ihn schließen oder sperren kann. */
-export function createBotRoom(code: string, ctx: Ctx): RoomState {
+/** Joseph als Mitspieler: immer verbunden, kann nie leiten */
+function botPlayer(color: string, ctx: Ctx): PlayerRec {
   return {
-    v: 1,
-    code,
-    createdAt: ctx.now,
-    status: 'lobby',
-    hostId: BOT_ID,
-    locked: false,
-    listed: true,
-    botRoom: true,
-    settings: { ...BOT_SETTINGS },
-    players: [
-      {
-        id: BOT_ID,
-        name: BOT_NAME,
-        color: PLAYER_COLORS[0],
-        tokenHash: BOT_TOKEN,
-        joinedAt: ctx.now,
-        plays: true,
-        score: 0,
-        stats: freshStats(),
-        bot: true,
-      },
-    ],
-    kicked: [],
-    game: null,
-    usedQuestionIds: [],
-    paused: null,
+    id: BOT_ID,
+    name: BOT_NAME,
+    color,
+    tokenHash: BOT_TOKEN,
+    joinedAt: ctx.now,
+    plays: true,
+    score: 0,
+    stats: freshStats(),
+    bot: true,
   };
 }
 
-/** Bots sind immer verbunden – für Wartelogik, Anzeige und Liste der offenen Räume */
+/** Bots sind immer verbunden – für Wartelogik und Anzeige */
 export function botPresence(state: RoomState, now: number): Record<string, number> {
   return Object.fromEntries(state.players.filter((p) => p.bot).map((p) => [p.id, now]));
-}
-
-function backToLobby(s: RoomState) {
-  s.status = 'lobby';
-  s.game = null;
-  s.paused = null;
-  for (const p of s.players) {
-    p.score = 0;
-    p.stats = freshStats();
-    delete p.quietRound;
-  }
-}
-
-/**
- * Der Dauerraum räumt sich selbst auf: Wer lange weg ist, geht; eine verlassene Partie endet;
- * nach dem Endstand wartet Joseph wieder auf die Nächsten.
- */
-function tidyBotRoom(s: RoomState, ctx: Ctx): boolean {
-  let changed = false;
-  const lastSeen = (p: PlayerRec) => ctx.presence[p.id] ?? p.joinedAt;
-  const gone = s.players.filter((p) => !p.bot && ctx.now - lastSeen(p) >= BOT_ROOM_AWAY_MS);
-  for (const p of gone) {
-    removePlayer(s, p.id);
-    changed = true;
-  }
-  const humans = s.players.filter((p) => !p.bot);
-  if (humans.length === 0 && (s.seenFrom?.length || s.kicked.length)) {
-    // Niemand mehr da: „Neues für alle“ beginnt für die Nächsten von vorn
-    delete s.seenFrom;
-    delete s.seenCounts;
-    s.kicked = [];
-    changed = true;
-  }
-  const lastHuman = Math.max(0, ...humans.map(lastSeen));
-  const abandoned = s.status === 'playing' && ctx.now - lastHuman >= BOT_ROOM_IDLE_MS;
-  const done = s.status === 'finished' && ctx.now - (s.game?.finishedAt ?? 0) >= BOT_ROOM_FINISHED_MS;
-  if (abandoned || done) {
-    backToLobby(s);
-    changed = true;
-  }
-  return changed;
 }
 
 /** Wann Joseph in dieser Phase zieht – fest je Runde, damit jeder Abruf dasselbe ergibt */
@@ -843,7 +776,7 @@ export function applyAction(state: RoomState, actorId: string, action: Action, c
 
   switch (action.type) {
     case 'start': {
-      requireLead(s, actorId);
+      requireHost(s, actorId);
       if (s.status !== 'lobby') throw new GameError('bad_state', 'Die Partie läuft bereits.');
       startGame(s, ctx);
       return { state: s };
@@ -1027,7 +960,7 @@ export function applyAction(state: RoomState, actorId: string, action: Action, c
     }
 
     case 'revealNext': {
-      requireLead(s, actorId);
+      requireHost(s, actorId);
       const g = requireGame(s);
       if (g.phase !== 'reveal' || !g.round.plan || g.round.revealStartedAt === null) {
         throw new GameError('bad_state', 'Gerade wird nichts aufgedeckt.');
@@ -1046,7 +979,7 @@ export function applyAction(state: RoomState, actorId: string, action: Action, c
     }
 
     case 'next': {
-      requireLead(s, actorId);
+      requireHost(s, actorId);
       const g = requireGame(s);
       if (g.phase !== 'scores') throw new GameError('bad_state', 'Erst nach der Auflösung geht es weiter.');
       resume(s, ctx);
@@ -1066,6 +999,7 @@ export function applyAction(state: RoomState, actorId: string, action: Action, c
     case 'makeHost': {
       requireHost(s, actorId);
       const target = requirePlayerTarget(s, action.playerId);
+      if (target.bot) throw new GameError('bad_target', `${target.name} spielt nur mit und kann nicht leiten.`, 400);
       s.hostId = target.id;
       return { state: s };
     }
@@ -1090,20 +1024,28 @@ export function applyAction(state: RoomState, actorId: string, action: Action, c
     }
 
     case 'playAgain': {
-      requireLead(s, actorId);
+      requireHost(s, actorId);
       if (s.status !== 'finished') throw new GameError('bad_state', 'Die Partie läuft noch.');
-      backToLobby(s);
+      s.status = 'lobby';
+      s.game = null;
+      s.paused = null;
+      for (const p of s.players) {
+        p.score = 0;
+        p.stats = freshStats();
+        delete p.quietRound;
+      }
       return { state: s };
     }
 
     case 'leave': {
       removePlayer(s, actorId);
+      // Leiten können nur Menschen; bleibt nur Joseph übrig, schließt der Raum
+      const humans = s.players.filter((p) => !p.bot);
       if (s.hostId === actorId) {
-        const successor = [...s.players].sort((a, b) => a.joinedAt - b.joinedAt).find((p) => isOnline(ctx, p.id)) ??
-          s.players[0];
+        const successor = [...humans].sort((a, b) => a.joinedAt - b.joinedAt).find((p) => isOnline(ctx, p.id)) ?? humans[0];
         if (successor) s.hostId = successor.id;
       }
-      if (!s.players.length) s.status = 'closed';
+      if (!humans.length) s.status = 'closed';
       return { state: s };
     }
 

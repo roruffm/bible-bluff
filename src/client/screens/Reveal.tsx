@@ -21,7 +21,7 @@ export function RevealPhase({ view, conn, display = false }: { view: RoomView; c
   const step = reveal.steps[index];
   const local = elapsed - step.at;
   const meId = view.me?.id ?? null;
-  const lead = (Boolean(view.me?.isHost) || (view.botRoom && Boolean(view.me))) && !display;
+  const isHost = Boolean(view.me?.isHost) && !display;
 
   return (
     <section class={`phase reveal${display ? ' is-display' : ''}`} aria-live="polite">
@@ -45,7 +45,7 @@ export function RevealPhase({ view, conn, display = false }: { view: RoomView; c
             <i class={`${i < index ? 'is-done' : ''}${i === index ? ' is-now' : ''}${s.kind === 'truth' ? ' is-truth' : ''}`} />
           ))}
         </div>
-        {lead && (
+        {isHost && (
           <Button variant="ghost" small onClick={() => conn.act({ type: 'revealNext' }).catch(() => {})}>
             Weiter ›
           </Button>

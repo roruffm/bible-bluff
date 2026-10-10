@@ -239,12 +239,12 @@ test('Impressum und Datenschutz sind von der Startseite und im Raum erreichbar',
   await expect(link).toHaveAttribute('target', '_blank');
 });
 
-/** Startseite öffnen und warten, bis sie die offenen Räume abgefragt hat (ohne Josephs Dauerraum) */
+/** Startseite öffnen und warten, bis sie die offenen Räume abgefragt hat */
 async function homeWithOpenRooms(page: Page): Promise<string[]> {
   const response = page.waitForResponse((r) => new URL(r.url()).pathname === '/api/rooms' && r.request().method() === 'GET');
   await page.goto('/');
-  const body = (await (await response).json()) as { rooms: { code: string; bot: string | null }[] };
-  return body.rooms.filter((r) => !r.bot).map((r) => r.code);
+  const body = (await (await response).json()) as { rooms: { code: string }[] };
+  return body.rooms.map((r) => r.code);
 }
 
 test('Öffentliche Räume stehen auf der Startseite, auch mitten in der Partie', async ({ browser }) => {
@@ -261,9 +261,9 @@ test('Öffentliche Räume stehen auf der Startseite, auch mitten in der Partie',
   const vibrations = () => host.evaluate(() => (window as unknown as { vibrations: unknown[] }).vibrations.length);
   const code = await createRoom(host, 'Rahel');
   const visitor = await phone(browser, 'gast');
-  // Privat ist der Normalfall: Der Raum steht nicht unter „Offene Räume“
+  // Privat ist der Normalfall: kein Bereich „Offene Räume“
   expect(await homeWithOpenRooms(visitor)).toEqual([]);
-  await expect(visitor.locator('.open-room', { hasText: code })).toHaveCount(0);
+  await expect(visitor.locator('.open-rooms')).toHaveCount(0);
 
   await host.getByText('Öffentlich zeigen', { exact: true }).click();
   await expect(host.getByText('Der Raum steht auf der Startseite')).toBeVisible();
@@ -301,7 +301,7 @@ test('Öffentliche Räume stehen auf der Startseite, auch mitten in der Partie',
   await expect(async () => {
     expect(await homeWithOpenRooms(later)).toEqual([]);
   }).toPass({ timeout: 20_000 });
-  await expect(later.locator('.open-room', { hasText: code })).toHaveCount(0);
+  await expect(later.locator('.open-rooms')).toHaveCount(0);
 });
 
 test('Ohne Vibration (wie auf dem iPhone) meldet ein Ton den Beitritt', async ({ browser }) => {
@@ -329,18 +329,22 @@ test('Ohne Vibration (wie auf dem iPhone) meldet ein Ton den Beitritt', async ({
   await expect.poll(() => host.evaluate(() => (window as unknown as { tones: number }).tones)).toBe(2);
 });
 
-test('Joseph wartet immer: Von der Startseite in eine Partie gegen den Bot', async ({ browser }) => {
+test('Allein gegen Joseph: eigener Raum von der Startseite aus', async ({ browser }) => {
   const page = await phone(browser, 'gast');
   await page.goto('/');
-  const entry = page.locator('.open-room', { hasText: 'Spiel gegen Joseph' });
-  await expect(entry).toContainText('Joseph wartet auf dich');
-  await entry.click();
-  await page.waitForURL('**/r/JOSEPH');
+  await page.getByRole('button', { name: 'Gegen Joseph spielen' }).click();
+  await page.waitForURL('**/joseph');
   await page.getByLabel('Dein Spitzname').fill('Hanna');
-  await page.getByRole('button', { name: 'Beitreten' }).click();
+  await page.getByRole('button', { name: 'Raum mit Joseph eröffnen' }).click();
+  await page.waitForURL(/\/r\/[A-Z]+\d+$/);
+  const code = page.url().split('/r/')[1];
 
   await expect(page.locator('.player', { hasText: 'Joseph' })).toContainText('Bot');
-  await page.getByRole('button', { name: 'Partie gegen Joseph starten' }).click();
+  // Der Raum ist privat: Er steht nicht unter „Offene Räume“
+  const other = await phone(browser, 'andere');
+  expect(await homeWithOpenRooms(other)).not.toContain(code);
+
+  await page.getByRole('button', { name: 'Partie starten' }).click();
   await expect(page.getByText('Runde 1 von 6')).toBeVisible();
 
   // Sobald Hanna abgibt, zieht Joseph sofort nach – die Abstimmung beginnt
@@ -349,7 +353,7 @@ test('Joseph wartet immer: Von der Startseite in eine Partie gegen den Bot', asy
   await expect(page.getByText('Welche Antwort stimmt?')).toBeVisible();
   await page.locator('.option:not(.is-mine)').first().click();
 
-  // Joseph stimmt ebenfalls sofort ab, also wird aufgedeckt; Hanna darf selbst weiterschalten
+  // Joseph stimmt ebenfalls sofort ab, also wird aufgedeckt; Hanna leitet und schaltet weiter
   await expect(page.locator('.reveal-head')).toContainText('Aufdeckung');
   const skip = page.getByRole('button', { name: 'Weiter ›' });
   await expect(async () => {
