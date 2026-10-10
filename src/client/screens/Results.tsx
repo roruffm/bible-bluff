@@ -14,6 +14,8 @@ export function ScoresPhase({ view, conn, display = false }: { view: RoomView; c
   const answer = round.answer!;
   const now = useServerNow(500);
   const isHost = Boolean(view.me?.isHost) && !display;
+  // Im Dauerraum mit Joseph schalten die Menschen selbst weiter
+  const lead = isHost || (view.botRoom && Boolean(view.me) && !display);
   const last = round.index + 1 >= round.total;
   const left = round.deadline ? round.deadline - (view.paused?.at ?? now) : 0;
   const results = new Map((round.results ?? []).map((r) => [r.playerId, r]));
@@ -125,7 +127,7 @@ export function ScoresPhase({ view, conn, display = false }: { view: RoomView; c
       <Toast message={toast} onDone={() => setToast(null)} />
 
       <footer class="next-bar">
-        {isHost ? (
+        {lead ? (
           <Button variant="gold" block onClick={() => conn.act({ type: 'next' })}>
             {last ? 'Zum Endstand' : 'Nächste Runde'}
           </Button>
@@ -134,7 +136,7 @@ export function ScoresPhase({ view, conn, display = false }: { view: RoomView; c
           <p class="muted small center">
             {view.paused
               ? 'Pausiert.'
-              : `${last ? 'Endstand' : 'Nächste Runde'} automatisch in ${formatSeconds(left)}${isHost ? '' : ' – oder wenn die Spielleitung weitertippt'}.`}
+              : `${last ? 'Endstand' : 'Nächste Runde'} automatisch in ${formatSeconds(left)}${lead ? '' : ' – oder wenn die Spielleitung weitertippt'}.`}
           </p>
         )}
       </footer>
@@ -398,6 +400,10 @@ export function FinalScreen({ view, conn, display = false }: { view: RoomView; c
                 Raum schließen
               </ConfirmButton>
             </>
+          ) : view.botRoom && view.me ? (
+            <Button variant="gold" block onClick={() => conn.act({ type: 'playAgain' })}>
+              Neue Partie gegen {view.players.find((p) => p.bot)?.name ?? 'den Bot'}
+            </Button>
           ) : (
             <p class="waiting">
               <span class="pulse" aria-hidden="true" />

@@ -165,6 +165,11 @@ export function DatenschutzPage() {
         ausschaltet oder den Raum sperrt, die Partie endet oder 15 Minuten lang niemand mehr verbunden war.
         Rechtsgrundlage ist die Bereitstellung des Spiels (Art. 6 Abs. 1 lit. b DSGVO).
       </p>
+      <p>
+        Der Raum „Spiel gegen Joseph“ ist immer öffentlich. Joseph ist ein Bot. Wer dort beitritt, spielt mit allen,
+        die gerade im Raum sind, und sieht deren Spitznamen und Bluffs. Wer zehn Minuten nicht mehr verbunden war,
+        verlässt den Raum automatisch.
+      </p>
 
       <h2>Entdeckungen-Seiten</h2>
       <p>

@@ -66,6 +66,19 @@ export const PRESENCE_TOUCH_MS = 5_000;
  * Mitspielende warten können, auch wenn sie in WhatsApp wechselt oder der Bildschirm aus ist.
  */
 export const LISTED_ALIVE_MS = 15 * 60 * 1000;
+
+/** Dauerraum mit Bot: Hier wartet Joseph immer auf eine Partie */
+export const BOT_ROOM_CODE = 'JOSEPH';
+export const BOT_NAME = 'Joseph';
+export const BOT_SETTINGS: Settings = { rounds: 6, difficulty: 'gemischt', writeSeconds: 60, voteSeconds: 30 };
+/** Josephs Trefferquote: so oft wählt er die richtige Antwort */
+export const BOT_TRUTH_RATE = 0.45;
+/** Laufende Partie zurücksetzen, wenn so lange kein Mensch mehr verbunden war */
+export const BOT_ROOM_IDLE_MS = 2 * 60 * 1000;
+/** Endstand so lange zeigen, dann wartet Joseph wieder auf eine neue Partie */
+export const BOT_ROOM_FINISHED_MS = 3 * 60 * 1000;
+/** Wer so lange nicht mehr da war, verlässt den Dauerraum automatisch */
+export const BOT_ROOM_AWAY_MS = 10 * 60 * 1000;
 /** Räume verfallen nach dieser Zeit ohne Änderung */
 export const ROOM_TTL_MS = 24 * 60 * 60 * 1000;
 

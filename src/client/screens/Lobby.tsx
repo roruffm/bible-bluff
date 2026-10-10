@@ -46,10 +46,16 @@ export function PlayerList({ view, showScore = false }: { view: RoomView; showSc
             {p.name}
             {p.id === view.me?.id && <small> (du)</small>}
           </span>
-          {p.isHost && (
-            <span class="badge" title="Spielleitung">
-              Leitung
+          {p.bot ? (
+            <span class="badge is-soft" title="Spielt automatisch mit">
+              Bot
             </span>
+          ) : (
+            p.isHost && (
+              <span class="badge" title="Spielleitung">
+                Leitung
+              </span>
+            )
           )}
           {!p.plays && <span class="badge is-soft">schaut zu</span>}
           {showScore && p.plays && <span class="player-score">{p.score}</span>}
@@ -160,6 +166,15 @@ export function Lobby({ view, conn }: { view: RoomView; conn: RoomConnection }) 
               : playing < RECOMMENDED_MIN_PLAYERS
                 ? `Startklar. Am meisten Spaß macht es ab ${RECOMMENDED_MIN_PLAYERS} Personen.`
                 : 'Alle da? Dann los!'}
+          </p>
+        </div>
+      ) : view.botRoom ? (
+        <div class="sticky-action">
+          <Button variant="gold" block disabled={playing < MIN_PLAYERS} onClick={start}>
+            Partie gegen {view.players.find((p) => p.bot)?.name ?? 'den Bot'} starten
+          </Button>
+          <p class="muted small center">
+            {view.players.find((p) => p.bot)?.name ?? 'Der Bot'} schreibt Bluffs und rät mit. Andere können jederzeit dazukommen.
           </p>
         </div>
       ) : (
