@@ -327,6 +327,16 @@ function Panel({ view, conn, onClose }: { view: RoomView; conn: RoomConnection; 
               <Button block variant="secondary" onClick={run({ type: 'lock', locked: !view.locked }, false)}>
                 {view.locked ? 'Raum wieder öffnen' : 'Raum für Neue sperren'}
               </Button>
+              <Button block variant="secondary" onClick={run({ type: 'listed', listed: !view.listed }, false)}>
+                {view.listed ? 'Nicht mehr öffentlich zeigen' : 'Öffentlich auf der Startseite zeigen'}
+              </Button>
+              {view.listed && (
+                <p class="muted small">
+                  {view.locked
+                    ? 'Gesperrt: Der Raum erscheint gerade nicht auf der Startseite.'
+                    : 'Der Raum steht auf der Startseite, und alle können beitreten.'}
+                </p>
+              )}
               <a class="btn btn-ghost btn-block" href={`/tv/${view.code}?${THEME_PARAM}=${theme}`} target="_blank" rel="noopener">
                 Leinwand-Ansicht öffnen ↗
               </a>

@@ -3,6 +3,7 @@ import type {
   ApiErrorBody,
   BluffListResponse,
   BluffStatus,
+  PublicRoomsResponse,
   RecapCreatedResponse,
   RecapResponse,
   RoomView,
@@ -67,6 +68,9 @@ export const api = {
   },
   action(code: string, token: string, action: Action) {
     return request<ViewResponse>('POST', `/api/rooms/${encodeURIComponent(code)}/action`, action, token);
+  },
+  publicRooms() {
+    return request<PublicRoomsResponse>('GET', '/api/rooms');
   },
   createRecap(code: string) {
     return request<RecapCreatedResponse>('POST', `/api/rooms/${encodeURIComponent(code)}/recap`);

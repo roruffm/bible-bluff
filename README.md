@@ -104,11 +104,21 @@ Das Menü „Leitung“ bietet:
 - eine Phase vorzeitig beenden
 - eine Frage tauschen oder die Aufdeckung beschleunigen
 - den Raum für Neue sperren
+- den Raum öffentlich auf der Startseite zeigen
 - Teilnehmende entfernen
 - die Spielleitung übergeben
 - den Raum schließen
 
 Die Spielleitung bleibt bei der Person, die den Raum eröffnet hat, auch wenn ihr Handy zwischendurch gesperrt ist oder sie kurz in eine andere App wechselt, etwa um den Code zu verschicken. Abgeben lässt sie sich nur bewusst über „Spielleitung übergeben“. Wer als Leitung das Gerät wechselt, gibt denselben Spitznamen wieder ein und leitet weiter. Die Punkte-Phase läuft nach 40 Sekunden von selbst weiter.
+
+### Öffentliche Räume
+
+Wer keine eigene Gruppe hat, kann trotzdem mitspielen: Die Leitung kann ihren Raum im Warteraum oder im Menü „Leitung“ öffentlich zeigen. Dann steht er auf der Startseite unter „Offene Räume“, und alle können mit einem Tipp beitreten, auch mitten in eine laufende Partie. Der Schalter ist zunächst immer aus.
+
+- **Keine Namen auf der Startseite.** Die Liste zeigt nur Raumcode, Zahl der Personen, Stand der Partie und Schwierigkeit. Spitznamen und anderer Freitext erscheinen dort nie, damit niemand Unpassendes auf die Startseite bringen kann.
+- **Nur Räume, in denen wirklich gespielt wird.** Gesperrte, volle, beendete und geschlossene Räume fehlen, ebenso Räume, in denen gerade niemand verbunden ist.
+- **Transparent für alle im Raum.** Mitspielende sehen im Warteraum, dass ihr Raum öffentlich ist.
+- **Sparsam.** Die Startseite fragt alle 10 Sekunden nach, solange sie sichtbar ist, und der Worker hält die Liste 4 Sekunden vor. Die Liste erscheint nur, wenn es gerade offene Räume gibt.
 
 ### Verbindungsabbrüche
 
@@ -142,13 +152,13 @@ Die D1-Datenbank `bible-bluff` (Region Westeuropa) ist angelegt, das Schema ist 
 
 ```bash
 npx wrangler login
-npm run db:migrate:remote                 # neue Migrationen einspielen (aktuell bis 0003_bluff_pool)
+npm run db:migrate:remote                 # neue Migrationen einspielen (aktuell bis 0004_listed_rooms)
 npm run deploy                            # baut die App und veröffentlicht Worker + Assets
 ```
 
 **Vorschauen je Pull-Request:** Workers Builds baut zu jedem Pull-Request eine Vorschau mit eigener URL (`wrangler preview`). Vorschauen nutzen eine eigene Datenbank `bible-bluff-preview` (Block `previews` in `wrangler.toml`), damit Tests nie Räume der Produktion berühren. Neue Migrationen müssen deshalb in beide Datenbanken: `npm run db:migrate:remote` für die Produktion und `npx wrangler d1 execute bible-bluff-preview --remote --file migrations/<datei>.sql` für die Vorschau.
 
-Die Tabellen `recaps` (Entdeckungen-Seiten) und `bluff_pool` (frische Hausbluffs) legt der Worker beim ersten Bedarf auch selbst an. Fehlt eine Migration in einer Datenbank, funktioniert trotzdem alles.
+Die Tabellen `recaps` (Entdeckungen-Seiten) und `bluff_pool` (frische Hausbluffs) sowie den Index für öffentliche Räume legt der Worker beim ersten Bedarf auch selbst an. Fehlt eine Migration in einer Datenbank, funktioniert trotzdem alles.
 
 Für ein anderes Cloudflare-Konto zuerst `npx wrangler d1 create bible-bluff` und `npx wrangler d1 create bible-bluff-preview` ausführen und beide `database_id`-Werte in `wrangler.toml` eintragen.
 
@@ -162,6 +172,7 @@ Handys / Leinwand ──(etwa jede Sekunde: GET /api/rooms/CODE)──▶ Cloudf
                   ──(POST /api/rooms/CODE/action)─────────────▶   presence (zuletzt gesehen)
 Endstand          ──(POST /api/rooms/CODE/recap)──────────────▶   recaps (Entdeckungen-Seiten)
 Seite /e/ID       ──(GET /api/recaps/ID)──────────────────────▶
+Startseite        ──(GET /api/rooms, offene Räume)────────────▶   rooms (nur öffentlich gezeigte)
 Freigabe /admin   ──(GET/POST /api/admin/bluffs, ADMIN_KEY)───▶   bluff_pool (Kandidaten, freigegebene Bluffs)
 ```
 

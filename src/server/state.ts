@@ -125,6 +125,8 @@ export interface RoomState {
   status: RoomStatus;
   hostId: string;
   locked: boolean;
+  /** öffentlich auf der Startseite anzeigen (fehlt bei älteren Räumen = nein) */
+  listed?: boolean;
   settings: Settings;
   players: PlayerRec[];
   kicked: KickedRec[];
