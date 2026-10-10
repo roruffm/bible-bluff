@@ -15,10 +15,15 @@ import type {
   RoundView,
   TalkView,
 } from '../shared/types';
-import { favoriteLeaders, isOnline, isQuiet, likeCounts, missStats, planLength, votersOf } from './engine';
-import { QUESTIONS, getQuestion } from './questions';
+import { favoriteLeaders, isOnline, isQuiet, likeCounts, matchingQuestions, missStats, planLength, votersOf } from './engine';
+import { getQuestion, type Question } from './questions';
 import type { Ctx, GameRec, PlayerRec, RoomState, RoundRec } from './state';
 import { talkNotes } from './talk';
+
+/** Lückentexte tragen ihre Art mit, damit die App die Lücke zeigen kann */
+export function gapKind(q: Question): { kind?: 'gap' } {
+  return q.kind === 'gap' ? { kind: 'gap' } : {};
+}
 
 function personLookup(state: RoomState) {
   const map = new Map<string, PersonRef>();
@@ -93,7 +98,7 @@ export function buildView(state: RoomState, meId: string | null, ctx: Ctx, versi
     players,
     round: g && (state.status === 'playing' || state.status === 'finished') ? buildRound(state, meId) : null,
     final: state.status === 'finished' ? buildFinal(state) : null,
-    poolSize: QUESTIONS.length,
+    poolSize: matchingQuestions(state.settings).length,
     freshCount: freshCount(state),
   };
 }
@@ -107,11 +112,11 @@ function meView(state: RoomState, me: PlayerRec, playing: GameRec | null): MeVie
   return { id: me.id, name: me.name, color: me.color, isHost: me.id === state.hostId, plays: me.plays, quiet };
 }
 
-/** „Neues für alle“: Fragen, die in diesem Raum noch nicht vorkamen und die niemand hier kennt */
+/** „Neues für alle“: passende Fragen, die in diesem Raum noch nicht vorkamen und die niemand hier kennt */
 function freshCount(state: RoomState): number {
   const used = new Set(state.usedQuestionIds);
   const seen = state.seenCounts ?? {};
-  return QUESTIONS.filter((q) => !used.has(q.id) && !seen[q.id]).length;
+  return matchingQuestions(state.settings).filter((q) => !used.has(q.id) && !seen[q.id]).length;
 }
 
 /**
@@ -161,7 +166,7 @@ function buildRound(state: RoomState, meId: string | null): RoundView {
     phase,
     phaseStartedAt: g.phaseStartedAt,
     deadline: g.deadline,
-    question: { id: q.id, book: q.book, group: q.group, difficulty: q.difficulty, prompt: q.prompt },
+    question: { id: q.id, book: q.book, group: q.group, difficulty: q.difficulty, prompt: q.prompt, ...gapKind(q) },
     myBluff: meId ? round.bluffs[meId]?.text ?? null : null,
     mySuggestion: phase === 'write' && meId ? round.suggestions?.[meId] ?? null : null,
     options:
@@ -280,7 +285,7 @@ function buildFinal(state: RoomState): FinalView {
 
   const discoveries = (g?.history ?? []).map((h) => {
     const q = getQuestion(h.questionId);
-    return { questionId: q.id, prompt: q.prompt, answer: q.answer, ref: q.ref, discovery: q.discovery, ...missStats(h) };
+    return { questionId: q.id, prompt: q.prompt, ...gapKind(q), answer: q.answer, ref: q.ref, discovery: q.discovery, ...missStats(h) };
   });
 
   return { ranking, awards, discoveries, recapId: g?.recapId ?? null, talk: g ? buildTalk(g) : null };
@@ -298,6 +303,7 @@ function buildTalk(g: GameRec): TalkView | null {
     book: q.book,
     group: q.group,
     prompt: q.prompt,
+    ...gapKind(q),
     answer: q.answer,
     ref: q.ref,
     discovery: q.discovery,

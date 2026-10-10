@@ -1,6 +1,6 @@
 import type { ComponentChildren } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
-import { BOT_ID, GROUP_LABELS } from '../../shared/rules';
+import { BOT_ID, GAP, GROUP_LABELS } from '../../shared/rules';
 import type { PersonRef, PlayerView, QuestionView } from '../../shared/types';
 import { useServerNow } from '../lib/hooks';
 import { BotFace } from './Icons';
@@ -175,12 +175,46 @@ export function Timer(props: { start: number; deadline: number | null; pausedAt?
 
 const DIFF_LABEL = { 1: 'leicht', 2: 'mittel', 3: 'schwer' } as const;
 
+/** Erster Buchstabe groß – für Antworten, die beim Lückentext klein beginnen („die Liebe“) */
+export function upperFirst(text: string): string {
+  return text.charAt(0).toLocaleUpperCase('de-DE') + text.slice(1);
+}
+
+/**
+ * Fragetext. Beim Lückentext wird „___“ zur sichtbaren Lücke – oder, mit `fill`, zur
+ * hervorgehobenen Antwort im Satz.
+ */
+export function QuestionText({ prompt, fill }: { prompt: string; fill?: string | null }) {
+  const at = prompt.indexOf(GAP);
+  if (at < 0) return <>{prompt}</>;
+  return (
+    <>
+      {prompt.slice(0, at)}
+      {fill ? (
+        <mark class="gap-fill">{fill}</mark>
+      ) : (
+        <span class="gap-blank">
+          <span class="sr-only">Lücke</span>
+        </span>
+      )}
+      {prompt.slice(at + GAP.length)}
+    </>
+  );
+}
+
 export function QuestionCard({ question, big = false }: { question: QuestionView; big?: boolean }) {
   return (
-    <article class={`question-card${big ? ' is-big' : ''}`} style={{ '--g': `var(--g-${question.group})` }}>
+    <article
+      class={`question-card${big ? ' is-big' : ''}${question.kind === 'gap' ? ' is-gap' : ''}`}
+      style={{ '--g': `var(--g-${question.group})` }}
+    >
       <header class="question-meta">
         <span class="book-chip">{question.book}</span>
-        <span class="group-label">{GROUP_LABELS[question.group]}</span>
+        {question.kind === 'gap' ? (
+          <span class="kind-chip">Lückentext</span>
+        ) : (
+          <span class="group-label">{GROUP_LABELS[question.group]}</span>
+        )}
         <span class="difficulty" title={`Schwierigkeit: ${DIFF_LABEL[question.difficulty]}`}>
           {[1, 2, 3].map((d) => (
             <i class={d <= question.difficulty ? 'on' : ''} />
@@ -188,7 +222,9 @@ export function QuestionCard({ question, big = false }: { question: QuestionView
           <span class="sr-only">Schwierigkeit {DIFF_LABEL[question.difficulty]}</span>
         </span>
       </header>
-      <h2 class="question-text">{question.prompt}</h2>
+      <h2 class="question-text">
+        <QuestionText prompt={question.prompt} />
+      </h2>
     </article>
   );
 }

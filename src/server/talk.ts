@@ -7,8 +7,9 @@
 //  crossRef   – eine andere Bibelstelle, die das Thema weiterführt, mit einem Satz dazu
 
 import type { TalkNotes } from '../shared/types';
+import { GAP_TALK } from './lueckentext';
 
-export const TALK: Record<string, TalkNotes> = {
+const CLASSIC_TALK: Record<string, TalkNotes> = {
   'mt-schlangen': {
     background: 'Im selben Vers sagt Jesus, er sende die Jünger wie Schafe mitten unter Wölfe. Die Schlange galt seit 1. Mose 3,1 als besonders schlau; das griechische Wort für „ohne Falsch“ heißt wörtlich „unvermischt“.',
     question: 'Wie kann man im Alltag klug handeln, ohne dabei berechnend oder unehrlich zu werden?',
@@ -940,6 +941,8 @@ export const TALK: Record<string, TalkNotes> = {
     crossRef: { ref: '5. Mose 18,21-22', note: 'Gott nennt ein Merkmal: Kündigt ein Prophet in seinem Namen etwas an, das nicht eintrifft, hat Gott nicht gesprochen.' },
   },
 };
+
+export const TALK: Record<string, TalkNotes> = { ...CLASSIC_TALK, ...GAP_TALK };
 
 export function talkNotes(questionId: string): TalkNotes | null {
   return TALK[questionId] ?? null;

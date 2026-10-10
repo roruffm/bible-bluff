@@ -1,22 +1,26 @@
 import { useEffect, useState } from 'preact/hooks';
 import {
+  ALL_CATEGORIES,
   BOT_COLOR,
   BOT_ID,
   BOT_NAME,
   BOT_SETTINGS,
+  CATEGORIES,
   DEFAULT_SETTINGS,
   DIFFICULTY_OPTIONS,
   NAME_MAX,
   ROUND_OPTIONS,
+  ROUND_TYPE_OPTIONS,
   VOTE_OPTIONS,
   WRITE_OPTIONS,
   normalizeCode,
 } from '../../shared/rules';
-import type { PublicRoom, Settings } from '../../shared/types';
+import type { CategoryId, PublicRoom, RoundType, Settings } from '../../shared/types';
 import { EnterIcon, FriendsIcon } from '../components/Icons';
 import { ThemePicker } from '../components/ThemePicker';
 import { Avatar, Button, Logo, Rules, Segmented, Toggle } from '../components/ui';
 import { ApiError, api } from '../lib/api';
+import { categoryCount, poolCount, poolNoun, settingsSummary, usePool } from '../lib/pool';
 import { navigate } from '../lib/router';
 import { LegalLinks } from './Legal';
 import { type Session, lastRoom, loadSession, rememberedName, saveSession } from '../lib/session';
@@ -361,9 +365,7 @@ export function CreateRoom({ bot = false }: { bot?: boolean }) {
           <details class="more-settings">
             <summary>
               <span>Einstellungen</span>
-              <span class="muted small">
-                {settings.rounds} Runden · {settings.difficulty} · {settings.writeSeconds} s bluffen
-              </span>
+              <span class="muted small">{settingsSummary(settings)}</span>
             </summary>
             <SettingsFields settings={settings} onChange={set} />
           </details>
@@ -385,8 +387,24 @@ export function CreateRoom({ bot = false }: { bot?: boolean }) {
   );
 }
 
+const ROUND_TYPE_HINTS: Record<RoundType, string> = {
+  fragen: 'Bibelfragen – alle erfinden eine falsche Antwort.',
+  luecken: 'Ein Satz mit Lücke – alle erfinden, was hineingehört.',
+  gemischt: 'Fragen und Lückentexte: etwa jede dritte Runde ist ein Lückentext.',
+};
+
 export function SettingsFields(props: { settings: Settings; onChange: (patch: Partial<Settings>) => void; disabled?: boolean }) {
   const { settings, onChange, disabled } = props;
+  const pool = usePool();
+  const available = pool ? poolCount(pool, settings) : null;
+  const all = settings.categories.length >= ALL_CATEGORIES.length;
+  const toggle = (id: CategoryId) => {
+    const on = settings.categories.includes(id);
+    // Mindestens eine Kategorie bleibt gewählt
+    if (on && settings.categories.length === 1) return;
+    const next = on ? settings.categories.filter((c) => c !== id) : [...settings.categories, id];
+    onChange({ categories: ALL_CATEGORIES.filter((c) => next.includes(c)) });
+  };
   return (
     <div class="settings">
       <div class="field">
@@ -398,6 +416,52 @@ export function SettingsFields(props: { settings: Settings; onChange: (patch: Pa
           onChange={(rounds) => onChange({ rounds })}
           disabled={disabled}
         />
+      </div>
+      <div class="field">
+        <span>Rundenart</span>
+        <Segmented
+          label="Rundenart"
+          value={settings.roundType}
+          options={ROUND_TYPE_OPTIONS}
+          onChange={(roundType) => onChange({ roundType })}
+          disabled={disabled}
+        />
+        <small class="field-hint">{ROUND_TYPE_HINTS[settings.roundType]}</small>
+      </div>
+      <div class="field">
+        <span class="field-head">
+          Kategorien
+          {!all && (
+            <button type="button" class="link-btn" disabled={disabled} onClick={() => onChange({ categories: [...ALL_CATEGORIES] })}>
+              Alle wählen
+            </button>
+          )}
+        </span>
+        <div class="cat-chips" role="group" aria-label="Kategorien">
+          {CATEGORIES.map((c) => {
+            const on = settings.categories.includes(c.id);
+            const n = pool ? categoryCount(pool, c.id, settings.roundType) : null;
+            return (
+              <button
+                type="button"
+                class={`cat-chip${on ? ' is-on' : ''}`}
+                aria-pressed={on}
+                disabled={disabled || (n === 0 && !on)}
+                onClick={() => toggle(c.id)}
+              >
+                <span>{c.label}</span>
+                {n !== null && <small>{n}</small>}
+              </button>
+            );
+          })}
+        </div>
+        {available !== null && (
+          <small class={`field-hint${available < settings.rounds ? ' is-warn' : ''}`}>
+            {available < settings.rounds
+              ? `Mit dieser Auswahl gibt es nur ${available} ${poolNoun(settings.roundType)} – die Partie hat dann ${available} Runden.`
+              : `${available} ${poolNoun(settings.roundType)} passen zu deiner Auswahl.`}
+          </small>
+        )}
       </div>
       <div class="field">
         <span>Schwierigkeit</span>

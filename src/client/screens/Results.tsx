@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import { POINTS_FAVORITE, POINTS_GIFT, TALK_STEPS } from '../../shared/rules';
 import type { RoomView, TalkNotes, TalkView } from '../../shared/types';
 import { QRCode } from '../components/QR';
-import { Avatar, Button, ConfirmButton, Toast, formatSeconds } from '../components/ui';
+import { Avatar, Button, ConfirmButton, QuestionText, Toast, formatSeconds, upperFirst } from '../components/ui';
 import { api } from '../lib/api';
 import { type RoomConnection, useServerNow } from '../lib/hooks';
 import { navigate, recapUrl } from '../lib/router';
@@ -41,9 +41,11 @@ export function ScoresPhase({ view, conn, display = false }: { view: RoomView; c
         <p class="eyebrow">
           Runde {round.index + 1} von {round.total} · Auflösung
         </p>
-        <h2 class="discovery-question">{round.question.prompt}</h2>
+        <h2 class="discovery-question">
+          <QuestionText prompt={round.question.prompt} fill={answer.text} />
+        </h2>
         <p class="discovery-answer">
-          <span aria-hidden="true">✓</span> {answer.text}
+          <span aria-hidden="true">✓</span> {upperFirst(answer.text)}
         </p>
         <p class="discovery-ref">{answer.ref}</p>
         <div class="merksatz">
@@ -366,8 +368,10 @@ export function FinalScreen({ view, conn, display = false }: { view: RoomView; c
           {final.discoveries.map((d) => (
             <li>
               <p class="d-ref">{d.ref}</p>
-              <p class="d-q">{d.prompt}</p>
-              <p class="d-a">✓ {d.answer}</p>
+              <p class="d-q">
+                <QuestionText prompt={d.prompt} fill={d.answer} />
+              </p>
+              <p class="d-a">✓ {upperFirst(d.answer)}</p>
               <p class="d-text">{d.discovery}</p>
             </li>
           ))}
@@ -553,9 +557,11 @@ function TalkScreen({ view, conn, talk, display }: { view: RoomView; conn: RoomC
 
       <article class="talk-question" style={{ '--g': `var(--g-${talk.group})` }}>
         <span class="book-chip">{talk.book}</span>
-        <p class="talk-prompt">{talk.prompt}</p>
+        <p class="talk-prompt">
+          <QuestionText prompt={talk.prompt} fill={talk.answer} />
+        </p>
         <p class="talk-answer">
-          <span aria-hidden="true">✓</span> {talk.answer}
+          <span aria-hidden="true">✓</span> {upperFirst(talk.answer)}
         </p>
         <p class="talk-ref">{talk.ref}</p>
         {talk.voted > 0 && (
@@ -617,7 +623,9 @@ function TalkScreen({ view, conn, talk, display }: { view: RoomView; conn: RoomC
                     class={`talk-choice${d.questionId === talk.questionId ? ' is-on' : ''}`}
                     onClick={() => act({ type: 'talk', questionId: d.questionId })}
                   >
-                    <span class="talk-choice-q">{d.prompt}</span>
+                    <span class="talk-choice-q">
+                      <QuestionText prompt={d.prompt} />
+                    </span>
                     <span class="muted small">
                       {d.ref}
                       {d.voted > 0 ? ` · ${d.missed} von ${d.voted} daneben` : ''}

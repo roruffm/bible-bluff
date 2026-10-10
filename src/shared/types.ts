@@ -4,12 +4,19 @@
 export type Difficulty = 'leicht' | 'mittel' | 'schwer' | 'gemischt';
 export type Phase = 'write' | 'vote' | 'reveal' | 'scores';
 export type RoomStatus = 'lobby' | 'playing' | 'finished' | 'closed';
+/** Welche Runden eine Partie hat: klassische Fragen, Lückentexte oder beides */
+export type RoundType = 'fragen' | 'luecken' | 'gemischt';
+/** Auswählbare Kategorien (Zuordnung zu den Buchgruppen in rules.ts) */
+export type CategoryId = 'evangelien' | 'apg' | 'paulus' | 'briefe' | 'offenbarung' | 'at';
 
 export interface Settings {
   rounds: number;
   difficulty: Difficulty;
   writeSeconds: number;
   voteSeconds: number;
+  roundType: RoundType;
+  /** mindestens eine; alle gewählt = der ganze Fragenpool */
+  categories: CategoryId[];
 }
 
 export type BookGroup =
@@ -73,6 +80,8 @@ export interface QuestionView {
   group: BookGroup;
   difficulty: 1 | 2 | 3;
   prompt: string;
+  /** Lückentext: prompt enthält die Lücke GAP („___“) */
+  kind?: 'gap';
 }
 
 export interface OptionView {
@@ -197,6 +206,7 @@ export interface AwardView {
 export interface DiscoveryView {
   questionId: string;
   prompt: string;
+  kind?: 'gap';
   answer: string;
   ref: string;
   discovery: string;
@@ -213,6 +223,7 @@ export interface TalkView {
   book: string;
   group: BookGroup;
   prompt: string;
+  kind?: 'gap';
   answer: string;
   ref: string;
   discovery: string;
@@ -236,6 +247,7 @@ export interface RecapItem {
   book: string;
   group: BookGroup;
   prompt: string;
+  kind?: 'gap';
   answer: string;
   ref: string;
   discovery: string;
@@ -285,9 +297,15 @@ export interface RoomView {
   players: PlayerView[];
   round: RoundView | null;
   final: FinalView | null;
+  /** Fragen, die zu den gewählten Kategorien und der Rundenart passen */
   poolSize: number;
-  /** Fragen, die in diesem Raum noch niemand kennt („Neues für alle“) */
+  /** davon die, die in diesem Raum noch niemand kennt („Neues für alle“) */
   freshCount: number;
+}
+
+/** Wie viele Fragen und Lückentexte es je Kategorie gibt – für die Auswahl beim Eröffnen */
+export interface PoolResponse {
+  categories: { id: CategoryId; questions: number; gaps: number }[];
 }
 
 /** Freigabe-Seite: ein starker Bluff aus echten Partien */

@@ -5,6 +5,7 @@
 import type { RecapView } from '../shared/types';
 import { getQuestion } from './questions';
 import type { RoomState } from './state';
+import { gapKind } from './view';
 
 /** Ohne 0/O, 1/l/i – gut abzutippen, falls jemand den Link vorliest */
 const ALPHABET = 'abcdefghjkmnpqrstuvwxyz23456789';
@@ -40,6 +41,7 @@ export function buildRecap(state: RoomState, id: string): RecapView {
         book: q.book,
         group: q.group,
         prompt: q.prompt,
+        ...gapKind(q),
         answer: q.answer,
         ref: q.ref,
         discovery: q.discovery,

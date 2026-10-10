@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { POINTS_GIFT, POINTS_TRUTH, TALK_STEPS } from '../src/shared/rules';
+import { ALL_CATEGORIES, POINTS_GIFT, POINTS_TRUTH, TALK_STEPS } from '../src/shared/rules';
 import { candidatesFromGame } from '../src/server/bluff-pool';
 import { applyAction, createRoom, joinRoom, mostMissedQuestion, pickQuestions, step, tick } from '../src/server/engine';
 import { QUESTIONS, getQuestion } from '../src/server/questions';
@@ -9,6 +9,7 @@ import { buildView } from '../src/server/view';
 import { Clock, ctxFor, seeded } from './helpers';
 
 const IDS = ['host', 'anna', 'ben', 'cleo'];
+const CLASSIC = { difficulty: 'gemischt' as const, roundType: 'fragen' as const, categories: ALL_CATEGORIES };
 /** Deutlich verschiedene Fantasie-Bluffs ohne Zahlen – keine Gefahr, zufällig die Wahrheit zu treffen */
 const WHO: Record<string, string> = { host: 'Ein Tukan', anna: 'Viele Kakteen', ben: 'Ein Pinguin', cleo: 'Mehrere Koalas' };
 const WHERE = ['im Iglu', 'am Nordpol', 'im Kino', 'auf dem Mond', 'im Zoo'];
@@ -210,7 +211,7 @@ describe('Neues für alle', () => {
     expect(fresh.size).toBeGreaterThanOrEqual(12);
     const seen = Object.fromEntries(QUESTIONS.filter((q) => !fresh.has(q.id)).map((q) => [q.id, 1]));
     for (let seed = 1; seed <= 20; seed++) {
-      const { main, spare } = pickQuestions('gemischt', new Set(), 8, seeded(seed), seen);
+      const { main, spare } = pickQuestions(CLASSIC, new Set(), 8, seeded(seed), seen);
       for (const id of [...main, ...spare]) expect(fresh.has(id), id).toBe(true);
     }
   });
@@ -220,7 +221,7 @@ describe('Neues für alle', () => {
     const once = new Set(QUESTIONS.slice(5, 40).map((q) => q.id));
     const seen: Record<string, number> = {};
     for (const q of QUESTIONS) if (!fresh.includes(q.id)) seen[q.id] = once.has(q.id) ? 1 : 3;
-    const { main, spare } = pickQuestions('gemischt', new Set(), 8, seeded(3), seen);
+    const { main, spare } = pickQuestions(CLASSIC, new Set(), 8, seeded(3), seen);
     const all = [...main, ...spare];
     for (const id of fresh) expect(all).toContain(id);
     for (const id of all.filter((id) => !fresh.includes(id))) expect(once.has(id), id).toBe(true);

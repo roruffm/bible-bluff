@@ -12,8 +12,11 @@
 //  ref        – Bibelstelle für die Auflösung
 //  discovery  – ein kurzer, überraschender Satz zur Entdeckung
 //  number     – Zahlenfrage (pro Partie höchstens zwei)
+//  kind       – 'gap' für Lückentexte (stehen in lueckentext.ts): prompt ist ein Satz mit der Lücke „___“,
+//               answer und bluffs sind Satzteile, die grammatisch in die Lücke passen
 
 import type { BookGroup } from '../shared/types';
+import { GAP_QUESTIONS } from './lueckentext';
 
 export interface Question {
   id: string;
@@ -28,9 +31,10 @@ export interface Question {
   ref: string;
   discovery: string;
   number?: boolean;
+  kind?: 'gap';
 }
 
-export const QUESTIONS: Question[] = [
+const CLASSIC: Question[] = [
   // ───────────── Matthäus ─────────────
   {
     id: 'mt-schlangen',
@@ -2410,6 +2414,8 @@ export const QUESTIONS: Question[] = [
     discovery: 'Das Joch zeigte: Juda und die Nachbarvölker sollen sich Babel beugen. Der Prophet Hananja zerbrach es öffentlich, doch Gott ließ ausrichten: Statt des hölzernen kommt nun ein eisernes Joch.',
   },
 ];
+
+export const QUESTIONS: Question[] = [...CLASSIC, ...GAP_QUESTIONS];
 
 const BY_ID = new Map(QUESTIONS.map((q) => [q.id, q]));
 

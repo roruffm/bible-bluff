@@ -1,4 +1,4 @@
-import type { BookGroup, Difficulty, Settings } from './types';
+import type { BookGroup, CategoryId, Difficulty, RoundType, Settings } from './types';
 
 export const ROUND_OPTIONS = [4, 6, 8, 10, 12] as const;
 export const WRITE_OPTIONS = [45, 60, 90, 120] as const;
@@ -10,11 +10,44 @@ export const DIFFICULTY_OPTIONS: { value: Difficulty; label: string }[] = [
   { value: 'gemischt', label: 'Gemischt' },
 ];
 
+export const ROUND_TYPE_OPTIONS: { value: RoundType; label: string }[] = [
+  { value: 'fragen', label: 'Fragen' },
+  { value: 'luecken', label: 'Lückentext' },
+  { value: 'gemischt', label: 'Gemischt' },
+];
+/** Gemischte Partien: etwa jede dritte Runde ist ein Lückentext */
+export const GAP_SHARE = 1 / 3;
+/** Die Lücke im Satz eines Lückentexts */
+export const GAP = '___';
+
+/** Setzt einen Text in die Lücke ein – für Stellen, die nur reinen Text zeigen */
+export function fillGap(prompt: string, text: string): string {
+  return prompt.replace(GAP, text);
+}
+
+/** Auswählbare Kategorien; jede umfasst eine oder mehrere Buchgruppen */
+export const CATEGORIES: { id: CategoryId; label: string; groups: BookGroup[] }[] = [
+  { id: 'evangelien', label: 'Evangelien', groups: ['evangelien'] },
+  { id: 'apg', label: 'Apostelgeschichte', groups: ['geschichte'] },
+  { id: 'paulus', label: 'Paulusbriefe', groups: ['paulus', 'pastoral'] },
+  { id: 'briefe', label: 'Weitere Briefe', groups: ['allgemein'] },
+  { id: 'offenbarung', label: 'Offenbarung', groups: ['prophetie'] },
+  { id: 'at', label: 'Altes Testament', groups: ['at'] },
+];
+export const ALL_CATEGORIES: CategoryId[] = CATEGORIES.map((c) => c.id);
+
+/** Kategorie einer Buchgruppe – null für Fragen zum ganzen Neuen Testament */
+export function categoryOf(group: BookGroup): CategoryId | null {
+  return CATEGORIES.find((c) => c.groups.includes(group))?.id ?? null;
+}
+
 export const DEFAULT_SETTINGS: Settings = {
   rounds: 8,
   difficulty: 'gemischt',
   writeSeconds: 60,
   voteSeconds: 30,
+  roundType: 'gemischt',
+  categories: [...ALL_CATEGORIES],
 };
 
 export const MIN_PLAYERS = 2;
@@ -72,7 +105,14 @@ export const BOT_NAME = 'Joseph';
 /** Josephs Spieler-ID – auch die App erkennt ihn daran und zeigt sein Gesicht statt Initialen */
 export const BOT_ID = 'bot-joseph';
 /** Vorschlag für eine Partie gegen Joseph: etwas kürzer als sonst */
-export const BOT_SETTINGS: Settings = { rounds: 6, difficulty: 'gemischt', writeSeconds: 60, voteSeconds: 30 };
+export const BOT_SETTINGS: Settings = {
+  rounds: 6,
+  difficulty: 'gemischt',
+  writeSeconds: 60,
+  voteSeconds: 30,
+  roundType: 'gemischt',
+  categories: [...ALL_CATEGORIES],
+};
 /** Josephs Trefferquote: so oft wählt er die richtige Antwort */
 export const BOT_TRUTH_RATE = 0.45;
 /** Räume verfallen nach dieser Zeit ohne Änderung */

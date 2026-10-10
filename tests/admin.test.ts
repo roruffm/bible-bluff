@@ -44,7 +44,8 @@ async function playGame(t: ReturnType<typeof setup>) {
     }
     const options = (await view(host)).round!.options!;
     if (r === 0) firstQuestion = (await view(host)).round!.question.id;
-    const rahels = options.find((o) => o.text.startsWith(BLUFFS[0]))!;
+    // In Lückentext-Runden beginnt „Ein …“ klein („ein …“), weil es mitten im Satz steht
+    const rahels = options.find((o) => o.text.toLowerCase().startsWith(BLUFFS[0].toLowerCase()))!;
     for (const p of players) {
       const own = (await view(p)).round!.options!;
       const pick = r === 0 && p !== host ? rahels.id : own.find((o) => !o.mine && o.id !== rahels.id)!.id;

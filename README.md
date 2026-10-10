@@ -6,7 +6,7 @@
 
 Bible Bluff ist ein Partyspiel für den Browser: Jede Person spielt auf dem eigenen Handy, ein Fernseher oder Beamer kann zusätzlich die gemeinsame Ansicht zeigen. Alle sehen dieselbe Bibelfrage und erfinden heimlich eine glaubwürdige, aber falsche Antwort. Danach steht die echte Antwort anonym zwischen den Bluffs, und alle tippen auf die vermeintlich richtige. Bei der Aufdeckung zeigt sich, wer worauf hereingefallen ist und was wirklich stimmt.
 
-Die Fragen stammen aus dem *Studienkonzept NT* (Lernblätter zu allen 27 Büchern des Neuen Testaments, freikirchlich-pfingstliche Lernfassung). Dazu kommen geprüfte Fragen aus einem eigenen Fragenpool, auch zu ausgewählten Geschichten des Alten Testaments. Hinzu kommen die in der Fragenwerkstatt freigegebenen Fragen, darunter 30 zu Jesu Botschaft. Der Pool umfasst 186 kuratierte Fragen mit Bibelstelle und einer kurzen Entdeckung.
+Die Fragen stammen aus dem *Studienkonzept NT* (Lernblätter zu allen 27 Büchern des Neuen Testaments, freikirchlich-pfingstliche Lernfassung). Dazu kommen geprüfte Fragen aus einem eigenen Fragenpool, auch zu ausgewählten Geschichten des Alten Testaments. Hinzu kommen die in der Fragenwerkstatt freigegebenen Fragen, darunter 30 zu Jesu Botschaft. Der Pool umfasst 186 kuratierte Fragen und 45 Lückentexte, jeweils mit Bibelstelle und einer kurzen Entdeckung.
 
 | Start | Lobby | Bluff schreiben | Abstimmen |
 | --- | --- | --- | --- |
@@ -30,7 +30,7 @@ Leinwand-Ansicht (`/tv/RAUMCODE`):
 
 ## So läuft eine Partie
 
-1. **Raum eröffnen.** Die Spielleitung wählt Rundenzahl (4–12, Standard 8), Schwierigkeit (leicht, mittel, schwer, gemischt) und die Zeitlimits. Sie spielt mit oder leitet nur, etwa am Beamer.
+1. **Raum eröffnen.** Die Spielleitung wählt Rundenzahl (4–12, Standard 8), Rundenart (Fragen, Lückentext oder gemischt), Kategorien, Schwierigkeit (leicht, mittel, schwer, gemischt) und die Zeitlimits. Sie spielt mit oder leitet nur, etwa am Beamer.
 2. **Beitreten.** Alle scannen den QR-Code oder geben den Raumcode (z. B. `LAMPE7`) und einen Spitznamen ein. Konten gibt es nicht.
 3. **Gemeinsam starten.** Dieselbe Runde beginnt auf allen Handys.
 
@@ -44,6 +44,18 @@ Leinwand-Ansicht (`/tv/RAUMCODE`):
 **Punkte:** +2 für das Erkennen der richtigen Antwort, +1 für jede Person, die auf den eigenen Bluff hereinfällt, +1 für den Lieblingsbluff der Runde.
 
 Dadurch kann auch jemand mit wenig Bibelwissen gewinnen, denn gute Einfälle und Menschenkenntnis zählen mit. Am Ende gibt es ein Siegertreppchen und fünf Auszeichnungen (Bluff-Meister, Wahrheitsfinder, Gutgläubigste Seele, Bester Bluff des Abends, Nächstenliebe). Außerdem zeigt der Endstand alle Entdeckungen der Partie zum Nachlesen, und die Leitung kann direkt ins Gespräch überleiten.
+
+### Lückentext
+
+Statt einer Frage steht ein Satz zu einer Bibelstelle mit einer Lücke da, zum Beispiel: „Simson erschlug tausend Philister mit ___.“ Alle erfinden, was in die Lücke gehört; die Wahrheit steht wie gewohnt anonym zwischen den Bluffs. Beim Aufdecken erscheint jede Antwort eingesetzt im Satz – das sorgt für eigene Lacher.
+
+- **Rundenart:** *Fragen* (wie bisher), *Lückentext* (nur Lückentexte) oder *Gemischt* (Standard): Dann ist etwa jede dritte Runde ein Lückentext, gleichmäßig verteilt und nie gleich in der ersten Runde.
+- **Schreibweise:** Mitten im Satz beginnen Artikel, Zahlen und Präpositionen klein („einem Ochsenstachel“), auch wenn das Handy sie großgeschrieben hat. Wer den ganzen Satz abtippt, bekommt nur den Teil für die Lücke. Beim Abstimmen beginnen alle Antworten groß, damit die Schreibweise nichts verrät.
+- Die 45 Lückentexte stehen in `src/server/lueckentext.ts`, mit eigenen Worten formuliert, samt Hausbluffs und Spickzettel.
+
+### Kategorien
+
+Die Spielleitung wählt beim Eröffnen oder in der Lobby eine oder mehrere Kategorien: *Evangelien*, *Apostelgeschichte*, *Paulusbriefe* (mit den Briefen an Timotheus und Titus), *Weitere Briefe* (Hebräer bis Judas), *Offenbarung* und *Altes Testament*. Jede Kategorie zeigt, wie viele Fragen beziehungsweise Lückentexte sie zur gewählten Rundenart hat (`GET /api/pool`). Reicht die Auswahl nicht für alle Runden, sagt die App das vorher, und die Partie wird entsprechend kürzer. „Neues für alle“ zählt nur Fragen aus der Auswahl.
 
 ### Lieblingsbluff
 
@@ -63,7 +75,7 @@ Wer eine Pause zum Beten braucht, tippt auf „Ruhige Minute“. Beim Schreiben 
 
 ### Vom Spiel ins Gespräch
 
-Zu jeder der 186 Fragen gibt es einen **Spickzettel** mit Hintergrundwissen, einer offenen Gesprächsfrage und einem Querverweis auf eine andere Bibelstelle. Er erscheint nach jeder Auflösung nur auf dem Gerät der Spielleitung (am Beamer zunächst zugeklappt).
+Zu jeder Frage und jedem Lückentext gibt es einen **Spickzettel** mit Hintergrundwissen, einer offenen Gesprächsfrage und einem Querverweis auf eine andere Bibelstelle. Er erscheint nach jeder Auflösung nur auf dem Gerät der Spielleitung (am Beamer zunächst zugeklappt).
 
 Nach dem Endstand führt „Weiter ins Gespräch“ zu der Frage, bei der die meisten danebenlagen; jede andere Frage der Partie lässt sich ebenso wählen. Die Leitung blättert durch vier Schritte, und alle Handys und die Leinwand gehen mit:
 
@@ -247,6 +259,8 @@ Die Fragen stehen in `src/server/questions.ts`. Jede Frage hat folgende Felder:
   discovery: 'Auch Paulus brauchte warme Kleidung und Lesestoff. …',
 }
 ```
+
+Lückentexte stehen in `src/server/lueckentext.ts` und haben zusätzlich `kind: 'gap'`. Ihr `prompt` ist ein Satz mit genau einer Lücke `___`; `answer`, `variants` und `bluffs` sind Satzteile, die grammatisch in die Lücke passen und mitten im Satz richtig geschrieben sind („dem Kieferknochen eines Esels“). Die Kategorie ergibt sich aus `group`.
 
 Schlüsselwörter werden ohne Umlaute geschrieben (`ae`, `oe`, `ue`, `ss`). Ein Wort ohne Zeichen muss am Wortanfang passen, `*wort` darf irgendwo im Wort stehen, `=wort` muss genau so lauten. Mehrere Wörter in einer Gruppe müssen alle vorkommen. Die Tests prüfen jede Frage automatisch: Die Antwort selbst muss erkannt werden, die vorbereiteten Bluffs dürfen nicht anschlagen.
 
