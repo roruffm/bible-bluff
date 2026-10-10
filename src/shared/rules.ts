@@ -60,6 +60,12 @@ export const SCORES_SECONDS = 40;
 /** Präsenz */
 export const ONLINE_WINDOW_MS = 15_000;
 export const PRESENCE_TOUCH_MS = 5_000;
+/**
+ * Öffentliche Räume bleiben so lange auf der Startseite, nachdem zuletzt jemand im Raum verbunden
+ * war. Großzügig, weil Handys im Hintergrund nicht nachfragen: Die Leitung soll in Ruhe auf
+ * Mitspielende warten können, auch wenn sie in WhatsApp wechselt oder der Bildschirm aus ist.
+ */
+export const LISTED_ALIVE_MS = 15 * 60 * 1000;
 /** Räume verfallen nach dieser Zeit ohne Änderung */
 export const ROOM_TTL_MS = 24 * 60 * 60 * 1000;
 
