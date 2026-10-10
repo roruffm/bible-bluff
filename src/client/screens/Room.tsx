@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'preact/hooks';
 import type { RoomView } from '../../shared/types';
 import { ThemePicker } from '../components/ThemePicker';
-import { Avatar, Button, ConfirmButton, Logo, Rules } from '../components/ui';
+import { Avatar, Button, ConfirmButton, Logo, Rules, Toast } from '../components/ui';
 import type { ApiError } from '../lib/api';
 import { type RoomConnection, useRoom, useWakeLock } from '../lib/hooks';
+import { useJoinAlert } from '../lib/join-alert';
 import { navigate } from '../lib/router';
 import { markSeen } from '../lib/seen';
 import { type Session, clearSession, loadSession } from '../lib/session';
@@ -97,7 +98,10 @@ function GameShell({ view, conn }: { view: RoomView; conn: RoomConnection }) {
   const isHost = Boolean(view.me?.isHost);
   // Wer nur leitet, sieht die gemeinsame Ansicht – mit Steuerung.
   const display = !view.me?.plays && view.status === 'playing';
-  useWakeLock(view.status === 'playing');
+  // Wartet die Leitung in einem öffentlichen Raum, bleibt ihr Bildschirm an – sonst käme die Meldung nicht an
+  useWakeLock(view.status === 'playing' || (isHost && view.listed && view.status === 'lobby'));
+  const [joinNote, setJoinNote] = useState<string | null>(null);
+  useJoinAlert(view, setJoinNote);
 
   // Neue Phase → nach oben, damit niemand mitten in der alten Ansicht hängen bleibt
   const phaseKey = `${view.status}-${view.round?.index ?? ''}-${view.round?.phase ?? ''}`;
@@ -147,6 +151,7 @@ function GameShell({ view, conn }: { view: RoomView; conn: RoomConnection }) {
       </main>
 
       {panel && <Panel view={view} conn={conn} onClose={() => setPanel(false)} />}
+      <Toast message={joinNote} onDone={() => setJoinNote(null)} />
     </div>
   );
 }

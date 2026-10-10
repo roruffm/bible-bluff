@@ -118,6 +118,7 @@ Wer keine eigene Gruppe hat, kann trotzdem mitspielen: Die Leitung kann ihren Ra
 - **Keine Namen auf der Startseite.** Die Liste zeigt nur Raumcode, Zahl der Personen, Stand der Partie und Schwierigkeit. Spitznamen und anderer Freitext erscheinen dort nie, damit niemand Unpassendes auf die Startseite bringen kann.
 - **Nur Räume, in denen wirklich gespielt wird.** Gesperrte, volle, beendete und geschlossene Räume fehlen, ebenso Räume, in denen seit 15 Minuten niemand mehr verbunden war. Die Frist ist bewusst großzügig: Ein Handy im Hintergrund oder mit gesperrtem Bildschirm fragt nicht nach, und die Leitung soll trotzdem in Ruhe auf Mitspielende warten können.
 - **Transparent für alle im Raum.** Mitspielende sehen im Warteraum, dass ihr Raum öffentlich ist.
+- **Bescheid für die Leitung.** Tritt jemand einem öffentlichen Raum bei, vibriert das Handy der Leitung kurz und zeigt etwa „Hanna ist beigetreten“. Auf dem iPhone, das Webseiten keine Vibration erlaubt, erklingt stattdessen ein leiser Zweiklang. Damit das auch beim Warten klappt, bleibt der Bildschirm der Leitung an, solange ihr Raum öffentlich ist. Ist das Handy gesperrt oder der Raum im Hintergrund, kann eine Webseite weder vibrieren noch nachfragen; die Meldung kommt dann beim Zurückkehren.
 - **Sparsam.** Die Startseite fragt alle 10 Sekunden nach, solange sie sichtbar ist, und der Worker hält die Liste 4 Sekunden vor. Die Liste erscheint nur, wenn es gerade offene Räume gibt.
 
 ### Verbindungsabbrüche
