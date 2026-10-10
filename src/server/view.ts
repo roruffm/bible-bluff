@@ -48,6 +48,7 @@ export function publicRoom(state: RoomState, ctx: Ctx): PublicRoom | null {
     round: g ? g.roundIndex + 1 : null,
     rounds: g ? g.questionIds.length : state.settings.rounds,
     difficulty: state.settings.difficulty,
+    bot: state.botRoom ? state.players.find((p) => p.bot)?.name ?? null : null,
   };
 }
 
@@ -72,6 +73,7 @@ export function buildView(state: RoomState, meId: string | null, ctx: Ctx, versi
       online: isOnline(ctx, p.id),
       plays: p.plays,
       isHost: p.id === state.hostId,
+      bot: Boolean(p.bot),
       done,
       quiet: playing ? isQuiet(p, playing) : false,
     };
@@ -86,6 +88,7 @@ export function buildView(state: RoomState, meId: string | null, ctx: Ctx, versi
     hostId: state.hostId,
     locked: state.locked,
     listed: Boolean(state.listed),
+    botRoom: Boolean(state.botRoom),
     paused: state.paused,
     settings: state.settings,
     hostPlays: host?.plays ?? true,

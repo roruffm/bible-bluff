@@ -10,7 +10,7 @@
 //   GET  /api/admin/bluffs           Kandidaten für frische Hausbluffs (nur mit ADMIN_KEY)
 //   POST /api/admin/bluffs           Kandidaten freigeben oder ablehnen (nur mit ADMIN_KEY)
 
-import { BLUFF_MAX, PRESENCE_TOUCH_MS, ROOM_TTL_MS, normalizeCode } from '../shared/rules';
+import { BLUFF_MAX, BOT_ROOM_CODE, PRESENCE_TOUCH_MS, ROOM_TTL_MS, normalizeCode } from '../shared/rules';
 import type {
   Action,
   ApiErrorBody,
@@ -25,7 +25,7 @@ import type {
 } from '../shared/types';
 import { randomCode } from './codes';
 import { candidatesFromGame, candidateView } from './bluff-pool';
-import { createRoom, formatAnswer, joinRoom, step, tick } from './engine';
+import { botPresence, createBotRoom, createRoom, formatAnswer, joinRoom, step, tick } from './engine';
 import { getQuestion, hasQuestion } from './questions';
 import { buildRecap, isRecapId, randomRecapId } from './recap';
 import { GameError, type Ctx, type PlayerRec, type RoomState } from './state';
@@ -159,9 +159,19 @@ export function createApi(deps: ApiDeps) {
   }
 
   async function loadRoom(code: string): Promise<RoomRecord> {
-    const rec = await store.load(code);
+    let rec = await store.load(code);
+    // Josephs Dauerraum gibt es immer – nach langer Ruhe (und dem Aufräumen) entsteht er neu
+    if (!rec && code === BOT_ROOM_CODE) {
+      await store.insert(code, createBotRoom(code, { now: now(), rng, presence: {} }), now());
+      rec = await store.load(code);
+    }
     if (!rec) throw new GameError('not_found', 'Diesen Raum gibt es nicht (mehr). Prüfe den Code.', 404);
     return rec;
+  }
+
+  /** Bots sind immer verbunden */
+  function presenceOf(rec: RoomRecord, at: number): Record<string, number> {
+    return { ...rec.presence, ...botPresence(rec.state, at) };
   }
 
   /** Spieler zum Token suchen – entfernte Personen bekommen eine eigene Meldung. */
@@ -186,6 +196,7 @@ export function createApi(deps: ApiDeps) {
     for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
       const rec = await loadRoom(code);
       const ctx = makeCtx(rec.presence, extraBluffs);
+      Object.assign(ctx.presence, botPresence(rec.state, ctx.now));
       const out = fn(rec, ctx);
       if (!out.next) return { state: rec.state, version: rec.version, ctx, ...out };
       if (await store.update(code, out.next, rec.version, ctx.now)) {
@@ -203,16 +214,26 @@ export function createApi(deps: ApiDeps) {
     if (last === undefined || at - last >= PRESENCE_TOUCH_MS) await store.touch(code, playerId, at);
   }
 
-  // Offene Räume für die Startseite – wartende Räume zuerst, dann laufende Partien
+  // Offene Räume für die Startseite – Joseph zuerst, dann wartende Räume, dann laufende Partien
   let publicCache: { at: number; data: PublicRoomsResponse } | null = null;
   async function publicRoomsRoute(): Promise<Response> {
     const t = now();
     if (!publicCache || t - publicCache.at >= PUBLIC_TTL_MS) {
       const records = await store.listedRooms(PUBLIC_MAX * 3);
+      if (!records.some((rec) => rec.state.code === BOT_ROOM_CODE)) records.push(await loadRoom(BOT_ROOM_CODE));
       const rooms = records
-        .map((rec) => publicRoom(rec.state, { now: t, rng, presence: rec.presence }))
+        .map((rec) => {
+          const ctx: Ctx = { now: t, rng, presence: presenceOf(rec, t) };
+          // So, wie der Raum beim nächsten Abruf aussähe (z. B. verlassene Partie schon zurückgesetzt)
+          return publicRoom(tick(rec.state, ctx) ?? rec.state, ctx);
+        })
         .filter((r) => r !== null)
-        .sort((a, b) => Number(a.status === 'playing') - Number(b.status === 'playing') || (a.round ?? 0) - (b.round ?? 0))
+        .sort(
+          (a, b) =>
+            Number(!a.bot) - Number(!b.bot) ||
+            Number(a.status === 'playing') - Number(b.status === 'playing') ||
+            (a.round ?? 0) - (b.round ?? 0),
+        )
         .slice(0, PUBLIC_MAX);
       publicCache = { at: t, data: { rooms } };
     }

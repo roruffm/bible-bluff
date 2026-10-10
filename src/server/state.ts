@@ -24,6 +24,8 @@ export interface PlayerRec {
   stats: PlayerStats;
   /** „Ruhige Minute“: diese Runde (Index) setzt die Person aus */
   quietRound?: number;
+  /** vom Spiel gesteuerte Figur (Joseph) – immer verbunden, zieht selbst */
+  bot?: true;
 }
 
 export interface KickedRec {
@@ -127,6 +129,8 @@ export interface RoomState {
   locked: boolean;
   /** öffentlich auf der Startseite anzeigen (fehlt bei älteren Räumen = nein) */
   listed?: boolean;
+  /** Dauerraum mit Bot: Menschen dürfen starten und weiterschalten, der Raum räumt sich selbst auf */
+  botRoom?: true;
   settings: Settings;
   players: PlayerRec[];
   kicked: KickedRec[];

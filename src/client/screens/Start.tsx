@@ -109,7 +109,11 @@ function OpenRooms() {
   return (
     <section class="card open-rooms" aria-labelledby="open-rooms-title">
       <h2 id="open-rooms-title">Offene Räume</h2>
-      <p class="muted small">Hier wird gerade gespielt, und neue Leute sind willkommen.</p>
+      <p class="muted small">
+        {rooms.some((r) => !r.bot)
+          ? 'Hier wird gerade gespielt, und neue Leute sind willkommen.'
+          : 'Keine Gruppe zur Hand? Hier spielst du sofort mit.'}
+      </p>
       <ul class="open-room-list">
         {rooms.map((r) => (
           <li key={r.code}>
@@ -122,11 +126,15 @@ function OpenRooms() {
               }}
             >
               <span class="open-room-text">
-                <b>Raum {r.code}</b>
-                <small>{r.status === 'lobby' ? 'Wartet auf den Start' : `Runde ${r.round} von ${r.rounds} läuft`}</small>
+                <b>{r.bot ? `Spiel gegen ${r.bot}` : `Raum ${r.code}`}</b>
                 <small>
-                  {r.people} {r.people === 1 ? 'Person' : 'Personen'} · {difficultyLabel(r.difficulty)}
+                  {r.status === 'playing'
+                    ? `Runde ${r.round} von ${r.rounds} läuft`
+                    : r.bot && r.people <= 1
+                      ? `${r.bot} wartet auf dich`
+                      : 'Wartet auf den Start'}
                 </small>
+                <small>{roomMeta(r)}</small>
               </span>
               <span class="open-room-go">Mitspielen</span>
             </a>
@@ -135,6 +143,13 @@ function OpenRooms() {
       </ul>
     </section>
   );
+}
+
+/** Personen und Schwierigkeit; bei Joseph zählen nur die Menschen */
+function roomMeta(r: PublicRoom) {
+  const humans = r.bot ? r.people - 1 : r.people;
+  const people = humans > 0 ? `${humans} ${humans === 1 ? 'Person' : 'Personen'}${r.bot ? ' dabei' : ''} · ` : '';
+  return `${people}${difficultyLabel(r.difficulty)}${r.bot ? ` · ${r.rounds} Runden` : ''}`;
 }
 
 function difficultyLabel(value: PublicRoom['difficulty']) {

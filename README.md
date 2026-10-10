@@ -121,6 +121,19 @@ Wer keine eigene Gruppe hat, kann trotzdem mitspielen: Die Leitung kann ihren Ra
 - **Bescheid für die Leitung.** Tritt jemand einem öffentlichen Raum bei, vibriert das Handy der Leitung kurz und zeigt etwa „Hanna ist beigetreten“. Auf dem iPhone, das Webseiten keine Vibration erlaubt, erklingt stattdessen ein leiser Zweiklang. Damit das auch beim Warten klappt, bleibt der Bildschirm der Leitung an, solange ihr Raum öffentlich ist. Ist das Handy gesperrt oder der Raum im Hintergrund, kann eine Webseite weder vibrieren noch nachfragen; die Meldung kommt dann beim Zurückkehren.
 - **Sparsam.** Die Startseite fragt alle 10 Sekunden nach, solange sie sichtbar ist, und der Worker hält die Liste 4 Sekunden vor. Die Liste erscheint nur, wenn es gerade offene Räume gibt.
 
+### Joseph – der Raum, in dem immer jemand wartet
+
+Unter „Offene Räume“ steht immer **„Spiel gegen Joseph“** (Raumcode `JOSEPH`). Joseph ist ein Bot, der wie ein Mensch mitspielt:
+
+- **Bluffen:** Joseph schreibt nach ein paar Sekunden Bedenkzeit einen Hausbluff zur Frage. Sobald alle Menschen abgegeben haben, zieht er sofort nach, damit niemand auf ihn warten muss.
+- **Raten:** Joseph stimmt genauso ab und findet die Wahrheit etwa in 45 Prozent der Runden. Seinen eigenen Bluff wählt er nie.
+- **Herzen:** Nach der Auflösung verteilt er ein Herz an einen Bluff der Menschen.
+- **Ohne Leitung spielbar:** Joseph leitet den Raum, damit niemand ihn schließen, sperren oder Leute entfernen kann. Starten, weiterschalten und neu beginnen dürfen alle Menschen im Raum. Gespielt werden 6 Runden, gemischte Schwierigkeit.
+- **Räumt sich selbst auf:** Ist zwei Minuten lang kein Mensch mehr verbunden, endet eine laufende Partie. Drei Minuten nach dem Endstand wartet Joseph wieder auf eine neue Partie. Wer zehn Minuten nicht mehr da war, verlässt den Raum automatisch.
+- **Immer da:** Den Raum legt der Server bei Bedarf selbst an, auch nachdem ihn das nächtliche Aufräumen gelöscht hat. Joseph braucht keinen laufenden Prozess: Er zieht wie alles andere „im Vorbeigehen“, wenn ein Handy nachfragt.
+
+Weil der Raum öffentlich ist, können sich dort auch Fremde treffen. Entfernen kann dort niemand jemanden.
+
 ### Verbindungsabbrüche
 
 Jedes Handy merkt sich seine Sitzung. Neu laden, kurz das WLAN verlieren oder den Bildschirm sperren kostet nichts. Wer das Gerät oder den Browser wechselt, gibt einfach denselben Spitznamen wieder ein und steigt am alten Platz wieder ein, solange das alte Gerät nicht mehr verbunden ist. Während der Partie bleibt der Bildschirm wach, sofern der Browser das unterstützt. Ein fertiger, aber noch nicht abgeschickter Bluff wird kurz vor Ablauf der Zeit automatisch abgegeben.

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { createApi } from '../src/server/api';
 import { MemoryStore } from '../src/server/store';
-import { LISTED_ALIVE_MS } from '../src/shared/rules';
+import { BOT_NAME, BOT_ROOM_CODE, LISTED_ALIVE_MS } from '../src/shared/rules';
 import type { PublicRoom, RoomView, SessionResponse, ViewResponse } from '../src/shared/types';
 import { Clock, seeded } from './helpers';
 
@@ -146,12 +146,12 @@ describe('API', () => {
 });
 
 describe('Öffentliche Räume', () => {
-  /** Liste der Startseite lesen – nach Ablauf des Zwischenspeichers */
+  /** Räume der Menschen auf der Startseite (ohne Josephs Dauerraum) – nach Ablauf des Zwischenspeichers */
   async function publicList(t: ReturnType<typeof setup>) {
     t.clock.advance(5000);
     const res = await t.call('GET', '/api/rooms');
     expect(res.status).toBe(200);
-    return res.body.rooms as PublicRoom[];
+    return (res.body.rooms as PublicRoom[]).filter((r) => !r.bot);
   }
   const act = (t: ReturnType<typeof setup>, code: string, token: string, action: unknown) =>
     t.call('POST', `/api/rooms/${code}/action`, action, token);
@@ -172,8 +172,8 @@ describe('Öffentliche Räume', () => {
 
     t.clock.advance(5000); // Zwischenspeicher der Liste abgelaufen
     const raw = await t.call('GET', '/api/rooms');
-    expect(raw.body.rooms).toEqual([
-      { code, people: 2, free: 10, status: 'lobby', round: null, rounds: 4, difficulty: 'gemischt' },
+    expect((raw.body.rooms as PublicRoom[]).filter((r) => !r.bot)).toEqual([
+      { code, people: 2, free: 10, status: 'lobby', round: null, rounds: 4, difficulty: 'gemischt', bot: null },
     ]);
     expect(JSON.stringify(raw.body)).not.toMatch(/Rahel|Jonas/);
 
@@ -228,5 +228,40 @@ describe('Öffentliche Räume', () => {
     const late = await t.call('POST', `/api/rooms/${running.code}/join`, { name: 'Hanna' });
     expect(late.status).toBe(200);
     expect((late.body as SessionResponse).view.status).toBe('playing');
+  });
+});
+
+describe('Joseph', () => {
+  it('wartet immer als erster offener Raum und entsteht bei Bedarf neu', async () => {
+    const t = setup();
+    const list = await t.call('GET', '/api/rooms');
+    expect(list.body.rooms[0]).toMatchObject({ code: BOT_ROOM_CODE, bot: BOT_NAME, people: 1, status: 'lobby' });
+
+    // Auch nach dem Aufräumen ist der Raum direkt erreichbar
+    await t.store.cleanup(t.clock.now + 1);
+    const tv = await t.call('GET', `/api/rooms/${BOT_ROOM_CODE}`);
+    expect(tv.status).toBe(200);
+    expect((tv.body as ViewResponse).view.players.map((p) => p.name)).toEqual([BOT_NAME]);
+  });
+
+  it('spielt mit Menschen, die selbst starten – Joseph ist dabei immer verbunden', async () => {
+    const t = setup();
+    const joined = await t.call('POST', `/api/rooms/${BOT_ROOM_CODE.toLowerCase()}/join`, { name: 'Hanna' });
+    expect(joined.status).toBe(200);
+    const me = joined.body as SessionResponse;
+    expect(me.view.botRoom).toBe(true);
+    expect(me.view.players.find((p) => p.bot)).toMatchObject({ name: BOT_NAME, online: true });
+
+    const started = await t.call('POST', `/api/rooms/${BOT_ROOM_CODE}/action`, { type: 'start' }, me.token);
+    expect(started.status).toBe(200);
+    expect((started.body as ViewResponse).view.status).toBe('playing');
+
+    const bluff = await t.call('POST', `/api/rooms/${BOT_ROOM_CODE}/action`, { type: 'bluff', text: 'Ein Zylinderhut aus Quarzglas' }, me.token);
+    // Joseph zieht sofort nach, also beginnt die Abstimmung
+    expect((bluff.body as ViewResponse).view.round!.phase).toBe('vote');
+
+    // Niemand darf Joseph hinauswerfen oder den Raum schließen
+    const kick = await t.call('POST', `/api/rooms/${BOT_ROOM_CODE}/action`, { type: 'close' }, me.token);
+    expect(kick.status).toBe(403);
   });
 });

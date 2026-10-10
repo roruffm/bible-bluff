@@ -3,6 +3,12 @@
 
 import {
   BLUFF_MAX,
+  BOT_NAME,
+  BOT_ROOM_AWAY_MS,
+  BOT_ROOM_FINISHED_MS,
+  BOT_ROOM_IDLE_MS,
+  BOT_SETTINGS,
+  BOT_TRUTH_RATE,
   DEFAULT_SETTINGS,
   DIFFICULTY_OPTIONS,
   MAX_PLAYERS,
@@ -107,6 +113,12 @@ function requireHost(state: RoomState, actorId: string) {
   if (state.hostId !== actorId) {
     throw new GameError('not_host', 'Das darf nur die Spielleitung.', 403);
   }
+}
+
+/** Starten, weiterschalten, neu beginnen: die Leitung – im Bot-Raum jeder Mensch */
+function requireLead(state: RoomState, actorId: string) {
+  if (state.botRoom && !player(state, actorId)?.bot) return;
+  requireHost(state, actorId);
 }
 
 function requireGame(state: RoomState): GameRec {
@@ -559,7 +571,7 @@ function strongBluffs(s: RoomState, round: RoundRec): StrongBluffRec[] {
   const likes = likeCounts(round);
   const names = [...s.players, ...s.kicked].map((p) => normalize(p.name)).filter((n) => n.length >= 2);
   return (round.options ?? [])
-    .filter((o) => o.kind === 'player')
+    .filter((o) => o.kind === 'player' && !o.authorIds.some((id) => player(s, id)?.bot))
     .map((o) => ({ text: o.text, fooled: votersOf(round, o.id).length, likes: likes.get(o.id) ?? 0 }))
     .filter((b) => (b.fooled >= STRONG_BLUFF_MIN || b.likes >= STRONG_BLUFF_MIN) && !mentionsName(b.text, names));
 }
@@ -670,8 +682,11 @@ export function tick(state: RoomState, ctx: Ctx): RoomState | null {
   const s = clone(state);
   let changed = false;
 
+  if (s.botRoom && tidyBotRoom(s, ctx)) changed = true;
+
   if (s.status === 'playing' && s.game && !s.paused) {
     for (let guard = 0; guard < 6 && s.status === 'playing'; guard++) {
+      if (botMoves(s, ctx)) changed = true;
       const g = s.game;
       const due = g.deadline !== null && ctx.now >= g.deadline;
       const early =
@@ -683,6 +698,135 @@ export function tick(state: RoomState, ctx: Ctx): RoomState | null {
   }
 
   return changed ? s : null;
+}
+
+// ───────────────────────── Joseph, der Bot ─────────────────────────
+
+export const BOT_ID = 'bot-joseph';
+/** Kein echter Token-Hash (die sind 64 Hex-Zeichen) – so kann sich niemand als Joseph ausgeben */
+const BOT_TOKEN = 'bot';
+
+/** Dauerraum, in dem Joseph immer wartet. Joseph leitet ihn, damit niemand ihn schließen oder sperren kann. */
+export function createBotRoom(code: string, ctx: Ctx): RoomState {
+  return {
+    v: 1,
+    code,
+    createdAt: ctx.now,
+    status: 'lobby',
+    hostId: BOT_ID,
+    locked: false,
+    listed: true,
+    botRoom: true,
+    settings: { ...BOT_SETTINGS },
+    players: [
+      {
+        id: BOT_ID,
+        name: BOT_NAME,
+        color: PLAYER_COLORS[0],
+        tokenHash: BOT_TOKEN,
+        joinedAt: ctx.now,
+        plays: true,
+        score: 0,
+        stats: freshStats(),
+        bot: true,
+      },
+    ],
+    kicked: [],
+    game: null,
+    usedQuestionIds: [],
+    paused: null,
+  };
+}
+
+/** Bots sind immer verbunden – für Wartelogik, Anzeige und Liste der offenen Räume */
+export function botPresence(state: RoomState, now: number): Record<string, number> {
+  return Object.fromEntries(state.players.filter((p) => p.bot).map((p) => [p.id, now]));
+}
+
+function backToLobby(s: RoomState) {
+  s.status = 'lobby';
+  s.game = null;
+  s.paused = null;
+  for (const p of s.players) {
+    p.score = 0;
+    p.stats = freshStats();
+    delete p.quietRound;
+  }
+}
+
+/**
+ * Der Dauerraum räumt sich selbst auf: Wer lange weg ist, geht; eine verlassene Partie endet;
+ * nach dem Endstand wartet Joseph wieder auf die Nächsten.
+ */
+function tidyBotRoom(s: RoomState, ctx: Ctx): boolean {
+  let changed = false;
+  const lastSeen = (p: PlayerRec) => ctx.presence[p.id] ?? p.joinedAt;
+  const gone = s.players.filter((p) => !p.bot && ctx.now - lastSeen(p) >= BOT_ROOM_AWAY_MS);
+  for (const p of gone) {
+    removePlayer(s, p.id);
+    changed = true;
+  }
+  const humans = s.players.filter((p) => !p.bot);
+  if (humans.length === 0 && (s.seenFrom?.length || s.kicked.length)) {
+    // Niemand mehr da: „Neues für alle“ beginnt für die Nächsten von vorn
+    delete s.seenFrom;
+    delete s.seenCounts;
+    s.kicked = [];
+    changed = true;
+  }
+  const lastHuman = Math.max(0, ...humans.map(lastSeen));
+  const abandoned = s.status === 'playing' && ctx.now - lastHuman >= BOT_ROOM_IDLE_MS;
+  const done = s.status === 'finished' && ctx.now - (s.game?.finishedAt ?? 0) >= BOT_ROOM_FINISHED_MS;
+  if (abandoned || done) {
+    backToLobby(s);
+    changed = true;
+  }
+  return changed;
+}
+
+/** Wann Joseph in dieser Phase zieht – fest je Runde, damit jeder Abruf dasselbe ergibt */
+function botDelay(g: GameRec): number {
+  const [base, spread] = g.phase === 'write' ? [8000, 12000] : g.phase === 'vote' ? [5000, 7000] : [3000, 4000];
+  const seed = (g.roundIndex + 1) * 2654435761 + g.phase.length * 40503;
+  return base + (seed % 1000) * (spread / 1000);
+}
+
+function botVote(round: RoundRec, botId: string, ctx: Ctx): string {
+  const options = (round.options ?? []).filter((o) => !o.authorIds.includes(botId));
+  const truth = options.find((o) => o.kind === 'truth');
+  const others = options.filter((o) => o.kind !== 'truth');
+  if (truth && (ctx.rng() < BOT_TRUTH_RATE || others.length === 0)) return truth.id;
+  return others[Math.floor(ctx.rng() * others.length)].id;
+}
+
+/**
+ * Josephs Züge in der laufenden Phase. Er zieht nach einer kurzen Bedenkzeit – oder sofort,
+ * sobald alle verbundenen Menschen fertig sind, damit niemand auf ihn warten muss.
+ */
+function botMoves(s: RoomState, ctx: Ctx): boolean {
+  const g = s.game!;
+  const round = g.round;
+  const humans = eligibleOnline(s, ctx).filter((p) => !p.bot);
+  const due = ctx.now >= g.phaseStartedAt + botDelay(g);
+  let moved = false;
+  for (const bot of players(s).filter((p) => p.bot)) {
+    if (g.phase === 'write' && !round.bluffs[bot.id]) {
+      if (!due && !humans.every((p) => round.bluffs[p.id])) continue;
+      round.bluffs[bot.id] = { text: formatAnswer(suggestBluff(s, bot.id, ctx)), at: ctx.now };
+      moved = true;
+    } else if (g.phase === 'vote' && !round.votes[bot.id] && round.options) {
+      if (!due && !humans.every((p) => round.votes[p.id])) continue;
+      round.votes[bot.id] = botVote(round, bot.id, ctx);
+      moved = true;
+    } else if (g.phase === 'scores' && due && !round.likes?.[bot.id]) {
+      // Ein Herz für einen Bluff der Menschen, wenn es einen gibt
+      const liked = (round.options ?? []).filter((o) => o.kind === 'player' && !o.authorIds.some((id) => player(s, id)?.bot));
+      if (!liked.length) continue;
+      (round.likes ??= {})[bot.id] = liked[Math.floor(ctx.rng() * liked.length)].id;
+      moved = true;
+    }
+  }
+  return moved;
 }
 
 // ───────────────────────── Aktionen ─────────────────────────
@@ -699,7 +843,7 @@ export function applyAction(state: RoomState, actorId: string, action: Action, c
 
   switch (action.type) {
     case 'start': {
-      requireHost(s, actorId);
+      requireLead(s, actorId);
       if (s.status !== 'lobby') throw new GameError('bad_state', 'Die Partie läuft bereits.');
       startGame(s, ctx);
       return { state: s };
@@ -883,7 +1027,7 @@ export function applyAction(state: RoomState, actorId: string, action: Action, c
     }
 
     case 'revealNext': {
-      requireHost(s, actorId);
+      requireLead(s, actorId);
       const g = requireGame(s);
       if (g.phase !== 'reveal' || !g.round.plan || g.round.revealStartedAt === null) {
         throw new GameError('bad_state', 'Gerade wird nichts aufgedeckt.');
@@ -902,7 +1046,7 @@ export function applyAction(state: RoomState, actorId: string, action: Action, c
     }
 
     case 'next': {
-      requireHost(s, actorId);
+      requireLead(s, actorId);
       const g = requireGame(s);
       if (g.phase !== 'scores') throw new GameError('bad_state', 'Erst nach der Auflösung geht es weiter.');
       resume(s, ctx);
@@ -946,16 +1090,9 @@ export function applyAction(state: RoomState, actorId: string, action: Action, c
     }
 
     case 'playAgain': {
-      requireHost(s, actorId);
+      requireLead(s, actorId);
       if (s.status !== 'finished') throw new GameError('bad_state', 'Die Partie läuft noch.');
-      s.status = 'lobby';
-      s.game = null;
-      s.paused = null;
-      for (const p of s.players) {
-        p.score = 0;
-        p.stats = freshStats();
-        delete p.quietRound;
-      }
+      backToLobby(s);
       return { state: s };
     }
 
