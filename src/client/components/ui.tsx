@@ -39,6 +39,8 @@ export function Button(props: {
   type?: 'button' | 'submit';
   block?: boolean;
   small?: boolean;
+  /** Erhaben wie „Raum eröffnen“: dunkler Rand und eine Kante darunter */
+  raised?: boolean;
   label?: string;
 }) {
   const [busy, setBusy] = useState(false);
@@ -59,7 +61,7 @@ export function Button(props: {
   return (
     <button
       type={props.type ?? 'button'}
-      class={`btn btn-${props.variant ?? 'primary'}${props.block ? ' btn-block' : ''}${props.small ? ' btn-small' : ''}${busy ? ' is-busy' : ''}`}
+      class={`btn btn-${props.variant ?? 'primary'}${props.block ? ' btn-block' : ''}${props.small ? ' btn-small' : ''}${props.raised ? ' btn-raised' : ''}${busy ? ' is-busy' : ''}`}
       disabled={props.disabled || busy}
       onClick={props.type === 'submit' ? undefined : click}
       aria-label={props.label}

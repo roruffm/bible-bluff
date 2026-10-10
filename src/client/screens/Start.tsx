@@ -95,7 +95,7 @@ export function Home() {
             </p>
           </div>
         </div>
-        <Button block onClick={() => navigate('/joseph')}>
+        <Button block raised onClick={() => navigate('/joseph')}>
           Gegen {BOT_NAME} spielen
         </Button>
       </section>
@@ -282,7 +282,7 @@ export function JoinForm(props: {
           {error}
         </p>
       )}
-      <Button type="submit" block disabled={busy}>
+      <Button type="submit" block raised disabled={busy}>
         {busy ? 'Trete bei …' : 'Beitreten'}
       </Button>
     </form>

@@ -43,6 +43,8 @@
   /* Rollen, die sich je Farbkonzept anpassen lassen */
   --primary: var(--brown);
   --on-primary: var(--cream);
+  /* Kante unter erhabenen Knöpfen (.btn-raised) */
+  --raised-edge: color-mix(in srgb, var(--primary) 42%, #000);
   --seg-on: var(--brown);
   --on-seg-on: var(--cream);
   --on-gold: #2b211c;
@@ -887,6 +889,17 @@ textarea {
 
 .btn-gold:active:not(:disabled) {
   box-shadow: 0 1px 0 var(--on-gold);
+  transform: translateY(2px);
+}
+
+/* Erhabene Knöpfe wie „Raum eröffnen“ – die Kante ist eine dunklere Stufe der Knopffarbe */
+.btn-raised {
+  border-color: var(--raised-border, var(--raised-edge));
+  box-shadow: 0 3px 0 var(--raised-edge);
+}
+
+.btn-raised:active:not(:disabled) {
+  box-shadow: 0 1px 0 var(--raised-edge);
   transform: translateY(2px);
 }
 
@@ -3646,6 +3659,9 @@ html.tv-mode body {
   --brown-2: #3d7bff;
   --cream: #ffffff;
   --gold: #ff4f9a;
+  /* Schwarze Knöpfe bekommen eine pinke Kante, sonst sähe man sie nicht */
+  --raised-edge: #ff4f9a;
+  --raised-border: #161616;
   --gold-2: #3d7bff;
   --gold-soft: #ffe1ee;
   --olive: #12b85f;
