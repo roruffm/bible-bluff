@@ -4087,3 +4087,8 @@ html.tv-mode body {
   --logo-tongue: #ff6b5e;
   --logo-glint: #ffffff;
 }
+
+/* Am Spielende zum Weitersagen einladen (Results.tsx, SpreadCard) */
+.spread-card .btn-ghost {
+  margin-top: 6px;
+}

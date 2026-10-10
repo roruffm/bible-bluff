@@ -143,6 +143,13 @@ Wer gerade keine Gruppe hat, tippt auf der Startseite auf **„Gegen Joseph spie
 - **Nur Mitspieler:** Joseph ist immer verbunden, kann aber nie die Leitung übernehmen. Gehen alle Menschen, schließt der Raum. Wer „Joseph“ heißen will, muss sich einen anderen Namen suchen.
 - **Ohne laufenden Prozess:** Joseph zieht wie alles andere „im Vorbeigehen“, wenn ein Handy nachfragt.
 
+### Weitersagen
+
+Bible Bluff verbreitet sich über Gruppen, die es gespielt haben. Darum hilft das Spiel beim Weitersagen:
+
+- **Link-Vorschau.** Wer biblebluff.de in WhatsApp, Signal oder Telegram teilt, bekommt eine Vorschau mit Logo, kurzem Satz und großem Bild (`og.jpg`). Einladungslinks in einen Raum (`/r/LAMPE7`) zeigen stattdessen „Du bist eingeladen – Raum LAMPE7“ mit eigenem Bild (`og-invite.jpg`). Dafür laufen diese Links zuerst durch den Worker (`run_worker_first` in `wrangler.toml`). Er liefert dieselbe App aus und tauscht nur Titel, Text und Bild der Vorschau aus (`src/server/preview.ts`). Der lokale Server macht es genauso. Suchmaschinen bleiben laut `robots.txt` weiter draußen; die Vorschau-Dienste von Messengern und sozialen Netzwerken dürfen Einladungslinks lesen.
+- **Einladung am Spielende.** Mitspielende sehen nach der Partie die Karte „Leite selbst eine Runde“ mit „Eigenen Raum eröffnen“ und „Link an deine Gruppe schicken“. Nach einer Partie gegen Joseph heißt die Karte „Jetzt mit Freunden spielen“; „Nochmal gegen Joseph“ geht weiterhin. Die Leitung einer Gruppe und die Leinwand sehen keine solche Karte.
+
 ### Verbindungsabbrüche
 
 Jedes Handy merkt sich seine Sitzung. Neu laden, kurz das WLAN verlieren oder den Bildschirm sperren kostet nichts. Wer das Gerät oder den Browser wechselt, gibt einfach denselben Spitznamen wieder ein und steigt am alten Platz wieder ein, solange das alte Gerät nicht mehr verbunden ist. Während der Partie bleibt der Bildschirm wach, sofern der Browser das unterstützt. Ein fertiger, aber noch nicht abgeschickter Bluff wird kurz vor Ablauf der Zeit automatisch abgegeben.
@@ -237,6 +244,8 @@ Das Logo zeigt eine aufgeschlagene Bibel, daneben „BIBLE“ mit einem lachende
 
 `src/client/public/logo.svg` ist das Logo in den Lernblatt-Farben zum Weitergeben. Favicon und Homescreen-Icons entstehen aus der Bildmarke `src/client/public/logo-mark.svg` (Buch mit Heiligenschein-Smiley) mit `node scripts/render-icons.mjs`.
 
+Die Vorschaubilder für geteilte Links (`og.jpg` und `og-invite.jpg`, je 1200 × 630 Pixel) entstehen mit `npm run build && node scripts/render-og.mjs` aus der gebauten App, mit dem Logo in See Genezareth. Alles Wichtige steht in der Mitte, weil manche Apps nur einen quadratischen Ausschnitt zeigen.
+
 ## Impressum und Datenschutz
 
 Unter `/impressum` und `/datenschutz` stehen Impressum und Datenschutzerklärung. Links darauf gibt es auf der Startseite, beim Raum-Eröffnen, beim Beitreten, auf den Entdeckungen-Seiten und im Menü eines Raums (dort in einem neuen Tab, damit niemand aus der Partie fällt). Name, Anschrift und E-Mail stehen an einer Stelle in `src/client/screens/Legal.tsx` (`ANBIETER`). Ändert sich etwas daran, was das Spiel speichert, gehört die Datenschutzerklärung in derselben Datei mit angepasst.
@@ -268,7 +277,7 @@ Schlüsselwörter werden ohne Umlaute geschrieben (`ae`, `oe`, `ue`, `ss`). Ein 
 
 ```bash
 npm run typecheck
-npm test             # Engine, Textvergleich, Fragenpool, Gesprächsstoff, API, Freigabe (Vitest)
+npm test             # Engine, Textvergleich, Fragenpool, Gesprächsstoff, API, Freigabe, Link-Vorschau (Vitest)
 npm run test:e2e     # komplette Partien mit mehreren Browsern (Playwright)
 ```
 
@@ -278,9 +287,9 @@ npm run test:e2e     # komplette Partien mit mehreren Browsern (Playwright)
 src/
   shared/      Typen und Regeln, die Server und Browser teilen
   server/      Engine, Fragenpool, Textvergleich, API, D1-/Speicher-Anbindung
-  worker.ts    Cloudflare-Worker-Einstieg
+  worker.ts    Cloudflare-Worker-Einstieg (API, Link-Vorschau für Einladungen)
   client/      Preact-App (Startseite, Lobby, Phasen, Aufdeckung, Leinwand)
 migrations/    D1-Schema
-scripts/       lokaler Node-Server
+scripts/       lokaler Node-Server, App-Icons und Vorschaubilder
 tests/ e2e/    Unit- und End-to-End-Tests
 ```

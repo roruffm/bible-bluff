@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
-import { POINTS_FAVORITE, POINTS_GIFT, TALK_STEPS } from '../../shared/rules';
+import { BOT_NAME, POINTS_FAVORITE, POINTS_GIFT, TALK_STEPS } from '../../shared/rules';
 import type { RoomView, TalkNotes, TalkView } from '../../shared/types';
+import { FriendsIcon } from '../components/Icons';
 import { QRCode } from '../components/QR';
 import { Avatar, Button, ConfirmButton, QuestionText, Toast, formatSeconds, upperFirst } from '../components/ui';
 import { api } from '../lib/api';
@@ -308,6 +309,7 @@ function FavoritesCard({ view, conn, display }: { view: RoomView; conn: RoomConn
 export function FinalScreen({ view, conn, display = false }: { view: RoomView; conn: RoomConnection; display?: boolean }) {
   const final = view.final!;
   const isHost = Boolean(view.me?.isHost) && !display;
+  const withBot = view.players.some((p) => p.bot);
   const podium = final.ranking.slice(0, 3);
   const order = [podium[1], podium[0], podium[2]].filter(Boolean);
   if (final.talk) return <TalkScreen view={view} conn={conn} talk={final.talk} display={display} />;
@@ -381,6 +383,7 @@ export function FinalScreen({ view, conn, display = false }: { view: RoomView; c
 
       {!display && (
         <footer class="stack">
+          {isHost && withBot && <SpreadCard friends />}
           {isHost && final.discoveries.length > 0 && (
             <section class="card talk-invite">
               <h2 class="card-title">Vom Spiel ins Gespräch</h2>
@@ -395,24 +398,70 @@ export function FinalScreen({ view, conn, display = false }: { view: RoomView; c
           )}
           {isHost ? (
             <>
-              <Button variant="gold" block onClick={() => conn.act({ type: 'playAgain' })}>
-                Neue Partie mit allen
+              {/* Mit Joseph ist „mit Freunden spielen“ der nächste Schritt – nochmal gegen ihn geht trotzdem */}
+              <Button variant={withBot ? 'secondary' : 'gold'} block onClick={() => conn.act({ type: 'playAgain' })}>
+                {withBot ? `Nochmal gegen ${BOT_NAME}` : 'Neue Partie mit allen'}
               </Button>
               <ConfirmButton block confirm="Wirklich schließen? Nochmal tippen" onConfirm={() => conn.act({ type: 'close' })}>
                 Raum schließen
               </ConfirmButton>
             </>
           ) : (
-            <p class="waiting">
-              <span class="pulse" aria-hidden="true" />
-              Vielleicht startet die Spielleitung gleich eine neue Partie …
-            </p>
+            <>
+              <p class="waiting">
+                <span class="pulse" aria-hidden="true" />
+                Vielleicht startet die Spielleitung gleich eine neue Partie …
+              </p>
+              <SpreadCard />
+            </>
           )}
           <Button variant="ghost" block onClick={() => navigate('/')}>
             Zur Startseite
           </Button>
         </footer>
       )}
+    </section>
+  );
+}
+
+/**
+ * Am Spielende zum Weitersagen einladen – so kommt das Spiel in weitere Gruppen: Wer mitgespielt hat,
+ * kann selbst eine Runde leiten; wer gegen Joseph gespielt hat (`friends`), als Nächstes mit Freunden.
+ */
+function SpreadCard({ friends = false }: { friends?: boolean }) {
+  const [toast, setToast] = useState<string | null>(null);
+  const share = async () =>
+    setToast(
+      await shareLink({
+        title: 'Bible Bluff',
+        text: 'Kennt ihr Bible Bluff? Alle erfinden Antworten auf eine Bibelfrage – wer findet die echte? Lasst uns das mal zusammen spielen!',
+        url: `${location.origin}/`,
+      }),
+    );
+  return (
+    <section class="card choice spread-card" aria-labelledby="spread-title">
+      <div class="choice-head">
+        <span class="choice-icon is-create">
+          <FriendsIcon />
+        </span>
+        <div>
+          <h2 id="spread-title">{friends ? 'Jetzt mit Freunden spielen' : 'Leite selbst eine Runde'}</h2>
+          <p class="muted small">
+            {friends
+              ? `Gegen ${BOT_NAME} geübt – mit echten Menschen wird es erst richtig lustig. Eröffne einen Raum und lade Freunde, Familie oder deine Jugendgruppe ein.`
+              : 'Hat’s dir gefallen? Spiel es mit deiner Jugendgruppe, deiner Familie oder im Hauskreis – kostenlos und ohne Anmeldung.'}
+          </p>
+        </div>
+      </div>
+      <Button variant="gold" block onClick={() => navigate('/neu')}>
+        {friends ? 'Raum für Freunde eröffnen' : 'Eigenen Raum eröffnen'}
+      </Button>
+      {!friends && (
+        <Button variant="ghost" block onClick={share}>
+          Link an deine Gruppe schicken
+        </Button>
+      )}
+      <Toast message={toast} onDone={() => setToast(null)} />
     </section>
   );
 }
