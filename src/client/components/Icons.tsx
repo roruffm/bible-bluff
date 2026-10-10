@@ -1,7 +1,7 @@
 // Kleine Bildzeichen für die Startseite und Josephs Gesicht.
 // Linien folgen der Schriftfarbe (currentColor); Josephs Gesicht hat feste Farben, weil es auf seiner Spielerfarbe sitzt.
 
-/** Joseph: ein kleiner Roboter mit der Maskenbrille aus dem Logo – er zwinkert wie die Bildmarke */
+/** Joseph: ein kleiner Roboter mit Maskenbrille, der verschmitzt zwinkert – ein Bluffer eben */
 export function BotFace() {
   return (
     <svg class="bot-face" viewBox="0 0 48 48" aria-hidden="true">

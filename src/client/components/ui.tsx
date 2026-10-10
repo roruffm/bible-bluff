@@ -4,7 +4,7 @@ import { BOT_ID, GROUP_LABELS } from '../../shared/rules';
 import type { PersonRef, PlayerView, QuestionView } from '../../shared/types';
 import { useServerNow } from '../lib/hooks';
 import { BotFace } from './Icons';
-import { LogoMark } from './LogoMark';
+import { LogoArt } from './LogoArt';
 
 export function initials(name: string): string {
   const parts = name.trim().split(/\s+/);
@@ -242,11 +242,7 @@ export function Toast({ message, onDone }: { message: string | null; onDone: () 
 export function Logo({ small = false }: { small?: boolean }) {
   return (
     <div class={`logo${small ? ' logo-small' : ''}`}>
-      <LogoMark />
-      <span class="logo-words">
-        <span class="logo-top">Bible</span>
-        <span class="logo-bottom">Bluff</span>
-      </span>
+      <LogoArt />
     </div>
   );
 }

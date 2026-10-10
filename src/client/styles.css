@@ -67,12 +67,23 @@
   --page-art: none;
   --page-art-size: auto;
 
-  --logo-ink: #2b211c;
-  --logo-cover: #b2492c;
-  --logo-pages: #fbf3e4;
-  --logo-ribbon: #e2b65c;
-  --logo-mask: #f2d9a0;
-  --logo-spark: #f2d9a0;
+  --logo-ink: #4a2412;
+  --logo-b1: #fde58f;
+  --logo-b2: #e39a2d;
+  --logo-f1: #f7902f;
+  --logo-f2: #c4271b;
+  --logo-suit: #9b1c12;
+  --logo-shadow: #2b1a10;
+  --logo-cover: #7d4a28;
+  --logo-pages: #f8e8c4;
+  --logo-pages-2: #e3c993;
+  --logo-lines: #9a7448;
+  --logo-ribbon: #d2342a;
+  --logo-face: #ffd23f;
+  --logo-halo: #f4c242;
+  --logo-mouth: #5c1a10;
+  --logo-tongue: #ff6b5e;
+  --logo-glint: #fffbe8;
 
   --radius: 18px;
   --radius-sm: 12px;
@@ -297,106 +308,217 @@ textarea {
 
 /* ───────── Logo & Startseite ───────── */
 
+/* Das Logo (components/LogoArt.tsx) ist ein SVG; seine Farben stehen als --logo-* in jedem Farbkonzept. */
 .logo {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.16em;
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  font-size: 3.6rem;
-}
-
-.logo-words {
-  display: inline-flex;
-  flex-direction: column;
-  line-height: 0.92;
-}
-
-.logo-mark {
-  flex: none;
-  width: 1.95em;
-  height: 1.95em;
-  overflow: visible;
-}
-
-/* Farben der Bildmarke folgen dem Farbkonzept */
-.logo-mark .lm-line {
-  stroke: var(--logo-ink);
-}
-.logo-mark .lm-cover {
-  fill: var(--logo-cover);
-}
-.logo-mark .lm-pages {
-  fill: var(--logo-pages);
-}
-.logo-mark .lm-ribbon {
-  fill: var(--logo-ribbon);
-}
-.logo-mark .lm-mask {
-  fill: var(--logo-mask);
-}
-.logo-mark .lm-shine {
-  stroke: var(--logo-pages);
-}
-.logo-mark .lm-pupil {
-  fill: var(--logo-ink);
-}
-.logo-mark .lm-glint {
-  fill: var(--logo-pages);
-}
-.logo-mark .logo-spark {
-  fill: var(--logo-spark);
-}
-
-.logo-top {
-  color: var(--cream);
-}
-
-.logo-bottom {
-  color: var(--gold);
+  width: min(100%, 23rem);
 }
 
 .logo-small {
-  font-size: 1.05rem;
-  gap: 0.35em;
+  width: auto;
 }
 
-.logo-small .logo-words {
-  flex-direction: row;
-  gap: 0.25em;
-  line-height: 1;
+.logo-small .logo-art {
+  width: auto;
+  height: 2.6rem;
 }
 
-.logo-small .logo-mark {
-  width: 1.75em;
-  height: 1.75em;
+.logo-art {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
 }
 
-/* Großes Logo: das Buch kippt leicht, der Stern funkelt, das Auge blinzelt ab und zu */
-.logo:not(.logo-small) .logo-mark {
-  transform: rotate(-6deg);
+.logo-art .lg-line {
+  stroke: var(--logo-ink);
+  stroke-width: 5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
 }
 
-.logo:not(.logo-small) .logo-spark {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: twinkle 4.5s ease-in-out infinite;
+.logo-art .lg-line-thin {
+  stroke: var(--logo-ink);
+  stroke-width: 3;
+  stroke-linejoin: round;
 }
 
-.logo:not(.logo-small) .logo-eye {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: blink 7s ease-in-out infinite;
+.logo-art .lg-thin {
+  stroke: var(--logo-ink);
+  stroke-width: 2.6;
+  stroke-linejoin: round;
 }
 
-.page-head .logo-small .logo-top,
-.gone .logo-small .logo-top {
-  color: var(--ink);
+.logo-art .lg-cover {
+  fill: var(--logo-cover);
 }
 
-.page-head .logo-small .logo-bottom,
-.gone .logo-small .logo-bottom {
-  color: var(--ochre);
+.logo-art .lg-block {
+  fill: var(--logo-pages-2);
+}
+
+.logo-art .lg-edge {
+  fill: none;
+  stroke: var(--logo-lines);
+  stroke-width: 1.6;
+  opacity: 0.7;
+}
+
+.logo-art .lg-page {
+  fill: var(--logo-pages);
+}
+
+.logo-art .lg-shade {
+  fill: var(--logo-pages-2);
+  opacity: 0.7;
+}
+
+.logo-art .lg-pic {
+  fill: var(--logo-pages-2);
+}
+
+.logo-art .lg-pic-art {
+  fill: var(--logo-lines);
+  opacity: 0.45;
+}
+
+.logo-art .lg-text {
+  fill: none;
+  stroke: var(--logo-lines);
+  stroke-width: 3;
+  stroke-linecap: round;
+  opacity: 0.8;
+}
+
+.logo-art .lg-flip {
+  fill: var(--logo-pages);
+}
+
+.logo-art .lg-flip-shade {
+  fill: var(--logo-pages-2);
+  opacity: 0.8;
+}
+
+.logo-art .lg-ribbon {
+  fill: var(--logo-ribbon);
+}
+
+.logo-art .lg-drop {
+  fill: var(--logo-shadow);
+  opacity: 0.45;
+}
+
+.logo-art .lg-depth {
+  fill: var(--logo-ink);
+  stroke: var(--logo-ink);
+  stroke-width: 16;
+  stroke-linejoin: round;
+}
+
+.logo-art .lg-outline {
+  fill: var(--logo-ink);
+  stroke: var(--logo-ink);
+  stroke-width: 16;
+  stroke-linejoin: round;
+}
+
+.logo-art .lg-b1 {
+  stop-color: var(--logo-b1);
+}
+
+.logo-art .lg-b2 {
+  stop-color: var(--logo-b2);
+}
+
+.logo-art .lg-f1 {
+  stop-color: var(--logo-f1);
+}
+
+.logo-art .lg-f2 {
+  stop-color: var(--logo-f2);
+}
+
+.logo-art .lg-suit {
+  fill: var(--logo-suit);
+  opacity: 0.85;
+}
+
+.logo-art .lg-rim {
+  fill: none;
+  stroke: var(--logo-glint);
+  stroke-width: 7;
+  opacity: 0.42;
+}
+
+.logo-art .lg-rim.is-soft {
+  opacity: 0.22;
+}
+
+.logo-art .lg-gl0 {
+  stop-color: var(--logo-glint);
+  stop-opacity: 0.38;
+}
+
+.logo-art .lg-gl1 {
+  stop-color: var(--logo-glint);
+  stop-opacity: 0;
+}
+
+.logo-art .lg-halo-edge {
+  fill: none;
+  stroke: var(--logo-ink);
+  stroke-width: 10;
+}
+
+.logo-art .lg-halo {
+  fill: none;
+  stroke: var(--logo-halo);
+  stroke-width: 5;
+}
+
+.logo-art .lg-halo-shine {
+  fill: none;
+  stroke: var(--logo-glint);
+  stroke-width: 2;
+  opacity: 0.7;
+  stroke-dasharray: 18 200;
+  stroke-dashoffset: -60;
+}
+
+.logo-art .lg-face {
+  fill: var(--logo-face);
+}
+
+.logo-art .lg-face-shine {
+  fill: none;
+  stroke: var(--logo-glint);
+  stroke-width: 3;
+  stroke-linecap: round;
+  opacity: 0.6;
+}
+
+.logo-art .lg-eye {
+  fill: none;
+  stroke: var(--logo-ink);
+  stroke-width: 3.6;
+  stroke-linecap: round;
+}
+
+.logo-art .lg-mouth {
+  fill: var(--logo-mouth);
+}
+
+.logo-art .lg-tongue {
+  fill: var(--logo-tongue);
+}
+
+.logo-art .lg-cheek {
+  fill: var(--logo-tongue);
+  opacity: 0.35;
+}
+
+/* Im großen Logo schwebt der Heiligenschein ein wenig */
+.logo:not(.logo-small) .lg-halo-float {
+  animation: halo-float 3.4s ease-in-out infinite;
 }
 
 .hero {
@@ -3256,15 +3378,7 @@ html.tv-mode body {
 }
 
 .tv-lobby-intro .logo {
-  color: var(--ink);
-}
-
-.tv-lobby-intro .logo .logo-top {
-  color: var(--ink);
-}
-
-.tv-lobby-intro .logo .logo-bottom {
-  color: var(--ochre);
+  width: min(100%, 30rem);
 }
 
 .tv-lobby-intro .tagline {
@@ -3486,28 +3600,13 @@ html.tv-mode body {
   }
 }
 
-@keyframes twinkle {
+@keyframes halo-float {
   0%,
-  70%,
   100% {
-    transform: scale(1) rotate(0deg);
+    transform: translateY(0);
   }
-  80% {
-    transform: scale(1.4) rotate(25deg);
-  }
-  90% {
-    transform: scale(0.9) rotate(0deg);
-  }
-}
-
-@keyframes blink {
-  0%,
-  93%,
-  100% {
-    transform: scaleY(1);
-  }
-  96% {
-    transform: scaleY(0.12);
+  50% {
+    transform: translateY(-3px);
   }
 }
 
@@ -3587,12 +3686,23 @@ html.tv-mode body {
   --page-art:
     radial-gradient(60vmax 40vmax at 0% 0%, rgba(255, 62, 165, 0.18), transparent 70%),
     radial-gradient(60vmax 40vmax at 100% 60%, rgba(41, 227, 239, 0.12), transparent 70%);
-  --logo-ink: #140a33;
-  --logo-cover: #ff3ea5;
+  --logo-ink: #1a0a3a;
+  --logo-b1: #fff59a;
+  --logo-b2: #ffc21a;
+  --logo-f1: #ff7ccc;
+  --logo-f2: #e0157f;
+  --logo-suit: #8a0a52;
+  --logo-shadow: #000000;
+  --logo-cover: #5b2bd1;
   --logo-pages: #f6f1ff;
+  --logo-pages-2: #dccff7;
+  --logo-lines: #7a5fb5;
   --logo-ribbon: #29e3ef;
-  --logo-mask: #ffd23f;
-  --logo-spark: #ffd23f;
+  --logo-face: #ffd23f;
+  --logo-halo: #29e3ef;
+  --logo-mouth: #3a0a2a;
+  --logo-tongue: #ff6b9e;
+  --logo-glint: #ffffff;
 }
 
 :root[data-theme='spieltisch'] {
@@ -3637,11 +3747,22 @@ html.tv-mode body {
   --shadow: 0 1px 0 rgba(31, 26, 23, 0.06), 0 10px 26px -14px rgba(20, 50, 35, 0.5);
   --shadow-lift: 0 18px 40px -20px rgba(20, 50, 35, 0.65);
   --logo-ink: #1f1a17;
-  --logo-cover: #c8322b;
+  --logo-b1: #fde39a;
+  --logo-b2: #e5ab2c;
+  --logo-f1: #ef5a45;
+  --logo-f2: #b0221c;
+  --logo-suit: #6e120d;
+  --logo-shadow: #0d2a1d;
+  --logo-cover: #7a3b22;
   --logo-pages: #fffdf6;
-  --logo-ribbon: #f1c24b;
-  --logo-mask: #f2d9a0;
-  --logo-spark: #f1c24b;
+  --logo-pages-2: #e8dfc6;
+  --logo-lines: #7a6a50;
+  --logo-ribbon: #c8322b;
+  --logo-face: #ffd23f;
+  --logo-halo: #f1c24b;
+  --logo-mouth: #4a120e;
+  --logo-tongue: #ff6b5e;
+  --logo-glint: #fffbe8;
 }
 
 :root[data-theme='comic'] {
@@ -3702,11 +3823,22 @@ html.tv-mode body {
   --page-art: radial-gradient(rgba(0, 0, 0, 0.07) 1.5px, transparent 1.7px);
   --page-art-size: 14px 14px;
   --logo-ink: #161616;
+  --logo-b1: #ffffff;
+  --logo-b2: #ffe14d;
+  --logo-f1: #7aa5ff;
+  --logo-f2: #2457d6;
+  --logo-suit: #0f2f8a;
+  --logo-shadow: #161616;
   --logo-cover: #ff4f9a;
   --logo-pages: #ffffff;
+  --logo-pages-2: #ffe9a8;
+  --logo-lines: #3a3528;
   --logo-ribbon: #3d7bff;
-  --logo-mask: #ffe066;
-  --logo-spark: #ffffff;
+  --logo-face: #ffd93d;
+  --logo-halo: #ffffff;
+  --logo-mouth: #5a0f22;
+  --logo-tongue: #ff4f9a;
+  --logo-glint: #ffffff;
 }
 
 :root[data-theme='see'] {
@@ -3752,12 +3884,23 @@ html.tv-mode body {
   --glow-strong: rgba(242, 200, 121, 0.95);
   --shadow: 0 1px 0 rgba(16, 40, 58, 0.05), 0 10px 28px -16px rgba(16, 40, 58, 0.45);
   --shadow-lift: 0 18px 40px -22px rgba(16, 40, 58, 0.7);
-  --logo-ink: #10283a;
-  --logo-cover: #2a6f8f;
-  --logo-pages: #fffaf0;
-  --logo-ribbon: #df5b3c;
-  --logo-mask: #f2c879;
-  --logo-spark: #f2c879;
+  --logo-ink: #0e2a3d;
+  --logo-b1: #fde7a6;
+  --logo-b2: #e6a93f;
+  --logo-f1: #3cc8b3;
+  --logo-f2: #0d7468;
+  --logo-suit: #06463f;
+  --logo-shadow: #0b2233;
+  --logo-cover: #1d5a82;
+  --logo-pages: #fbf6e8;
+  --logo-pages-2: #e3d8bd;
+  --logo-lines: #6b7f8c;
+  --logo-ribbon: #e8604c;
+  --logo-face: #ffd23f;
+  --logo-halo: #f2c879;
+  --logo-mouth: #4a1410;
+  --logo-tongue: #ff6b5e;
+  --logo-glint: #ffffff;
 }
 
 :root[data-theme='klar'] {
@@ -3804,10 +3947,21 @@ html.tv-mode body {
   --glow-strong: rgba(255, 209, 102, 0.95);
   --shadow: 0 1px 2px rgba(20, 22, 43, 0.05), 0 10px 26px -14px rgba(20, 22, 43, 0.22);
   --shadow-lift: 0 22px 44px -22px rgba(20, 22, 43, 0.35);
-  --logo-ink: #14162b;
-  --logo-cover: #4f46e5;
+  --logo-ink: #1e1b4b;
+  --logo-b1: #ffe9a8;
+  --logo-b2: #ffbf3d;
+  --logo-f1: #ff7b65;
+  --logo-f2: #d93a28;
+  --logo-suit: #7a1a10;
+  --logo-shadow: #14123a;
+  --logo-cover: #4338ca;
   --logo-pages: #ffffff;
+  --logo-pages-2: #e3e5f3;
+  --logo-lines: #6b6f9c;
   --logo-ribbon: #ef4f3c;
-  --logo-mask: #ffd166;
-  --logo-spark: #ffd166;
+  --logo-face: #ffd166;
+  --logo-halo: #ffd166;
+  --logo-mouth: #3b0f0a;
+  --logo-tongue: #ff6b5e;
+  --logo-glint: #ffffff;
 }

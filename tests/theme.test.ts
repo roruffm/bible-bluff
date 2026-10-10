@@ -21,7 +21,7 @@ describe('Farbkonzepte', () => {
   });
 
   it('setzt in jedem Block dieselben Grundfarben', () => {
-    const required = ['--paper', '--card', '--ink', '--line', '--brown', '--cream', '--gold', '--olive', '--rust', '--g-nt', '--g-at', '--logo-cover'];
+    const required = ['--paper', '--card', '--ink', '--line', '--brown', '--cream', '--gold', '--olive', '--rust', '--g-nt', '--g-at', '--logo-ink', '--logo-b1', '--logo-f1', '--logo-cover'];
     for (const id of THEME_IDS.filter((t) => t !== BASE_THEME)) {
       const block = css.split(`:root[data-theme='${id}'] {`)[1].split('}')[0];
       for (const name of required) expect(block, `${id} ${name}`).toContain(`${name}:`);

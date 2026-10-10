@@ -1,4 +1,4 @@
-<p align="center"><img src="src/client/public/logo.svg" width="150" alt="Bible-Bluff-Logo: aufgeschlagene Bibel mit Maskenbrille, die zwinkert"></p>
+<p align="center"><img src="src/client/public/logo.svg" width="360" alt="Bible-Bluff-Logo: aufgeschlagene Bibel, daneben „BIBLE“ mit einem lachenden Smiley samt Heiligenschein als i-Punkt und „BLUFF“ mit Spielkartenzeichen"></p>
 
 # Bible Bluff
 
@@ -221,7 +221,9 @@ Technisch setzt jedes Konzept nur CSS-Variablen (`html[data-theme]` am Ende von 
 
 ## Logo
 
-Die Bildmarke liegt als SVG in `src/client/public/logo.svg`: eine aufgeschlagene Bibel mit Maskenbrille, die verschmitzt zwinkert. In der App ist sie als Komponente `LogoMark` eingebaut; im großen Logo funkelt der Stern, und das Auge blinzelt ab und zu. Ihre Farben passen sich dem gewählten Farbkonzept an. Favicon und Homescreen-Icons entstehen aus der Bildmarke mit `node scripts/render-icons.mjs`.
+Das Logo zeigt eine aufgeschlagene Bibel, daneben „BIBLE“ mit einem lachenden Smiley samt Heiligenschein als i-Punkt und „BLUFF“ voller Spielkartenzeichen. In der App ist es die Komponente `LogoArt` (ein SVG): Die Buchstaben sind Umrisse der Schrift Titan One (SIL Open Font License), es braucht also keine Webschrift. Alle Farben kommen aus den Variablen `--logo-*`, die jedes Farbkonzept setzt – „BLUFF“ ist zum Beispiel in See Genezareth türkis, im Nachtquiz pink und im Comic blau; im großen Logo schwebt der Heiligenschein ein wenig.
+
+`src/client/public/logo.svg` ist das Logo in den Lernblatt-Farben zum Weitergeben. Favicon und Homescreen-Icons entstehen aus der Bildmarke `src/client/public/logo-mark.svg` (Buch mit Heiligenschein-Smiley) mit `node scripts/render-icons.mjs`.
 
 ## Impressum und Datenschutz
 

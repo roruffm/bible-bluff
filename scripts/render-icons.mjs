@@ -1,4 +1,4 @@
-// Erzeugt App-Icons aus der Bildmarke src/client/public/logo.svg:
+// Erzeugt App-Icons aus der Bildmarke src/client/public/logo-mark.svg (Buch mit Heiligenschein-Smiley):
 //   icon.svg (Favicon), icons/apple-touch-icon.png, icons/icon-192.png, icons/icon-512.png,
 //   icons/icon-maskable-512.png
 // Aufruf: node scripts/render-icons.mjs   (braucht den Playwright-Chromium)
@@ -7,7 +7,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { chromium } from '@playwright/test';
 
 const PUBLIC = new URL('../src/client/public/', import.meta.url);
-const logo = readFileSync(new URL('logo.svg', PUBLIC), 'utf8');
+const logo = readFileSync(new URL('logo-mark.svg', PUBLIC), 'utf8');
 const inner = logo
   .replace(/^[\s\S]*?<svg[^>]*>/, '')
   .replace(/<\/svg>\s*$/, '')
