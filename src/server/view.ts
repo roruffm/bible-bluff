@@ -33,7 +33,7 @@ function personLookup(state: RoomState) {
  * Enthält keine Spitznamen und keinen anderen Freitext.
  */
 export function publicRoom(state: RoomState, ctx: Ctx): PublicRoom | null {
-  if (!state.listed || state.locked) return null;
+  if (!state.listed || state.locked || state.botRoom) return null;
   if (state.status !== 'lobby' && state.status !== 'playing') return null;
   const free = MAX_PLAYERS - state.players.filter((p) => p.plays).length;
   if (free <= 0) return null;
@@ -48,7 +48,6 @@ export function publicRoom(state: RoomState, ctx: Ctx): PublicRoom | null {
     round: g ? g.roundIndex + 1 : null,
     rounds: g ? g.questionIds.length : state.settings.rounds,
     difficulty: state.settings.difficulty,
-    bot: state.botRoom ? state.players.find((p) => p.bot)?.name ?? null : null,
   };
 }
 
@@ -88,7 +87,6 @@ export function buildView(state: RoomState, meId: string | null, ctx: Ctx, versi
     hostId: state.hostId,
     locked: state.locked,
     listed: Boolean(state.listed),
-    botRoom: Boolean(state.botRoom),
     paused: state.paused,
     settings: state.settings,
     hostPlays: host?.plays ?? true,

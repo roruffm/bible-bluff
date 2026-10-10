@@ -10,7 +10,7 @@
 //   GET  /api/admin/bluffs           Kandidaten für frische Hausbluffs (nur mit ADMIN_KEY)
 //   POST /api/admin/bluffs           Kandidaten freigeben oder ablehnen (nur mit ADMIN_KEY)
 
-import { BLUFF_MAX, BOT_ROOM_CODE, PRESENCE_TOUCH_MS, ROOM_TTL_MS, normalizeCode } from '../shared/rules';
+import { BLUFF_MAX, PRESENCE_TOUCH_MS, ROOM_TTL_MS, normalizeCode } from '../shared/rules';
 import type {
   Action,
   ApiErrorBody,
@@ -25,7 +25,7 @@ import type {
 } from '../shared/types';
 import { randomCode } from './codes';
 import { candidatesFromGame, candidateView } from './bluff-pool';
-import { botPresence, createBotRoom, createRoom, formatAnswer, joinRoom, step, tick } from './engine';
+import { botPresence, createRoom, formatAnswer, joinRoom, step, tick } from './engine';
 import { getQuestion, hasQuestion } from './questions';
 import { buildRecap, isRecapId, randomRecapId } from './recap';
 import { GameError, type Ctx, type PlayerRec, type RoomState } from './state';
@@ -159,13 +159,12 @@ export function createApi(deps: ApiDeps) {
   }
 
   async function loadRoom(code: string): Promise<RoomRecord> {
-    let rec = await store.load(code);
-    // Josephs Dauerraum gibt es immer – nach langer Ruhe (und dem Aufräumen) entsteht er neu
-    if (!rec && code === BOT_ROOM_CODE) {
-      await store.insert(code, createBotRoom(code, { now: now(), rng, presence: {} }), now());
-      rec = await store.load(code);
-    }
+    const rec = await store.load(code);
     if (!rec) throw new GameError('not_found', 'Diesen Raum gibt es nicht (mehr). Prüfe den Code.', 404);
+    // Der frühere gemeinsame Raum mit Joseph ist abgeschaltet – jetzt spielt jede Person in einem eigenen Raum
+    if (rec.state.botRoom) {
+      throw new GameError('not_found', 'Diesen Raum gibt es nicht mehr. Gegen Joseph spielst du über die Startseite.', 404);
+    }
     return rec;
   }
 
@@ -214,13 +213,12 @@ export function createApi(deps: ApiDeps) {
     if (last === undefined || at - last >= PRESENCE_TOUCH_MS) await store.touch(code, playerId, at);
   }
 
-  // Offene Räume für die Startseite – Joseph zuerst, dann wartende Räume, dann laufende Partien
+  // Offene Räume für die Startseite – wartende Räume zuerst, dann laufende Partien
   let publicCache: { at: number; data: PublicRoomsResponse } | null = null;
   async function publicRoomsRoute(): Promise<Response> {
     const t = now();
     if (!publicCache || t - publicCache.at >= PUBLIC_TTL_MS) {
       const records = await store.listedRooms(PUBLIC_MAX * 3);
-      if (!records.some((rec) => rec.state.code === BOT_ROOM_CODE)) records.push(await loadRoom(BOT_ROOM_CODE));
       const rooms = records
         .map((rec) => {
           const ctx: Ctx = { now: t, rng, presence: presenceOf(rec, t) };
@@ -228,12 +226,7 @@ export function createApi(deps: ApiDeps) {
           return publicRoom(tick(rec.state, ctx) ?? rec.state, ctx);
         })
         .filter((r) => r !== null)
-        .sort(
-          (a, b) =>
-            Number(!a.bot) - Number(!b.bot) ||
-            Number(a.status === 'playing') - Number(b.status === 'playing') ||
-            (a.round ?? 0) - (b.round ?? 0),
-        )
+        .sort((a, b) => Number(a.status === 'playing') - Number(b.status === 'playing') || (a.round ?? 0) - (b.round ?? 0))
         .slice(0, PUBLIC_MAX);
       publicCache = { at: t, data: { rooms } };
     }
@@ -258,6 +251,7 @@ export function createApi(deps: ApiDeps) {
           hostName: String(body.name ?? ''),
           tokenHash,
           plays: body.plays !== false,
+          withBot: body.bot === true,
           settings: (body.settings && typeof body.settings === 'object' ? body.settings : undefined) as Partial<Settings> | undefined,
           seen: body.seen,
         },
@@ -265,6 +259,7 @@ export function createApi(deps: ApiDeps) {
       );
       if (await store.insert(code, state, t)) {
         await store.touch(code, hostId, t);
+        Object.assign(ctx.presence, botPresence(state, t));
         const res: SessionResponse = { code, playerId: hostId, token, view: buildView(state, hostId, ctx, 1) };
         return json(res, 201);
       }

@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'preact/hooks';
 import {
+  BOT_NAME,
+  BOT_SETTINGS,
   DEFAULT_SETTINGS,
   DIFFICULTY_OPTIONS,
   NAME_MAX,
@@ -62,6 +64,17 @@ export function Home() {
       </Button>
       <p class="muted center small">Du leitest die Partie – auf dem Handy oder am Beamer.</p>
 
+      <section class="card joseph-card">
+        <h2>Allein spielen?</h2>
+        <p class="muted small">
+          Joseph ist ein Bot und hat immer Zeit. Er erfindet Bluffs, rät mit und ist schlagbar. Du bekommst einen eigenen
+          Raum mit ihm.
+        </p>
+        <Button variant="secondary" block onClick={() => navigate('/joseph')}>
+          Gegen {BOT_NAME} spielen
+        </Button>
+      </section>
+
       <Rules />
 
       <section class="card">
@@ -109,11 +122,7 @@ function OpenRooms() {
   return (
     <section class="card open-rooms" aria-labelledby="open-rooms-title">
       <h2 id="open-rooms-title">Offene Räume</h2>
-      <p class="muted small">
-        {rooms.some((r) => !r.bot)
-          ? 'Hier wird gerade gespielt, und neue Leute sind willkommen.'
-          : 'Keine Gruppe zur Hand? Hier spielst du sofort mit.'}
-      </p>
+      <p class="muted small">Hier wird gerade gespielt, und neue Leute sind willkommen.</p>
       <ul class="open-room-list">
         {rooms.map((r) => (
           <li key={r.code}>
@@ -126,14 +135,8 @@ function OpenRooms() {
               }}
             >
               <span class="open-room-text">
-                <b>{r.bot ? `Spiel gegen ${r.bot}` : `Raum ${r.code}`}</b>
-                <small>
-                  {r.status === 'playing'
-                    ? `Runde ${r.round} von ${r.rounds} läuft`
-                    : r.bot && r.people <= 1
-                      ? `${r.bot} wartet auf dich`
-                      : 'Wartet auf den Start'}
-                </small>
+                <b>Raum {r.code}</b>
+                <small>{r.status === 'lobby' ? 'Wartet auf den Start' : `Runde ${r.round} von ${r.rounds} läuft`}</small>
                 <small>{roomMeta(r)}</small>
               </span>
               <span class="open-room-go">Mitspielen</span>
@@ -145,11 +148,8 @@ function OpenRooms() {
   );
 }
 
-/** Personen und Schwierigkeit; bei Joseph zählen nur die Menschen */
 function roomMeta(r: PublicRoom) {
-  const humans = r.bot ? r.people - 1 : r.people;
-  const people = humans > 0 ? `${humans} ${humans === 1 ? 'Person' : 'Personen'}${r.bot ? ' dabei' : ''} · ` : '';
-  return `${people}${difficultyLabel(r.difficulty)}${r.bot ? ` · ${r.rounds} Runden` : ''}`;
+  return `${r.people} ${r.people === 1 ? 'Person' : 'Personen'} · ${difficultyLabel(r.difficulty)}`;
 }
 
 function difficultyLabel(value: PublicRoom['difficulty']) {
@@ -259,10 +259,11 @@ export function JoinForm(props: {
   );
 }
 
-export function CreateRoom() {
+/** Raum eröffnen – oder mit `bot` einen eigenen Raum, in dem Joseph schon mitspielt */
+export function CreateRoom({ bot = false }: { bot?: boolean }) {
   const [name, setName] = useState(rememberedName());
   const [plays, setPlays] = useState(true);
-  const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
+  const [settings, setSettings] = useState<Settings>(bot ? BOT_SETTINGS : DEFAULT_SETTINGS);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const set = (patch: Partial<Settings>) => setSettings((s) => ({ ...s, ...patch }));
@@ -272,7 +273,7 @@ export function CreateRoom() {
     setBusy(true);
     setError(null);
     try {
-      const res = await api.createRoom(name, plays, settings);
+      const res = await api.createRoom(name, bot || plays, settings, bot);
       saveSession({ code: res.code, token: res.token, playerId: res.playerId, name: res.view.me?.name ?? name });
       navigate(`/r/${res.code}`, true);
     } catch (err) {
@@ -289,7 +290,13 @@ export function CreateRoom() {
         </button>
         <Logo small />
       </header>
-      <h1>Raum eröffnen</h1>
+      <h1>{bot ? `Gegen ${BOT_NAME} spielen` : 'Raum eröffnen'}</h1>
+      {bot && (
+        <p class="lead">
+          {BOT_NAME} schreibt Bluffs und rät mit. Der Raum gehört dir: Du startest, wann du willst, und kannst auch Freunde
+          einladen.
+        </p>
+      )}
       <form
         class="stack"
         onSubmit={(e) => {
@@ -308,12 +315,14 @@ export function CreateRoom() {
           />
         </label>
 
-        <Toggle
-          checked={plays}
-          onChange={setPlays}
-          label="Ich spiele mit"
-          hint={plays ? 'Du leitest und spielst auf diesem Handy.' : 'Dieses Gerät leitet nur – ideal für Beamer oder Fernseher.'}
-        />
+        {!bot && (
+          <Toggle
+            checked={plays}
+            onChange={setPlays}
+            label="Ich spiele mit"
+            hint={plays ? 'Du leitest und spielst auf diesem Handy.' : 'Dieses Gerät leitet nur – ideal für Beamer oder Fernseher.'}
+          />
+        )}
 
         <SettingsFields settings={settings} onChange={set} />
 
@@ -323,7 +332,7 @@ export function CreateRoom() {
           </p>
         )}
         <Button type="submit" variant="gold" block disabled={busy}>
-          {busy ? 'Raum wird eröffnet …' : 'Raum eröffnen'}
+          {busy ? 'Raum wird eröffnet …' : bot ? `Raum mit ${BOT_NAME} eröffnen` : 'Raum eröffnen'}
         </Button>
       </form>
       <LegalLinks />

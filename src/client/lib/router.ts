@@ -2,7 +2,7 @@ import { useEffect, useState } from 'preact/hooks';
 
 export type Route =
   | { name: 'home' }
-  | { name: 'create' }
+  | { name: 'create'; bot?: boolean }
   | { name: 'room'; code: string }
   | { name: 'tv'; code: string }
   | { name: 'recap'; id: string }
@@ -13,6 +13,7 @@ export type Route =
 export function parseRoute(pathname: string): Route {
   const parts = pathname.split('/').filter(Boolean);
   if (parts[0] === 'neu') return { name: 'create' };
+  if (parts[0] === 'joseph') return { name: 'create', bot: true };
   if (parts[0] === 'r' && parts[1]) return { name: 'room', code: parts[1].toUpperCase() };
   if (parts[0] === 'tv' && parts[1]) return { name: 'tv', code: parts[1].toUpperCase() };
   if (parts[0] === 'e' && parts[1]) return { name: 'recap', id: parts[1].toLowerCase() };
