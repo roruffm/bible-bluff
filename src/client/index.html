@@ -7,9 +7,24 @@
     <meta name="description" content="Bible Bluff – das Partyspiel fürs Handy: Bluffs erfinden, die Wahrheit finden, die Bibel entdecken." />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="Bible Bluff" />
-    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
-    <link rel="icon" href="/icons/icon-192.png" type="image/png" sizes="192x192" />
-    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <!-- Vorschau beim Teilen (WhatsApp, Signal, Telegram …). Für Einladungslinks /r/CODE tauscht der
+         Worker Titel, Text und Bild aus (server/preview.ts) – dort dieselbe Schreibweise beibehalten. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Bible Bluff" />
+    <meta property="og:locale" content="de_DE" />
+    <meta property="og:title" content="Bible Bluff – das Bibel-Partyspiel fürs Handy" />
+    <meta property="og:description" content="Alle erfinden Antworten auf echte Bibelfragen – wer findet die richtige? Kostenlos und ohne Anmeldung, für Jugendgruppe, Hauskreis und Familie." />
+    <meta property="og:image" content="https://biblebluff.de/og.jpg" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Bible Bluff: Erfinde Bluffs. Finde die Wahrheit. Entdecke die Bibel." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <!-- Symbole unter neuen Namen seit dem Logo-Wechsel (scripts/render-icons.mjs, alte Namen: public/_redirects) -->
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/icons/bible-bluff.svg" type="image/svg+xml" />
+    <link rel="icon" href="/icons/bible-bluff-192.png" type="image/png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <title>Bible Bluff</title>
     <script>

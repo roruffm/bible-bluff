@@ -1,0 +1,7 @@
+# Frühere Adressen der App-Symbole (bis zum Logo-Wechsel). Messenger und Browser hatten unter diesen
+# Adressen noch das alte Logo gespeichert; neue Namen erzeugt scripts/render-icons.mjs.
+/icon.svg /icons/bible-bluff.svg 301
+/icons/apple-touch-icon.png /apple-touch-icon.png 301
+/icons/icon-192.png /icons/bible-bluff-192.png 301
+/icons/icon-512.png /icons/bible-bluff-512.png 301
+/icons/icon-maskable-512.png /icons/bible-bluff-maskable-512.png 301

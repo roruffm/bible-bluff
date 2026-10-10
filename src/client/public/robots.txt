@@ -2,3 +2,15 @@ User-agent: *
 Disallow: /r/
 Disallow: /tv/
 Disallow: /api/
+
+# Vorschau-Dienste von Messengern und sozialen Netzwerken dürfen Einladungslinks (/r/) lesen,
+# damit dort „Du bist eingeladen – Raum …“ erscheint. Sie nehmen nichts in eine Suche auf.
+User-agent: facebookexternalhit
+User-agent: meta-externalagent
+User-agent: Twitterbot
+User-agent: TelegramBot
+User-agent: Slackbot-LinkExpanding
+User-agent: Discordbot
+User-agent: WhatsApp
+Disallow: /tv/
+Disallow: /api/

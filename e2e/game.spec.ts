@@ -146,6 +146,16 @@ test('eine komplette Partie auf drei Handys und der Leinwand', async ({ browser 
   }
 
   for (const p of [host, jonas, mirjam, tv]) await expect(p.getByRole('heading', { name: 'Endstand' })).toBeVisible();
+  // Weitersagen: Mitspielende werden eingeladen, selbst eine Runde zu leiten – Leitung und Leinwand nicht
+  await expect(jonas.getByRole('heading', { name: 'Leite selbst eine Runde' })).toBeVisible();
+  await expect(jonas.getByRole('button', { name: 'Link an deine Gruppe schicken' })).toBeVisible();
+  await expect(host.locator('.spread-card')).toHaveCount(0);
+  await expect(tv.locator('.spread-card')).toHaveCount(0);
+  await jonas.getByRole('button', { name: 'Eigenen Raum eröffnen' }).click();
+  await jonas.waitForURL('**/neu');
+  await expect(jonas.getByLabel('Dein Spitzname')).toHaveValue('Jonas');
+  await jonas.goBack();
+  await expect(jonas.getByRole('heading', { name: 'Endstand' })).toBeVisible();
   await expect(host.locator('.podium-place')).toHaveCount(3);
   await expect(host.locator('.discoveries li')).toHaveCount(4);
   await expect(host.getByText('Bluff-Meister')).toBeVisible();
@@ -334,7 +344,7 @@ test('Ohne Vibration (wie auf dem iPhone) meldet ein Ton den Beitritt', async ({
   await expect.poll(() => host.evaluate(() => (window as unknown as { tones: number }).tones)).toBe(2);
 });
 
-test('Allein gegen Joseph: eigener Raum von der Startseite aus', async ({ browser }) => {
+test('Allein gegen Joseph: eigener Raum von der Startseite aus, danach weiter mit Freunden', async ({ browser }) => {
   const page = await phone(browser, 'gast');
   await page.goto('/');
   await page.getByRole('button', { name: 'Gegen Joseph spielen' }).click();
@@ -366,7 +376,43 @@ test('Allein gegen Joseph: eigener Raum von der Startseite aus', async ({ browse
     await expect(page.getByRole('button', { name: 'Nächste Runde' })).toBeVisible({ timeout: 1000 });
   }).toPass({ timeout: 30_000 });
   await page.getByRole('button', { name: 'Nächste Runde' }).click();
-  await expect(page.getByText('Runde 2 von 6')).toBeVisible();
+
+  // Restliche Runden über das Leitungsmenü durchschalten
+  for (let round = 2; round <= 6; round++) {
+    await expect(page.getByText(`Runde ${round} von 6`)).toBeVisible();
+    await hostAction(page, 'Schreibzeit jetzt beenden');
+    await expect(page.getByText(VOTE_TITLE)).toBeVisible();
+    await hostAction(page, 'Abstimmung jetzt beenden');
+    await hostAction(page, 'Aufdeckung überspringen');
+    await page.getByRole('button', { name: round === 6 ? 'Zum Endstand' : 'Nächste Runde' }).click();
+  }
+
+  // Am Ende lädt das Spiel ein, als Nächstes mit Freunden zu spielen
+  await expect(page.getByRole('heading', { name: 'Endstand' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Jetzt mit Freunden spielen' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Nochmal gegen Joseph' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Neue Partie mit allen' })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Raum für Freunde eröffnen' }).click();
+  await page.waitForURL('**/neu');
+  await expect(page.getByRole('heading', { name: 'Raum eröffnen' })).toBeVisible();
+  await expect(page.getByLabel('Dein Spitzname')).toHaveValue('Hanna');
+});
+
+test('Einladungslinks haben eine eigene Link-Vorschau', async ({ request }) => {
+  const invite = await (await request.get('/r/lampe7')).text();
+  expect(invite).toContain('<meta property="og:title" content="Du bist eingeladen – Raum LAMPE7"');
+  expect(invite).toMatch(/<meta property="og:image" content="http:\/\/localhost:\d+\/og-invite\.jpg"/);
+  // Die Startseite holt ihr Vorschaubild außerhalb von biblebluff.de von derselben Adresse
+  const home = await (await request.get('/')).text();
+  expect(home).toMatch(/<meta property="og:image" content="http:\/\/localhost:\d+\/og\.jpg"/);
+  for (const [path, type] of [
+    ['/og.jpg', 'image/jpeg'],
+    ['/og-invite.jpg', 'image/jpeg'],
+    ['/favicon.ico', 'image/x-icon'],
+    ['/apple-touch-icon.png', 'image/png'],
+  ]) {
+    expect((await request.get(path)).headers()['content-type'], path).toBe(type);
+  }
 });
 
 test('Lückentext aus gewählten Kategorien: Lücke, eingesetzte Antworten, Auflösung im Satz', async ({ browser }) => {
