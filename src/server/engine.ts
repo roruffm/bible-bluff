@@ -2,6 +2,7 @@
 // Zeit, Zufall und Präsenz kommen über den Ctx herein.
 
 import {
+  ALL_CATEGORIES,
   BLUFF_MAX,
   BOT_COLOR,
   BOT_ID,
@@ -9,6 +10,8 @@ import {
   BOT_TRUTH_RATE,
   DEFAULT_SETTINGS,
   DIFFICULTY_OPTIONS,
+  GAP,
+  GAP_SHARE,
   MAX_PLAYERS,
   MIN_PLAYERS,
   ONLINE_WINDOW_MS,
@@ -22,16 +25,18 @@ import {
   REVEAL_REST_MS,
   REVEAL_TRUTH_MS,
   ROUND_OPTIONS,
+  ROUND_TYPE_OPTIONS,
   SCORES_SECONDS,
   SEEN_SEND_MAX,
   STRONG_BLUFF_MIN,
   TALK_STEPS,
   VOTE_OPTIONS,
   WRITE_OPTIONS,
+  categoryOf,
   cleanBluff,
   cleanName,
 } from '../shared/rules';
-import type { Action, Difficulty, Settings } from '../shared/types';
+import type { Action, CategoryId, Difficulty, RoundType, Settings } from '../shared/types';
 import { QUESTIONS, getQuestion, hasQuestion, type Question } from './questions';
 import {
   GameError,
@@ -91,6 +96,46 @@ function randomId(rng: () => number, length = 8): string {
 export function formatAnswer(text: string): string {
   const t = cleanBluff(text).replace(/[.!]+$/u, '').trim();
   return t ? t.charAt(0).toLocaleUpperCase('de-DE') + t.slice(1) : t;
+}
+
+/** Wörter, die mitten im Satz kleingeschrieben werden – auch wenn das Handy sie großgeschrieben hat */
+const LOWER_FIRST = new Set(
+  (
+    'der die das dem den des ein eine einem einen einer eines kein keine keinem keinen keiner keines ' +
+    'mein meine meinem meinen meiner dein deine deinem deinen deiner sein seine seinem seinen seiner seines ' +
+    'ihr ihre ihrem ihren ihrer ihres unser unsere unserem unseren unserer euer eure eurem euren eurer ' +
+    'er sie es man wir ich du jeder jede jedes jedem jeden alle allen aller alles nichts etwas viele wenige ' +
+    'mit ohne auf in im ins an am ans zu zum zur von vom bei beim aus nach vor über unter neben zwischen ' +
+    'durch für gegen um bis seit wegen trotz während und oder aber denn weil dass als wie wenn ob ' +
+    'zwei drei vier fünf sechs sieben acht neun zehn elf zwölf zwanzig dreißig vierzig fünfzig hundert tausend ' +
+    'einmal zweimal dreimal siebenmal nur noch schon sehr ganz immer nie oft stets gern bald jetzt heute ' +
+    'morgen hier dort da so sogar nicht auch allezeit jederzeit täglich einfach genau fast'
+  ).split(' '),
+);
+
+/**
+ * Antwort für einen Lückentext: Mitten im Satz kleingeschriebene Wörter (Artikel, Präpositionen,
+ * Zahlen …) beginnen klein, sonst bleibt der Text, wie er getippt wurde. Wer den ganzen Satz
+ * abtippt, bekommt nur den Teil für die Lücke.
+ */
+export function formatGap(text: string, prompt: string): string {
+  let t = cleanBluff(text);
+  const [before, after = ''] = prompt.split(GAP);
+  const head = cleanBluff(before);
+  const tail = cleanBluff(after).replace(/[.!?]+$/u, '');
+  if (head && t.toLocaleLowerCase('de-DE').startsWith(head.toLocaleLowerCase('de-DE'))) t = t.slice(head.length).trim();
+  t = t.replace(/[.!?;:,]+$/u, '').trim();
+  if (tail && t.toLocaleLowerCase('de-DE').endsWith(tail.toLocaleLowerCase('de-DE'))) t = t.slice(0, -tail.length).trim();
+  t = t.replace(/[.!?;:,–-]+$/u, '').trim();
+  if (!t) return t;
+  if (!head) return t.charAt(0).toLocaleUpperCase('de-DE') + t.slice(1);
+  const first = t.split(' ')[0].toLocaleLowerCase('de-DE');
+  return LOWER_FIRST.has(first) ? t.charAt(0).toLocaleLowerCase('de-DE') + t.slice(1) : t;
+}
+
+/** Antwort im passenden Stil: als eigenständige Antwort oder als Satzteil für die Lücke */
+export function formatFor(q: Question, text: string): string {
+  return q.kind === 'gap' ? formatGap(text, q.prompt) : formatAnswer(text);
 }
 
 function player(state: RoomState, id: string): PlayerRec | undefined {
@@ -180,7 +225,24 @@ export function sanitizeSettings(input: Partial<Settings> | undefined, base: Set
     if (!DIFFICULTY_OPTIONS.some((d) => d.value === input.difficulty)) throw new GameError('bad_settings', 'Ungültige Schwierigkeit.', 400);
     s.difficulty = input.difficulty;
   }
+  if (input.roundType !== undefined) {
+    if (!ROUND_TYPE_OPTIONS.some((o) => o.value === input.roundType)) throw new GameError('bad_settings', 'Ungültige Rundenart.', 400);
+    s.roundType = input.roundType;
+  }
+  if (input.categories !== undefined) {
+    const picked = Array.isArray(input.categories) ? input.categories : [];
+    if (picked.some((c) => !ALL_CATEGORIES.includes(c))) throw new GameError('bad_settings', 'Unbekannte Kategorie.', 400);
+    if (!picked.length) throw new GameError('bad_settings', 'Wähle mindestens eine Kategorie.', 400);
+    s.categories = ALL_CATEGORIES.filter((c) => picked.includes(c));
+  }
+  if (!matchingQuestions(s).length) throw new GameError('bad_settings', 'Zu dieser Auswahl gibt es keine Fragen.', 400);
   return s;
+}
+
+/** Räume von vor den Kategorien und Lückentexten bekommen die Standardwerte dazu */
+export function withSettingDefaults(settings: Partial<Settings>): Settings {
+  const merged = { ...DEFAULT_SETTINGS, ...settings };
+  return { ...merged, categories: settings.categories?.length ? settings.categories : [...ALL_CATEGORIES] };
 }
 
 // ───────────────────────── Raum & Beitritt ─────────────────────────
@@ -281,17 +343,47 @@ export function joinRoom(state: RoomState, input: JoinInput, ctx: Ctx): { state:
 
 // ───────────────────────── Fragenauswahl ─────────────────────────
 
-export function pickQuestions(
+/** Was die Spielleitung für die Fragenauswahl eingestellt hat */
+export interface QuestionFilter {
+  difficulty: Difficulty;
+  roundType: RoundType;
+  categories: CategoryId[];
+}
+
+function isGap(q: Question): boolean {
+  return q.kind === 'gap';
+}
+
+function inCategories(q: Question, categories: CategoryId[]): boolean {
+  // Alle Kategorien gewählt: der ganze Pool, auch Fragen zum Neuen Testament insgesamt
+  if (ALL_CATEGORIES.every((c) => categories.includes(c))) return true;
+  const c = categoryOf(q.group);
+  return c !== null && categories.includes(c);
+}
+
+/** Alle Fragen, die zu Kategorien und Rundenart passen */
+export function matchingQuestions(filter: Pick<QuestionFilter, 'roundType' | 'categories'>): Question[] {
+  return QUESTIONS.filter(
+    (q) => inCategories(q, filter.categories) && (filter.roundType === 'gemischt' || isGap(q) === (filter.roundType === 'luecken')),
+  );
+}
+
+/**
+ * Zieht `count` Fragen aus `source` plus ein paar Ersatzfragen. Weniger, wenn die Auswahl nicht reicht.
+ * `numbersLeft`: wie viele Zahlenfragen noch dazukommen dürfen.
+ */
+function pickFrom(
+  source: Question[],
   difficulty: Difficulty,
   used: Set<string>,
   count: number,
   rng: () => number,
-  /** „Neues für alle“: wie viele Personen im Raum eine Frage schon kennen */
-  seen: Record<string, number> = {},
-): { main: string[]; spare: string[] } {
+  seen: Record<string, number>,
+  numbersLeft = MAX_NUMBER_QUESTIONS,
+): { main: Question[]; spare: Question[] } {
   const weights = DIFFICULTY_WEIGHTS[difficulty];
-  let pool = QUESTIONS.filter((q) => !used.has(q.id));
-  if (pool.length < count + SPARE_QUESTIONS) pool = [...QUESTIONS];
+  let pool = source.filter((q) => !used.has(q.id));
+  if (pool.length < count + SPARE_QUESTIONS) pool = [...source];
 
   // Gewichtetes Ziehen ohne Zurücklegen (Efraimidis–Spirakis). Stufen davor: Fragen, die hier
   // schon jemand kennt, kommen nach hinten – je mehr Leute sie kennen, desto weiter. Eine bekannte
@@ -317,7 +409,7 @@ export function pickQuestions(
       for (const q of tier) {
         if (chosen.length >= want) break;
         if (chosen.includes(q)) continue;
-        if (strict && (books.has(q.book) || (q.number && numbers >= MAX_NUMBER_QUESTIONS))) continue;
+        if (strict && (books.has(q.book) || (q.number && numbers >= numbersLeft))) continue;
         chosen.push(q);
         books.add(q.book);
         if (q.number) numbers++;
@@ -327,7 +419,49 @@ export function pickQuestions(
 
   const main = chosen.slice(0, count);
   if (difficulty === 'gemischt') main.sort((a, b) => a.difficulty - b.difficulty);
-  return { main: main.map((q) => q.id), spare: chosen.slice(count).map((q) => q.id) };
+  return { main, spare: chosen.slice(count) };
+}
+
+/**
+ * Fragen für eine Partie. Gemischt: etwa jede dritte Runde ist ein Lückentext, gleichmäßig verteilt
+ * und nie gleich zu Beginn. Reicht die Auswahl nicht für alle Runden, gibt es entsprechend weniger.
+ */
+export function pickQuestions(
+  filter: QuestionFilter,
+  used: Set<string>,
+  count: number,
+  rng: () => number,
+  /** „Neues für alle“: wie viele Personen im Raum eine Frage schon kennen */
+  seen: Record<string, number> = {},
+): { main: string[]; spare: string[] } {
+  const matching = matchingQuestions(filter);
+  const ids = (qs: Question[]) => qs.map((q) => q.id);
+  if (filter.roundType !== 'gemischt') {
+    const { main, spare } = pickFrom(matching, filter.difficulty, used, count, rng, seen);
+    return { main: ids(main), spare: ids(spare) };
+  }
+
+  const gaps = matching.filter(isGap);
+  const plain = matching.filter((q) => !isGap(q));
+  const wantGaps = Math.min(Math.round(count * GAP_SHARE), gaps.length);
+  const classic = pickFrom(plain, filter.difficulty, used, count - wantGaps, rng, seen);
+  // Fehlen klassische Fragen, springen Lückentexte ein
+  const gapCount = Math.min(gaps.length, count - classic.main.length);
+  const numbersLeft = Math.max(0, MAX_NUMBER_QUESTIONS - classic.main.filter((q) => q.number).length);
+  const filled = pickFrom(gaps, filter.difficulty, used, gapCount, rng, seen, numbersLeft);
+
+  const total = classic.main.length + filled.main.length;
+  const slots = new Set<number>();
+  filled.main.forEach((_, i) => {
+    let at = Math.min(total - 1, Math.max(1, Math.round(((i + 1) * total) / (filled.main.length + 1))));
+    while (slots.has(at)) at = (at + 1) % total;
+    slots.add(at);
+  });
+  const main: Question[] = [];
+  let ci = 0;
+  let gi = 0;
+  for (let i = 0; i < total; i++) main.push(slots.has(i) ? filled.main[gi++] : classic.main[ci++]);
+  return { main: ids(main), spare: ids([...classic.spare, ...filled.spare]) };
 }
 
 // ───────────────────────── Phasen ─────────────────────────
@@ -349,13 +483,8 @@ function startGame(s: RoomState, ctx: Ctx) {
   if (players(s).length < MIN_PLAYERS) {
     throw new GameError('too_few', `Es braucht mindestens ${MIN_PLAYERS} Mitspielende.`);
   }
-  const { main, spare } = pickQuestions(
-    s.settings.difficulty,
-    new Set(s.usedQuestionIds),
-    s.settings.rounds,
-    ctx.rng,
-    s.seenCounts,
-  );
+  const { main, spare } = pickQuestions(s.settings, new Set(s.usedQuestionIds), s.settings.rounds, ctx.rng, s.seenCounts);
+  if (!main.length) throw new GameError('no_questions', 'Zu dieser Auswahl gibt es keine Fragen.');
   for (const p of s.players) {
     p.score = 0;
     p.stats = freshStats();
@@ -412,7 +541,7 @@ function startVote(s: RoomState, ctx: Ctx) {
   }
 
   const options: OptionRec[] = [
-    { id: '', text: formatAnswer(q.answer), kind: 'truth', authorIds: [] },
+    { id: '', text: formatFor(q, q.answer), kind: 'truth', authorIds: [] },
     ...groups.map((grp) => ({ id: '', text: grp.text, kind: 'player' as const, authorIds: grp.authorIds })),
   ];
 
@@ -420,7 +549,7 @@ function startVote(s: RoomState, ctx: Ctx) {
   for (const decoy of shuffle(houseBluffs(q, ctx), ctx.rng)) {
     if (options.length >= MIN_OPTIONS) break;
     if (options.some((o) => isDuplicate(o.text, decoy))) continue;
-    options.push({ id: '', text: formatAnswer(decoy), kind: 'house', authorIds: [] });
+    options.push({ id: '', text: formatFor(q, decoy), kind: 'house', authorIds: [] });
   }
 
   const ids = new Set<string>();
@@ -747,7 +876,7 @@ function botMoves(s: RoomState, ctx: Ctx): boolean {
   for (const bot of players(s).filter((p) => p.bot)) {
     if (g.phase === 'write' && !round.bluffs[bot.id]) {
       if (!due && !humans.every((p) => round.bluffs[p.id])) continue;
-      round.bluffs[bot.id] = { text: formatAnswer(suggestBluff(s, bot.id, ctx)), at: ctx.now };
+      round.bluffs[bot.id] = { text: formatFor(getQuestion(round.questionId), suggestBluff(s, bot.id, ctx)), at: ctx.now };
       moved = true;
     } else if (g.phase === 'vote' && !round.votes[bot.id] && round.options) {
       if (!due && !humans.every((p) => round.votes[p.id])) continue;
@@ -802,10 +931,10 @@ export function applyAction(state: RoomState, actorId: string, action: Action, c
       if (g.phase !== 'write') throw new GameError('phase_over', 'Die Schreibzeit ist vorbei.');
       if (!actor.plays) throw new GameError('not_playing', 'Du leitest nur – mitschreiben geht nicht.');
       requireNotQuiet(actor, g);
-      const text = formatAnswer(typeof action.text === 'string' ? action.text : '');
+      const q = getQuestion(g.round.questionId);
+      const text = formatFor(q, typeof action.text === 'string' ? action.text : '');
       if (!text) throw new GameError('empty', 'Schreib zuerst einen Bluff.', 400);
       if (text.length > BLUFF_MAX) throw new GameError('too_long', `Höchstens ${BLUFF_MAX} Zeichen.`, 400);
-      const q = getQuestion(g.round.questionId);
       if (isTooCloseToTruth(text, q)) {
         throw new GameError(
           'too_close',
@@ -951,11 +1080,16 @@ export function applyAction(state: RoomState, actorId: string, action: Action, c
       const g = requireGame(s);
       if (g.phase !== 'write') throw new GameError('bad_state', 'Fragen lassen sich nur beim Schreiben tauschen.');
       resume(s, ctx);
-      let next = g.spareIds.shift();
+      // Ersatz von derselben Art: ein Lückentext für einen Lückentext, eine Frage für eine Frage
+      const gap = isGap(getQuestion(g.round.questionId));
+      const at = g.spareIds.findIndex((id) => isGap(getQuestion(id)) === gap);
+      let next = at >= 0 ? g.spareIds.splice(at, 1)[0] : undefined;
       if (!next) {
         const used = new Set([...s.usedQuestionIds, ...g.questionIds]);
-        next = pickQuestions(s.settings.difficulty, used, 1, ctx.rng, s.seenCounts).main[0];
+        const sameKind = { ...s.settings, roundType: (gap ? 'luecken' : 'fragen') as RoundType };
+        next = pickQuestions(sameKind, used, 1, ctx.rng, s.seenCounts).main.find((id) => !g.questionIds.includes(id));
       }
+      if (!next) throw new GameError('no_questions', 'Zu dieser Auswahl gibt es keine weitere Frage.');
       g.questionIds[g.roundIndex] = next;
       startRound(s, g.roundIndex, ctx);
       return { state: s };

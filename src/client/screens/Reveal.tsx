@@ -4,7 +4,7 @@
 import { useEffect, useMemo } from 'preact/hooks';
 import { POINTS_TRUTH, REVEAL_AUTHOR_AT_MS } from '../../shared/rules';
 import type { RevealStepView, RoomView } from '../../shared/types';
-import { Avatar, Button, PersonChip } from '../components/ui';
+import { Avatar, Button, PersonChip, QuestionText } from '../components/ui';
 import { buzz, type RoomConnection, useServerNow } from '../lib/hooks';
 
 export function RevealPhase({ view, conn, display = false }: { view: RoomView; conn: RoomConnection; display?: boolean }) {
@@ -22,6 +22,8 @@ export function RevealPhase({ view, conn, display = false }: { view: RoomView; c
   const local = elapsed - step.at;
   const meId = view.me?.id ?? null;
   const isHost = Boolean(view.me?.isHost) && !display;
+  // Lückentext: Jede Antwort erscheint eingesetzt im Satz
+  const gapPrompt = round.question.kind === 'gap' ? round.question.prompt : null;
 
   return (
     <section class={`phase reveal${display ? ' is-display' : ''}`} aria-live="polite">
@@ -29,13 +31,15 @@ export function RevealPhase({ view, conn, display = false }: { view: RoomView; c
         <p class="eyebrow">
           Runde {round.index + 1} von {round.total} · Aufdeckung
         </p>
-        <p class="reveal-question">{round.question.prompt}</p>
+        <p class="reveal-question">
+          <QuestionText prompt={round.question.prompt} />
+        </p>
       </header>
 
       <div class="reveal-stage" key={`${round.index}-${index}`}>
         {step.kind === 'intro' && <Intro />}
-        {step.kind === 'bluff' && <BluffStep step={step} local={local} meId={meId} />}
-        {step.kind === 'truth' && <TruthStep step={step} local={local} meId={meId} />}
+        {step.kind === 'bluff' && <BluffStep step={step} local={local} meId={meId} prompt={gapPrompt} />}
+        {step.kind === 'truth' && <TruthStep step={step} local={local} meId={meId} prompt={gapPrompt} />}
         {step.kind === 'rest' && <RestStep step={step} meId={meId} />}
       </div>
 
@@ -69,7 +73,26 @@ function Intro() {
   );
 }
 
-function BluffStep({ step, local, meId }: { step: Extract<RevealStepView, { kind: 'bluff' }>; local: number; meId: string | null }) {
+/** Der aufgedeckte Text – beim Lückentext als vollständiger Satz */
+function RevealText({ text, prompt }: { text: string; prompt: string | null }) {
+  return (
+    <blockquote class={`reveal-text${prompt ? ' is-sentence' : ''}`}>
+      {prompt ? <QuestionText prompt={prompt} fill={text} /> : text}
+    </blockquote>
+  );
+}
+
+function BluffStep({
+  step,
+  local,
+  meId,
+  prompt,
+}: {
+  step: Extract<RevealStepView, { kind: 'bluff' }>;
+  local: number;
+  meId: string | null;
+  prompt: string | null;
+}) {
   const exposed = local >= REVEAL_AUTHOR_AT_MS;
   const house = step.authors.length === 0;
   const fell = Boolean(meId && step.voters.some((v) => v.id === meId));
@@ -82,7 +105,7 @@ function BluffStep({ step, local, meId }: { step: Extract<RevealStepView, { kind
   return (
     <div class={`reveal-card is-bluff${exposed ? ' is-exposed' : ''}`}>
       <div class="paper">
-        <blockquote class="reveal-text">{step.text}</blockquote>
+        <RevealText text={step.text} prompt={prompt} />
         {exposed && <div class={`stamp ${house ? 'stamp-house' : 'stamp-bluff'}`}>{house ? 'Hausbluff' : 'Geblufft!'}</div>}
       </div>
 
@@ -123,7 +146,17 @@ function BluffStep({ step, local, meId }: { step: Extract<RevealStepView, { kind
   );
 }
 
-function TruthStep({ step, local, meId }: { step: Extract<RevealStepView, { kind: 'truth' }>; local: number; meId: string | null }) {
+function TruthStep({
+  step,
+  local,
+  meId,
+  prompt,
+}: {
+  step: Extract<RevealStepView, { kind: 'truth' }>;
+  local: number;
+  meId: string | null;
+  prompt: string | null;
+}) {
   const exposed = local >= REVEAL_AUTHOR_AT_MS;
   const found = Boolean(meId && step.voters.some((v) => v.id === meId));
   const sparks = useMemo(
@@ -144,7 +177,7 @@ function TruthStep({ step, local, meId }: { step: Extract<RevealStepView, { kind
   return (
     <div class={`reveal-card is-truth${exposed ? ' is-exposed' : ''}`}>
       <div class="paper">
-        <blockquote class="reveal-text">{step.text}</blockquote>
+        <RevealText text={step.text} prompt={prompt} />
         {exposed && <div class="stamp stamp-truth">Wahr!</div>}
         {exposed && (
           <div class="sparks" aria-hidden="true">

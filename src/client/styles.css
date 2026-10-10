@@ -890,6 +890,88 @@ textarea {
   box-shadow: 0 2px 6px -2px rgba(0, 0, 0, 0.4);
 }
 
+/* Hinweis unter einem Einstellungsfeld */
+.field-hint {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--ink-2);
+}
+
+.field-hint.is-warn {
+  color: var(--rust-text);
+  font-weight: 700;
+}
+
+.field-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.link-btn {
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--ink-2);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+/* Kategorien: mehrere wählbar, mindestens eine */
+.cat-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cat-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 42px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1.5px solid var(--line);
+  background: var(--paper-2);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.cat-chip small {
+  font-size: 0.75rem;
+  font-weight: 800;
+  opacity: 0.7;
+}
+
+.cat-chip.is-on {
+  background: var(--seg-on);
+  border-color: var(--seg-on);
+  color: var(--on-seg-on);
+}
+
+.cat-chip.is-on::before {
+  content: '✓';
+}
+
+.cat-chip:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.cat-chip:focus-visible,
+.link-btn:focus-visible {
+  outline: 3px solid var(--gold-2);
+  outline-offset: 2px;
+}
+
 .toggle {
   display: flex;
   align-items: flex-start;
@@ -1658,6 +1740,41 @@ textarea {
   line-height: 1.22;
 }
 
+/* Lückentext: sichtbare Lücke im Satz, später die eingesetzte Antwort */
+.kind-chip {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  border: 1.5px solid currentColor;
+  border-radius: 6px;
+  padding: 1px 6px;
+}
+
+.gap-blank {
+  display: inline-block;
+  width: 3.4em;
+  height: 0.85em;
+  margin: 0 0.1em;
+  border-bottom: 0.13em solid var(--g, currentColor);
+  vertical-align: baseline;
+}
+
+.gap-fill {
+  background: var(--gold-soft);
+  color: inherit;
+  border-radius: 0.25em;
+  padding: 0 0.15em;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+/* Beim Abstimmen beginnen alle Antworten groß – sonst verriete die Schreibweise die Wahrheit */
+.options.is-gap .option-text::first-letter {
+  text-transform: uppercase;
+}
+
 .question-card.is-big .question-text {
   font-size: clamp(1.6rem, 3.2vw, 2.6rem);
 }
@@ -1913,6 +2030,11 @@ textarea {
   font-size: clamp(1.45rem, 6.4vw, 2.1rem);
   font-weight: 800;
   line-height: 1.2;
+}
+
+.reveal-text.is-sentence {
+  font-size: clamp(1.2rem, 5.2vw, 1.75rem);
+  line-height: 1.3;
 }
 
 .reveal-text::before {

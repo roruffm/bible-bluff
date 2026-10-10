@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  ALL_CATEGORIES,
   POINTS_FAVORITE,
   POINTS_PER_FOOLED,
   POINTS_TRUTH,
@@ -12,6 +13,8 @@ import { buildView } from '../src/server/view';
 import { Clock, ctxFor, seeded } from './helpers';
 
 const IDS = ['host', 'anna', 'ben', 'cleo'];
+/** Nur klassische Fragen aus allen Kategorien – so wie vor den Lückentexten */
+const classic = (difficulty: 'gemischt' | 'leicht') => ({ difficulty, roundType: 'fragen' as const, categories: ALL_CATEGORIES });
 
 function setup(names = ['Host', 'Anna', 'Ben', 'Cleo']) {
   const clock = new Clock();
@@ -83,7 +86,7 @@ describe('Raum und Beitritt', () => {
 describe('Fragenauswahl', () => {
   it('liefert verschiedene Fragen aus verschiedenen Büchern, höchstens zwei Zahlenfragen', () => {
     for (let seed = 1; seed < 30; seed++) {
-      const { main, spare } = pickQuestions('gemischt', new Set(), 8, seeded(seed));
+      const { main, spare } = pickQuestions(classic('gemischt'), new Set(), 8, seeded(seed));
       expect(main).toHaveLength(8);
       expect(spare.length).toBeGreaterThan(0);
       const qs = main.map(getQuestion);
@@ -96,14 +99,14 @@ describe('Fragenauswahl', () => {
   });
 
   it('bevorzugt die gewählte Schwierigkeit', () => {
-    const { main } = pickQuestions('leicht', new Set(), 8, seeded(3));
+    const { main } = pickQuestions(classic('leicht'), new Set(), 8, seeded(3));
     const easy = main.map(getQuestion).filter((q) => q.difficulty === 1).length;
     expect(easy).toBeGreaterThanOrEqual(4);
   });
 
   it('vermeidet bereits gespielte Fragen', () => {
     const used = new Set(QUESTIONS.slice(0, 100).map((q) => q.id));
-    const { main } = pickQuestions('gemischt', used, 8, seeded(5));
+    const { main } = pickQuestions(classic('gemischt'), used, 8, seeded(5));
     for (const id of main) expect(used.has(id)).toBe(false);
   });
 });

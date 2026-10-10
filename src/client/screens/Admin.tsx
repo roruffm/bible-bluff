@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'preact/hooks';
 import { BLUFF_MAX } from '../../shared/rules';
 import type { BluffCandidateView, BluffStatus } from '../../shared/types';
-import { Button, Logo, Segmented, Toast } from '../components/ui';
+import { Button, Logo, QuestionText, Segmented, Toast } from '../components/ui';
 import { ApiError, api } from '../lib/api';
 import { navigate } from '../lib/router';
 
@@ -182,7 +182,9 @@ function AdminItem({
     <li class="card admin-item">
       {q ? (
         <div class="admin-q">
-          <p class="admin-prompt">{q.prompt}</p>
+          <p class="admin-prompt">
+            <QuestionText prompt={q.prompt} />
+          </p>
           <p class="admin-answer">
             ✓ {q.answer} <span class="muted small">· {q.ref}</span>
           </p>

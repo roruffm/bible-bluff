@@ -10,12 +10,13 @@
 //   GET  /api/admin/bluffs           Kandidaten für frische Hausbluffs (nur mit ADMIN_KEY)
 //   POST /api/admin/bluffs           Kandidaten freigeben oder ablehnen (nur mit ADMIN_KEY)
 
-import { BLUFF_MAX, PRESENCE_TOUCH_MS, ROOM_TTL_MS, normalizeCode } from '../shared/rules';
+import { BLUFF_MAX, CATEGORIES, PRESENCE_TOUCH_MS, ROOM_TTL_MS, normalizeCode } from '../shared/rules';
 import type {
   Action,
   ApiErrorBody,
   BluffListResponse,
   BluffStatus,
+  PoolResponse,
   PublicRoomsResponse,
   RecapCreatedResponse,
   RecapResponse,
@@ -25,7 +26,7 @@ import type {
 } from '../shared/types';
 import { randomCode } from './codes';
 import { candidatesFromGame, candidateView } from './bluff-pool';
-import { botPresence, createRoom, formatAnswer, joinRoom, step, tick } from './engine';
+import { botPresence, createRoom, formatFor, joinRoom, matchingQuestions, step, tick, withSettingDefaults } from './engine';
 import { getQuestion, hasQuestion } from './questions';
 import { buildRecap, isRecapId, randomRecapId } from './recap';
 import { GameError, type Ctx, type PlayerRec, type RoomState } from './state';
@@ -165,6 +166,8 @@ export function createApi(deps: ApiDeps) {
     if (rec.state.botRoom) {
       throw new GameError('not_found', 'Diesen Raum gibt es nicht mehr. Gegen Joseph spielst du über die Startseite.', 404);
     }
+    // Räume aus der Zeit vor Kategorien und Lückentexten
+    rec.state.settings = withSettingDefaults(rec.state.settings);
     return rec;
   }
 
@@ -215,6 +218,18 @@ export function createApi(deps: ApiDeps) {
 
   // Offene Räume für die Startseite – wartende Räume zuerst, dann laufende Partien
   let publicCache: { at: number; data: PublicRoomsResponse } | null = null;
+  /** Wie viele Fragen und Lückentexte es je Kategorie gibt – ändert sich nur mit einer neuen Version */
+  function poolRoute(): Response {
+    const res: PoolResponse = {
+      categories: CATEGORIES.map((c) => {
+        const all = matchingQuestions({ roundType: 'gemischt', categories: [c.id] });
+        const gaps = all.filter((q) => q.kind === 'gap').length;
+        return { id: c.id, questions: all.length - gaps, gaps };
+      }),
+    };
+    return json(res, 200, 'public, max-age=3600');
+  }
+
   async function publicRoomsRoute(): Promise<Response> {
     const t = now();
     if (!publicCache || t - publicCache.at >= PUBLIC_TTL_MS) {
@@ -385,10 +400,10 @@ export function createApi(deps: ApiDeps) {
     const status = body.status as BluffStatus;
     if (!BLUFF_STATUSES.includes(status)) throw new GameError('bad_status', 'Unbekannter Status.', 400);
     if (!hasQuestion(questionId) || !key) throw new GameError('not_found', 'Diesen Kandidaten gibt es nicht.', 404);
-    const text = formatAnswer(typeof body.text === 'string' ? body.text : '');
+    const q = getQuestion(questionId);
+    const text = formatFor(q, typeof body.text === 'string' ? body.text : '');
     if (!text || text.length > BLUFF_MAX) throw new GameError('bad_text', `Der Bluff braucht 1 bis ${BLUFF_MAX} Zeichen.`, 400);
     if (status === 'approved') {
-      const q = getQuestion(questionId);
       if (isTooCloseToTruth(text, q)) {
         throw new GameError('too_close', 'Das ist zu nah an der richtigen Antwort – so würde der Bluff die Wahrheit verraten.', 422);
       }
@@ -413,6 +428,7 @@ export function createApi(deps: ApiDeps) {
       if (parts.length === 2 && parts[1] === 'health' && method === 'GET') return json({ ok: true });
       if (parts.length === 2 && parts[1] === 'rooms' && method === 'POST') return await createRoomRoute(request);
       if (parts.length === 2 && parts[1] === 'rooms' && method === 'GET') return await publicRoomsRoute();
+      if (parts.length === 2 && parts[1] === 'pool' && method === 'GET') return poolRoute();
 
       if (parts[1] === 'rooms' && parts.length >= 3) {
         const code = normalizeCode(decodeURIComponent(parts[2]));

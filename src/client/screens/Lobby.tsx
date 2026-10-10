@@ -4,6 +4,7 @@ import type { RoomView, Settings } from '../../shared/types';
 import { QRCode } from '../components/QR';
 import { Avatar, Button, Rules, Toast, Toggle } from '../components/ui';
 import type { RoomConnection } from '../lib/hooks';
+import { poolNoun, poolNounDative, settingsSummary } from '../lib/pool';
 import { roomUrl } from '../lib/router';
 import { shareLink } from '../lib/share';
 import { SettingsFields } from './Start';
@@ -113,8 +114,14 @@ export function Lobby({ view, conn }: { view: RoomView; conn: RoomConnection }) 
           <p class="notice small">Öffentlicher Raum: Er steht auf der Startseite, und alle können beitreten.</p>
         )}
         <p class="fresh-note small" title="Fragen, die auf diesen Handys schon aufgelöst wurden, kommen erst später dran.">
-          <span aria-hidden="true">✦</span> Für alle neu: <b>{view.freshCount}</b> von {view.poolSize} Fragen
+          <span aria-hidden="true">✦</span> Für alle neu: <b>{view.freshCount}</b> von {view.poolSize} {poolNounDative(view.settings.roundType)}
         </p>
+        {view.poolSize < view.settings.rounds && (
+          <p class="notice small">
+            Zur gewählten Auswahl gibt es nur {view.poolSize} {poolNoun(view.settings.roundType)} – die Partie hat dann{' '}
+            {view.poolSize} Runden.
+          </p>
+        )}
       </section>
 
       {isHost ? (
@@ -143,9 +150,9 @@ export function Lobby({ view, conn }: { view: RoomView; conn: RoomConnection }) 
       ) : (
         <section class="card summary">
           <h2 class="card-title">Partie</h2>
-          <p>
-            {view.settings.rounds} Runden · {cap(view.settings.difficulty)} · {view.settings.writeSeconds} s bluffen ·{' '}
-            {view.settings.voteSeconds} s abstimmen
+          <p>{settingsSummary(view.settings)}</p>
+          <p class="muted small">
+            Schwierigkeit {view.settings.difficulty} · {view.settings.writeSeconds} s bluffen · {view.settings.voteSeconds} s abstimmen
           </p>
         </section>
       )}
@@ -181,8 +188,4 @@ export function Lobby({ view, conn }: { view: RoomView; conn: RoomConnection }) 
       <Rules compact />
     </section>
   );
-}
-
-function cap(s: string) {
-  return s.charAt(0).toUpperCase() + s.slice(1);
 }

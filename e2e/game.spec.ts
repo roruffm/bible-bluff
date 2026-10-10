@@ -28,6 +28,11 @@ async function join(page: Page, code: string, name: string) {
   await expect(page.getByText('Gleich geht’s los')).toBeVisible();
 }
 
+/** Abstimmen – bei Lückentext-Runden mit eigener Überschrift */
+const VOTE_TITLE = /Welche Antwort stimmt\?|Was gehört in die Lücke\?/;
+/** Eingabefeld für den Bluff – bei Lückentext-Runden mit eigener Beschriftung */
+const BLUFF_FIELD = /Deine erfundene Antwort|Was gehört in die Lücke/;
+
 async function hostAction(host: Page, label: string | RegExp) {
   await host.locator('.topbar-menu').click();
   await host.locator('.sheet').getByRole('button', { name: label }).click();
@@ -129,9 +134,9 @@ test('eine komplette Partie auf drei Handys und der Leinwand', async ({ browser 
       await expect(mirjam.getByRole('heading', { name: 'Zeit für ein Gebet' })).toBeVisible();
       await expect(tv.locator('.progress-person.is-quiet')).toHaveCount(1);
     }
-    if (round === 3) await expect(mirjam.getByLabel('Deine erfundene Antwort')).toBeVisible();
+    if (round === 3) await expect(mirjam.getByLabel(BLUFF_FIELD)).toBeVisible();
     await hostAction(host, 'Schreibzeit jetzt beenden');
-    await expect(host.getByText('Welche Antwort stimmt?')).toBeVisible();
+    await expect(host.getByText(VOTE_TITLE)).toBeVisible();
     if (round === 2) await expect(mirjam.getByRole('heading', { name: 'Zeit für ein Gebet' })).toBeVisible();
     await hostAction(host, 'Abstimmung jetzt beenden');
     await hostAction(host, 'Aufdeckung überspringen');
@@ -362,4 +367,54 @@ test('Allein gegen Joseph: eigener Raum von der Startseite aus', async ({ browse
   }).toPass({ timeout: 30_000 });
   await page.getByRole('button', { name: 'Nächste Runde' }).click();
   await expect(page.getByText('Runde 2 von 6')).toBeVisible();
+});
+
+test('Lückentext aus gewählten Kategorien: Lücke, eingesetzte Antworten, Auflösung im Satz', async ({ browser }) => {
+  const host = await phone(browser, 'host');
+  await host.goto('/neu');
+  await host.getByLabel('Dein Spitzname').fill('Rahel');
+  await host.getByRole('radiogroup', { name: 'Runden' }).getByRole('radio', { name: '4', exact: true }).click();
+  await host.getByRole('radiogroup', { name: 'Rundenart' }).getByRole('radio', { name: 'Lückentext' }).click();
+  // Nur Evangelien und Altes Testament
+  const chips = host.getByRole('group', { name: 'Kategorien' });
+  for (const name of ['Apostelgeschichte', 'Paulusbriefe', 'Weitere Briefe', 'Offenbarung']) {
+    await chips.getByRole('button', { name: new RegExp(name) }).click();
+  }
+  await expect(chips.locator('.cat-chip.is-on')).toHaveCount(2);
+  await expect(host.locator('.field-hint', { hasText: 'passen zu deiner Auswahl' })).toContainText('22 Lückentexte');
+  await host.getByRole('button', { name: 'Raum eröffnen' }).click();
+  await host.waitForURL(/\/r\/[A-Z]+\d+$/);
+  const code = host.url().split('/r/')[1];
+  await expect(host.locator('.fresh-note')).toContainText('von 22 Lückentexten');
+
+  const guest = await phone(browser, 'guest');
+  await join(guest, code, 'Jonas');
+  await host.getByRole('button', { name: 'Partie starten' }).click();
+
+  // Die Frage ist ein Satz mit Lücke
+  for (const p of [host, guest]) {
+    await expect(p.locator('.question-card .kind-chip')).toHaveText('Lückentext');
+    await expect(p.locator('.question-card .gap-blank')).toBeVisible();
+    await expect(p.getByText('Lücke füllen')).toBeVisible();
+  }
+  const group = await host.locator('.question-card .book-chip').textContent();
+  expect(['Matthäus', 'Markus', 'Lukas', 'Johannes', '1. Mose', '1. Samuel', 'Jona', 'Daniel', 'Richter', '1. Könige', 'Josua', '2. Mose']).toContain(group);
+
+  // Mitten im Satz beginnt „Ein …“ klein – im eingereichten Satz zu sehen
+  await host.getByLabel(BLUFF_FIELD).fill(SAFE_BLUFFS.host);
+  await host.getByRole('button', { name: 'Bluff abgeben' }).click();
+  await expect(host.locator('.submitted-text .gap-fill')).toHaveText(SAFE_BLUFFS.host.replace(/^Ein/, 'ein'));
+  await guest.getByLabel(BLUFF_FIELD).fill(SAFE_BLUFFS.mirjam);
+  await guest.getByRole('button', { name: 'Bluff abgeben' }).click();
+
+  // Abstimmen: Jonas fällt auf Rahels Bluff herein
+  await expect(guest.getByText('Was gehört in die Lücke?')).toBeVisible();
+  await guest.locator('.option', { hasText: /Zylinderhut aus Quarzglas/ }).click();
+  await host.locator('button.option:not([disabled])').first().click();
+
+  // Aufdeckung: Jede Antwort steht eingesetzt im Satz
+  await expect(guest.locator('.reveal-text.is-sentence .gap-fill').first()).toBeVisible({ timeout: 30_000 });
+  await expect(guest.locator('.stamp-truth')).toBeVisible({ timeout: 40_000 });
+  await expect(host.getByText('Punktestand')).toBeVisible({ timeout: 30_000 });
+  await expect(host.locator('.discovery-question .gap-fill')).toBeVisible();
 });

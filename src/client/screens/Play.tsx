@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { BLUFF_MAX } from '../../shared/rules';
 import type { RoomView } from '../../shared/types';
-import { Button, Progress, QuestionCard, Timer } from '../components/ui';
+import { Button, Progress, QuestionCard, QuestionText, Timer } from '../components/ui';
 import { type RoomConnection, useServerNow } from '../lib/hooks';
 
 const LETTERS = 'ABCDEFGHIJKLMN';
@@ -68,10 +68,11 @@ export function WritePhase({ view, conn, display = false }: { view: RoomView; co
   };
 
   if (quiet) return <QuietScreen view={view} conn={conn} />;
+  const gap = round.question.kind === 'gap';
 
   return (
     <section class="phase write stack">
-      <PhaseHead view={view} title="Bluff schreiben" />
+      <PhaseHead view={view} title={gap ? 'Lücke füllen' : 'Bluff schreiben'} />
       <QuestionCard question={round.question} big={display} />
 
       {canWrite &&
@@ -84,13 +85,14 @@ export function WritePhase({ view, conn, display = false }: { view: RoomView; co
             }}
           >
             <label class="field">
-              <span>Deine erfundene Antwort</span>
+              <span>{gap ? 'Was gehört in die Lücke? Erfinde etwas!' : 'Deine erfundene Antwort'}</span>
               <textarea
                 ref={inputRef}
                 value={text}
                 maxLength={BLUFF_MAX}
                 rows={2}
-                placeholder="Glaubwürdig, aber falsch …"
+                placeholder={gap ? 'Nur der fehlende Teil – glaubwürdig, aber falsch …' : 'Glaubwürdig, aber falsch …'}
+                autocapitalize={gap ? 'off' : 'sentences'}
                 onInput={(e) => setText((e.currentTarget as HTMLTextAreaElement).value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
@@ -127,7 +129,9 @@ export function WritePhase({ view, conn, display = false }: { view: RoomView; co
         ) : (
           <div class="submitted pop">
             <p class="eyebrow">Dein Bluff ist drin ✓</p>
-            <p class="submitted-text">„{round.myBluff}“</p>
+            <p class="submitted-text">
+              {gap ? <QuestionText prompt={round.question.prompt} fill={round.myBluff} /> : `„${round.myBluff}“`}
+            </p>
             <Button variant="ghost" small onClick={() => setEditing(true)}>
               Noch ändern
             </Button>
@@ -162,9 +166,9 @@ export function VotePhase({ view, conn, display = false }: { view: RoomView; con
 
   return (
     <section class="phase vote stack">
-      <PhaseHead view={view} title="Welche Antwort stimmt?" />
+      <PhaseHead view={view} title={round.question.kind === 'gap' ? 'Was gehört in die Lücke?' : 'Welche Antwort stimmt?'} />
       <QuestionCard question={round.question} big={display} />
-      <ul class={`options${display ? ' is-display' : ''}`}>
+      <ul class={`options${display ? ' is-display' : ''}${round.question.kind === 'gap' ? ' is-gap' : ''}`}>
         {round.options!.map((o, i) => {
           const chosen = (pending ?? round.myVote) === o.id;
           return (

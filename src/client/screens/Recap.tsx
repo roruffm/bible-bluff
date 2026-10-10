@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'preact/hooks';
 import { GROUP_LABELS } from '../../shared/rules';
 import type { RecapView } from '../../shared/types';
-import { Button, Logo, Toast } from '../components/ui';
+import { Button, Logo, QuestionText, Toast, upperFirst } from '../components/ui';
 import { ApiError, api } from '../lib/api';
 import { navigate, recapUrl } from '../lib/router';
 import { shareLink } from '../lib/share';
@@ -91,8 +91,10 @@ export function RecapPage({ id }: { id: string }) {
                 {i + 1}/{recap.items.length}
               </span>
             </header>
-            <p class="recap-q">{item.prompt}</p>
-            <p class="recap-a">✓ {item.answer}</p>
+            <p class="recap-q">
+              <QuestionText prompt={item.prompt} fill={item.answer} />
+            </p>
+            <p class="recap-a">✓ {upperFirst(item.answer)}</p>
             <p class="recap-ref">{item.ref}</p>
             <p class="recap-d">{item.discovery}</p>
             {item.favorites.length > 0 && (
