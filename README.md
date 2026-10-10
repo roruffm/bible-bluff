@@ -116,7 +116,7 @@ Die Spielleitung bleibt bei der Person, die den Raum eröffnet hat, auch wenn ih
 Wer keine eigene Gruppe hat, kann trotzdem mitspielen: Die Leitung kann ihren Raum im Warteraum oder im Menü „Leitung“ öffentlich zeigen. Dann steht er auf der Startseite unter „Offene Räume“, und alle können mit einem Tipp beitreten, auch mitten in eine laufende Partie. Der Schalter ist zunächst immer aus.
 
 - **Keine Namen auf der Startseite.** Die Liste zeigt nur Raumcode, Zahl der Personen, Stand der Partie und Schwierigkeit. Spitznamen und anderer Freitext erscheinen dort nie, damit niemand Unpassendes auf die Startseite bringen kann.
-- **Nur Räume, in denen wirklich gespielt wird.** Gesperrte, volle, beendete und geschlossene Räume fehlen, ebenso Räume, in denen gerade niemand verbunden ist.
+- **Nur Räume, in denen wirklich gespielt wird.** Gesperrte, volle, beendete und geschlossene Räume fehlen, ebenso Räume, in denen seit 15 Minuten niemand mehr verbunden war. Die Frist ist bewusst großzügig: Ein Handy im Hintergrund oder mit gesperrtem Bildschirm fragt nicht nach, und die Leitung soll trotzdem in Ruhe auf Mitspielende warten können.
 - **Transparent für alle im Raum.** Mitspielende sehen im Warteraum, dass ihr Raum öffentlich ist.
 - **Sparsam.** Die Startseite fragt alle 10 Sekunden nach, solange sie sichtbar ist, und der Worker hält die Liste 4 Sekunden vor. Die Liste erscheint nur, wenn es gerade offene Räume gibt.
 

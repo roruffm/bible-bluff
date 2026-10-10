@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { createApi } from '../src/server/api';
 import { MemoryStore } from '../src/server/store';
+import { LISTED_ALIVE_MS } from '../src/shared/rules';
 import type { PublicRoom, RoomView, SessionResponse, ViewResponse } from '../src/shared/types';
 import { Clock, seeded } from './helpers';
 
@@ -190,8 +191,11 @@ describe('Öffentliche Räume', () => {
     await act(t, code, host.token, { type: 'lock', locked: false });
     expect((await publicList(t)).map((r) => r.code)).toEqual([code]);
 
-    // Niemand mehr verbunden → verschwindet, bis wieder jemand da ist
-    t.clock.advance(20_000);
+    // Handy im Hintergrund oder gesperrt: Der Raum bleibt eine Weile stehen …
+    t.clock.advance(5 * 60 * 1000);
+    expect((await publicList(t)).map((r) => r.code)).toEqual([code]);
+    // … verschwindet aber, wenn lange niemand mehr da war, und kommt mit der Leitung zurück
+    t.clock.advance(LISTED_ALIVE_MS);
     expect(await publicList(t)).toEqual([]);
     await t.call('GET', `/api/rooms/${code}`, undefined, host.token);
     expect((await publicList(t)).map((r) => r.code)).toEqual([code]);

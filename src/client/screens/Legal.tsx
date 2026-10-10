@@ -162,8 +162,8 @@ export function DatenschutzPage() {
         Personen, Stand der Partie und Schwierigkeit, aber ohne Spitznamen. Alle, die die Startseite besuchen, können
         dann beitreten und sehen im Raum wie alle anderen die Spitznamen und Bluffs der Runde. Wer in einem öffentlichen
         Raum ist, sieht das im Warteraum. Der Raum verschwindet von der Startseite, sobald die Leitung die Anzeige
-        ausschaltet oder den Raum sperrt, die Partie endet oder niemand mehr verbunden ist. Rechtsgrundlage ist die
-        Bereitstellung des Spiels (Art. 6 Abs. 1 lit. b DSGVO).
+        ausschaltet oder den Raum sperrt, die Partie endet oder 15 Minuten lang niemand mehr verbunden war.
+        Rechtsgrundlage ist die Bereitstellung des Spiels (Art. 6 Abs. 1 lit. b DSGVO).
       </p>
 
       <h2>Entdeckungen-Seiten</h2>

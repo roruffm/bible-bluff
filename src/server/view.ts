@@ -1,7 +1,7 @@
 // Gefilterte Sicht auf den Raum: Jede Person bekommt nur, was sie gerade sehen darf.
 // Antworten, Bluff-Urheber und Stimmen bleiben bis zur Aufdeckung auf dem Server.
 
-import { MAX_PLAYERS, POINTS_FAVORITE } from '../shared/rules';
+import { LISTED_ALIVE_MS, MAX_PLAYERS, POINTS_FAVORITE } from '../shared/rules';
 import type {
   AwardView,
   FavoriteOptionView,
@@ -29,7 +29,7 @@ function personLookup(state: RoomState) {
 
 /**
  * Eintrag für die Liste offener Räume auf der Startseite – oder null, wenn der Raum dort nicht
- * hingehört: nicht freigegeben, gesperrt, voll, vorbei oder gerade niemand verbunden.
+ * hingehört: nicht freigegeben, gesperrt, voll, vorbei oder seit LISTED_ALIVE_MS niemand mehr da.
  * Enthält keine Spitznamen und keinen anderen Freitext.
  */
 export function publicRoom(state: RoomState, ctx: Ctx): PublicRoom | null {
@@ -37,7 +37,8 @@ export function publicRoom(state: RoomState, ctx: Ctx): PublicRoom | null {
   if (state.status !== 'lobby' && state.status !== 'playing') return null;
   const free = MAX_PLAYERS - state.players.filter((p) => p.plays).length;
   if (free <= 0) return null;
-  if (!state.players.some((p) => isOnline(ctx, p.id))) return null;
+  const lastSeen = Math.max(0, ...state.players.map((p) => ctx.presence[p.id] ?? 0));
+  if (ctx.now - lastSeen >= LISTED_ALIVE_MS) return null;
   const g = state.status === 'playing' ? state.game : null;
   return {
     code: state.code,
