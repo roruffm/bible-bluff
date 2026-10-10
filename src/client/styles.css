@@ -504,6 +504,102 @@ textarea {
   background: var(--line);
 }
 
+/* Startseite: drei Wege ins Spiel – je Karte ein Bildzeichen, Titel, ein Satz und ein Knopf */
+.choice-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.choice-head h2 {
+  font-size: 1.35rem;
+  margin-bottom: 4px;
+}
+
+.choice-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+}
+
+.choice-icon .icon {
+  width: 1.9rem;
+  height: 1.9rem;
+}
+
+.choice-icon.is-join {
+  background: color-mix(in srgb, var(--primary) 13%, var(--card));
+  color: var(--primary);
+}
+
+.choice-icon.is-create {
+  background: var(--gold);
+  color: var(--on-gold);
+}
+
+/* Ruhige Nebenkarte (Farben) im Stil von „So geht’s“ */
+.side-card {
+  background: var(--card-2);
+  border-radius: var(--radius);
+  padding: 18px;
+  border: 1.5px dashed var(--line);
+}
+
+.side-card h2 {
+  font-size: 1rem;
+  margin-bottom: 10px;
+}
+
+/* Partie gegen Joseph: sein Gesicht neben der Einleitung, Einstellungen eingeklappt */
+.bot-intro {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.more-settings {
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  padding: 12px 14px;
+}
+
+.more-settings summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 10px;
+  font-weight: 700;
+  list-style: none;
+  cursor: pointer;
+}
+
+.more-settings summary .muted {
+  font-weight: 500;
+}
+
+.more-settings summary::-webkit-details-marker {
+  display: none;
+}
+
+.more-settings summary::before {
+  content: '▸';
+  color: var(--ochre);
+  transition: transform 0.2s;
+}
+
+.more-settings[open] summary::before {
+  transform: rotate(90deg);
+}
+
+.more-settings .settings {
+  margin-top: 14px;
+}
+
 .footnote {
   text-align: center;
   font-size: 0.8rem;
@@ -672,7 +768,7 @@ textarea {
 
 .toggle {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 14px;
   cursor: pointer;
   padding: 4px 0;
@@ -1082,6 +1178,11 @@ textarea {
   width: 4rem;
   height: 4rem;
   font-size: 1.3rem;
+}
+
+.avatar.is-bot svg {
+  width: 90%;
+  height: 90%;
 }
 
 .avatar.is-dim {
