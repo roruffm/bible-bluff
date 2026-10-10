@@ -249,6 +249,16 @@ async function homeWithOpenRooms(page: Page): Promise<string[]> {
 
 test('Öffentliche Räume stehen auf der Startseite, auch mitten in der Partie', async ({ browser }) => {
   const host = await phone(browser, 'host');
+  // Vibrationen der Leitung mitschreiben
+  await host.addInitScript(() => {
+    const w = window as unknown as { vibrations: unknown[] };
+    w.vibrations = [];
+    navigator.vibrate = ((pattern: VibratePattern) => {
+      w.vibrations.push(pattern);
+      return true;
+    }) as Navigator['vibrate'];
+  });
+  const vibrations = () => host.evaluate(() => (window as unknown as { vibrations: unknown[] }).vibrations.length);
   const code = await createRoom(host, 'Rahel');
   const visitor = await phone(browser, 'gast');
   // Privat ist der Normalfall: kein Bereich „Offene Räume“
@@ -260,6 +270,9 @@ test('Öffentliche Räume stehen auf der Startseite, auch mitten in der Partie',
   const jonas = await phone(browser, 'jonas');
   await join(jonas, code, 'Jonas');
   await expect(jonas.getByText('Öffentlicher Raum')).toBeVisible();
+  // Die Leitung bekommt Bescheid: Vibration und kurze Meldung
+  await expect(host.getByRole('status').filter({ hasText: 'Jonas ist beigetreten' })).toBeVisible();
+  expect(await vibrations()).toBe(1);
   await host.getByRole('button', { name: 'Partie starten' }).click();
   await expect(host.getByText('Runde 1 von 4')).toBeVisible();
 
@@ -277,6 +290,8 @@ test('Öffentliche Räume stehen auf der Startseite, auch mitten in der Partie',
   await visitor.getByLabel('Dein Spitzname').fill('Hanna');
   await visitor.getByRole('button', { name: 'Beitreten' }).click();
   await expect(visitor.getByText('Runde 1 von 4')).toBeVisible();
+  await expect(host.getByRole('status').filter({ hasText: 'Hanna ist beigetreten' })).toBeVisible();
+  expect(await vibrations()).toBe(2);
 
   // Die Leitung nimmt den Raum wieder von der Startseite
   await host.locator('.topbar-menu').click();

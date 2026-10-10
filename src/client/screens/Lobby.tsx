@@ -125,10 +125,10 @@ export function Lobby({ view, conn }: { view: RoomView; conn: RoomConnection }) 
             label="Öffentlich zeigen"
             hint={
               !view.listed
-                ? 'Nur wer den Code oder Link hat, kommt herein.'
+                ? 'Nur wer den Code oder Link hat, kommt herein. Schalte das nur ein, wenn Fremde willkommen sind.'
                 : view.locked
                   ? 'Solange der Raum gesperrt ist, erscheint er nicht auf der Startseite.'
-                  : 'Der Raum steht auf der Startseite, und alle können beitreten. Schalte das nur ein, wenn Fremde willkommen sind.'
+                  : 'Der Raum steht auf der Startseite, und alle können beitreten. Lass ihn offen, dann meldet sich dein Handy, wenn jemand dazukommt.'
             }
           />
           <SettingsFields settings={view.settings} onChange={(settings) => change({ settings })} />
