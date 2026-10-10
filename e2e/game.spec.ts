@@ -303,3 +303,28 @@ test('Öffentliche Räume stehen auf der Startseite, auch mitten in der Partie',
   }).toPass({ timeout: 20_000 });
   await expect(later.locator('.open-rooms')).toHaveCount(0);
 });
+
+test('Ohne Vibration (wie auf dem iPhone) meldet ein Ton den Beitritt', async ({ browser }) => {
+  const host = await phone(browser, 'host');
+  // Kein navigator.vibrate wie auf dem iPhone; erzeugte Töne mitzählen
+  await host.addInitScript(() => {
+    const w = window as unknown as { tones: number };
+    w.tones = 0;
+    Object.defineProperty(Navigator.prototype, 'vibrate', { value: undefined, configurable: true });
+    const original = AudioContext.prototype.createOscillator;
+    AudioContext.prototype.createOscillator = function (this: AudioContext) {
+      w.tones++;
+      return original.call(this);
+    };
+  });
+  const code = await createRoom(host, 'Rahel');
+  // Antippen (mit dem Finger, nicht der Maus) schaltet den Ton frei
+  await host.getByText('Öffentlich zeigen', { exact: true }).tap();
+  await expect(host.getByText('Der Raum steht auf der Startseite')).toBeVisible();
+
+  const guest = await phone(browser, 'gast');
+  await join(guest, code, 'Lea');
+  await expect(host.getByRole('status').filter({ hasText: 'Lea ist beigetreten' })).toBeVisible();
+  // Zweiklang: zwei Töne
+  await expect.poll(() => host.evaluate(() => (window as unknown as { tones: number }).tones)).toBe(2);
+});
