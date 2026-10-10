@@ -13,12 +13,13 @@ watch_dir = "src/client"
 
 # Die gebaute App (vite build) wird als statische Assets ausgeliefert.
 # Unbekannte Pfade landen in der Single-Page-App. Einladungslinks /r/LAMPE7 gehen zuerst durch den
-# Worker, der ihnen eine eigene Link-Vorschau gibt („Du bist eingeladen – Raum LAMPE7“).
+# Worker, der ihnen eine eigene Link-Vorschau gibt („Du bist eingeladen – Raum LAMPE7“). Die Startseite
+# „/“ ebenfalls: Auf Testadressen holt sie ihr Vorschaubild von dort statt von biblebluff.de.
 [assets]
 directory = "./dist/client"
 binding = "ASSETS"
 not_found_handling = "single-page-application"
-run_worker_first = ["/api/*", "/r/*"]
+run_worker_first = ["/api/*", "/r/*", "/"]
 
 # D1-Datenbank „bible-bluff“ (Region Westeuropa). Für ein eigenes Konto:
 # `npx wrangler d1 create bible-bluff` ausführen und die ausgegebene database_id hier eintragen.

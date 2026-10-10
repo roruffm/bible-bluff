@@ -402,10 +402,17 @@ test('Einladungslinks haben eine eigene Link-Vorschau', async ({ request }) => {
   const invite = await (await request.get('/r/lampe7')).text();
   expect(invite).toContain('<meta property="og:title" content="Du bist eingeladen – Raum LAMPE7"');
   expect(invite).toMatch(/<meta property="og:image" content="http:\/\/localhost:\d+\/og-invite\.jpg"/);
+  // Die Startseite holt ihr Vorschaubild außerhalb von biblebluff.de von derselben Adresse
   const home = await (await request.get('/')).text();
-  expect(home).toContain('<meta property="og:image" content="https://biblebluff.de/og.jpg"');
-  const image = await request.get('/og-invite.jpg');
-  expect(image.headers()['content-type']).toBe('image/jpeg');
+  expect(home).toMatch(/<meta property="og:image" content="http:\/\/localhost:\d+\/og\.jpg"/);
+  for (const [path, type] of [
+    ['/og.jpg', 'image/jpeg'],
+    ['/og-invite.jpg', 'image/jpeg'],
+    ['/favicon.ico', 'image/x-icon'],
+    ['/apple-touch-icon.png', 'image/png'],
+  ]) {
+    expect((await request.get(path)).headers()['content-type'], path).toBe(type);
+  }
 });
 
 test('Lückentext aus gewählten Kategorien: Lücke, eingesetzte Antworten, Auflösung im Satz', async ({ browser }) => {

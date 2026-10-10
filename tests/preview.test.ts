@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { inviteCode, invitePreview } from '../src/server/preview';
+import { homePreview, inviteCode, invitePreview } from '../src/server/preview';
 import worker from '../src/worker';
 
 const index = readFileSync(new URL('../src/client/index.html', import.meta.url), 'utf8');
@@ -54,6 +54,7 @@ describe('Link-Vorschau', () => {
   it('lässt Cloudflare Einladungslinks zuerst durch den Worker laufen', () => {
     const toml = readFileSync(new URL('../wrangler.toml', import.meta.url), 'utf8');
     expect(toml).toMatch(/run_worker_first = \[[^\]]*"\/r\/\*"/);
+    expect(toml).toMatch(/run_worker_first = \[[^\]]*"\/"[,\]]/);
   });
 });
 
@@ -76,6 +77,14 @@ describe('Einladungslinks', () => {
     expect(meta(html, 'og:image:alt')).toContain('eingeladen');
     const swapped = /<meta (property|name)="(og:title|og:description|og:image|og:image:alt|description)" content="[^"]*"/g;
     expect(html.replace(swapped, '')).toBe(index.replace(swapped, ''));
+  });
+
+  it('holen das Vorschaubild der Startseite auf Testadressen von dort', () => {
+    const html = homePreview(index, 'https://vorschau.example');
+    expect(meta(html, 'og:image')).toBe('https://vorschau.example/og.jpg');
+    expect(html.replace(/<meta property="og:image" content="[^"]*"/, '')).toBe(index.replace(/<meta property="og:image" content="[^"]*"/, ''));
+    expect(homePreview(index, 'https://biblebluff.de')).toBe(index);
+    expect(homePreview(index.replace('https://biblebluff.de/og.jpg', 'https://cdn.example/og.jpg'), 'https://x.example')).toContain('https://cdn.example/og.jpg');
   });
 
   it('maskieren, was sie in die Seite schreiben', () => {
@@ -101,7 +110,8 @@ describe('Worker', () => {
         },
       },
     };
-    return { calls, fetch: (path: string, init?: RequestInit) => worker.fetch(new Request(`https://biblebluff.de${path}`, init), env) };
+    const fetch = (path: string, init?: RequestInit, origin = 'https://biblebluff.de') => worker.fetch(new Request(`${origin}${path}`, init), env);
+    return { calls, fetch };
   }
 
   it('liefert Einladungslinks mit Einladungs-Vorschau, ohne veraltetes ETag', async () => {
@@ -128,6 +138,16 @@ describe('Worker', () => {
     await fetch('/r/lampe7', { method: 'POST' });
     await fetch('/r/a/b');
     expect(calls).toEqual(['GET /', 'POST /r/lampe7', 'GET /r/a/b']);
+  });
+
+  it('gibt der Startseite auf Testadressen ihr eigenes Vorschaubild, auf biblebluff.de bleibt sie unverändert', async () => {
+    const { calls, fetch } = setup();
+    const preview = await fetch('/', undefined, 'https://claude-test.biblebluff.de');
+    expect(meta(await preview.text(), 'og:image')).toBe('https://claude-test.biblebluff.de/og.jpg');
+    const home = await fetch('/', { headers: { 'if-none-match': '"abc"' } });
+    expect(meta(await home.text(), 'og:image')).toBe('https://biblebluff.de/og.jpg');
+    // Auf biblebluff.de geht die Anfrage samt Bedingungen unverändert an die statische App
+    expect(calls).toEqual(['GET /', 'GET / (bedingt)']);
   });
 
   it('fällt auf die normale Seite zurück, wenn die App-Seite fehlt', async () => {
