@@ -16,9 +16,10 @@ import {
   normalizeCode,
 } from '../../shared/rules';
 import type { CategoryId, PublicRoom, RoundType, Settings } from '../../shared/types';
+import { Guide } from '../components/Guide';
 import { EnterIcon, FriendsIcon } from '../components/Icons';
-import { ThemePicker } from '../components/ThemePicker';
-import { Avatar, Button, Logo, Rules, Segmented, Toggle } from '../components/ui';
+import { ThemeFold } from '../components/ThemePicker';
+import { Avatar, Button, Logo, Segmented, Toggle } from '../components/ui';
 import { ApiError, api } from '../lib/api';
 import { categoryCount, poolCount, poolNoun, settingsSummary, usePool } from '../lib/pool';
 import { navigate } from '../lib/router';
@@ -104,12 +105,8 @@ export function Home() {
         </Button>
       </section>
 
-      <Rules />
-
-      <section class="side-card">
-        <h2>Farben</h2>
-        <ThemePicker compact />
-      </section>
+      <Guide />
+      <ThemeFold />
 
       <footer class="footnote">
         Fragen aus allen 27 Büchern des Neuen Testaments und ausgewählten Geschichten des Alten Testaments · freikirchlich-pfingstliche Lernfassung

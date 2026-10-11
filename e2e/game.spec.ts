@@ -272,6 +272,46 @@ test('Neugierig auf Jesus? – eine eigene, ruhige Seite', async ({ browser }) =
   await expect(page.getByRole('button', { name: 'Raum eröffnen' })).toBeVisible();
 });
 
+test('Startseite: Anleitung und Farben klappen auf', async ({ browser }) => {
+  const page = await phone(browser, 'gast');
+  await page.goto('/');
+
+  // Zugeklappt bleibt die Seite kurz, die Zeile sagt, was drinsteht
+  const guide = page.locator('details.guide');
+  const guideHead = guide.locator(':scope > summary');
+  await expect(guideHead).toContainText('Herzensrunde');
+  await expect(guide.getByText('Bluff schreiben.')).toBeHidden();
+  await guideHead.click();
+  await expect(guide.getByText('Bluff schreiben.')).toBeVisible();
+  await expect(guide.getByText('für den Bluff mit den meisten Herzen')).toBeVisible();
+
+  // Die Themen klappen einzeln auf
+  const topic = (title: string) => guide.locator('details.guide-topic').filter({ has: page.locator('summary', { hasText: title }) });
+  await expect(topic('Allein gegen Joseph').getByText('Er schreibt Bluffs, rät mit')).toBeHidden();
+  await topic('Allein gegen Joseph').locator('summary').click();
+  await expect(topic('Allein gegen Joseph').getByText('Er schreibt Bluffs, rät mit')).toBeVisible();
+  await topic('Herzensrunde').locator('summary').click();
+  await expect(topic('Herzensrunde').getByText('ohne Namen')).toBeVisible();
+  await topic('Nachbesprechung').locator('summary').click();
+  await expect(topic('Nachbesprechung').getByText('Lesen, Entdecken, Nachfragen, Mitnehmen')).toBeVisible();
+  await topic('Nach der Partie').locator('summary').click();
+  await topic('Nach der Partie').getByRole('link', { name: 'Eine kurze, ehrliche Seite' }).click();
+  await expect(page).toHaveURL(/\/jesus$/);
+  await expect(page.getByRole('heading', { name: 'Neugierig auf Jesus?' })).toBeVisible();
+
+  // Farben: zugeklappt steht das gewählte Konzept in der Zeile, die Wahl bleibt gespeichert
+  await page.goto('/');
+  const colors = page.locator('details.colors');
+  await expect(colors.locator('summary')).toContainText('See Genezareth');
+  await expect(colors.getByRole('radiogroup', { name: 'Farbkonzept' })).toBeHidden();
+  await colors.locator('summary').click();
+  await colors.getByRole('radio', { name: 'Nachtquiz' }).click();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'nacht');
+  await expect(colors.locator('summary')).toContainText('Nachtquiz');
+  await page.reload();
+  await expect(page.locator('details.colors summary')).toContainText('Nachtquiz');
+});
+
 test('Impressum und Datenschutz sind von der Startseite und im Raum erreichbar', async ({ browser }) => {
   const page = await phone(browser, 'gast');
   await page.goto('/');
