@@ -322,7 +322,7 @@ describe('Spielleitung', () => {
 describe('Ganze Partie', () => {
   it('endet nach der letzten Runde mit Rangliste, Auszeichnungen und Entdeckungen', () => {
     const g = setup(['Host', 'Anna', 'Ben']);
-    g.act('host', { type: 'settings', settings: { rounds: 4 } });
+    g.act('host', { type: 'settings', settings: { rounds: 4, heartRound: false } });
     g.act('host', { type: 'start' });
     for (let r = 0; r < 4; r++) {
       expect(g.state.game!.roundIndex).toBe(r);
@@ -446,7 +446,7 @@ describe('Lieblingsbluff', () => {
 
   it('kürt am Ende den besten Bluff des Abends mit Zitat', () => {
     const g = setup(['Host', 'Anna', 'Ben']);
-    g.act('host', { type: 'settings', settings: { rounds: 4 } });
+    g.act('host', { type: 'settings', settings: { rounds: 4, heartRound: false } });
     g.act('host', { type: 'start' });
     const likes: Record<string, string>[] = [{ anna: 'ben' }, { anna: 'ben', host: 'ben' }, { ben: 'anna', host: 'anna' }, {}];
     for (let r = 0; r < 4; r++) {

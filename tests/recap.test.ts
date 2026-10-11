@@ -27,7 +27,7 @@ const BLUFFS = ['Zwölf Fässer mit Wein', 'Eine Posaune aus Messing', 'Ein Korb
 
 /** Spielt eine Partie mit vier Fragen über die API durch; in Runde 1 bekommt Rahels Bluff ein Herz. */
 async function playGame(t: ReturnType<typeof setup>) {
-  const created = (await t.call('POST', '/api/rooms', { name: 'Rahel', settings: { rounds: 4 } })).body as SessionResponse;
+  const created = (await t.call('POST', '/api/rooms', { name: 'Rahel', settings: { rounds: 4, heartRound: false } })).body as SessionResponse;
   const code = created.code;
   const players = [created];
   for (const name of ['Jonas', 'Mirjam']) players.push((await t.call('POST', `/api/rooms/${code}/join`, { name })).body);

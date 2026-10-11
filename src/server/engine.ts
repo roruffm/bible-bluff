@@ -12,6 +12,10 @@ import {
   DIFFICULTY_OPTIONS,
   GAP,
   GAP_SHARE,
+  HEART_MAX,
+  HEART_QUESTIONS,
+  HEART_SECONDS,
+  HEART_SHOW_SECONDS,
   MAX_PLAYERS,
   MIN_PLAYERS,
   ONLINE_WINDOW_MS,
@@ -35,6 +39,7 @@ import {
   categoryOf,
   cleanBluff,
   cleanName,
+  heartRoundAhead,
 } from '../shared/rules';
 import type { Action, CategoryId, Difficulty, RoundType, Settings } from '../shared/types';
 import { QUESTIONS, getQuestion, hasQuestion, type Question } from './questions';
@@ -235,14 +240,25 @@ export function sanitizeSettings(input: Partial<Settings> | undefined, base: Set
     if (!picked.length) throw new GameError('bad_settings', 'Wähle mindestens eine Kategorie.', 400);
     s.categories = ALL_CATEGORIES.filter((c) => picked.includes(c));
   }
+  if (input.heartRound !== undefined) {
+    if (typeof input.heartRound !== 'boolean') throw new GameError('bad_settings', 'Ungültige Angabe zur Herzensrunde.', 400);
+    s.heartRound = input.heartRound;
+  }
   if (!matchingQuestions(s).length) throw new GameError('bad_settings', 'Zu dieser Auswahl gibt es keine Fragen.', 400);
   return s;
 }
 
-/** Räume von vor den Kategorien und Lückentexten bekommen die Standardwerte dazu */
+/**
+ * Räume von vor den Kategorien und Lückentexten bekommen die Standardwerte dazu. Die Herzensrunde
+ * bleibt dort aus: Die Leitung hat sie beim Eröffnen nicht gewählt.
+ */
 export function withSettingDefaults(settings: Partial<Settings>): Settings {
   const merged = { ...DEFAULT_SETTINGS, ...settings };
-  return { ...merged, categories: settings.categories?.length ? settings.categories : [...ALL_CATEGORIES] };
+  return {
+    ...merged,
+    categories: settings.categories?.length ? settings.categories : [...ALL_CATEGORIES],
+    heartRound: settings.heartRound ?? false,
+  };
 }
 
 // ───────────────────────── Raum & Beitritt ─────────────────────────
@@ -753,14 +769,52 @@ export function mostMissedQuestion(g: GameRec): string | null {
 function afterScores(s: RoomState, ctx: Ctx) {
   const g = s.game!;
   settleRound(s);
-  if (g.roundIndex + 1 < g.questionIds.length) {
-    startRound(s, g.roundIndex + 1, ctx);
-  } else {
-    s.status = 'finished';
-    g.deadline = null;
-    g.finishedAt = ctx.now;
-    s.paused = null;
-  }
+  if (g.roundIndex + 1 < g.questionIds.length) startRound(s, g.roundIndex + 1, ctx);
+  else if (heartRoundAhead(s.settings, s.players)) startHeart(s, ctx);
+  else finishGame(s, ctx);
+}
+
+function finishGame(s: RoomState, ctx: Ctx) {
+  const g = s.game!;
+  s.status = 'finished';
+  g.deadline = null;
+  g.finishedAt = ctx.now;
+  // Die ehrlichen Antworten der Herzensrunde gehören dem Moment – mit dem Endstand sind sie weg
+  g.heart = null;
+  s.paused = null;
+}
+
+// ───────────────────────── Herzensrunde ─────────────────────────
+
+function startHeart(s: RoomState, ctx: Ctx) {
+  const g = s.game!;
+  // Eine ruhige Minute gilt nur für eine Spielrunde – hier dürfen alle mitschreiben
+  for (const p of s.players) delete p.quietRound;
+  g.heart = { question: Math.floor(ctx.rng() * HEART_QUESTIONS.length), answers: {}, shown: null };
+  g.phase = 'heart';
+  g.phaseStartedAt = ctx.now;
+  g.deadline = ctx.now + HEART_SECONDS * 1000;
+}
+
+/** Antworten gemischt zeigen; wer was geschrieben hat, wird ab hier nicht mehr gespeichert */
+function startHeartShow(s: RoomState, ctx: Ctx) {
+  const g = s.game!;
+  const heart = (g.heart ??= { question: 0, answers: {}, shown: null });
+  const texts = Object.entries(heart.answers)
+    .filter(([id, a]) => a.text && player(s, id)?.plays)
+    .map(([, a]) => a.text as string);
+  heart.shown = shuffle(texts, ctx.rng);
+  heart.answers = {};
+  g.phase = 'heartShow';
+  g.phaseStartedAt = ctx.now;
+  g.deadline = ctx.now + HEART_SHOW_SECONDS * 1000;
+}
+
+/** Alle verbundenen Menschen haben geschrieben oder „Diesmal nicht“ gewählt */
+function everyoneAnswered(s: RoomState, ctx: Ctx): boolean {
+  const eligible = eligibleOnline(s, ctx).filter((p) => !p.bot);
+  const answers = s.game!.heart?.answers ?? {};
+  return eligible.length > 0 && eligible.every((p) => answers[p.id]);
 }
 
 /** Auf wen gewartet wird: wer mitspielt, verbunden ist und nicht gerade eine ruhige Minute macht */
@@ -791,6 +845,10 @@ function advancePhase(s: RoomState, ctx: Ctx) {
       return startScores(s, ctx);
     case 'scores':
       return afterScores(s, ctx);
+    case 'heart':
+      return startHeartShow(s, ctx);
+    case 'heartShow':
+      return finishGame(s, ctx);
   }
 }
 
@@ -812,7 +870,9 @@ export function tick(state: RoomState, ctx: Ctx): RoomState | null {
       const g = s.game;
       const due = g.deadline !== null && ctx.now >= g.deadline;
       const early =
-        (g.phase === 'write' && everyoneWrote(s, ctx)) || (g.phase === 'vote' && everyoneVoted(s, ctx));
+        (g.phase === 'write' && everyoneWrote(s, ctx)) ||
+        (g.phase === 'vote' && everyoneVoted(s, ctx)) ||
+        (g.phase === 'heart' && everyoneAnswered(s, ctx));
       if (!due && !early) break;
       advancePhase(s, ctx);
       changed = true;
@@ -1054,6 +1114,34 @@ export function applyAction(state: RoomState, actorId: string, action: Action, c
       return { state: s };
     }
 
+    case 'heart': {
+      const g = requireGame(s);
+      if (g.phase !== 'heart' || !g.heart) throw new GameError('phase_over', 'Die Herzensrunde ist schon vorbei.');
+      if (!actor.plays) throw new GameError('not_playing', 'Du leitest nur – schreiben können die Mitspielenden.');
+      let text: string | null = null;
+      if (action.text !== null) {
+        text = cleanBluff(typeof action.text === 'string' ? action.text : '');
+        if (!text) throw new GameError('empty', 'Schreib zuerst etwas – oder tippe auf „Diesmal nicht“.', 400);
+        if (text.length > HEART_MAX) throw new GameError('too_long', `Höchstens ${HEART_MAX} Zeichen.`, 400);
+      }
+      g.heart.answers[actorId] = { text, at: ctx.now };
+      return { state: s };
+    }
+
+    case 'heartSwap': {
+      requireHost(s, actorId);
+      const g = requireGame(s);
+      if (g.phase !== 'heart' || !g.heart) throw new GameError('bad_state', 'Gerade läuft keine Herzensrunde.');
+      if (Object.keys(g.heart.answers).length) {
+        throw new GameError('bad_state', 'Es hat schon jemand geantwortet – die Frage bleibt.');
+      }
+      resume(s, ctx);
+      g.heart.question = (g.heart.question + 1) % HEART_QUESTIONS.length;
+      g.phaseStartedAt = ctx.now;
+      g.deadline = ctx.now + HEART_SECONDS * 1000;
+      return { state: s };
+    }
+
     case 'pause': {
       requireHost(s, actorId);
       requireGame(s);
@@ -1117,9 +1205,10 @@ export function applyAction(state: RoomState, actorId: string, action: Action, c
     case 'next': {
       requireHost(s, actorId);
       const g = requireGame(s);
-      if (g.phase !== 'scores') throw new GameError('bad_state', 'Erst nach der Auflösung geht es weiter.');
+      if (g.phase !== 'scores' && g.phase !== 'heartShow') throw new GameError('bad_state', 'Erst nach der Auflösung geht es weiter.');
       resume(s, ctx);
-      afterScores(s, ctx);
+      if (g.phase === 'heartShow') finishGame(s, ctx);
+      else afterScores(s, ctx);
       return { state: s };
     }
 
@@ -1203,6 +1292,7 @@ function removePlayer(s: RoomState, id: string) {
   if (s.game!.phase === 'write') delete round.bluffs[id];
   if (s.game!.phase === 'vote') delete round.votes[id];
   if (s.game!.phase === 'scores' && round.likes) delete round.likes[id];
+  if (s.game!.phase === 'heart') delete s.game!.heart?.answers[id];
 }
 
 function resume(s: RoomState, ctx: Ctx) {

@@ -1,13 +1,15 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
-import { BOT_NAME, POINTS_FAVORITE, POINTS_GIFT, TALK_STEPS } from '../../shared/rules';
+import { BOT_NAME, POINTS_FAVORITE, POINTS_GIFT, TALK_STEPS, heartRoundAhead } from '../../shared/rules';
 import type { RoomView, TalkNotes, TalkView } from '../../shared/types';
 import { FriendsIcon } from '../components/Icons';
+import { WeekVerseCard } from '../components/WeekVerse';
 import { QRCode } from '../components/QR';
 import { Avatar, Button, ConfirmButton, QuestionText, Toast, formatSeconds, upperFirst } from '../components/ui';
 import { api } from '../lib/api';
 import { type RoomConnection, useServerNow } from '../lib/hooks';
 import { navigate, recapUrl } from '../lib/router';
 import { shareLink } from '../lib/share';
+import { CuriousCard } from './Jesus';
 import { QuietOffer } from './Play';
 
 export function ScoresPhase({ view, conn, display = false }: { view: RoomView; conn: RoomConnection; display?: boolean }) {
@@ -16,6 +18,8 @@ export function ScoresPhase({ view, conn, display = false }: { view: RoomView; c
   const now = useServerNow(500);
   const isHost = Boolean(view.me?.isHost) && !display;
   const last = round.index + 1 >= round.total;
+  // Nach der letzten Runde kommt – wenn eingeschaltet – erst die Herzensrunde, dann der Endstand
+  const upcoming = !last ? 'Nächste Runde' : heartRoundAhead(view.settings, view.players) ? 'Herzensrunde' : 'Endstand';
   const left = round.deadline ? round.deadline - (view.paused?.at ?? now) : 0;
   const results = new Map((round.results ?? []).map((r) => [r.playerId, r]));
   const ranked = view.players
@@ -130,14 +134,14 @@ export function ScoresPhase({ view, conn, display = false }: { view: RoomView; c
       <footer class="next-bar">
         {isHost ? (
           <Button variant="gold" block onClick={() => conn.act({ type: 'next' })}>
-            {last ? 'Zum Endstand' : 'Nächste Runde'}
+            {!last ? 'Nächste Runde' : upcoming === 'Herzensrunde' ? 'Zur Herzensrunde' : 'Zum Endstand'}
           </Button>
         ) : null}
         {round.deadline && (
           <p class="muted small center">
             {view.paused
               ? 'Pausiert.'
-              : `${last ? 'Endstand' : 'Nächste Runde'} automatisch in ${formatSeconds(left)}${isHost ? '' : ' – oder wenn die Spielleitung weitertippt'}.`}
+              : `${upcoming} automatisch in ${formatSeconds(left)}${isHost ? '' : ' – oder wenn die Spielleitung weitertippt'}.`}
           </p>
         )}
       </footer>
@@ -381,6 +385,10 @@ export function FinalScreen({ view, conn, display = false }: { view: RoomView; c
         {!display && <RecapShare view={view} display={false} />}
       </section>
 
+      {!display && final.discoveries.length > 0 && (
+        <WeekVerseCard items={final.discoveries.map((d) => ({ book: d.book, group: d.group, key: d.questionId }))} />
+      )}
+
       {!display && (
         <footer class="stack">
           {isHost && withBot && <SpreadCard friends />}
@@ -418,6 +426,7 @@ export function FinalScreen({ view, conn, display = false }: { view: RoomView; c
           <Button variant="ghost" block onClick={() => navigate('/')}>
             Zur Startseite
           </Button>
+          <CuriousCard newTab />
         </footer>
       )}
     </section>

@@ -1,11 +1,12 @@
 // Gefilterte Sicht auf den Raum: Jede Person bekommt nur, was sie gerade sehen darf.
 // Antworten, Bluff-Urheber und Stimmen bleiben bis zur Aufdeckung auf dem Server.
 
-import { LISTED_ALIVE_MS, MAX_PLAYERS, POINTS_FAVORITE } from '../shared/rules';
+import { HEART_QUESTIONS, LISTED_ALIVE_MS, MAX_PLAYERS, POINTS_FAVORITE } from '../shared/rules';
 import type {
   AwardView,
   FavoriteOptionView,
   FinalView,
+  HeartView,
   MeView,
   PersonRef,
   PlayerView,
@@ -68,6 +69,8 @@ export function buildView(state: RoomState, meId: string | null, ctx: Ctx, versi
     if (playing) {
       if (playing.phase === 'write') done = Boolean(playing.round.bluffs[p.id]);
       if (playing.phase === 'vote') done = Boolean(playing.round.votes[p.id]);
+      // Herzensrunde: fertig heißt geschrieben oder ausgesetzt – was davon, verrät die Sicht nicht
+      if (playing.phase === 'heart') done = Boolean(playing.heart?.answers[p.id]);
     }
     return {
       id: p.id,
@@ -97,6 +100,7 @@ export function buildView(state: RoomState, meId: string | null, ctx: Ctx, versi
     hostPlays: host?.plays ?? true,
     players,
     round: g && (state.status === 'playing' || state.status === 'finished') ? buildRound(state, meId) : null,
+    heart: buildHeart(state, meId),
     final: state.status === 'finished' ? buildFinal(state) : null,
     poolSize: matchingQuestions(state.settings).length,
     freshCount: freshCount(state),
@@ -203,6 +207,23 @@ function buildRound(state: RoomState, meId: string | null): RoundView {
   };
 }
 
+/** Herzensrunde: Fragen und eigene Abgabe beim Schreiben, danach nur die Texte – nie, wer was geschrieben hat */
+function buildHeart(state: RoomState, meId: string | null): HeartView | null {
+  const g = state.game;
+  if (state.status !== 'playing' || !g?.heart || (g.phase !== 'heart' && g.phase !== 'heartShow')) return null;
+  const answers = g.heart.answers;
+  const mine = meId ? answers[meId] : undefined;
+  return {
+    phase: g.phase === 'heart' ? 'write' : 'show',
+    question: HEART_QUESTIONS[g.heart.question] ?? HEART_QUESTIONS[0],
+    phaseStartedAt: g.phaseStartedAt,
+    deadline: g.deadline,
+    mine: mine ? { text: mine.text } : null,
+    canSwap: g.phase === 'heart' && Object.keys(answers).length === 0,
+    answers: g.phase === 'heartShow' ? g.heart.shown ?? [] : null,
+  };
+}
+
 function buildSteps(round: RoundRec, person: (id: string) => PersonRef, ref: string): RevealStepView[] {
   const options = new Map((round.options ?? []).map((o) => [o.id, o]));
   const results = round.results ?? {};
@@ -285,7 +306,17 @@ function buildFinal(state: RoomState): FinalView {
 
   const discoveries = (g?.history ?? []).map((h) => {
     const q = getQuestion(h.questionId);
-    return { questionId: q.id, prompt: q.prompt, ...gapKind(q), answer: q.answer, ref: q.ref, discovery: q.discovery, ...missStats(h) };
+    return {
+      questionId: q.id,
+      book: q.book,
+      group: q.group,
+      prompt: q.prompt,
+      ...gapKind(q),
+      answer: q.answer,
+      ref: q.ref,
+      discovery: q.discovery,
+      ...missStats(h),
+    };
   });
 
   return { ranking, awards, discoveries, recapId: g?.recapId ?? null, talk: g ? buildTalk(g) : null };

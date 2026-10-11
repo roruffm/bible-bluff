@@ -148,7 +148,8 @@ export function DatenschutzPage() {
         <li>deine Bluffs, Stimmen, Herzen, verschenkten Punkte und deinen Punktestand,</li>
         <li>wann dein Gerät zuletzt verbunden war, damit das Spiel weiß, auf wen es warten muss,</li>
         <li>eine zufällige Sitzungskennung, und zwar nur als nicht rückrechenbaren Prüfwert,</li>
-        <li>die Nummern der Fragen, die die Geräte im Raum schon kennen, damit möglichst neue Fragen kommen.</li>
+        <li>die Nummern der Fragen, die die Geräte im Raum schon kennen, damit möglichst neue Fragen kommen,</li>
+        <li>deine Antwort in der Herzensrunde, wenn die Leitung sie eingeschaltet hat (siehe unten).</li>
       </ul>
       <p>
         Diese Daten dienen nur dem Spiel. Rechtsgrundlage ist die Bereitstellung des Spiels, das du nutzen möchtest
@@ -164,6 +165,24 @@ export function DatenschutzPage() {
         Raum ist, sieht das im Warteraum. Der Raum verschwindet von der Startseite, sobald die Leitung die Anzeige
         ausschaltet oder den Raum sperrt, die Partie endet oder 15 Minuten lang niemand mehr verbunden war.
         Rechtsgrundlage ist die Bereitstellung des Spiels (Art. 6 Abs. 1 lit. b DSGVO).
+      </p>
+
+      <h2>Herzensrunde</h2>
+      <p>
+        Hat die Leitung die Herzensrunde eingeschaltet, kann zum Schluss jede Person eine ehrliche Antwort aufschreiben
+        oder aussetzen. Der Server verbindet deine Antwort nur so lange mit dir, bis die Antworten gezeigt werden. Danach
+        speichert er nur noch die Texte, gemischt und ohne Zuordnung, und mit dem Endstand sind auch sie gelöscht. Die
+        Antworten erscheinen auf allen Geräten im Raum ohne Namen. Sie kommen weder auf die Entdeckungen-Seite noch zu den
+        gesammelten Bluffs. Bedenke: Wer dich gut kennt, erkennt dich vielleicht an deinen Worten. Rechtsgrundlage ist die
+        Bereitstellung des Spiels (Art. 6 Abs. 1 lit. b DSGVO).
+      </p>
+
+      <h2>Mein Vers für die Woche</h2>
+      <p>
+        Das Bild für den Sperrbildschirm entsteht auf deinem Gerät; der Server erfährt nicht, welchen Vers du wählst.
+        Tippst du auf „In den Kalender eintragen“, lädt dein Gerät eine Kalenderdatei vom Server. Dabei werden nur der
+        gewählte Vers, das Startdatum und die Uhrzeit übertragen, gespeichert wird davon nichts. Die Termine landen in
+        deinem eigenen Kalender.
       </p>
 
       <h2>Entdeckungen-Seiten</h2>
@@ -198,6 +217,12 @@ export function DatenschutzPage() {
 
       <h2>Schrift</h2>
       <p>Die Schrift liegt auf dem eigenen Server. Es wird keine Verbindung zu Google oder anderen Anbietern aufgebaut.</p>
+
+      <h2>Links zu anderen Seiten</h2>
+      <p>
+        Die Seite „Neugierig auf Jesus?“ verlinkt auf bibleserver.com. Erst wenn du einen solchen Link antippst, verbindet
+        sich dein Browser mit der anderen Seite; dort gilt deren Datenschutzerklärung.
+      </p>
 
       <h2>Deine Rechte</h2>
       <p>

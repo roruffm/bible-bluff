@@ -103,6 +103,17 @@ export interface TalkRec {
   step: number;
 }
 
+/**
+ * Herzensrunde: Antworten je Person (text null = „Diesmal nicht“). Beim Zeigen bleiben nur die
+ * gemischten Texte ohne Zuordnung übrig; mit dem Endstand verschwindet alles.
+ */
+export interface HeartRec {
+  /** Index in HEART_QUESTIONS */
+  question: number;
+  answers: Record<string, { text: string | null; at: number }>;
+  shown: string[] | null;
+}
+
 export interface GameRec {
   questionIds: string[];
   spareIds: string[];
@@ -118,6 +129,8 @@ export interface GameRec {
   recapId?: string;
   /** läuft gerade das Gespräch nach dem Spiel? */
   talk?: TalkRec | null;
+  /** Herzensrunde nach der letzten Runde */
+  heart?: HeartRec | null;
 }
 
 export interface RoomState {

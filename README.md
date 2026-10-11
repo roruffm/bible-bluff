@@ -88,6 +88,25 @@ So wird aus einem Spieleabend ein Hauskreis-Abend ohne Vorbereitung. Das Gesprä
 
 ![Gespräch auf der Leinwand](docs/screenshots/tv-gespraech.png)
 
+### Herzensrunde
+
+Zum Schluss eine Runde ohne Punkte und ohne Bluffen: Alle schreiben ehrlich eine Antwort auf eine von fünf Fragen, zum Beispiel „Was hat dich heute an Jesus überrascht?“ oder „Was würdest du Jesus gern fragen?“. Die Fragen passen auch für Gäste, die mit dem Glauben (noch) wenig anfangen können. „Diesmal nicht“ geht immer. Sobald alle fertig sind (oder nach zwei Minuten), erscheinen die Antworten nacheinander auf allen Handys und der Leinwand, gemischt und **ohne Namen**. Danach geht es zum Endstand.
+
+- **Die Leitung entscheidet beim Eröffnen** (Schalter „Herzensrunde am Ende“, auch im Warteraum änderbar). Eingeschaltet ist sie zunächst; Mitspielende sehen im Warteraum „mit Herzensrunde“.
+- Die Leitung kann die Frage wechseln, solange noch niemand fertig ist, die Schreibzeit beenden und zum Endstand weiterschalten.
+- **Anonym und flüchtig:** Wer was geschrieben hat, speichert der Server nur bis zum Zeigen; danach bleiben nur die gemischten Texte, und mit dem Endstand ist alles gelöscht. Die Antworten kommen weder auf die Entdeckungen-Seite noch zu den gesammelten Bluffs.
+- Allein mit Joseph gibt es keine Herzensrunde (ohne Namen ergibt sie erst ab zwei Menschen Sinn). Räume, die vor dieser Funktion eröffnet wurden, spielen ohne.
+
+### Mein Vers für die Woche
+
+Am Endstand und auf der Entdeckungen-Seite wählt jede Person einen von vier Versen, passend zu den Büchern der Partie (dann zur Buchgruppe, sonst Worte, in denen Jesus selbst einlädt). Daraus entsteht auf dem Handy ein **Sperrbildschirm-Bild** („Als Sperrbildschirm sichern“ öffnet den Teilen-Dialog, sonst wird es gespeichert). Auf Wunsch kommen **sieben Kalender-Erinnerungen** dazu: ab morgen täglich morgens, mittags oder abends, mit dem Vers und einem kurzen Gedanken für den Tag. Das ist eine Kalenderdatei von `/api/kalender`, ganz ohne App und Anmeldung; das iPhone bietet direkt „Alle hinzufügen“ an.
+
+Die 68 Verse (`src/shared/verses.ts`) stehen im Wortlaut der gemeinfreien **Lutherbibel 1912** mit heutiger Rechtschreibung (ebible.org, abgeglichen mit bolls.life), die Stellenangaben in heutiger Zählung.
+
+### Neugierig auf Jesus?
+
+Ganz am Ende des Endstands und auf der Entdeckungen-Seite steht eine ruhige Karte für Gäste ohne Glaubenshintergrund. Sie führt zur Seite **`/jesus`**: kurz und ehrlich, wer Jesus war, was er über Gott und sich sagte, warum Kreuz und Ostern wichtig sind und dass Glaube eine Beziehung ist – mit Ideen zum Weiterfragen (Markusevangelium lesen, mit der einladenden Person reden, beten, eine Gruppe besuchen). Ohne Druck und ohne Daten.
+
 ### Neues für alle
 
 Bei einem Bluff-Spiel verdirbt eine bekannte Frage die Runde: Wer die Antwort noch weiß, tippt sofort richtig. Darum merkt sich jedes Handy, welche Fragen es schon aufgelöst gesehen hat (nur die Frage-IDs, nur auf dem Gerät), und meldet sie beim Eröffnen oder Beitreten. Der Server zählt pro Raum, wie viele Leute eine Frage kennen, und zieht zuerst Fragen, die niemand kennt, dann die, die am wenigsten Leute kennen. Die Lobby zeigt, wie viele Fragen „für alle neu“ sind.
@@ -202,6 +221,7 @@ Handys / Leinwand ──(etwa jede Sekunde: GET /api/rooms/CODE)──▶ Cloudf
                   ──(POST /api/rooms/CODE/action)─────────────▶   presence (zuletzt gesehen)
 Endstand          ──(POST /api/rooms/CODE/recap)──────────────▶   recaps (Entdeckungen-Seiten)
 Seite /e/ID       ──(GET /api/recaps/ID)──────────────────────▶
+Wochenvers        ──(GET /api/kalender?vers=…&ab=…&zeit=…)───▶   (nichts gespeichert, nur Kalenderdatei)
 Startseite        ──(GET /api/rooms, offene Räume)────────────▶   rooms (nur öffentlich gezeigte)
 Freigabe /admin   ──(GET/POST /api/admin/bluffs, ADMIN_KEY)───▶   bluff_pool (Kandidaten, freigegebene Bluffs)
 ```
@@ -277,7 +297,7 @@ Schlüsselwörter werden ohne Umlaute geschrieben (`ae`, `oe`, `ue`, `ss`). Ein 
 
 ```bash
 npm run typecheck
-npm test             # Engine, Textvergleich, Fragenpool, Gesprächsstoff, API, Freigabe, Link-Vorschau (Vitest)
+npm test             # Engine, Textvergleich, Fragenpool, Gesprächsstoff, API, Freigabe, Link-Vorschau, Herzensrunde, Wochenverse (Vitest)
 npm run test:e2e     # komplette Partien mit mehreren Browsern (Playwright)
 ```
 

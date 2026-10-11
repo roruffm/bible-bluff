@@ -8,7 +8,8 @@ export type Route =
   | { name: 'recap'; id: string }
   | { name: 'admin' }
   | { name: 'impressum' }
-  | { name: 'datenschutz' };
+  | { name: 'datenschutz' }
+  | { name: 'jesus' };
 
 export function parseRoute(pathname: string): Route {
   const parts = pathname.split('/').filter(Boolean);
@@ -20,6 +21,7 @@ export function parseRoute(pathname: string): Route {
   if (parts[0] === 'admin') return { name: 'admin' };
   if (parts[0] === 'impressum') return { name: 'impressum' };
   if (parts[0] === 'datenschutz') return { name: 'datenschutz' };
+  if (parts[0] === 'jesus') return { name: 'jesus' };
   return { name: 'home' };
 }
 

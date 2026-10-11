@@ -3738,6 +3738,98 @@ html.tv-mode body {
   }
 }
 
+/* Herzensrunde (screens/Heart.tsx): ruhig, ohne Punkte, Antworten ohne Namen */
+.heart-question {
+  background: var(--card);
+  border: 2px solid color-mix(in srgb, var(--rust) 40%, var(--line));
+  border-radius: var(--radius);
+  padding: 20px 20px 22px;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+
+.heart-question p {
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+.heart-mark {
+  display: inline-grid;
+  place-items: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  margin-bottom: 10px;
+  border-radius: 50%;
+  background: var(--rust-soft);
+  color: var(--rust);
+  font-size: 1.25rem;
+}
+
+.heart.is-display .heart-question p {
+  font-size: clamp(1.6rem, 3.2vw, 2.6rem);
+}
+
+.heart-show-head {
+  text-align: center;
+}
+
+.heart-show-head .phase-title {
+  font-size: 1.4rem;
+  line-height: 1.3;
+}
+
+.heart-answers {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.heart-answer {
+  background: var(--card);
+  border-left: 4px solid var(--rust);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  font-size: 1.1rem;
+  line-height: 1.45;
+  box-shadow: var(--shadow);
+  overflow-wrap: anywhere;
+  opacity: 0;
+  animation: heart-in 0.9s ease forwards;
+}
+
+.heart-thanks {
+  opacity: 0;
+  animation: heart-in 0.9s ease forwards;
+}
+
+@keyframes heart-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.heart-show.is-display .heart-show-head .phase-title {
+  font-size: clamp(1.8rem, 3.4vw, 2.8rem);
+}
+
+.heart-show.is-display .heart-answers {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+  gap: 18px;
+}
+
+.heart-show.is-display .heart-answer {
+  font-size: clamp(1.2rem, 2vw, 1.7rem);
+  padding: 20px 24px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -4091,4 +4183,85 @@ html.tv-mode body {
 /* Am Spielende zum Weitersagen einladen (Results.tsx, SpreadCard) */
 .spread-card .btn-ghost {
   margin-top: 6px;
+}
+
+/* Mein Vers für die Woche (components/WeekVerse.tsx) */
+.verse-choices {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.verse-choice {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card-2);
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.verse-choice.is-on {
+  border-color: var(--gold-2);
+  background: var(--gold-soft);
+}
+
+.verse-choice:focus-visible {
+  outline: 3px solid var(--gold-2);
+  outline-offset: 2px;
+}
+
+.verse-text {
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.verse-ref {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--ochre);
+}
+
+.verse-result {
+  margin-top: 16px;
+}
+
+.verse-preview {
+  display: grid;
+  place-items: center;
+  align-self: center;
+  width: min(62%, 220px);
+  aspect-ratio: 1170 / 2532;
+  border-radius: 22px;
+  overflow: hidden;
+  background: #0c2536;
+  box-shadow: var(--shadow);
+  border: 3px solid var(--line-strong);
+}
+
+.verse-preview img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Neugierig auf Jesus? (screens/Jesus.tsx) */
+.curious-card .btn {
+  margin-top: 12px;
+}
+
+.jesus .tagline {
+  color: var(--cream);
+}
+
+.jesus blockquote {
+  margin: 4px 0;
+  padding-left: 14px;
+  border-left: 4px solid var(--gold-2);
 }

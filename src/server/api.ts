@@ -7,9 +7,11 @@
 //   POST /api/rooms/:code/action     Aktion ausführen
 //   POST /api/rooms/:code/recap      Entdeckungen-Seite einer beendeten Partie anlegen (idempotent)
 //   GET  /api/recaps/:id             Entdeckungen-Seite lesen
+//   GET  /api/kalender?vers=&ab=&zeit=  Kalenderdatei: sieben Erinnerungen an „Mein Vers für die Woche“
 //   GET  /api/admin/bluffs           Kandidaten für frische Hausbluffs (nur mit ADMIN_KEY)
 //   POST /api/admin/bluffs           Kandidaten freigeben oder ablehnen (nur mit ADMIN_KEY)
 
+import { isCalendarDay, isReminderTime, verseCalendar } from '../shared/calendar';
 import { BLUFF_MAX, CATEGORIES, PRESENCE_TOUCH_MS, ROOM_TTL_MS, normalizeCode } from '../shared/rules';
 import type {
   Action,
@@ -32,6 +34,7 @@ import { buildRecap, isRecapId, randomRecapId } from './recap';
 import { GameError, type Ctx, type PlayerRec, type RoomState } from './state';
 import type { RoomRecord, RoomStore } from './store';
 import { isDuplicate, isTooCloseToTruth } from './text';
+import { WEEK_VERSES } from '../shared/verses';
 import { buildView, publicRoom } from './view';
 
 export interface ApiDeps {
@@ -51,11 +54,14 @@ const BLUFF_STATUSES: BluffStatus[] = ['new', 'approved', 'rejected'];
 const PUBLIC_TTL_MS = 4000;
 const PUBLIC_MAX = 12;
 
-const ACTION_TYPES = new Set<Action['type']>([
-  'start', 'settings', 'bluff', 'suggest', 'vote', 'like', 'gift', 'quiet', 'talk', 'talkStep', 'talkEnd',
-  'pause', 'resume', 'skipPhase', 'swapQuestion', 'revealNext', 'next', 'kick', 'makeHost', 'lock', 'listed', 'close',
-  'playAgain', 'leave',
-]);
+/** Erlaubte Aktionen – als Record, damit TypeScript meldet, wenn eine neue Aktion hier fehlt */
+const ACTION_KEYS: Record<Action['type'], true> = {
+  start: true, settings: true, bluff: true, suggest: true, vote: true, like: true, gift: true, quiet: true,
+  talk: true, talkStep: true, talkEnd: true, heart: true, heartSwap: true, pause: true, resume: true,
+  skipPhase: true, swapQuestion: true, revealNext: true, next: true, kick: true, makeHost: true, lock: true,
+  listed: true, close: true, playAgain: true, leave: true,
+};
+const ACTION_TYPES = new Set(Object.keys(ACTION_KEYS));
 
 export function cryptoRng(): number {
   const buf = new Uint32Array(1);
@@ -230,6 +236,25 @@ export function createApi(deps: ApiDeps) {
     return json(res, 200, 'public, max-age=3600');
   }
 
+  /** Kalenderdatei zu „Mein Vers für die Woche“ – der Tag kommt vom Handy, damit „morgen“ dort stimmt */
+  function calendarRoute(url: URL): Response {
+    const verse = WEEK_VERSES.find((v) => v.id === url.searchParams.get('vers'));
+    if (!verse) throw new GameError('not_found', 'Diesen Vers gibt es nicht.', 404);
+    const day = url.searchParams.get('ab') ?? '';
+    if (!isCalendarDay(day)) throw new GameError('bad_day', 'Ungültiges Datum.', 400);
+    const time = url.searchParams.get('zeit') ?? '0730';
+    if (!isReminderTime(time)) throw new GameError('bad_time', 'Ungültige Uhrzeit.', 400);
+    return new Response(verseCalendar(verse, day, time, new Date(now())), {
+      headers: {
+        'content-type': 'text/calendar; charset=utf-8',
+        // inline: Das iPhone bietet dann direkt „Alle hinzufügen“ an; andere Geräte laden die Datei herunter
+        'content-disposition': 'inline; filename="mein-vers-fuer-die-woche.ics"',
+        'cache-control': 'no-store',
+        'x-content-type-options': 'nosniff',
+      },
+    });
+  }
+
   async function publicRoomsRoute(): Promise<Response> {
     const t = now();
     if (!publicCache || t - publicCache.at >= PUBLIC_TTL_MS) {
@@ -325,7 +350,7 @@ export function createApi(deps: ApiDeps) {
     if (!token) throw new GameError('unknown_session', 'Bitte tritt dem Raum zuerst bei.', 401);
     const tokenHash = await hashToken(token);
     const body = await readJson(request);
-    if (typeof body.type !== 'string' || !ACTION_TYPES.has(body.type as Action['type'])) {
+    if (typeof body.type !== 'string' || !ACTION_TYPES.has(body.type)) {
       throw new GameError('bad_action', 'Unbekannte Aktion.', 400);
     }
     const action = body as unknown as Action;
@@ -429,6 +454,7 @@ export function createApi(deps: ApiDeps) {
       if (parts.length === 2 && parts[1] === 'rooms' && method === 'POST') return await createRoomRoute(request);
       if (parts.length === 2 && parts[1] === 'rooms' && method === 'GET') return await publicRoomsRoute();
       if (parts.length === 2 && parts[1] === 'pool' && method === 'GET') return poolRoute();
+      if (parts.length === 2 && parts[1] === 'kalender' && method === 'GET') return calendarRoute(url);
 
       if (parts[1] === 'rooms' && parts.length >= 3) {
         const code = normalizeCode(decodeURIComponent(parts[2]));

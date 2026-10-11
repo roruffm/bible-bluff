@@ -7,7 +7,7 @@ import type { RoomConnection } from '../lib/hooks';
 import { poolNoun, poolNounDative, settingsSummary } from '../lib/pool';
 import { roomUrl } from '../lib/router';
 import { shareLink } from '../lib/share';
-import { SettingsFields } from './Start';
+import { HeartToggle, SettingsFields } from './Start';
 
 export function RoomCodeCard({ code, big = false }: { code: string; big?: boolean }) {
   const [toast, setToast] = useState<string | null>(null);
@@ -145,6 +145,7 @@ export function Lobby({ view, conn }: { view: RoomView; conn: RoomConnection }) 
                   : 'Der Raum steht auf der Startseite, und alle können beitreten. Lass ihn offen, dann meldet sich dein Handy, wenn jemand dazukommt.'
             }
           />
+          {!withBot && <HeartToggle checked={view.settings.heartRound} onChange={(heartRound) => change({ settings: { heartRound } })} />}
           <SettingsFields settings={view.settings} onChange={(settings) => change({ settings })} />
         </section>
       ) : (

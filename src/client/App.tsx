@@ -1,5 +1,6 @@
 import { useRoute } from './lib/router';
 import { AdminPage } from './screens/Admin';
+import { JesusPage } from './screens/Jesus';
 import { DatenschutzPage, ImpressumPage } from './screens/Legal';
 import { RecapPage } from './screens/Recap';
 import { RoomPage, TvPage } from './screens/Room';
@@ -22,6 +23,8 @@ export function App() {
       return <ImpressumPage />;
     case 'datenschutz':
       return <DatenschutzPage />;
+    case 'jesus':
+      return <JesusPage />;
     default:
       return <Home />;
   }
