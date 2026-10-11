@@ -45,6 +45,23 @@ Leinwand-Ansicht (`/tv/RAUMCODE`):
 
 Dadurch kann auch jemand mit wenig Bibelwissen gewinnen, denn gute Einfälle und Menschenkenntnis zählen mit. Am Ende gibt es ein Siegertreppchen und fünf Auszeichnungen (Bluff-Meister, Wahrheitsfinder, Gutgläubigste Seele, Bester Bluff des Abends, Nächstenliebe). Außerdem zeigt der Endstand alle Entdeckungen der Partie zum Nachlesen, und die Leitung kann direkt ins Gespräch überleiten.
 
+### Anleitung auf der Startseite
+
+<img src="docs/screenshots/anleitung.png" width="260" align="right" alt="Aufgeklappte Anleitung mit Ablauf, Punkten und dem Thema „Allein gegen Joseph“">
+
+„So geht’s“ steht auf der Startseite zugeklappt, damit sie kurz bleibt; die Zeile nennt, was drinsteht. Aufgeklappt zeigt die Anleitung oben Ablauf und Punkte, darunter Themen, die sich einzeln aufklappen lassen:
+
+- **Mit Freunden spielen und leiten:** Raum eröffnen, Beitreten, Leinwand, Menü „Leitung“, Wiedereinstieg mit demselben Spitznamen
+- **Allein gegen Joseph:** was der Bot kann und wie man stattdessen einem offenen Raum beitritt
+- **Extras in jeder Runde:** Vorschlag, „zu nah an der Wahrheit“, Lieblingsbluff, Liebe deinen Nächsten, Ruhige Minute
+- **Herzensrunde:** Ablauf, Anonymität und wer sie ein- und ausschaltet
+- **Nachbesprechung:** Spickzettel der Leitung und „Weiter ins Gespräch“ mit seinen vier Schritten
+- **Nach der Partie:** Auszeichnungen, Entdeckungen, Mein Vers für die Woche und ein Link zu `/jesus`
+
+Die Anleitung und die kurzen Regeln „So geht’s“ beim Beitreten, im Warteraum und im Menü nutzen dieselben Bausteine (`RuleSteps`, `Points` in `src/client/components/ui.tsx`); die Themen stehen in `src/client/components/Guide.tsx`. Auch die Farbauswahl ist auf der Startseite zugeklappt und zeigt in der Zeile das gewählte Farbkonzept.
+
+<br clear="right">
+
 ### Lückentext
 
 Statt einer Frage steht ein Satz zu einer Bibelstelle mit einer Lücke da, zum Beispiel: „Simson erschlug tausend Philister mit ___.“ Alle erfinden, was in die Lücke gehört; die Wahrheit steht wie gewohnt anonym zwischen den Bluffs. Beim Aufdecken erscheint jede Antwort eingesetzt im Satz – das sorgt für eigene Lacher.
@@ -241,7 +258,7 @@ Räume werden 24 Stunden nach der letzten Änderung gelöscht. Entdeckungen-Seit
 
 ### Farben
 
-Jede Person wählt auf der Startseite oder im Menü ihr eigenes Farbkonzept. Die Wahl gilt nur auf diesem Gerät und bleibt gespeichert. Wer nichts wählt, sieht See Genezareth.
+Jede Person wählt auf der Startseite (unter „Farben“ zum Aufklappen) oder im Menü ihr eigenes Farbkonzept. Die Wahl gilt nur auf diesem Gerät und bleibt gespeichert. Wer nichts wählt, sieht See Genezareth.
 
 | Farbkonzept | Wirkung |
 | --- | --- |

@@ -665,7 +665,7 @@ textarea {
   color: var(--on-gold);
 }
 
-/* Ruhige Nebenkarte (Farben) im Stil von „So geht’s“ */
+/* Ruhige Nebenkarte im Stil von „So geht’s“ (etwa „Neugierig auf Jesus?“) */
 .side-card {
   background: var(--card-2);
   border-radius: var(--radius);
@@ -676,6 +676,123 @@ textarea {
 .side-card h2 {
   font-size: 1rem;
   margin-bottom: 10px;
+}
+
+/* Startseite: Anleitung und Farben als ruhige Karten zum Aufklappen */
+.fold {
+  background: var(--card-2);
+  border-radius: var(--radius);
+  border: 1.5px dashed var(--line);
+}
+
+.fold > summary {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: baseline;
+  gap: 4px 10px;
+  padding: 16px 18px;
+  list-style: none;
+  cursor: pointer;
+  border-radius: var(--radius);
+}
+
+.fold > summary::-webkit-details-marker {
+  display: none;
+}
+
+.fold > summary::before {
+  content: '▸';
+  color: var(--ochre);
+  transition: transform 0.2s;
+}
+
+.fold[open] > summary::before {
+  transform: rotate(90deg);
+}
+
+.fold > summary:focus-visible {
+  outline: 3px solid var(--gold-2);
+  outline-offset: 2px;
+}
+
+.fold-title {
+  font-weight: 800;
+}
+
+.fold-hint {
+  grid-column: 2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.86rem;
+  color: var(--ink-2);
+}
+
+.fold-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 0 18px 18px;
+}
+
+.fold-body .points {
+  margin-top: 0;
+}
+
+.guide-topics {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.guide-topic {
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--card);
+}
+
+.guide-topic > summary {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 12px 14px;
+  font-weight: 700;
+  list-style: none;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+}
+
+.guide-topic > summary::-webkit-details-marker {
+  display: none;
+}
+
+.guide-topic > summary::before {
+  content: '▸';
+  color: var(--ochre);
+  transition: transform 0.2s;
+}
+
+.guide-topic[open] > summary::before {
+  transform: rotate(90deg);
+}
+
+.guide-topic > summary:focus-visible {
+  outline: 3px solid var(--gold-2);
+  outline-offset: 2px;
+}
+
+.guide-topic-body {
+  margin: 0;
+  padding: 0 14px 14px 2.1em;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.94rem;
+  color: var(--ink-2);
+}
+
+.guide-topic-body b {
+  color: var(--ink);
 }
 
 /* Partie gegen Joseph: sein Gesicht neben der Einleitung, Einstellungen eingeklappt */
@@ -1145,7 +1262,7 @@ textarea {
   margin-bottom: 8px;
 }
 
-.rules ol {
+.rule-steps {
   margin: 0;
   padding-left: 1.2em;
   display: flex;
@@ -1232,6 +1349,14 @@ textarea {
 
 .is-compact .theme-swatch {
   height: 40px;
+}
+
+/* Kleine Vorschau in der zugeklappten Farbkarte der Startseite */
+.theme-swatch.is-mini {
+  flex: none;
+  width: 30px;
+  height: 20px;
+  border-radius: 5px;
 }
 
 /* Leiste oben, darunter zwei Akzente und eine „Karte“ */

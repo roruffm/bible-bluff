@@ -283,34 +283,50 @@ export function Logo({ small = false }: { small?: boolean }) {
   );
 }
 
+/** Die vier Schritte einer Runde – in „So geht’s“ und in der Anleitung der Startseite */
+export function RuleSteps() {
+  return (
+    <ol class="rule-steps">
+      <li>
+        <strong>Bluff schreiben.</strong> Alle sehen dieselbe Bibelfrage und erfinden heimlich eine glaubwürdige,
+        aber falsche Antwort.
+      </li>
+      <li>
+        <strong>Abstimmen.</strong> Die echte Antwort steht anonym zwischen euren Bluffs. Tippe auf die, die du für
+        wahr hältst.
+      </li>
+      <li>
+        <strong>Aufdecken.</strong> Wer hat was gewählt? Wer hat was erfunden? Und was stimmt wirklich?
+      </li>
+      <li>
+        <strong>Entdecken.</strong> Die Bibelstelle und ein überraschender Satz lösen auf.
+      </li>
+    </ol>
+  );
+}
+
+export function Points() {
+  return (
+    <div class="points">
+      <span>
+        <b>+2</b> richtige Antwort erkannt
+      </span>
+      <span>
+        <b>+1</b> je Person, die auf deinen Bluff hereinfällt
+      </span>
+      <span>
+        <b>+1</b> für den Bluff mit den meisten Herzen
+      </span>
+    </div>
+  );
+}
+
 export function Rules({ compact = false }: { compact?: boolean }) {
   return (
     <section class={`rules${compact ? ' is-compact' : ''}`}>
       <h3>So geht’s</h3>
-      <ol>
-        <li>
-          <strong>Bluff schreiben.</strong> Alle sehen dieselbe Bibelfrage und erfinden heimlich eine glaubwürdige,
-          aber falsche Antwort.
-        </li>
-        <li>
-          <strong>Abstimmen.</strong> Die echte Antwort steht anonym zwischen euren Bluffs. Tippe auf die, die du für
-          wahr hältst.
-        </li>
-        <li>
-          <strong>Aufdecken.</strong> Wer hat was gewählt? Wer hat was erfunden? Und was stimmt wirklich?
-        </li>
-        <li>
-          <strong>Entdecken.</strong> Die Bibelstelle und ein überraschender Satz lösen auf.
-        </li>
-      </ol>
-      <div class="points">
-        <span>
-          <b>+2</b> richtige Antwort erkannt
-        </span>
-        <span>
-          <b>+1</b> je Person, die auf deinen Bluff hereinfällt
-        </span>
-      </div>
+      <RuleSteps />
+      <Points />
     </section>
   );
 }
