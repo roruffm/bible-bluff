@@ -10,6 +10,7 @@ import { markSeen } from '../lib/seen';
 import { type Session, clearSession, loadSession } from '../lib/session';
 import { THEME_PARAM, useTheme } from '../lib/theme';
 import { Lobby, RoomCodeCard, PlayerList } from './Lobby';
+import { HeartPhase } from './Heart';
 import { VotePhase, WritePhase } from './Play';
 import { RevealPhase } from './Reveal';
 import { FinalScreen, ScoresPhase } from './Results';
@@ -161,6 +162,7 @@ function Stage({ view, conn, display }: { view: RoomView; conn: RoomConnection; 
     return display || !view.me ? <TvLobby view={view} /> : <Lobby view={view} conn={conn} />;
   }
   if (view.status === 'finished') return <FinalScreen view={view} conn={conn} display={!view.me} />;
+  if (view.heart) return <HeartPhase view={view} conn={conn} display={display} />;
   const round = view.round;
   if (!round) return <Loading />;
   switch (round.phase) {
@@ -282,6 +284,8 @@ function Panel({ view, conn, onClose }: { view: RoomView; conn: RoomConnection; 
     vote: 'Abstimmung jetzt beenden',
     reveal: 'Aufdeckung überspringen',
     scores: 'Nächste Runde',
+    heart: 'Schreibzeit jetzt beenden',
+    heartShow: 'Zum Endstand',
   };
 
   return (
@@ -318,6 +322,11 @@ function Panel({ view, conn, onClose }: { view: RoomView; conn: RoomConnection; 
               </Button>
               {phase === 'write' && (
                 <Button block variant="secondary" onClick={run({ type: 'swapQuestion' })}>
+                  Andere Frage nehmen
+                </Button>
+              )}
+              {phase === 'heart' && view.heart?.canSwap && (
+                <Button block variant="secondary" onClick={run({ type: 'heartSwap' })}>
                   Andere Frage nehmen
                 </Button>
               )}

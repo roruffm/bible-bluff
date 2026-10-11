@@ -28,7 +28,7 @@ const BLUFFS = ['Ein Tukan im Iglu', 'Viele Kakteen am Nordpol', 'Ein Pinguin im
 
 /** Partie mit vier Fragen über die API; in Runde 1 fallen Jonas und Mirjam auf Rahels Bluff herein. */
 async function playGame(t: ReturnType<typeof setup>) {
-  const host = (await t.call('POST', '/api/rooms', { name: 'Rahel', settings: { rounds: 4 } })).body as SessionResponse;
+  const host = (await t.call('POST', '/api/rooms', { name: 'Rahel', settings: { rounds: 4, heartRound: false } })).body as SessionResponse;
   const code = host.code;
   const players = [host];
   for (const name of ['Jonas', 'Mirjam']) players.push((await t.call('POST', `/api/rooms/${code}/join`, { name })).body);

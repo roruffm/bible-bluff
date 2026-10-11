@@ -48,7 +48,33 @@ export const DEFAULT_SETTINGS: Settings = {
   voteSeconds: 30,
   roundType: 'gemischt',
   categories: [...ALL_CATEGORIES],
+  heartRound: true,
 };
+
+/**
+ * Herzensrunde: Zum Schluss eine Runde ohne Punkte und ohne Bluffen. Alle schreiben ehrlich eine
+ * Antwort auf eine dieser Fragen; gezeigt werden die Antworten gemischt und ohne Namen. Die Fragen
+ * passen auch für Gäste, die mit dem Glauben (noch) wenig anfangen können.
+ */
+export const HEART_QUESTIONS = [
+  'Was hat dich heute an Jesus überrascht?',
+  'Was würdest du Jesus gern fragen?',
+  'Welche Geschichte von heute geht dir nach – und warum?',
+  'Wofür möchtest du Jesus heute danken?',
+  'Wenn Jesus jetzt mit am Tisch säße: Was würdest du ihm sagen?',
+] as const;
+export const HEART_MAX = 200;
+/** Zeit zum Schreiben – endet früher, sobald alle fertig sind */
+export const HEART_SECONDS = 120;
+/** So lange bleiben die Antworten stehen, falls niemand zum Endstand weiterschaltet */
+export const HEART_SHOW_SECONDS = 600;
+/** Ohne Namen ergibt die Runde erst ab zwei Menschen Sinn – mit Joseph allein gibt es sie nicht */
+export const HEART_MIN_PEOPLE = 2;
+
+/** Folgt auf die letzte Runde die Herzensrunde? Server und App rechnen gleich. */
+export function heartRoundAhead(settings: Pick<Settings, 'heartRound'>, people: { plays: boolean; bot?: boolean }[]): boolean {
+  return Boolean(settings.heartRound) && people.filter((p) => p.plays && !p.bot).length >= HEART_MIN_PEOPLE;
+}
 
 export const MIN_PLAYERS = 2;
 export const RECOMMENDED_MIN_PLAYERS = 4;
@@ -112,6 +138,7 @@ export const BOT_SETTINGS: Settings = {
   voteSeconds: 30,
   roundType: 'gemischt',
   categories: [...ALL_CATEGORIES],
+  heartRound: false,
 };
 /** Josephs Trefferquote: so oft wählt er die richtige Antwort */
 export const BOT_TRUTH_RATE = 0.45;

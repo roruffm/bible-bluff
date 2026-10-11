@@ -51,6 +51,8 @@ test('eine komplette Partie auf drei Handys und der Leinwand', async ({ browser 
   await join(mirjam, code, 'Mirjam');
   // Neues für alle: Die Lobby zeigt, wie viele Fragen hier noch niemand kennt
   await expect(host.locator('.fresh-note')).toContainText('Für alle neu');
+  // Die Herzensrunde ist beim Eröffnen eingeschaltet – Mitspielende sehen das im Warteraum
+  await expect(jonas.locator('.summary')).toContainText('mit Herzensrunde');
 
   const tvContext = await browser.newContext({ viewport: { width: 1280, height: 720 } });
   const tv = await tvContext.newPage();
@@ -142,10 +144,37 @@ test('eine komplette Partie auf drei Handys und der Leinwand', async ({ browser 
     await hostAction(host, 'Aufdeckung überspringen');
     await expect(host.getByText('Punktestand')).toBeVisible();
     if (round === 2) await expect(row(host, 'Mirjam').locator('.delta.is-quiet')).toBeVisible();
-    await host.getByRole('button', { name: round === 4 ? 'Zum Endstand' : 'Nächste Runde' }).click();
+    await host.getByRole('button', { name: round === 4 ? 'Zur Herzensrunde' : 'Nächste Runde' }).click();
   }
 
+  // Herzensrunde: ohne Punkte, alle schreiben ehrlich – oder setzen aus; gezeigt wird ohne Namen
+  for (const p of [host, jonas, mirjam, tv]) await expect(p.getByRole('heading', { name: 'Herzensrunde' })).toBeVisible();
+  await expect(tv.locator('.heart-question')).toBeVisible();
+  await jonas.getByLabel('Deine Antwort').fill('Dass Jesus für jeden Zeit hatte.');
+  await jonas.getByRole('button', { name: 'Abschicken' }).click();
+  await expect(jonas.getByText('Deine Antwort ist drin ✓')).toBeVisible();
+  await mirjam.getByRole('button', { name: 'Diesmal nicht' }).click();
+  await expect(mirjam.getByText('Diesmal nicht – völlig in Ordnung')).toBeVisible();
+  await host.getByLabel('Deine Antwort').fill('Dass er Petrus nicht aufgegeben hat.');
+  await host.getByRole('button', { name: 'Abschicken' }).click();
+  for (const p of [jonas, mirjam, tv]) await expect(p.locator('.heart-answer')).toHaveCount(2);
+  await expect(tv.locator('.heart-answer', { hasText: 'Dass Jesus für jeden Zeit hatte.' })).toBeVisible({ timeout: 10_000 });
+  await expect(tv.locator('.heart-show')).not.toContainText('Jonas');
+  await host.getByRole('button', { name: 'Zum Endstand' }).click();
+
   for (const p of [host, jonas, mirjam, tv]) await expect(p.getByRole('heading', { name: 'Endstand' })).toBeVisible();
+  // Mein Vers für die Woche: passend zur Partie, als Bild und als Kalender-Erinnerung
+  const verses = jonas.locator('.week-verse');
+  await expect(verses.getByRole('radio')).toHaveCount(4);
+  await expect(tv.locator('.week-verse')).toHaveCount(0);
+  await verses.getByRole('radio').first().click();
+  await expect(verses.locator('.verse-preview img')).toHaveAttribute('src', /^data:image\/jpeg/);
+  const calendar = verses.getByRole('link', { name: 'In den Kalender eintragen' });
+  const ics = await jonas.request.get((await calendar.getAttribute('href'))!);
+  expect(ics.headers()['content-type']).toBe('text/calendar; charset=utf-8');
+  expect((await ics.text()).match(/BEGIN:VEVENT/g)).toHaveLength(7);
+  // Neugierig auf Jesus? – im Raum in neuem Tab
+  await expect(jonas.getByRole('link', { name: 'Mehr erfahren' })).toHaveAttribute('href', '/jesus');
   // Weitersagen: Mitspielende werden eingeladen, selbst eine Runde zu leiten – Leitung und Leinwand nicht
   await expect(jonas.getByRole('heading', { name: 'Leite selbst eine Runde' })).toBeVisible();
   await expect(jonas.getByRole('button', { name: 'Link an deine Gruppe schicken' })).toBeVisible();
@@ -231,6 +260,16 @@ test('Spielleitung am Beamer: Pause, Wiedereinstieg und Entfernen', async ({ bro
   await host.getByRole('button', { name: 'Raum schließen' }).click();
   await host.getByRole('button', { name: /Für alle schließen/ }).click();
   await expect(anna.getByRole('heading', { name: 'Raum geschlossen' })).toBeVisible();
+});
+
+test('Neugierig auf Jesus? – eine eigene, ruhige Seite', async ({ browser }) => {
+  const page = await phone(browser, 'gast');
+  await page.goto('/jesus');
+  await expect(page.getByRole('heading', { name: 'Neugierig auf Jesus?' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Glaube ist eine Beziehung' })).toBeVisible();
+  await expect(page.getByRole('link', { name: '„Hoffnung für alle“' })).toHaveAttribute('href', /bibleserver\.com\/HFA\/Markus1/);
+  await page.getByRole('button', { name: 'Zur Startseite' }).click();
+  await expect(page.getByRole('button', { name: 'Raum eröffnen' })).toBeVisible();
 });
 
 test('Impressum und Datenschutz sind von der Startseite und im Raum erreichbar', async ({ browser }) => {

@@ -127,9 +127,17 @@ describe('Kategorien und Rundenart', () => {
     );
   });
 
-  it('ergänzt Räume aus der Zeit davor um die Standardwerte', () => {
+  it('ergänzt Räume aus der Zeit davor um die Standardwerte – ohne Herzensrunde, die dort niemand gewählt hat', () => {
     const old = { rounds: 6, difficulty: 'leicht', writeSeconds: 45, voteSeconds: 20 } as Partial<Settings>;
-    expect(withSettingDefaults(old)).toEqual({ ...DEFAULT_SETTINGS, rounds: 6, difficulty: 'leicht', writeSeconds: 45, voteSeconds: 20 });
+    expect(withSettingDefaults(old)).toEqual({
+      ...DEFAULT_SETTINGS,
+      rounds: 6,
+      difficulty: 'leicht',
+      writeSeconds: 45,
+      voteSeconds: 20,
+      heartRound: false,
+    });
+    expect(withSettingDefaults({ ...old, heartRound: true }).heartRound).toBe(true);
   });
 });
 

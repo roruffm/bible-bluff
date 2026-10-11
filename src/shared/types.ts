@@ -2,7 +2,8 @@
 // Alles hier darf im Browser landen – keine geheimen Spieldaten.
 
 export type Difficulty = 'leicht' | 'mittel' | 'schwer' | 'gemischt';
-export type Phase = 'write' | 'vote' | 'reveal' | 'scores';
+/** heart/heartShow: Herzensrunde nach der letzten Runde (schreiben, dann ohne Namen zeigen) */
+export type Phase = 'write' | 'vote' | 'reveal' | 'scores' | 'heart' | 'heartShow';
 export type RoomStatus = 'lobby' | 'playing' | 'finished' | 'closed';
 /** Welche Runden eine Partie hat: klassische Fragen, Lückentexte oder beides */
 export type RoundType = 'fragen' | 'luecken' | 'gemischt';
@@ -17,6 +18,8 @@ export interface Settings {
   roundType: RoundType;
   /** mindestens eine; alle gewählt = der ganze Fragenpool */
   categories: CategoryId[];
+  /** Herzensrunde am Ende – die Leitung entscheidet beim Eröffnen (in Räumen mit Joseph aus) */
+  heartRound: boolean;
 }
 
 export type BookGroup =
@@ -44,6 +47,10 @@ export type Action =
   | { type: 'talk'; questionId?: string }
   | { type: 'talkStep'; step: number }
   | { type: 'talkEnd' }
+  /** Herzensrunde: ehrliche Antwort abgeben; null = „Diesmal nicht“ */
+  | { type: 'heart'; text: string | null }
+  /** Herzensrunde: andere Frage (nur Spielleitung, solange noch niemand fertig ist) */
+  | { type: 'heartSwap' }
   | { type: 'pause' }
   | { type: 'resume' }
   | { type: 'skipPhase' }
@@ -66,7 +73,7 @@ export interface PlayerView {
   online: boolean;
   plays: boolean;
   isHost: boolean;
-  /** Schreibphase: hat einen Bluff abgegeben. Abstimmung: hat gewählt. */
+  /** Schreibphase: hat einen Bluff abgegeben. Abstimmung: hat gewählt. Herzensrunde: fertig (geschrieben oder ausgesetzt). */
   done: boolean;
   /** setzt die laufende Runde aus („Ruhige Minute“) */
   quiet: boolean;
@@ -193,6 +200,21 @@ export interface RoundView {
   talk: TalkNotes | null;
 }
 
+/** Herzensrunde: alle schreiben ehrlich, gezeigt wird ohne Namen */
+export interface HeartView {
+  /** write: alle schreiben – show: die Antworten erscheinen nacheinander */
+  phase: 'write' | 'show';
+  question: string;
+  phaseStartedAt: number;
+  deadline: number | null;
+  /** eigene Abgabe; text null = „Diesmal nicht“ */
+  mine: { text: string | null } | null;
+  /** Frage wechseln geht nur, solange noch niemand fertig ist */
+  canSwap: boolean;
+  /** beim Zeigen: die Antworten gemischt und ohne Namen */
+  answers: string[] | null;
+}
+
 export interface AwardView {
   key: 'bluffer' | 'finder' | 'trusting' | 'favorite' | 'neighbor';
   title: string;
@@ -205,6 +227,8 @@ export interface AwardView {
 
 export interface DiscoveryView {
   questionId: string;
+  book: string;
+  group: BookGroup;
   prompt: string;
   kind?: 'gap';
   answer: string;
@@ -296,6 +320,8 @@ export interface RoomView {
   hostPlays: boolean;
   players: PlayerView[];
   round: RoundView | null;
+  /** Herzensrunde – solange sie läuft */
+  heart: HeartView | null;
   final: FinalView | null;
   /** Fragen, die zu den gewählten Kategorien und der Rundenart passen */
   poolSize: number;

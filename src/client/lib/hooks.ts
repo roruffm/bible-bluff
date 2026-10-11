@@ -24,6 +24,7 @@ function pollDelay(view: RoomView | null, failures: number): number {
     case 'reveal':
       return 1500;
     case 'scores':
+    case 'heartShow':
       return 2000;
     default:
       return 1000;

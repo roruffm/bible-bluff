@@ -106,7 +106,7 @@ describe('Liebe deinen Nächsten', () => {
 
   it('kürt am Ende die meiste Nächstenliebe', () => {
     const g = setup(['Host', 'Anna', 'Ben']);
-    g.act('host', { type: 'settings', settings: { rounds: 4 } });
+    g.act('host', { type: 'settings', settings: { rounds: 4, heartRound: false } });
     g.act('host', { type: 'start' });
     for (let r = 1; r <= 4; r++) {
       g.playRound(r);
@@ -170,7 +170,7 @@ describe('Ruhige Minute', () => {
 
   it('gibt es nicht über die letzte Runde hinaus und endet mit der Partie', () => {
     const g = setup(['Host', 'Anna']);
-    g.act('host', { type: 'settings', settings: { rounds: 4 } });
+    g.act('host', { type: 'settings', settings: { rounds: 4, heartRound: false } });
     g.act('host', { type: 'start' });
     for (let r = 1; r <= 3; r++) {
       g.playRound(r);
@@ -231,7 +231,7 @@ describe('Neues für alle', () => {
 describe('Vom Spiel ins Gespräch', () => {
   function finishedGame() {
     const g = setup(['Host', 'Anna', 'Ben']);
-    g.act('host', { type: 'settings', settings: { rounds: 4 } });
+    g.act('host', { type: 'settings', settings: { rounds: 4, heartRound: false } });
     g.act('host', { type: 'start' });
     for (let r = 1; r <= 4; r++) {
       if (r === 3) {

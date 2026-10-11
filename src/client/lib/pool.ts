@@ -55,7 +55,7 @@ export function poolNounDative(roundType: RoundType): string {
   return 'Fragen und Lückentexten';
 }
 
-/** Kurzfassung für Lobby und Joseph-Seite: „8 Runden · Fragen & Lückentexte · alle Kategorien“ */
+/** Kurzfassung für Lobby und Joseph-Seite: „8 Runden · Fragen & Lückentexte · alle Kategorien · mit Herzensrunde“ */
 export function settingsSummary(s: Settings): string {
   const type = s.roundType === 'fragen' ? 'nur Fragen' : s.roundType === 'luecken' ? 'nur Lückentexte' : 'Fragen & Lückentexte';
   const categories =
@@ -64,5 +64,5 @@ export function settingsSummary(s: Settings): string {
       : CATEGORIES.filter((c) => s.categories.includes(c.id))
           .map((c) => c.label)
           .join(', ');
-  return `${s.rounds} Runden · ${type} · ${categories}`;
+  return `${s.rounds} Runden · ${type} · ${categories}${s.heartRound ? ' · mit Herzensrunde' : ''}`;
 }

@@ -2,9 +2,11 @@ import { useEffect, useState } from 'preact/hooks';
 import { GROUP_LABELS } from '../../shared/rules';
 import type { RecapView } from '../../shared/types';
 import { Button, Logo, QuestionText, Toast, upperFirst } from '../components/ui';
+import { WeekVerseCard } from '../components/WeekVerse';
 import { ApiError, api } from '../lib/api';
 import { navigate, recapUrl } from '../lib/router';
 import { shareLink } from '../lib/share';
+import { CuriousCard } from './Jesus';
 import { LegalLinks } from './Legal';
 
 const DATE = new Intl.DateTimeFormat('de-DE', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -111,6 +113,8 @@ export function RecapPage({ id }: { id: string }) {
         ))}
       </ol>
 
+      <WeekVerseCard items={recap.items.map((item, i) => ({ book: item.book, group: item.group, key: `${recap.id}-${i}` }))} />
+
       <section class="stack">
         <Button variant="gold" block onClick={share}>
           Seite teilen
@@ -119,6 +123,7 @@ export function RecapPage({ id }: { id: string }) {
           Selbst eine Partie spielen
         </Button>
       </section>
+      <CuriousCard />
       <p class="footnote">Diese Seite bleibt erhalten, auch wenn der Spielraum längst geschlossen ist.</p>
       <LegalLinks />
       <Toast message={toast} onDone={() => setToast(null)} />

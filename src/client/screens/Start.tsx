@@ -360,6 +360,7 @@ export function CreateRoom({ bot = false }: { bot?: boolean }) {
             hint={plays ? 'Du leitest und spielst auf diesem Handy.' : 'Dieses Gerät leitet nur – ideal für Beamer oder Fernseher.'}
           />
         )}
+        {!bot && <HeartToggle checked={settings.heartRound} onChange={(heartRound) => set({ heartRound })} />}
 
         {bot ? (
           <details class="more-settings">
@@ -384,6 +385,22 @@ export function CreateRoom({ bot = false }: { bot?: boolean }) {
       </form>
       <LegalLinks />
     </main>
+  );
+}
+
+/** Herzensrunde ein oder aus – beim Eröffnen und im Warteraum (nicht in Räumen mit Joseph) */
+export function HeartToggle({ checked, onChange }: { checked: boolean; onChange: (on: boolean) => void }) {
+  return (
+    <Toggle
+      checked={checked}
+      onChange={onChange}
+      label="Herzensrunde am Ende"
+      hint={
+        checked
+          ? 'Zum Schluss eine Runde ohne Punkte: Alle schreiben ehrlich, zum Beispiel was sie an Jesus überrascht hat. Die Antworten erscheinen ohne Namen.'
+          : 'Ohne Herzensrunde: Nach der letzten Runde kommt gleich der Endstand.'
+      }
+    />
   );
 }
 
