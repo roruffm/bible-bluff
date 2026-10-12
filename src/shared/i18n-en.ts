@@ -42,7 +42,7 @@ export const EN: Record<string, string> = {
   'Im Spiel erfindest du selbst solche Bluffs – und versuchst, Josephs Antwort zu durchschauen.':
     'In the game, you invent bluffs like these and try to spot Joseph’s answer.',
   'Jetzt gegen Joseph spielen': 'Play against Joseph now',
-  'Partie selbst einstellen →': 'Set up your own game →',
+  'Spiel anpassen →': 'Customise the game →',
   'oder einem Raum beitreten': 'or join a room',
   'Raum': 'Room',
   'Raum {code}': 'Room {code}',
@@ -106,8 +106,8 @@ export const EN: Record<string, string> = {
   'Zurück zu Raum {code} als {name} →': 'Back to room {code} as {name} →',
   'Du hast einen Raumcode? Gib ihn hier ein.': 'Got a room code? Enter it here.',
   'Mit Freunden': 'With friends',
-  'Starte eine Partie mit Freunden – auch am Beamer.':
-    'Start a game with friends – on a projector too.',
+  'Spiele mit Freunden – auch am Beamer.':
+    'Play with friends – on a projector too.',
   'Raum eröffnen': 'Create a room',
   'Allein gegen {bot}': 'Solo against {bot}',
   'Gegen {bot} spielen': 'Play against {bot}',
