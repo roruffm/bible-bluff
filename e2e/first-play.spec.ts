@@ -5,7 +5,7 @@ test('new visitor tries a bluff and reaches the first real question without setu
   await page.goto('/');
 
   await expect(page.getByRole('button', { name: 'Jetzt sofort spielen' })).toBeVisible();
-  await page.getByRole('button', { name: /Er bat um eine Kaffeepause/ }).click();
+  await page.getByRole('button', { name: /Er rief: Kaffeepause/ }).click();
   await expect(page.getByText('Reingelegt!')).toBeVisible();
   await expect(page.getByRole('button', { name: /Er fiel aus dem Fenster/ })).toHaveClass(/is-true/);
 
