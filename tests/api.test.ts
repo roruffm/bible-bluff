@@ -231,8 +231,8 @@ describe('Öffentliche Räume', () => {
   });
 });
 
-describe('Joseph', () => {
-  it('eröffnet auf Wunsch einen eigenen, privaten Raum mit Joseph', async () => {
+describe('Jakob', () => {
+  it('eröffnet auf Wunsch einen eigenen, privaten Raum mit Jakob', async () => {
     const t = setup();
     const created = await t.call('POST', '/api/rooms', { name: 'Hanna', bot: true, settings: { rounds: 6 } });
     expect(created.status).toBe(201);
@@ -249,11 +249,32 @@ describe('Joseph', () => {
     const started = await t.call('POST', `/api/rooms/${me.code}/action`, { type: 'start' }, me.token);
     expect((started.body as ViewResponse).view.status).toBe('playing');
     const bluff = await t.call('POST', `/api/rooms/${me.code}/action`, { type: 'bluff', text: 'Ein Zylinderhut aus Quarzglas' }, me.token);
-    // Joseph zieht sofort nach, also beginnt die Abstimmung
+    // Jakob zieht sofort nach, also beginnt die Abstimmung
     expect((bluff.body as ViewResponse).view.round!.phase).toBe('vote');
   });
 
-  it('ohne Wunsch bleibt Joseph draußen', async () => {
+  it('zeigt Jakob auch in bestehenden Räumen und behält menschliche Namen und Spieler-IDs', async () => {
+    const t = setup();
+    const created = await t.call('POST', '/api/rooms', { name: 'Joseph', bot: true });
+    const me = created.body as SessionResponse;
+    const old = (await t.store.load(me.code))!;
+    const bot = old.state.players.find((p) => p.bot)!;
+    const botId = bot.id;
+    bot.name = 'Joseph';
+    await t.store.update(me.code, old.state, old.version, t.clock.now);
+
+    const loaded = await t.call('GET', `/api/rooms/${me.code}`, undefined, me.token);
+    expect(loaded.status).toBe(200);
+    const view = (loaded.body as ViewResponse).view;
+    expect(view.players.find((p) => p.bot)).toMatchObject({ id: botId, name: 'Jakob' });
+    expect(view.me!.name).toBe('Joseph');
+
+    const joined = await t.call('POST', `/api/rooms/${me.code}/join`, { name: 'jakob' });
+    expect(joined.status).toBe(409);
+    expect(joined.body.error.code).toBe('name_taken');
+  });
+
+  it('ohne Wunsch bleibt Jakob draußen', async () => {
     const t = setup();
     const created = await t.call('POST', '/api/rooms', { name: 'Hanna' });
     expect((created.body as SessionResponse).view.players.map((p) => p.name)).toEqual(['Hanna']);
