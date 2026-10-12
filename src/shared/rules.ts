@@ -69,7 +69,7 @@ export const HEART_MAX = 200;
 export const HEART_SECONDS = 120;
 /** So lange bleiben die Antworten stehen, falls niemand zum Endstand weiterschaltet */
 export const HEART_SHOW_SECONDS = 600;
-/** Ohne Namen ergibt die Runde erst ab zwei Menschen Sinn – mit Joseph allein gibt es sie nicht */
+/** Ohne Namen ergibt die Runde erst ab zwei Menschen Sinn – mit Jakob allein gibt es sie nicht */
 export const HEART_MIN_PEOPLE = 2;
 
 /** Folgt auf die letzte Runde die Herzensrunde? Server und App rechnen gleich. */
@@ -127,11 +127,11 @@ export const PRESENCE_TOUCH_MS = 5_000;
  */
 export const LISTED_ALIVE_MS = 15 * 60 * 1000;
 
-/** Joseph: ein Bot, mit dem man jederzeit allein spielen kann (eigener Raum je Person) */
-export const BOT_NAME = 'Joseph';
-/** Josephs Spieler-ID – auch die App erkennt ihn daran und zeigt sein Gesicht statt Initialen */
+/** Jakob: ein Bot, mit dem man jederzeit allein spielen kann (eigener Raum je Person) */
+export const BOT_NAME = 'Jakob';
+/** Stabile Spieler-ID (historischer Name): bestehende Partien und Avatare bleiben kompatibel. */
 export const BOT_ID = 'bot-joseph';
-/** Vorschlag für eine Partie gegen Joseph: etwas kürzer als sonst */
+/** Vorschlag für eine Partie gegen Jakob: etwas kürzer als sonst */
 export const BOT_SETTINGS: Settings = {
   rounds: 6,
   difficulty: 'gemischt',
@@ -142,7 +142,7 @@ export const BOT_SETTINGS: Settings = {
   heartRound: false,
   lang: 'de',
 };
-/** Josephs Trefferquote: so oft wählt er die richtige Antwort */
+/** Jakobs Trefferquote: so oft wählt er die richtige Antwort */
 export const BOT_TRUTH_RATE = 0.45;
 /** Räume verfallen nach dieser Zeit ohne Änderung */
 export const ROOM_TTL_MS = 24 * 60 * 60 * 1000;
@@ -175,7 +175,7 @@ export const PLAYER_COLORS = [
   '#53606b', // grau
 ];
 
-/** Josephs Farbe: die zweite – die erste bekommt immer, wer den Raum eröffnet */
+/** Jakobs Farbe: die zweite – die erste bekommt immer, wer den Raum eröffnet */
 export const BOT_COLOR = PLAYER_COLORS[1];
 
 export function normalizeCode(input: string): string {
