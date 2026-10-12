@@ -6,6 +6,7 @@ import { POINTS_TRUTH, REVEAL_AUTHOR_AT_MS } from '../../shared/rules';
 import type { RevealStepView, RoomView } from '../../shared/types';
 import { Avatar, Button, PersonChip, QuestionText } from '../components/ui';
 import { buzz, type RoomConnection, useServerNow } from '../lib/hooks';
+import { t } from '../lib/i18n';
 
 export function RevealPhase({ view, conn, display = false }: { view: RoomView; conn: RoomConnection; display?: boolean }) {
   const round = view.round!;
@@ -28,9 +29,7 @@ export function RevealPhase({ view, conn, display = false }: { view: RoomView; c
   return (
     <section class={`phase reveal${display ? ' is-display' : ''}`} aria-live="polite">
       <header class="reveal-head">
-        <p class="eyebrow">
-          Runde {round.index + 1} von {round.total} · Aufdeckung
-        </p>
+        <p class="eyebrow">{t('Runde {n} von {total} · Aufdeckung', { n: round.index + 1, total: round.total })}</p>
         <p class="reveal-question">
           <QuestionText prompt={round.question.prompt} />
         </p>
@@ -44,14 +43,14 @@ export function RevealPhase({ view, conn, display = false }: { view: RoomView; c
       </div>
 
       <footer class="reveal-foot">
-        <div class="reveal-dots" aria-label={`Schritt ${index + 1} von ${reveal.steps.length}`}>
+        <div class="reveal-dots" aria-label={t('Schritt {n} von {total}', { n: index + 1, total: reveal.steps.length })}>
           {reveal.steps.map((s, i) => (
             <i class={`${i < index ? 'is-done' : ''}${i === index ? ' is-now' : ''}${s.kind === 'truth' ? ' is-truth' : ''}`} />
           ))}
         </div>
         {isHost && (
           <Button variant="ghost" small onClick={() => conn.act({ type: 'revealNext' }).catch(() => {})}>
-            Weiter ›
+            {t('Weiter ›')}
           </Button>
         )}
       </footer>
@@ -62,8 +61,8 @@ export function RevealPhase({ view, conn, display = false }: { view: RoomView; c
 function Intro() {
   return (
     <div class="reveal-intro">
-      <p class="intro-kicker">Aufdeckung</p>
-      <p class="intro-line">Wer ist worauf hereingefallen?</p>
+      <p class="intro-kicker">{t('Aufdeckung')}</p>
+      <p class="intro-line">{t('Wer ist worauf hereingefallen?')}</p>
       <div class="intro-cards" aria-hidden="true">
         <span />
         <span />
@@ -106,10 +105,10 @@ function BluffStep({
     <div class={`reveal-card is-bluff${exposed ? ' is-exposed' : ''}`}>
       <div class="paper">
         <RevealText text={step.text} prompt={prompt} />
-        {exposed && <div class={`stamp ${house ? 'stamp-house' : 'stamp-bluff'}`}>{house ? 'Hausbluff' : 'Geblufft!'}</div>}
+        {exposed && <div class={`stamp ${house ? 'stamp-house' : 'stamp-bluff'}`}>{house ? t('Hausbluff') : t('Geblufft!')}</div>}
       </div>
 
-      <p class="reveal-label">Gewählt von</p>
+      <p class="reveal-label">{t('Gewählt von')}</p>
       <div class="chips">
         {step.voters.map((v, i) => (
           <PersonChip person={v} delay={350 + i * 220} />
@@ -119,10 +118,10 @@ function BluffStep({
       {exposed && (
         <div class="reveal-author slide-up">
           {house ? (
-            <p class="author-line">Vom Spiel erfunden – niemand von euch!</p>
+            <p class="author-line">{t('Vom Spiel erfunden – niemand von euch!')}</p>
           ) : (
             <>
-              <p class="author-line">{step.authors.length > 1 ? 'Erfunden von gleich mehreren' : 'Erfunden von'}</p>
+              <p class="author-line">{step.authors.length > 1 ? t('Erfunden von gleich mehreren') : t('Erfunden von')}</p>
               <div class="chips">
                 {step.authors.map((a, i) => (
                   <span class="author">
@@ -136,10 +135,12 @@ function BluffStep({
         </div>
       )}
 
-      {exposed && fell && <p class="personal is-fooled">Du bist darauf hereingefallen 🙈</p>}
+      {exposed && fell && <p class="personal is-fooled">{t('Du bist darauf hereingefallen 🙈')}</p>}
       {exposed && mine && (
         <p class="personal is-proud">
-          Dein Bluff! {step.voters.length === 1 ? 'Eine Person' : `${step.voters.length} Personen`} reingelegt.
+          {step.voters.length === 1
+            ? t('Dein Bluff! Eine Person reingelegt.')
+            : t('Dein Bluff! {n} Personen reingelegt.', { n: step.voters.length })}
         </p>
       )}
     </div>
@@ -178,7 +179,7 @@ function TruthStep({
     <div class={`reveal-card is-truth${exposed ? ' is-exposed' : ''}`}>
       <div class="paper">
         <RevealText text={step.text} prompt={prompt} />
-        {exposed && <div class="stamp stamp-truth">Wahr!</div>}
+        {exposed && <div class="stamp stamp-truth">{t('Wahr!')}</div>}
         {exposed && (
           <div class="sparks" aria-hidden="true">
             {sparks.map((s) => (
@@ -191,13 +192,13 @@ function TruthStep({
         )}
       </div>
 
-      <p class="reveal-label">{step.voters.length ? 'Richtig erkannt von' : 'Gewählt von'}</p>
+      <p class="reveal-label">{step.voters.length ? t('Richtig erkannt von') : t('Gewählt von')}</p>
       <div class="chips">
         {step.voters.length ? (
           step.voters.map((v, i) => <PersonChip person={v} delay={350 + i * 200} note={exposed ? `+${POINTS_TRUTH}` : undefined} />)
         ) : (
           <p class="nobody pop" style={{ animationDelay: '400ms' }}>
-            Niemand hat die Wahrheit gefunden!
+            {t('Niemand hat die Wahrheit gefunden!')}
           </p>
         )}
       </div>
@@ -212,7 +213,7 @@ function TruthStep({
           </p>
         </div>
       )}
-      {exposed && found && <p class="personal is-proud">Richtig! +{POINTS_TRUTH} für dich.</p>}
+      {exposed && found && <p class="personal is-proud">{t('Richtig! +{n} für dich.', { n: POINTS_TRUTH })}</p>}
     </div>
   );
 }
@@ -220,7 +221,7 @@ function TruthStep({
 function RestStep({ step, meId }: { step: Extract<RevealStepView, { kind: 'rest' }>; meId: string | null }) {
   return (
     <div class="reveal-rest">
-      <p class="reveal-label">Darauf ist niemand hereingefallen</p>
+      <p class="reveal-label">{t('Darauf ist niemand hereingefallen')}</p>
       <ul>
         {step.items.map((item, i) => (
           <li class="rest-item pop" style={{ animationDelay: `${i * 260}ms` }}>
@@ -230,11 +231,11 @@ function RestStep({ step, meId }: { step: Extract<RevealStepView, { kind: 'rest'
                 item.authors.map((a) => (
                   <span class="rest-author">
                     <Avatar person={a} size="sm" />
-                    {a.id === meId ? 'du' : a.name}
+                    {a.id === meId ? t('du') : a.name}
                   </span>
                 ))
               ) : (
-                <em>vom Spiel</em>
+                <em>{t('vom Spiel')}</em>
               )}
             </span>
           </li>

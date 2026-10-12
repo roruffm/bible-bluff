@@ -8,7 +8,7 @@ import { networkInterfaces } from 'node:os';
 import { extname, join, normalize, resolve } from 'node:path';
 import { createApi } from '../src/server/api';
 import { sendWebResponse, toWebRequest } from '../src/server/node-adapter';
-import { homePreview, inviteCode, invitePreview } from '../src/server/preview';
+import { homePreview, inviteCode, invitePreview, linkLang } from '../src/server/preview';
 import { MemoryStore } from '../src/server/store';
 
 const PORT = Number(process.env.PORT ?? 8787);
@@ -44,14 +44,15 @@ const server = http.createServer(async (req, res) => {
       const request = await toWebRequest(req, `http://${req.headers.host ?? 'localhost'}`);
       return await sendWebResponse(res, await handleApi(request));
     }
-    // Einladungslinks und Startseite bekommen wie bei Cloudflare ihre eigene Link-Vorschau
+    // Einladungslinks, Startseite und englische Entdeckungen-Seiten bekommen wie bei Cloudflare ihre eigene Link-Vorschau
     const code = inviteCode(url.pathname);
-    if (code || url.pathname === '/') {
+    if (code || url.pathname === '/' || (url.pathname.startsWith('/e/') && linkLang(url) === 'en')) {
       const html = readFileSync(join(ROOT, 'index.html'), 'utf8');
       const origin = `http://${req.headers.host ?? 'localhost'}`;
       res.setHeader('content-type', TYPES['.html']);
       res.setHeader('cache-control', 'no-cache');
-      return res.end(code ? invitePreview(html, code, origin) : homePreview(html, origin));
+      const lang = linkLang(url);
+      return res.end(code ? invitePreview(html, code, origin, lang) : homePreview(html, origin, lang));
     }
     let file = normalize(join(ROOT, decodeURIComponent(url.pathname)));
     if (!file.startsWith(ROOT) || !existsSync(file) || statSync(file).isDirectory()) {

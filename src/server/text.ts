@@ -9,7 +9,9 @@ const STOPWORDS = new Set([
   'sein', 'seine', 'seinen', 'seinem', 'seiner', 'seines',
   'ihr', 'ihre', 'ihren', 'ihrem', 'ihrer', 'ihres',
   'es', 'er', 'sie', 'man', 'sich', 'so', 'ganz', 'etwas', 'noch', 'auch',
-  'the', 'a', 'an', 'of',
+  // Englisch (britische Fassung des Spiels)
+  'the', 'a', 'an', 'of', 'and', 'or', 'with', 'from', 'to', 'on', 'at', 'by', 'for', 'into', 'onto',
+  'his', 'her', 'their', 'its', 'he', 'she', 'they', 'it', 'him', 'them', 'some', 'that', 'this', 'just', 'times',
 ]);
 
 const NUMBER_WORDS: Record<string, string> = {
@@ -18,6 +20,11 @@ const NUMBER_WORDS: Record<string, string> = {
   fuenfzehn: '15', sechzehn: '16', siebzehn: '17', achtzehn: '18', neunzehn: '19', zwanzig: '20',
   dreissig: '30', vierzig: '40', fuenfzig: '50', sechzig: '60', siebzig: '70', achtzig: '80',
   neunzig: '90', hundert: '100', einhundert: '100', tausend: '1000', eintausend: '1000',
+  zero: '0', one: '1', two: '2', three: '3', four: '4', five: '5', six: '6', seven: '7', eight: '8', nine: '9',
+  ten: '10', eleven: '11', twelve: '12', thirteen: '13', fourteen: '14', fifteen: '15', sixteen: '16',
+  seventeen: '17', eighteen: '18', nineteen: '19', twenty: '20', thirty: '30', forty: '40', fifty: '50',
+  sixty: '60', seventy: '70', eighty: '80', ninety: '90', hundred: '100', thousand: '1000',
+  once: '1', twice: '2', thrice: '3',
 };
 
 /** Zahlwort oder Ziffer → Ziffernfolge, sonst null. "dreimal" → "3". */

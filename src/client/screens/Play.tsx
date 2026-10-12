@@ -3,6 +3,7 @@ import { BLUFF_MAX } from '../../shared/rules';
 import type { RoomView } from '../../shared/types';
 import { Button, Progress, QuestionCard, QuestionText, Timer } from '../components/ui';
 import { type RoomConnection, useServerNow } from '../lib/hooks';
+import { t } from '../lib/i18n';
 
 const LETTERS = 'ABCDEFGHIJKLMN';
 
@@ -40,14 +41,14 @@ export function WritePhase({ view, conn, display = false }: { view: RoomView; co
   }, [now]);
 
   const submit = async () => {
-    if (!text.trim()) return setError('Schreib zuerst einen Bluff.');
+    if (!text.trim()) return setError(t('Schreib zuerst einen Bluff.'));
     setBusy(true);
     setError(null);
     try {
       await conn.act({ type: 'bluff', text });
       setEditing(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Abgabe fehlgeschlagen.');
+      setError(err instanceof Error ? err.message : t('Abgabe fehlgeschlagen.'));
     } finally {
       setBusy(false);
     }
@@ -63,7 +64,7 @@ export function WritePhase({ view, conn, display = false }: { view: RoomView; co
         inputRef.current?.focus();
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Kein Vorschlag verfügbar.');
+      setError(err instanceof Error ? err.message : t('Kein Vorschlag verfügbar.'));
     }
   };
 
@@ -72,7 +73,7 @@ export function WritePhase({ view, conn, display = false }: { view: RoomView; co
 
   return (
     <section class="phase write stack">
-      <PhaseHead view={view} title={gap ? 'Lücke füllen' : 'Bluff schreiben'} />
+      <PhaseHead view={view} title={gap ? t('Lücke füllen') : t('Bluff schreiben')} />
       <QuestionCard question={round.question} big={display} />
 
       {canWrite &&
@@ -85,13 +86,13 @@ export function WritePhase({ view, conn, display = false }: { view: RoomView; co
             }}
           >
             <label class="field">
-              <span>{gap ? 'Was gehört in die Lücke? Erfinde etwas!' : 'Deine erfundene Antwort'}</span>
+              <span>{gap ? t('Was gehört in die Lücke? Erfinde etwas!') : t('Deine erfundene Antwort')}</span>
               <textarea
                 ref={inputRef}
                 value={text}
                 maxLength={BLUFF_MAX}
                 rows={2}
-                placeholder={gap ? 'Nur der fehlende Teil – glaubwürdig, aber falsch …' : 'Glaubwürdig, aber falsch …'}
+                placeholder={gap ? t('Nur der fehlende Teil – glaubwürdig, aber falsch …') : t('Glaubwürdig, aber falsch …')}
                 autocapitalize={gap ? 'off' : 'sentences'}
                 onInput={(e) => setText((e.currentTarget as HTMLTextAreaElement).value)}
                 onKeyDown={(e) => {
@@ -114,31 +115,31 @@ export function WritePhase({ view, conn, display = false }: { view: RoomView; co
             )}
             <div class="bluff-actions">
               <Button type="submit" block disabled={busy || !text.trim()}>
-                {round.myBluff ? 'Änderung abgeben' : 'Bluff abgeben'}
+                {round.myBluff ? t('Änderung abgeben') : t('Bluff abgeben')}
               </Button>
               {round.mySuggestion ? (
-                <p class="muted small suggest-used">Den Vorschlag für diese Runde hast du schon bekommen.</p>
+                <p class="muted small suggest-used">{t('Den Vorschlag für diese Runde hast du schon bekommen.')}</p>
               ) : (
                 <Button variant="ghost" small onClick={suggest}>
-                  Keine Idee? Vorschlag nehmen
+                  {t('Keine Idee? Vorschlag nehmen')}
                 </Button>
               )}
             </div>
-            <p class="muted small">Jede Person, die auf deinen Bluff hereinfällt, bringt dir einen Punkt.</p>
+            <p class="muted small">{t('Jede Person, die auf deinen Bluff hereinfällt, bringt dir einen Punkt.')}</p>
           </form>
         ) : (
           <div class="submitted pop">
-            <p class="eyebrow">Dein Bluff ist drin ✓</p>
+            <p class="eyebrow">{t('Dein Bluff ist drin ✓')}</p>
             <p class="submitted-text">
-              {gap ? <QuestionText prompt={round.question.prompt} fill={round.myBluff} /> : `„${round.myBluff}“`}
+              {gap ? <QuestionText prompt={round.question.prompt} fill={round.myBluff} /> : t('„{text}“', { text: round.myBluff ?? '' })}
             </p>
             <Button variant="ghost" small onClick={() => setEditing(true)}>
-              Noch ändern
+              {t('Noch ändern')}
             </Button>
           </div>
         ))}
 
-      <Progress players={view.players} label="Bluffs abgegeben" />
+      <Progress players={view.players} label={t('Bluffs abgegeben')} />
       {canWrite && <QuietOffer conn={conn} />}
     </section>
   );
@@ -158,7 +159,7 @@ export function VotePhase({ view, conn, display = false }: { view: RoomView; con
     try {
       await conn.act({ type: 'vote', optionId });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Stimme nicht angekommen.');
+      setError(err instanceof Error ? err.message : t('Stimme nicht angekommen.'));
     } finally {
       setPending(null);
     }
@@ -166,7 +167,7 @@ export function VotePhase({ view, conn, display = false }: { view: RoomView; con
 
   return (
     <section class="phase vote stack">
-      <PhaseHead view={view} title={round.question.kind === 'gap' ? 'Was gehört in die Lücke?' : 'Welche Antwort stimmt?'} />
+      <PhaseHead view={view} title={round.question.kind === 'gap' ? t('Was gehört in die Lücke?') : t('Welche Antwort stimmt?')} />
       <QuestionCard question={round.question} big={display} />
       <ul class={`options${display ? ' is-display' : ''}${round.question.kind === 'gap' ? ' is-gap' : ''}`}>
         {round.options!.map((o, i) => {
@@ -182,8 +183,8 @@ export function VotePhase({ view, conn, display = false }: { view: RoomView; con
               >
                 <span class="option-letter">{LETTERS[i]}</span>
                 <span class="option-text">{o.text}</span>
-                {o.mine && <span class="option-tag">Dein Bluff</span>}
-                {chosen && !o.mine && <span class="option-tag is-check">Deine Wahl</span>}
+                {o.mine && <span class="option-tag">{t('Dein Bluff')}</span>}
+                {chosen && !o.mine && <span class="option-tag is-check">{t('Deine Wahl')}</span>}
               </button>
             </li>
           );
@@ -196,24 +197,26 @@ export function VotePhase({ view, conn, display = false }: { view: RoomView; con
       )}
       {canVote && (
         <p class="muted small center">
-          {round.myVote ? 'Du kannst bis zum Ende noch umentscheiden.' : 'Tippe auf die Antwort, die du für wahr hältst.'}
+          {round.myVote ? t('Du kannst bis zum Ende noch umentscheiden.') : t('Tippe auf die Antwort, die du für wahr hältst.')}
         </p>
       )}
-      <Progress players={view.players} label="Stimmen abgegeben" />
+      <Progress players={view.players} label={t('Stimmen abgegeben')} />
       {canVote && <QuietOffer conn={conn} />}
     </section>
   );
 }
 
 /** Gebetsimpulse für die ruhige Minute – je Runde ein anderer */
-const PRAYER_PROMPTS = [
-  'Danke Gott für etwas, das dich heute gefreut hat.',
-  'Bring einen Menschen vor Gott, der dir gerade am Herzen liegt.',
-  'Sag Gott ehrlich, was dich gerade beschäftigt.',
-  'Bitte um Frieden für jemanden, mit dem es gerade schwierig ist.',
-  'Danke für die Menschen hier im Raum – einzeln, mit Namen.',
-  'Sei einfach still und lass Gott Gott sein.',
-];
+function prayerPrompts(): string[] {
+  return [
+    t('Danke Gott für etwas, das dich heute gefreut hat.'),
+    t('Bring einen Menschen vor Gott, der dir gerade am Herzen liegt.'),
+    t('Sag Gott ehrlich, was dich gerade beschäftigt.'),
+    t('Bitte um Frieden für jemanden, mit dem es gerade schwierig ist.'),
+    t('Danke für die Menschen hier im Raum – einzeln, mit Namen.'),
+    t('Sei einfach still und lass Gott Gott sein.'),
+  ];
+}
 
 /** „Ruhige Minute“: Diese Person setzt die Runde aus und nimmt sich Zeit zum Beten. */
 export function QuietScreen({ view, conn }: { view: RoomView; conn: RoomConnection }) {
@@ -224,29 +227,28 @@ export function QuietScreen({ view, conn }: { view: RoomView; conn: RoomConnecti
     try {
       await conn.act({ type: 'quiet', on: false });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Das ging nicht.');
+      setError(err instanceof Error ? err.message : t('Das ging nicht.'));
     }
   };
+  const prompts = prayerPrompts();
   return (
     <section class="phase quiet-screen stack" aria-live="polite">
       <div class="quiet-breath" aria-hidden="true" />
-      <p class="eyebrow">
-        Runde {round.index + 1} von {round.total} · Ruhige Minute
-      </p>
-      <h1 class="quiet-title">Zeit für ein Gebet</h1>
+      <p class="eyebrow">{t('Runde {n} von {total} · Ruhige Minute', { n: round.index + 1, total: round.total })}</p>
+      <h1 class="quiet-title">{t('Zeit für ein Gebet')}</h1>
       <blockquote class="quiet-verse">
-        „Seid stille und erkennet, dass ich Gott bin!“
-        <cite>Psalm 46,11</cite>
+        {t('„Seid stille und erkennet, dass ich Gott bin!“')}
+        <cite>{t('Psalm 46,11')}</cite>
       </blockquote>
-      <p class="quiet-prompt">{PRAYER_PROMPTS[round.index % PRAYER_PROMPTS.length]}</p>
-      <p class="muted small">Die anderen spielen diese Runde ohne dich weiter. Zur Auflösung bist du wieder dabei.</p>
+      <p class="quiet-prompt">{prompts[round.index % prompts.length]}</p>
+      <p class="muted small">{t('Die anderen spielen diese Runde ohne dich weiter. Zur Auflösung bist du wieder dabei.')}</p>
       {error && (
         <p class="error" role="alert">
           {error}
         </p>
       )}
       <Button variant="secondary" onClick={back}>
-        Zurück ins Spiel
+        {t('Zurück ins Spiel')}
       </Button>
     </section>
   );
@@ -260,15 +262,15 @@ export function QuietOffer({ conn, next = false }: { conn: RoomConnection; next?
     try {
       await conn.act({ type: 'quiet', on: true });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Das ging nicht.');
+      setError(err instanceof Error ? err.message : t('Das ging nicht.'));
     }
   };
   return (
     <div class="quiet-offer">
       <Button variant="ghost" small onClick={start}>
-        Ruhige Minute
+        {t('Ruhige Minute')}
       </Button>
-      <span class="muted small">{next ? 'Die nächste Runde aussetzen, um zu beten.' : 'Diese Runde aussetzen, um zu beten.'}</span>
+      <span class="muted small">{next ? t('Die nächste Runde aussetzen, um zu beten.') : t('Diese Runde aussetzen, um zu beten.')}</span>
       {error && (
         <p class="error" role="alert">
           {error}
@@ -283,9 +285,7 @@ export function PhaseHead({ view, title }: { view: RoomView; title: string }) {
   return (
     <header class="phase-head">
       <div>
-        <p class="eyebrow">
-          Runde {round.index + 1} von {round.total}
-        </p>
+        <p class="eyebrow">{t('Runde {n} von {total}', { n: round.index + 1, total: round.total })}</p>
         <h1 class="phase-title">{title}</h1>
       </div>
       <Timer start={round.phaseStartedAt} deadline={round.deadline} pausedAt={view.paused?.at ?? null} />

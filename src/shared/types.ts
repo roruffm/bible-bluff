@@ -10,6 +10,9 @@ export type RoundType = 'fragen' | 'luecken' | 'gemischt';
 /** Auswählbare Kategorien (Zuordnung zu den Buchgruppen in rules.ts) */
 export type CategoryId = 'evangelien' | 'apg' | 'paulus' | 'briefe' | 'offenbarung' | 'at';
 
+/** Sprache eines Raums und der Oberfläche: Deutsch (Standard) oder britisches Englisch */
+export type Lang = 'de' | 'en';
+
 export interface Settings {
   rounds: number;
   difficulty: Difficulty;
@@ -20,6 +23,8 @@ export interface Settings {
   categories: CategoryId[];
   /** Herzensrunde am Ende – die Leitung entscheidet beim Eröffnen (in Räumen mit Joseph aus) */
   heartRound: boolean;
+  /** Sprache der Fragen und Texte im Raum – folgt beim Eröffnen der Sprache der Startseite */
+  lang: Lang;
 }
 
 export type BookGroup =
@@ -281,6 +286,8 @@ export interface RecapItem {
 
 export interface RecapView {
   id: string;
+  /** Sprache der Partie – ältere Seiten haben keine und sind deutsch */
+  lang?: Lang;
   /** Ende der Partie */
   playedAt: number;
   players: number;
@@ -381,6 +388,7 @@ export interface PublicRoom {
   round: number | null;
   rounds: number;
   difficulty: Difficulty;
+  lang: Lang;
 }
 
 export interface PublicRoomsResponse {

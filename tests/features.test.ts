@@ -250,7 +250,7 @@ describe('Vom Spiel ins Gespräch', () => {
       if (r === 1) {
         // Spickzettel nur für die Leitung und erst nach der Auflösung
         const qid = g.state.game!.round.questionId;
-        expect(g.view('host').round!.talk).toEqual(talkNotes(qid));
+        expect(g.view('host').round!.talk).toEqual(talkNotes(qid, 'de'));
         expect(g.view('host').round!.talk).not.toBeNull();
         expect(g.view('anna').round!.talk).toBeNull();
         expect(g.view(null).round!.talk).toBeNull();
@@ -272,8 +272,8 @@ describe('Vom Spiel ins Gespräch', () => {
     expect(() => g.act('anna', { type: 'talk' })).toThrowError(expect.objectContaining({ code: 'not_host' }));
     g.act('host', { type: 'talk' });
     let talk = g.view('ben').final!.talk!;
-    expect(talk).toMatchObject({ questionId: third, step: 0, ref: getQuestion(third).ref, missed: 3, voted: 3 });
-    expect(talk.notes).toEqual(talkNotes(third));
+    expect(talk).toMatchObject({ questionId: third, step: 0, ref: getQuestion(third, 'de').ref, missed: 3, voted: 3 });
+    expect(talk.notes).toEqual(talkNotes(third, 'de'));
     expect(g.view(null).final!.talk!.questionId).toBe(third);
 
     g.act('host', { type: 'talkStep', step: TALK_STEPS.length - 1 });
@@ -300,7 +300,7 @@ describe('Frische Hausbluffs', () => {
     const g = setup();
     g.act('host', { type: 'settings', settings: { rounds: 4 } });
     g.act('host', { type: 'start' });
-    const q = getQuestion(g.state.game!.round.questionId);
+    const q = getQuestion(g.state.game!.round.questionId, 'de');
     g.act('host', { type: 'bluff', text: 'Ein Zelt aus Ziegenhaar und Zebra' });
     g.act('anna', { type: 'bluff', text: 'Bens alter Esel mit Zebra' });
     g.act('ben', { type: 'bluff', text: q.bluffs[0] });
@@ -336,7 +336,7 @@ describe('Frische Hausbluffs', () => {
     // Vorschläge gehen möglichst an niemanden doppelt: Sind alle Hausbluffs schon vergeben,
     // ist der freigegebene Bluff an der Reihe.
     const taken = structuredClone(g.state);
-    taken.game!.round.suggestions = Object.fromEntries(getQuestion(qid).bluffs.map((b, i) => [`x${i}`, b]));
+    taken.game!.round.suggestions = Object.fromEntries(getQuestion(qid, 'de').bluffs.map((b, i) => [`x${i}`, b]));
     expect(step(taken, 'anna', { type: 'suggest' }, extraCtx()).suggestion).toBe(fresh);
 
     // Mit nur einem Bluff wird aufgefüllt – irgendwann auch mit dem freigegebenen

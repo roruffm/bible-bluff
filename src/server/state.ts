@@ -167,11 +167,16 @@ export interface Ctx {
 }
 
 export class GameError extends Error {
+  /** Deutscher Text mit Platzhaltern wie {name} – daraus entsteht die englische Fassung */
+  template: string;
+
   constructor(
     public code: string,
     message: string,
     public status = 409,
+    public params?: Record<string, string | number>,
   ) {
-    super(message);
+    super(params ? message.replace(/\{(\w+)\}/g, (all, key: string) => (key in params ? String(params[key]) : all)) : message);
+    this.template = message;
   }
 }

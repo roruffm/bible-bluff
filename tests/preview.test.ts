@@ -33,8 +33,8 @@ describe('Link-Vorschau', () => {
     expect(meta(index, 'twitter:card')).toBe('summary_large_image');
   });
 
-  it('liefert beide Bilder in 1200 × 630 und klein genug für WhatsApp', () => {
-    for (const file of ['og.jpg', 'og-invite.jpg']) {
+  it('liefert alle Bilder (auch die englischen) in 1200 × 630 und klein genug für WhatsApp', () => {
+    for (const file of ['og.jpg', 'og-invite.jpg', 'og-en.jpg', 'og-invite-en.jpg']) {
       const buf = readFileSync(new URL(`../src/client/public/${file}`, import.meta.url));
       expect(jpegSize(buf), file).toEqual({ width: 1200, height: 630 });
       expect(buf.length, file).toBeLessThan(300 * 1024);

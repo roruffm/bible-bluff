@@ -31,12 +31,14 @@ export function isRecapId(value: string): boolean {
 /** Stellt die Seite aus einer beendeten Partie zusammen – deterministisch, damit doppelte Anfragen dasselbe speichern. */
 export function buildRecap(state: RoomState, id: string): RecapView {
   const g = state.game!;
+  const lang = state.settings.lang;
   return {
     id,
+    lang,
     playedAt: g.finishedAt ?? g.phaseStartedAt,
     players: state.players.filter((p) => p.plays).length,
     items: g.history.map((h) => {
-      const q = getQuestion(h.questionId);
+      const q = getQuestion(h.questionId, lang);
       return {
         book: q.book,
         group: q.group,

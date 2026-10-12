@@ -542,6 +542,61 @@ textarea {
   background: radial-gradient(circle, color-mix(in srgb, var(--gold) 24%, transparent), transparent 70%);
 }
 
+/* Sprachwahl: zwei Flaggen oben rechts in der Kopfkarte der Startseite; das Logo beginnt darunter,
+   sonst läge der Schalter auf schmalen Handys über dem Heiligenschein */
+.hero.has-lang {
+  padding-top: 58px;
+}
+
+.lang-switch {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1;
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--cream) 14%, transparent);
+}
+
+.lang-switch button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 10px 0 7px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--cream);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  opacity: 0.72;
+}
+
+.lang-switch button.is-on {
+  background: var(--cream);
+  color: var(--brown);
+  opacity: 1;
+}
+
+.lang-switch button:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+.flag {
+  width: 22px;
+  height: 15px;
+  flex: none;
+  border-radius: 3px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.18);
+}
+
 .tagline {
   margin-top: 14px;
   font-size: 1.08rem;
@@ -2170,6 +2225,15 @@ textarea {
 .reveal-text::after {
   content: '“';
   color: var(--ink-3);
+}
+
+/* Englisch: Anführungszeichen wie in der World English Bible */
+html[lang='en'] .reveal-text::before {
+  content: '“';
+}
+
+html[lang='en'] .reveal-text::after {
+  content: '”';
 }
 
 .reveal-label {

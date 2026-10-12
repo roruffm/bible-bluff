@@ -22,7 +22,7 @@ import { ALL_CATEGORIES, CATEGORIES, DEFAULT_SETTINGS, GAP, categoryOf, fillGap 
 import type { CategoryId, PoolResponse, Settings } from '../src/shared/types';
 import { Clock, ctxFor, seeded } from './helpers';
 
-const isGap = (id: string) => getQuestion(id).kind === 'gap';
+const isGap = (id: string) => getQuestion(id, 'de').kind === 'gap';
 const filter = (roundType: Settings['roundType'], categories: CategoryId[] = ALL_CATEGORIES) => ({
   difficulty: 'gemischt' as const,
   roundType,
@@ -92,7 +92,7 @@ describe('Kategorien und Rundenart', () => {
       const gaps = main.map((id, i) => (isGap(id) ? i : -1)).filter((i) => i >= 0);
       expect(gaps).toHaveLength(3);
       expect(gaps).not.toContain(0);
-      expect(main.map(getQuestion).filter((q) => q.number).length).toBeLessThanOrEqual(2);
+      expect(main.map((id) => getQuestion(id, 'de')).filter((q) => q.number).length).toBeLessThanOrEqual(2);
     }
     expect(pickQuestions(filter('fragen'), new Set(), 8, seeded(2)).main.some(isGap)).toBe(false);
     expect(pickQuestions(filter('luecken'), new Set(), 8, seeded(2)).main.every(isGap)).toBe(true);
@@ -101,7 +101,7 @@ describe('Kategorien und Rundenart', () => {
   it('nimmt nur Fragen aus den gewählten Kategorien', () => {
     for (let seed = 1; seed <= 10; seed++) {
       const { main, spare } = pickQuestions(filter('gemischt', ['apg', 'at']), new Set(), 8, seeded(seed));
-      for (const id of [...main, ...spare]) expect(['geschichte', 'at']).toContain(getQuestion(id).group);
+      for (const id of [...main, ...spare]) expect(['geschichte', 'at']).toContain(getQuestion(id, 'de').group);
     }
   });
 
@@ -167,7 +167,7 @@ describe('Eine Partie mit Lückentexten', () => {
     const g = setup({ rounds: 4, roundType: 'luecken', categories: ['evangelien'] });
     expect(buildView(g.state, 'host', g.ctx(), 1).poolSize).toBe(matchingQuestions(filter('luecken', ['evangelien'])).length);
     g.act('host', { type: 'start' });
-    const q = getQuestion(g.state.game!.round.questionId);
+    const q = getQuestion(g.state.game!.round.questionId, 'de');
     expect(q.kind).toBe('gap');
     const view = buildView(g.state, 'host', g.ctx(), 2);
     expect(view.round!.question.kind).toBe('gap');

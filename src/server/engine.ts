@@ -41,8 +41,9 @@ import {
   cleanName,
   heartRoundAhead,
 } from '../shared/rules';
-import type { Action, CategoryId, Difficulty, RoundType, Settings } from '../shared/types';
-import { QUESTIONS, getQuestion, hasQuestion, type Question } from './questions';
+import type { Action, CategoryId, Difficulty, Lang, RoundType, Settings } from '../shared/types';
+import { isLang } from '../shared/i18n';
+import { getQuestion, hasQuestion, questionsFor, type Question } from './questions';
 import {
   GameError,
   type Ctx,
@@ -119,11 +120,25 @@ const LOWER_FIRST = new Set(
 );
 
 /**
+ * Englisch: Mitten im Satz beginnt alles klein – außer Namen und „I“. Die Liste deckt die Namen aus
+ * dem englischen Fragenpool ab und die bekanntesten biblischen Namen, Orte und Feste.
+ */
+const EN_NAMES = new Set(
+  (
+    'god lord jesus christ spirit holy bible israel israelites jerusalem egypt rome moses abraham isaac jacob joseph ' +
+    'david goliath saul solomon peter paul mary martha lazarus john james andrew thomas judas pilate herod zacchaeus ' +
+    'elijah elisha samson jonah daniel noah adam eve pharaoh satan galilee jordan bethlehem nazareth babylon philistines ' +
+    'gideon jericho joshua nineveh malta patmos athens damascus pentecost passover easter christmas sabbath gentiles ' +
+    'rhoda eutychus malchus onesimus timothy titus philemon rebekah esau balaam nehemiah artaxerxes achish gath'
+  ).split(' '),
+);
+
+/**
  * Antwort für einen Lückentext: Mitten im Satz kleingeschriebene Wörter (Artikel, Präpositionen,
  * Zahlen …) beginnen klein, sonst bleibt der Text, wie er getippt wurde. Wer den ganzen Satz
  * abtippt, bekommt nur den Teil für die Lücke.
  */
-export function formatGap(text: string, prompt: string): string {
+export function formatGap(text: string, prompt: string, lang: Lang = 'de'): string {
   let t = cleanBluff(text);
   const [before, after = ''] = prompt.split(GAP);
   const head = cleanBluff(before);
@@ -134,13 +149,17 @@ export function formatGap(text: string, prompt: string): string {
   t = t.replace(/[.!?;:,–-]+$/u, '').trim();
   if (!t) return t;
   if (!head) return t.charAt(0).toLocaleUpperCase('de-DE') + t.slice(1);
-  const first = t.split(' ')[0].toLocaleLowerCase('de-DE');
-  return LOWER_FIRST.has(first) ? t.charAt(0).toLocaleLowerCase('de-DE') + t.slice(1) : t;
+  const word = t.split(' ')[0];
+  if (lang === 'en') {
+    const bare = word.replace(/[’']s$/u, '').replace(/[^\p{L}]/gu, '').toLowerCase();
+    return word === 'I' || EN_NAMES.has(bare) ? t : t.charAt(0).toLowerCase() + t.slice(1);
+  }
+  return LOWER_FIRST.has(word.toLocaleLowerCase('de-DE')) ? t.charAt(0).toLocaleLowerCase('de-DE') + t.slice(1) : t;
 }
 
 /** Antwort im passenden Stil: als eigenständige Antwort oder als Satzteil für die Lücke */
-export function formatFor(q: Question, text: string): string {
-  return q.kind === 'gap' ? formatGap(text, q.prompt) : formatAnswer(text);
+export function formatFor(q: Question, text: string, lang: Lang = 'de'): string {
+  return q.kind === 'gap' ? formatGap(text, q.prompt, lang) : formatAnswer(text);
 }
 
 function player(state: RoomState, id: string): PlayerRec | undefined {
@@ -202,7 +221,7 @@ function noteSeen(s: RoomState, playerId: string, seen: unknown) {
   if (from.includes(playerId)) return;
   from.push(playerId);
   const counts = (s.seenCounts ??= {});
-  const ids = new Set(seen.slice(0, SEEN_SEND_MAX).filter((id): id is string => typeof id === 'string' && hasQuestion(id)));
+  const ids = new Set(seen.slice(0, SEEN_SEND_MAX).filter((id): id is string => typeof id === 'string' && hasQuestion(id, s.settings.lang)));
   for (const id of ids) counts[id] = (counts[id] ?? 0) + 1;
 }
 
@@ -244,6 +263,10 @@ export function sanitizeSettings(input: Partial<Settings> | undefined, base: Set
     if (typeof input.heartRound !== 'boolean') throw new GameError('bad_settings', 'Ungültige Angabe zur Herzensrunde.', 400);
     s.heartRound = input.heartRound;
   }
+  if (input.lang !== undefined) {
+    if (!isLang(input.lang)) throw new GameError('bad_settings', 'Unbekannte Sprache.', 400);
+    s.lang = input.lang;
+  }
   if (!matchingQuestions(s).length) throw new GameError('bad_settings', 'Zu dieser Auswahl gibt es keine Fragen.', 400);
   return s;
 }
@@ -258,6 +281,7 @@ export function withSettingDefaults(settings: Partial<Settings>): Settings {
     ...merged,
     categories: settings.categories?.length ? settings.categories : [...ALL_CATEGORIES],
     heartRound: settings.heartRound ?? false,
+    lang: isLang(settings.lang) ? settings.lang : 'de',
   };
 }
 
@@ -330,10 +354,10 @@ export function joinRoom(state: RoomState, input: JoinInput, ctx: Ctx): { state:
   const existing = s.players.find((p) => normalize(p.name) === key);
   if (existing) {
     if (isOnline(ctx, existing.id)) {
-      throw new GameError('name_taken', `„${existing.name}“ ist schon dabei. Wähle einen anderen Namen.`);
+      throw new GameError('name_taken', '„{name}“ ist schon dabei. Wähle einen anderen Namen.', 409, { name: existing.name });
     }
     if (!input.reclaim) {
-      throw new GameError('name_offline', `„${existing.name}“ ist gerade nicht verbunden. Bist du das?`);
+      throw new GameError('name_offline', '„{name}“ ist gerade nicht verbunden. Bist du das?', 409, { name: existing.name });
     }
     existing.tokenHash = input.tokenHash;
     noteSeen(s, existing.id, input.seen);
@@ -341,7 +365,7 @@ export function joinRoom(state: RoomState, input: JoinInput, ctx: Ctx): { state:
   }
 
   if (s.locked) throw new GameError('locked', 'Die Spielleitung hat den Raum für neue Teilnehmende gesperrt.', 403);
-  if (players(s).length >= MAX_PLAYERS) throw new GameError('full', `Der Raum ist voll (höchstens ${MAX_PLAYERS}).`, 403);
+  if (players(s).length >= MAX_PLAYERS) throw new GameError('full', 'Der Raum ist voll (höchstens {max}).', 403, { max: MAX_PLAYERS });
 
   s.players.push({
     id: input.playerId,
@@ -364,6 +388,8 @@ export interface QuestionFilter {
   difficulty: Difficulty;
   roundType: RoundType;
   categories: CategoryId[];
+  /** ohne Angabe: Deutsch */
+  lang?: Lang;
 }
 
 function isGap(q: Question): boolean {
@@ -378,8 +404,8 @@ function inCategories(q: Question, categories: CategoryId[]): boolean {
 }
 
 /** Alle Fragen, die zu Kategorien und Rundenart passen */
-export function matchingQuestions(filter: Pick<QuestionFilter, 'roundType' | 'categories'>): Question[] {
-  return QUESTIONS.filter(
+export function matchingQuestions(filter: Pick<QuestionFilter, 'roundType' | 'categories' | 'lang'>): Question[] {
+  return questionsFor(filter.lang ?? 'de').filter(
     (q) => inCategories(q, filter.categories) && (filter.roundType === 'gemischt' || isGap(q) === (filter.roundType === 'luecken')),
   );
 }
@@ -497,7 +523,7 @@ function newRound(index: number, questionId: string): RoundRec {
 
 function startGame(s: RoomState, ctx: Ctx) {
   if (players(s).length < MIN_PLAYERS) {
-    throw new GameError('too_few', `Es braucht mindestens ${MIN_PLAYERS} Mitspielende.`);
+    throw new GameError('too_few', 'Es braucht mindestens {min} Mitspielende.', 409, { min: MIN_PLAYERS });
   }
   const { main, spare } = pickQuestions(s.settings, new Set(s.usedQuestionIds), s.settings.rounds, ctx.rng, s.seenCounts);
   if (!main.length) throw new GameError('no_questions', 'Zu dieser Auswahl gibt es keine Fragen.');
@@ -524,7 +550,8 @@ function startGame(s: RoomState, ctx: Ctx) {
 function markUsed(s: RoomState, questionId: string) {
   if (!s.usedQuestionIds.includes(questionId)) s.usedQuestionIds.push(questionId);
   // Liste nicht endlos wachsen lassen
-  if (s.usedQuestionIds.length > QUESTIONS.length) s.usedQuestionIds = s.usedQuestionIds.slice(-QUESTIONS.length);
+  const size = questionsFor(s.settings.lang).length;
+  if (s.usedQuestionIds.length > size) s.usedQuestionIds = s.usedQuestionIds.slice(-size);
 }
 
 function startRound(s: RoomState, index: number, ctx: Ctx) {
@@ -543,7 +570,8 @@ function startRound(s: RoomState, index: number, ctx: Ctx) {
 function startVote(s: RoomState, ctx: Ctx) {
   const g = s.game!;
   const round = g.round;
-  const q = getQuestion(round.questionId);
+  const lang = s.settings.lang;
+  const q = getQuestion(round.questionId, lang);
 
   // Bluffs der noch anwesenden Mitspielenden, in Abgabe-Reihenfolge, Duplikate zusammengeführt
   const entries = Object.entries(round.bluffs)
@@ -557,15 +585,15 @@ function startVote(s: RoomState, ctx: Ctx) {
   }
 
   const options: OptionRec[] = [
-    { id: '', text: formatFor(q, q.answer), kind: 'truth', authorIds: [] },
+    { id: '', text: formatFor(q, q.answer, lang), kind: 'truth', authorIds: [] },
     ...groups.map((grp) => ({ id: '', text: grp.text, kind: 'player' as const, authorIds: grp.authorIds })),
   ];
 
   // Mit Hausbluffs auffüllen, damit es immer etwas zu raten gibt
-  for (const decoy of shuffle(houseBluffs(q, ctx), ctx.rng)) {
+  for (const decoy of shuffle(houseBluffs(q, ctx, lang), ctx.rng)) {
     if (options.length >= MIN_OPTIONS) break;
     if (options.some((o) => isDuplicate(o.text, decoy))) continue;
-    options.push({ id: '', text: formatFor(q, decoy), kind: 'house', authorIds: [] });
+    options.push({ id: '', text: formatFor(q, decoy, lang), kind: 'house', authorIds: [] });
   }
 
   const ids = new Set<string>();
@@ -690,9 +718,10 @@ export function favoriteLeaders(round: RoundRec): OptionRec[] {
   return (round.options ?? []).filter((o) => o.kind === 'player' && counts.get(o.id) === best);
 }
 
-/** Hausbluffs einer Frage: die vorbereiteten plus freigegebene aus echten Partien */
-function houseBluffs(q: Question, ctx: Ctx): string[] {
+/** Hausbluffs einer Frage: die vorbereiteten plus freigegebene aus echten Partien (die gibt es nur auf Deutsch) */
+function houseBluffs(q: Question, ctx: Ctx, lang: Lang): string[] {
   const all = [...q.bluffs];
+  if (lang !== 'de') return all;
   for (const text of ctx.extraBluffs?.[q.id] ?? []) if (!all.some((t) => isDuplicate(t, text))) all.push(text);
   return all;
 }
@@ -936,7 +965,10 @@ function botMoves(s: RoomState, ctx: Ctx): boolean {
   for (const bot of players(s).filter((p) => p.bot)) {
     if (g.phase === 'write' && !round.bluffs[bot.id]) {
       if (!due && !humans.every((p) => round.bluffs[p.id])) continue;
-      round.bluffs[bot.id] = { text: formatFor(getQuestion(round.questionId), suggestBluff(s, bot.id, ctx)), at: ctx.now };
+      round.bluffs[bot.id] = {
+        text: formatFor(getQuestion(round.questionId, s.settings.lang), suggestBluff(s, bot.id, ctx), s.settings.lang),
+        at: ctx.now,
+      };
       moved = true;
     } else if (g.phase === 'vote' && !round.votes[bot.id] && round.options) {
       if (!due && !humans.every((p) => round.votes[p.id])) continue;
@@ -991,10 +1023,10 @@ export function applyAction(state: RoomState, actorId: string, action: Action, c
       if (g.phase !== 'write') throw new GameError('phase_over', 'Die Schreibzeit ist vorbei.');
       if (!actor.plays) throw new GameError('not_playing', 'Du leitest nur – mitschreiben geht nicht.');
       requireNotQuiet(actor, g);
-      const q = getQuestion(g.round.questionId);
-      const text = formatFor(q, typeof action.text === 'string' ? action.text : '');
+      const q = getQuestion(g.round.questionId, s.settings.lang);
+      const text = formatFor(q, typeof action.text === 'string' ? action.text : '', s.settings.lang);
       if (!text) throw new GameError('empty', 'Schreib zuerst einen Bluff.', 400);
-      if (text.length > BLUFF_MAX) throw new GameError('too_long', `Höchstens ${BLUFF_MAX} Zeichen.`, 400);
+      if (text.length > BLUFF_MAX) throw new GameError('too_long', 'Höchstens {max} Zeichen.', 400, { max: BLUFF_MAX });
       if (isTooCloseToTruth(text, q)) {
         throw new GameError(
           'too_close',
@@ -1122,7 +1154,7 @@ export function applyAction(state: RoomState, actorId: string, action: Action, c
       if (action.text !== null) {
         text = cleanBluff(typeof action.text === 'string' ? action.text : '');
         if (!text) throw new GameError('empty', 'Schreib zuerst etwas – oder tippe auf „Diesmal nicht“.', 400);
-        if (text.length > HEART_MAX) throw new GameError('too_long', `Höchstens ${HEART_MAX} Zeichen.`, 400);
+        if (text.length > HEART_MAX) throw new GameError('too_long', 'Höchstens {max} Zeichen.', 400, { max: HEART_MAX });
       }
       g.heart.answers[actorId] = { text, at: ctx.now };
       return { state: s };
@@ -1169,8 +1201,8 @@ export function applyAction(state: RoomState, actorId: string, action: Action, c
       if (g.phase !== 'write') throw new GameError('bad_state', 'Fragen lassen sich nur beim Schreiben tauschen.');
       resume(s, ctx);
       // Ersatz von derselben Art: ein Lückentext für einen Lückentext, eine Frage für eine Frage
-      const gap = isGap(getQuestion(g.round.questionId));
-      const at = g.spareIds.findIndex((id) => isGap(getQuestion(id)) === gap);
+      const gap = isGap(getQuestion(g.round.questionId, s.settings.lang));
+      const at = g.spareIds.findIndex((id) => isGap(getQuestion(id, s.settings.lang)) === gap);
       let next = at >= 0 ? g.spareIds.splice(at, 1)[0] : undefined;
       if (!next) {
         const used = new Set([...s.usedQuestionIds, ...g.questionIds]);
@@ -1224,7 +1256,7 @@ export function applyAction(state: RoomState, actorId: string, action: Action, c
     case 'makeHost': {
       requireHost(s, actorId);
       const target = requirePlayerTarget(s, action.playerId);
-      if (target.bot) throw new GameError('bad_target', `${target.name} spielt nur mit und kann nicht leiten.`, 400);
+      if (target.bot) throw new GameError('bad_target', '{name} spielt nur mit und kann nicht leiten.', 400, { name: target.name });
       s.hostId = target.id;
       return { state: s };
     }
@@ -1309,7 +1341,7 @@ function resume(s: RoomState, ctx: Ctx) {
 /** Hausbluff als Vorschlag – möglichst einer, den noch niemand geschrieben oder vorgeschlagen bekommen hat */
 function suggestBluff(s: RoomState, actorId: string, ctx: Ctx): string {
   const g = s.game!;
-  const pool = houseBluffs(getQuestion(g.round.questionId), ctx);
+  const pool = houseBluffs(getQuestion(g.round.questionId, s.settings.lang), ctx, s.settings.lang);
   const position = Math.max(0, players(s).findIndex((p) => p.id === actorId));
   const others = Object.entries(g.round.bluffs)
     .filter(([id]) => id !== actorId)

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'preact/hooks';
+import type { Lang } from '../../shared/types';
 
 export type Route =
   | { name: 'home' }
@@ -46,11 +47,12 @@ export function useRoute(): Route {
   return route;
 }
 
-export function roomUrl(code: string): string {
-  return `${location.origin}/r/${code}`;
+/** Einladungslink in einen Raum – englische Räume mit ?lang=en, damit Vorschau und App gleich englisch sind */
+export function roomUrl(code: string, lang: Lang = 'de'): string {
+  return `${location.origin}/r/${code}${lang === 'en' ? '?lang=en' : ''}`;
 }
 
-/** Dauerhafte Entdeckungen-Seite einer Partie */
-export function recapUrl(id: string): string {
-  return `${location.origin}/e/${id}`;
+/** Dauerhafte Entdeckungen-Seite einer Partie – englische mit ?lang=en, damit auch die Link-Vorschau englisch ist */
+export function recapUrl(id: string, lang: Lang = 'de'): string {
+  return `${location.origin}/e/${id}${lang === 'en' ? '?lang=en' : ''}`;
 }

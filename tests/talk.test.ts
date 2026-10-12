@@ -15,8 +15,8 @@ const BOOKS = [
 describe('Gesprächsstoff', () => {
   it('gibt es für jede Frage genau einmal', () => {
     expect(Object.keys(TALK).sort()).toEqual(QUESTIONS.map((q) => q.id).sort());
-    for (const q of QUESTIONS) expect(talkNotes(q.id), q.id).not.toBeNull();
-    expect(talkNotes('gibt-es-nicht')).toBeNull();
+    for (const q of QUESTIONS) expect(talkNotes(q.id, 'de'), q.id).not.toBeNull();
+    expect(talkNotes('gibt-es-nicht', 'de')).toBeNull();
   });
 
   it('hält die Längen ein, damit Spickzettel und Leinwand lesbar bleiben', () => {

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import type { Action, RoomView } from '../../shared/types';
 import { ApiError, api, isFatal } from './api';
 import { clock } from './clock';
+import { t } from './i18n';
 
 /** Server-Zeit, die sich regelmäßig aktualisiert (für Timer und die Aufdeckung). */
 export function useServerNow(intervalMs = 250): number {
@@ -125,7 +126,7 @@ export function useRoom(code: string, token: string | null): RoomConnection {
   }, [code, token]);
 
   const act = async (action: Action) => {
-    if (!token) throw new ApiError('unknown_session', 'Bitte tritt zuerst bei.', 401);
+    if (!token) throw new ApiError('unknown_session', t('Bitte tritt zuerst bei.'), 401);
     try {
       const res = await api.action(code, token, action);
       apply(res.view);

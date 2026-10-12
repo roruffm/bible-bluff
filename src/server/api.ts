@@ -12,8 +12,10 @@
 //   POST /api/admin/bluffs           Kandidaten freigeben oder ablehnen (nur mit ADMIN_KEY)
 
 import { isCalendarDay, isReminderTime, verseCalendar } from '../shared/calendar';
+import { DEFAULT_LANG, LANG_PARAM, isLang, translate } from '../shared/i18n';
 import { BLUFF_MAX, CATEGORIES, PRESENCE_TOUCH_MS, ROOM_TTL_MS, normalizeCode } from '../shared/rules';
 import type {
+  Lang,
   Action,
   ApiErrorBody,
   BluffListResponse,
@@ -34,7 +36,7 @@ import { buildRecap, isRecapId, randomRecapId } from './recap';
 import { GameError, type Ctx, type PlayerRec, type RoomState } from './state';
 import type { RoomRecord, RoomStore } from './store';
 import { isDuplicate, isTooCloseToTruth } from './text';
-import { WEEK_VERSES } from '../shared/verses';
+import { versesFor } from '../shared/verses';
 import { buildView, publicRoom } from './view';
 
 export interface ApiDeps {
@@ -97,13 +99,21 @@ function json(body: unknown, status = 200, cache = 'no-store'): Response {
   });
 }
 
-function errorResponse(err: unknown): Response {
+/** Sprache für Meldungen: Die App schickt ihre aktuelle Sprache mit (im Raum die des Raums) */
+function requestLang(request: Request): Lang {
+  const lang = request.headers.get('x-lang');
+  return isLang(lang) ? lang : DEFAULT_LANG;
+}
+
+function errorResponse(err: unknown, lang: Lang): Response {
   if (err instanceof GameError) {
-    const body: ApiErrorBody = { error: { code: err.code, message: err.message } };
+    const body: ApiErrorBody = { error: { code: err.code, message: translate(lang, err.template, err.params) } };
     return json(body, err.status);
   }
   console.error('Unerwarteter Fehler', err);
-  const body: ApiErrorBody = { error: { code: 'internal', message: 'Da ist etwas schiefgelaufen. Bitte nochmal versuchen.' } };
+  const body: ApiErrorBody = {
+    error: { code: 'internal', message: translate(lang, 'Da ist etwas schiefgelaufen. Bitte nochmal versuchen.') },
+  };
   return json(body, 500);
 }
 
@@ -225,10 +235,12 @@ export function createApi(deps: ApiDeps) {
   // Offene Räume für die Startseite – wartende Räume zuerst, dann laufende Partien
   let publicCache: { at: number; data: PublicRoomsResponse } | null = null;
   /** Wie viele Fragen und Lückentexte es je Kategorie gibt – ändert sich nur mit einer neuen Version */
-  function poolRoute(): Response {
+  function poolRoute(url: URL): Response {
+    const param = url.searchParams.get(LANG_PARAM);
+    const lang = isLang(param) ? param : DEFAULT_LANG;
     const res: PoolResponse = {
       categories: CATEGORIES.map((c) => {
-        const all = matchingQuestions({ roundType: 'gemischt', categories: [c.id] });
+        const all = matchingQuestions({ roundType: 'gemischt', categories: [c.id], lang });
         const gaps = all.filter((q) => q.kind === 'gap').length;
         return { id: c.id, questions: all.length - gaps, gaps };
       }),
@@ -238,17 +250,20 @@ export function createApi(deps: ApiDeps) {
 
   /** Kalenderdatei zu „Mein Vers für die Woche“ – der Tag kommt vom Handy, damit „morgen“ dort stimmt */
   function calendarRoute(url: URL): Response {
-    const verse = WEEK_VERSES.find((v) => v.id === url.searchParams.get('vers'));
+    const param = url.searchParams.get(LANG_PARAM);
+    const lang = isLang(param) ? param : DEFAULT_LANG;
+    const verse = versesFor(lang).find((v) => v.id === url.searchParams.get('vers'));
     if (!verse) throw new GameError('not_found', 'Diesen Vers gibt es nicht.', 404);
     const day = url.searchParams.get('ab') ?? '';
     if (!isCalendarDay(day)) throw new GameError('bad_day', 'Ungültiges Datum.', 400);
     const time = url.searchParams.get('zeit') ?? '0730';
     if (!isReminderTime(time)) throw new GameError('bad_time', 'Ungültige Uhrzeit.', 400);
-    return new Response(verseCalendar(verse, day, time, new Date(now())), {
+    const file = lang === 'en' ? 'my-verse-for-the-week.ics' : 'mein-vers-fuer-die-woche.ics';
+    return new Response(verseCalendar(verse, day, time, new Date(now()), lang), {
       headers: {
         'content-type': 'text/calendar; charset=utf-8',
         // inline: Das iPhone bietet dann direkt „Alle hinzufügen“ an; andere Geräte laden die Datei herunter
-        'content-disposition': 'inline; filename="mein-vers-fuer-die-woche.ics"',
+        'content-disposition': `inline; filename="${file}"`,
         'cache-control': 'no-store',
         'x-content-type-options': 'nosniff',
       },
@@ -281,8 +296,10 @@ export function createApi(deps: ApiDeps) {
     const t = now();
     if (rng() < 0.2) await store.cleanup(t - ROOM_TTL_MS);
 
+    const wanted = (body.settings as Partial<Settings> | undefined)?.lang;
+    const lang: Lang = isLang(wanted) ? wanted : DEFAULT_LANG;
     for (let attempt = 0; attempt < 16; attempt++) {
-      const code = randomCode(rng, attempt < 8 ? 1 : 2);
+      const code = randomCode(rng, attempt < 8 ? 1 : 2, lang);
       const ctx: Ctx = { now: t, rng, presence: { [hostId]: t } };
       const state = createRoom(
         {
@@ -424,10 +441,10 @@ export function createApi(deps: ApiDeps) {
     const key = String(body.key ?? '');
     const status = body.status as BluffStatus;
     if (!BLUFF_STATUSES.includes(status)) throw new GameError('bad_status', 'Unbekannter Status.', 400);
-    if (!hasQuestion(questionId) || !key) throw new GameError('not_found', 'Diesen Kandidaten gibt es nicht.', 404);
-    const q = getQuestion(questionId);
+    if (!hasQuestion(questionId, 'de') || !key) throw new GameError('not_found', 'Diesen Kandidaten gibt es nicht.', 404);
+    const q = getQuestion(questionId, 'de');
     const text = formatFor(q, typeof body.text === 'string' ? body.text : '');
-    if (!text || text.length > BLUFF_MAX) throw new GameError('bad_text', `Der Bluff braucht 1 bis ${BLUFF_MAX} Zeichen.`, 400);
+    if (!text || text.length > BLUFF_MAX) throw new GameError('bad_text', 'Der Bluff braucht 1 bis {max} Zeichen.', 400, { max: BLUFF_MAX });
     if (status === 'approved') {
       if (isTooCloseToTruth(text, q)) {
         throw new GameError('too_close', 'Das ist zu nah an der richtigen Antwort – so würde der Bluff die Wahrheit verraten.', 422);
@@ -453,7 +470,7 @@ export function createApi(deps: ApiDeps) {
       if (parts.length === 2 && parts[1] === 'health' && method === 'GET') return json({ ok: true });
       if (parts.length === 2 && parts[1] === 'rooms' && method === 'POST') return await createRoomRoute(request);
       if (parts.length === 2 && parts[1] === 'rooms' && method === 'GET') return await publicRoomsRoute();
-      if (parts.length === 2 && parts[1] === 'pool' && method === 'GET') return poolRoute();
+      if (parts.length === 2 && parts[1] === 'pool' && method === 'GET') return poolRoute(url);
       if (parts.length === 2 && parts[1] === 'kalender' && method === 'GET') return calendarRoute(url);
 
       if (parts[1] === 'rooms' && parts.length >= 3) {
@@ -473,7 +490,7 @@ export function createApi(deps: ApiDeps) {
       }
       throw new GameError('not_found', 'Nicht gefunden.', 404);
     } catch (err) {
-      return errorResponse(err);
+      return errorResponse(err, requestLang(request));
     }
   };
 }

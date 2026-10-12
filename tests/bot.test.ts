@@ -67,7 +67,7 @@ describe('Joseph spielt mit', () => {
     g.run();
     const bluff = g.state.game!.round.bluffs[BOT_ID];
     expect(bluff?.text).toBeTruthy();
-    expect(getQuestion(g.state.game!.round.questionId).bluffs.map((b) => b.toLowerCase())).toContain(bluff!.text.toLowerCase());
+    expect(getQuestion(g.state.game!.round.questionId, 'de').bluffs.map((b) => b.toLowerCase())).toContain(bluff!.text.toLowerCase());
 
     // Sobald der Mensch fertig ist, geht es sofort weiter
     g.act('host', { type: 'bluff', text: SAFE_BLUFFS.host });

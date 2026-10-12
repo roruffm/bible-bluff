@@ -3,7 +3,9 @@
 // Datei („floating“): Der Kalender erinnert um 7:30 Uhr dort, wo das Handy gerade ist. Gleiche Termine
 // tragen beim erneuten Hinzufügen dieselbe UID und verdoppeln sich so nicht.
 
-import { VERSE_IMPULSES, VERSE_SOURCE, type WeekVerse } from './verses';
+import { translate } from './i18n';
+import type { Lang } from './types';
+import { VERSE_IMPULSES, type WeekVerse, verseSource } from './verses';
 
 export const REMINDER_TIMES = [
   { value: '0730', label: 'Morgens · 7:30' },
@@ -57,8 +59,13 @@ function fold(line: string): string {
   return parts.join('\r\n ');
 }
 
+/** Vers in Anführungszeichen der jeweiligen Sprache */
+export function quoted(text: string, lang: Lang): string {
+  return lang === 'en' ? `“${text}”` : `„${text}“`;
+}
+
 /** Kalenderdatei (iCalendar) mit sieben Erinnerungen an den Vers, ab `startDay` (JJJJMMTT) */
-export function verseCalendar(verse: WeekVerse, startDay: string, time: ReminderTime, stamp: Date): string {
+export function verseCalendar(verse: WeekVerse, startDay: string, time: ReminderTime, stamp: Date, lang: Lang = 'de'): string {
   const hour = time.slice(0, 2);
   const minute = Number(time.slice(2));
   const pad = (n: number) => String(n).padStart(2, '0');
@@ -66,7 +73,7 @@ export function verseCalendar(verse: WeekVerse, startDay: string, time: Reminder
   const lines = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//Bible Bluff//Mein Vers fuer die Woche//DE',
+    lang === 'en' ? 'PRODID:-//Bible Bluff//My verse for the week//EN' : 'PRODID:-//Bible Bluff//Mein Vers fuer die Woche//DE',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
   ];
@@ -78,8 +85,10 @@ export function verseCalendar(verse: WeekVerse, startDay: string, time: Reminder
       `DTSTAMP:${dtstamp}`,
       `DTSTART:${day}T${hour}${pad(minute)}00`,
       `DTEND:${day}T${hour}${pad(minute + 10)}00`,
-      `SUMMARY:${escapeText(`Mein Vers: ${verse.ref}`)}`,
-      `DESCRIPTION:${escapeText(`„${verse.text}“\n${verse.ref} (${VERSE_SOURCE})\n\nTag ${i + 1}: ${impulse}\n\nbiblebluff.de`)}`,
+      `SUMMARY:${escapeText(translate(lang, 'Mein Vers: {ref}', { ref: verse.ref }))}`,
+      `DESCRIPTION:${escapeText(
+        `${quoted(verse.text, lang)}\n${verse.ref} (${verseSource(lang)})\n\n${translate(lang, 'Tag {n}: {impulse}', { n: i + 1, impulse: translate(lang, impulse) })}\n\nbiblebluff.de`,
+      )}`,
       'BEGIN:VALARM',
       'ACTION:DISPLAY',
       `DESCRIPTION:${escapeText(`${verse.ref}: ${verse.text}`)}`,
