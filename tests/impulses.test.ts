@@ -8,7 +8,7 @@ import { EN_DAILY_IMPULSES } from '../src/shared/daily-impulses-en';
 import { WEEK_VERSES } from '../src/shared/verses';
 import { EN_WEEK_VERSES } from '../src/shared/verses-en';
 
-const AMERICAN = /\b(color|favor|favorite|honor|savior|neighbor|labor|behavior|realize|recognize|organize|apologize|baptize|criticize|center|theater|traveled|traveling|gray|mom|program|defense|offense|fulfill|practicing)\w*\b/i;
+const AMERICAN = /\b(colors?|colored|colorful|favors?|favored|favorite\w*|honors?|honored|honoring|saviors?|neighbors?|neighborhoods?|labors?|labored|behaviors?|(?:realiz|recogniz|organiz|apologiz|baptiz|criticiz|emphasiz|prioritiz)(?:e|es|ed|ing|ation)|centers?|centered|theaters?|traveled|traveling|travelers?|gray|moms?|programs?|defense|offense|fulfills?|fulfillment|practicing)\b/i;
 
 function checkSentence(text: string, where: string) {
   expect(text, where).toBe(text.trim());
