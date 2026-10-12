@@ -149,7 +149,7 @@ function QuickPreview({ onPlay, busy }: { onPlay: () => void; busy: boolean }) {
   ];
   return (
     <section class="card quick-preview" aria-labelledby="preview-title">
-      <p class="eyebrow">{t('Eine Frage zum Ausprobieren')}</p>
+      <p class="eyebrow">{t('Probefrage')}</p>
       <h2 id="preview-title">{t('Was passierte Eutychus bei Paulus’ Predigt?')}</h2>
       <p class="muted small">{t('Eine Antwort ist echt. Welche?')}</p>
       <div class="preview-answers">
