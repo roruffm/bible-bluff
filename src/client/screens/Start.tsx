@@ -101,7 +101,7 @@ export function Home() {
           </span>
           <div>
             <h2 id="create-title">{t('Mit Freunden')}</h2>
-            <p class="muted small">{t('Starte eine Partie mit Freunden – auch am Beamer.')}</p>
+            <p class="muted small">{t('Spiele mit Freunden – auch am Beamer.')}</p>
           </div>
         </div>
         <Button variant="gold" block onClick={() => navigate('/neu')}>
@@ -178,7 +178,7 @@ function QuickPreview({ onPlay, busy }: { onPlay: () => void; busy: boolean }) {
         </div>
       )}
       <button type="button" class="preview-custom" onClick={() => navigate('/joseph')}>
-        {t('Partie selbst einstellen →')}
+        {t('Spiel anpassen →')}
       </button>
     </section>
   );
