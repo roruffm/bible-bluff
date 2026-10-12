@@ -609,7 +609,6 @@ textarea {
 }
 
 .home .tagline {
-  max-width: 32ch;
   margin-inline: auto;
   text-align: center;
   line-height: 1.4;
