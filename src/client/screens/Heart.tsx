@@ -6,6 +6,7 @@ import { HEART_MAX } from '../../shared/rules';
 import type { RoomView } from '../../shared/types';
 import { Button, Progress, Timer } from '../components/ui';
 import type { RoomConnection } from '../lib/hooks';
+import { t } from '../lib/i18n';
 
 export function HeartPhase({ view, conn, display = false }: { view: RoomView; conn: RoomConnection; display?: boolean }) {
   return view.heart!.phase === 'write' ? (
@@ -31,14 +32,14 @@ function HeartWrite({ view, conn, display }: { view: RoomView; conn: RoomConnect
   }, [heart.question]);
 
   const send = async (value: string | null) => {
-    if (value !== null && !value.trim()) return setError('Schreib zuerst etwas – oder tippe auf „Diesmal nicht“.');
+    if (value !== null && !value.trim()) return setError(t('Schreib zuerst etwas – oder tippe auf „Diesmal nicht“.'));
     setBusy(true);
     setError(null);
     try {
       await conn.act({ type: 'heart', text: value });
       setEditing(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Das ging nicht.');
+      setError(err instanceof Error ? err.message : t('Das ging nicht.'));
     } finally {
       setBusy(false);
     }
@@ -49,7 +50,7 @@ function HeartWrite({ view, conn, display }: { view: RoomView; conn: RoomConnect
     try {
       await conn.act({ type: 'heartSwap' });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Das ging nicht.');
+      setError(err instanceof Error ? err.message : t('Das ging nicht.'));
     }
   };
 
@@ -57,8 +58,8 @@ function HeartWrite({ view, conn, display }: { view: RoomView; conn: RoomConnect
     <section class={`phase heart stack${display ? ' is-display' : ''}`}>
       <header class="phase-head">
         <div>
-          <p class="eyebrow">Zum Schluss · ohne Punkte</p>
-          <h1 class="phase-title">Herzensrunde</h1>
+          <p class="eyebrow">{t('Zum Schluss · ohne Punkte')}</p>
+          <h1 class="phase-title">{t('Herzensrunde')}</h1>
         </div>
         <Timer start={heart.phaseStartedAt} deadline={heart.deadline} pausedAt={view.paused?.at ?? null} />
       </header>
@@ -70,13 +71,12 @@ function HeartWrite({ view, conn, display }: { view: RoomView; conn: RoomConnect
         <p>{heart.question}</p>
       </article>
       <p class="muted small center">
-        Kein Bluff, keine Punkte: Schreib ehrlich, was dir durch den Kopf geht. Alle Antworten erscheinen gleich nacheinander –
-        ohne Namen.
+        {t('Kein Bluff, keine Punkte: Schreib ehrlich, was dir durch den Kopf geht. Alle Antworten erscheinen gleich nacheinander – ohne Namen.')}
       </p>
       {isHost && heart.canSwap && (
         <div class="center">
           <Button variant="ghost" small onClick={swap}>
-            Andere Frage
+            {t('Andere Frage')}
           </Button>
         </div>
       )}
@@ -91,12 +91,12 @@ function HeartWrite({ view, conn, display }: { view: RoomView; conn: RoomConnect
             }}
           >
             <label class="field">
-              <span>Deine Antwort</span>
+              <span>{t('Deine Antwort')}</span>
               <textarea
                 value={text}
                 maxLength={HEART_MAX}
                 rows={3}
-                placeholder="Ehrlich und in deinen Worten …"
+                placeholder={t('Ehrlich und in deinen Worten …')}
                 onInput={(e) => setText((e.currentTarget as HTMLTextAreaElement).value)}
                 autocomplete="off"
               />
@@ -110,33 +110,33 @@ function HeartWrite({ view, conn, display }: { view: RoomView; conn: RoomConnect
               </p>
             )}
             <Button type="submit" block disabled={busy || !text.trim()}>
-              {heart.mine?.text ? 'Änderung abschicken' : 'Abschicken'}
+              {heart.mine?.text ? t('Änderung abschicken') : t('Abschicken')}
             </Button>
             <Button variant="ghost" small disabled={busy} onClick={() => send(null)}>
-              Diesmal nicht
+              {t('Diesmal nicht')}
             </Button>
           </form>
         ) : (
           <div class="submitted pop">
             {heart.mine?.text ? (
               <>
-                <p class="eyebrow">Deine Antwort ist drin ✓</p>
-                <p class="submitted-text">„{heart.mine.text}“</p>
-                <p class="muted small">Sie erscheint gleich zwischen den anderen – ohne deinen Namen.</p>
+                <p class="eyebrow">{t('Deine Antwort ist drin ✓')}</p>
+                <p class="submitted-text">{t('„{text}“', { text: heart.mine.text })}</p>
+                <p class="muted small">{t('Sie erscheint gleich zwischen den anderen – ohne deinen Namen.')}</p>
               </>
             ) : (
               <>
-                <p class="eyebrow">Diesmal nicht – völlig in Ordnung</p>
-                <p class="muted small">Gleich kannst du lesen, was die anderen geschrieben haben.</p>
+                <p class="eyebrow">{t('Diesmal nicht – völlig in Ordnung')}</p>
+                <p class="muted small">{t('Gleich kannst du lesen, was die anderen geschrieben haben.')}</p>
               </>
             )}
             <Button variant="ghost" small onClick={() => setEditing(true)}>
-              {heart.mine?.text ? 'Noch ändern' : 'Doch etwas schreiben'}
+              {heart.mine?.text ? t('Noch ändern') : t('Doch etwas schreiben')}
             </Button>
           </div>
         ))}
 
-      <Progress players={view.players.filter((p) => !p.bot)} label="Fertig" />
+      <Progress players={view.players.filter((p) => !p.bot)} label={t('Fertig')} />
     </section>
   );
 }
@@ -152,7 +152,7 @@ function HeartShow({ view, conn, display }: { view: RoomView; conn: RoomConnecti
     try {
       await conn.act({ type: 'next' });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Das ging nicht.');
+      setError(err instanceof Error ? err.message : t('Das ging nicht.'));
     }
   };
   const step = display ? 1800 : 1100;
@@ -160,7 +160,7 @@ function HeartShow({ view, conn, display }: { view: RoomView; conn: RoomConnecti
   return (
     <section class={`phase heart heart-show stack${display ? ' is-display' : ''}`}>
       <header class="heart-show-head">
-        <p class="eyebrow">Herzensrunde · ohne Namen</p>
+        <p class="eyebrow">{t('Herzensrunde · ohne Namen')}</p>
         <h1 class="phase-title">{heart.question}</h1>
       </header>
       {answers.length ? (
@@ -172,10 +172,10 @@ function HeartShow({ view, conn, display }: { view: RoomView; conn: RoomConnecti
           ))}
         </ul>
       ) : (
-        <p class="notice center">Diesmal hat niemand etwas aufgeschrieben – auch das ist in Ordnung.</p>
+        <p class="notice center">{t('Diesmal hat niemand etwas aufgeschrieben – auch das ist in Ordnung.')}</p>
       )}
       <p class="heart-thanks muted center" style={{ animationDelay: `${600 + answers.length * step}ms` }}>
-        Danke für eure Ehrlichkeit.
+        {t('Danke für eure Ehrlichkeit.')}
       </p>
       {error && (
         <p class="error" role="alert">
@@ -186,12 +186,12 @@ function HeartShow({ view, conn, display }: { view: RoomView; conn: RoomConnecti
         <footer class="next-bar">
           {isHost ? (
             <Button variant="gold" block onClick={next}>
-              Zum Endstand
+              {t('Zum Endstand')}
             </Button>
           ) : (
             <p class="waiting">
               <span class="pulse" aria-hidden="true" />
-              Gleich geht es zum Endstand …
+              {t('Gleich geht es zum Endstand …')}
             </p>
           )}
         </footer>

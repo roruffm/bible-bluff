@@ -6,7 +6,8 @@
 //  question   – offene Gesprächsfrage für die Gruppe (höchstens 140 Zeichen)
 //  crossRef   – eine andere Bibelstelle, die das Thema weiterführt, mit einem Satz dazu
 
-import type { TalkNotes } from '../shared/types';
+import type { Lang, TalkNotes } from '../shared/types';
+import { EN_TALK } from './en/talk';
 import { GAP_TALK } from './lueckentext';
 
 const CLASSIC_TALK: Record<string, TalkNotes> = {
@@ -944,6 +945,6 @@ const CLASSIC_TALK: Record<string, TalkNotes> = {
 
 export const TALK: Record<string, TalkNotes> = { ...CLASSIC_TALK, ...GAP_TALK };
 
-export function talkNotes(questionId: string): TalkNotes | null {
-  return TALK[questionId] ?? null;
+export function talkNotes(questionId: string, lang: Lang): TalkNotes | null {
+  return (lang === 'en' ? EN_TALK : TALK)[questionId] ?? null;
 }

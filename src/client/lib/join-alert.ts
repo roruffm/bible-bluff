@@ -4,6 +4,7 @@
 
 import { useEffect, useRef } from 'preact/hooks';
 import type { RoomView } from '../../shared/types';
+import { t } from './i18n';
 
 /** Namen der Personen, die seit dem letzten Stand neu sind (ohne mich); beim ersten Stand keine */
 export function newcomers(known: ReadonlySet<string> | null, players: { id: string; name: string }[], meId: string | null): string[] {
@@ -12,8 +13,8 @@ export function newcomers(known: ReadonlySet<string> | null, players: { id: stri
 }
 
 export function joinMessage(names: string[]): string {
-  if (names.length === 1) return `${names[0]} ist beigetreten`;
-  return `${names.slice(0, -1).join(', ')} und ${names[names.length - 1]} sind beigetreten`;
+  if (names.length === 1) return t('{name} ist beigetreten', { name: names[0] });
+  return t('{names} und {last} sind beigetreten', { names: names.slice(0, -1).join(', '), last: names[names.length - 1] });
 }
 
 let audio: AudioContext | null = null;

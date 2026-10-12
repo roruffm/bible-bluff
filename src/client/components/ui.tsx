@@ -1,8 +1,9 @@
 import type { ComponentChildren } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
-import { BOT_ID, GAP, GROUP_LABELS } from '../../shared/rules';
+import { BOT_ID, DIFFICULTY_OPTIONS, GAP, GROUP_LABELS } from '../../shared/rules';
 import type { PersonRef, PlayerView, QuestionView } from '../../shared/types';
 import { useServerNow } from '../lib/hooks';
+import { locale, t } from '../lib/i18n';
 import { BotFace } from './Icons';
 import { LogoArt } from './LogoArt';
 
@@ -164,7 +165,7 @@ export function Timer(props: { start: number; deadline: number | null; pausedAt?
   const ratio = Math.min(1, left / total);
   const urgent = left <= 10_000;
   return (
-    <div class={`timer${urgent ? ' is-urgent' : ''}${props.big ? ' timer-big' : ''}`} role="timer" aria-label={`Noch ${Math.ceil(left / 1000)} Sekunden`}>
+    <div class={`timer${urgent ? ' is-urgent' : ''}${props.big ? ' timer-big' : ''}`} role="timer" aria-label={t('Noch {n} Sekunden', { n: Math.ceil(left / 1000) })}>
       <div class="timer-bar">
         <div class="timer-fill" style={{ transform: `scaleX(${ratio})` }} />
       </div>
@@ -173,7 +174,13 @@ export function Timer(props: { start: number; deadline: number | null; pausedAt?
   );
 }
 
-const DIFF_LABEL = { 1: 'leicht', 2: 'mittel', 3: 'schwer' } as const;
+const DIFF_VALUE = { 1: 'leicht', 2: 'mittel', 3: 'schwer' } as const;
+
+/** „Schwierigkeit: leicht“ – klein geschrieben wie im Satz */
+function difficultyText(level: 1 | 2 | 3): string {
+  const label = DIFFICULTY_OPTIONS.find((o) => o.value === DIFF_VALUE[level])?.label ?? DIFF_VALUE[level];
+  return t('Schwierigkeit: {level}', { level: t(label).toLocaleLowerCase(locale()) });
+}
 
 /** Erster Buchstabe groß – für Antworten, die beim Lückentext klein beginnen („die Liebe“) */
 export function upperFirst(text: string): string {
@@ -194,7 +201,7 @@ export function QuestionText({ prompt, fill }: { prompt: string; fill?: string |
         <mark class="gap-fill">{fill}</mark>
       ) : (
         <span class="gap-blank">
-          <span class="sr-only">Lücke</span>
+          <span class="sr-only">{t('Lücke')}</span>
         </span>
       )}
       {prompt.slice(at + GAP.length)}
@@ -211,15 +218,15 @@ export function QuestionCard({ question, big = false }: { question: QuestionView
       <header class="question-meta">
         <span class="book-chip">{question.book}</span>
         {question.kind === 'gap' ? (
-          <span class="kind-chip">Lückentext</span>
+          <span class="kind-chip">{t('Lückentext')}</span>
         ) : (
-          <span class="group-label">{GROUP_LABELS[question.group]}</span>
+          <span class="group-label">{t(GROUP_LABELS[question.group])}</span>
         )}
-        <span class="difficulty" title={`Schwierigkeit: ${DIFF_LABEL[question.difficulty]}`}>
+        <span class="difficulty" title={difficultyText(question.difficulty)}>
           {[1, 2, 3].map((d) => (
             <i class={d <= question.difficulty ? 'on' : ''} />
           ))}
-          <span class="sr-only">Schwierigkeit {DIFF_LABEL[question.difficulty]}</span>
+          <span class="sr-only">{difficultyText(question.difficulty)}</span>
         </span>
       </header>
       <h2 class="question-text">
@@ -246,7 +253,7 @@ export function Progress({ players, label }: { players: PlayerView[]; label: str
         {relevant.map((p) => (
           <span
             class={`progress-person${p.done ? ' is-done' : ''}${p.online ? '' : ' is-offline'}${p.quiet ? ' is-quiet' : ''}`}
-            title={p.quiet ? `${p.name} – ruhige Minute` : p.name}
+            title={p.quiet ? t('{name} – ruhige Minute', { name: p.name }) : p.name}
           >
             <Avatar person={p} size="sm" dim={!p.done} />
             {p.done && <span class="tick" aria-hidden="true">✓</span>}
@@ -288,18 +295,18 @@ export function RuleSteps() {
   return (
     <ol class="rule-steps">
       <li>
-        <strong>Bluff schreiben.</strong> Alle sehen dieselbe Bibelfrage und erfinden heimlich eine glaubwürdige,
-        aber falsche Antwort.
+        <strong>{t('Bluff schreiben.')}</strong>{' '}
+        {t('Alle sehen dieselbe Bibelfrage und erfinden heimlich eine glaubwürdige, aber falsche Antwort.')}
       </li>
       <li>
-        <strong>Abstimmen.</strong> Die echte Antwort steht anonym zwischen euren Bluffs. Tippe auf die, die du für
-        wahr hältst.
+        <strong>{t('Abstimmen.')}</strong>{' '}
+        {t('Die echte Antwort steht anonym zwischen euren Bluffs. Tippe auf die, die du für wahr hältst.')}
       </li>
       <li>
-        <strong>Aufdecken.</strong> Wer hat was gewählt? Wer hat was erfunden? Und was stimmt wirklich?
+        <strong>{t('Aufdecken.')}</strong> {t('Wer hat was gewählt? Wer hat was erfunden? Und was stimmt wirklich?')}
       </li>
       <li>
-        <strong>Entdecken.</strong> Die Bibelstelle und ein überraschender Satz lösen auf.
+        <strong>{t('Entdecken.')}</strong> {t('Die Bibelstelle und ein überraschender Satz lösen auf.')}
       </li>
     </ol>
   );
@@ -309,13 +316,13 @@ export function Points() {
   return (
     <div class="points">
       <span>
-        <b>+2</b> richtige Antwort erkannt
+        <b>+2</b> {t('richtige Antwort erkannt')}
       </span>
       <span>
-        <b>+1</b> je Person, die auf deinen Bluff hereinfällt
+        <b>+1</b> {t('je Person, die auf deinen Bluff hereinfällt')}
       </span>
       <span>
-        <b>+1</b> für den Bluff mit den meisten Herzen
+        <b>+1</b> {t('für den Bluff mit den meisten Herzen')}
       </span>
     </div>
   );
@@ -324,7 +331,7 @@ export function Points() {
 export function Rules({ compact = false }: { compact?: boolean }) {
   return (
     <section class={`rules${compact ? ' is-compact' : ''}`}>
-      <h3>So geht’s</h3>
+      <h3>{t('So geht’s')}</h3>
       <RuleSteps />
       <Points />
     </section>

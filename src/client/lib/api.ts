@@ -3,6 +3,7 @@ import type {
   ApiErrorBody,
   BluffListResponse,
   BluffStatus,
+  Lang,
   PoolResponse,
   PublicRoomsResponse,
   RecapCreatedResponse,
@@ -13,6 +14,7 @@ import type {
   ViewResponse,
 } from '../../shared/types';
 import { clock } from './clock';
+import { currentLang, t } from './i18n';
 import { seenQuestions } from './seen';
 
 export class ApiError extends Error {
@@ -34,12 +36,14 @@ async function request<T>(method: string, path: string, body?: unknown, token?: 
       headers: {
         ...(body !== undefined ? { 'content-type': 'application/json' } : {}),
         ...(token ? { authorization: `Bearer ${token}` } : {}),
+        // Meldungen des Servers kommen in der Sprache der App
+        'x-lang': currentLang(),
       },
       body: body !== undefined ? JSON.stringify(body) : undefined,
       cache: 'no-store',
     });
   } catch {
-    throw new ApiError('network', 'Keine Verbindung zum Spielserver.', 0);
+    throw new ApiError('network', t('Keine Verbindung zum Spielserver.'), 0);
   }
   const received = Date.now();
   let data: unknown = null;
@@ -50,7 +54,7 @@ async function request<T>(method: string, path: string, body?: unknown, token?: 
   }
   if (!res.ok) {
     const err = (data as ApiErrorBody | null)?.error;
-    throw new ApiError(err?.code ?? 'http', err?.message ?? `Fehler ${res.status}`, res.status);
+    throw new ApiError(err?.code ?? 'http', err?.message ?? t('Fehler {status}', { status: res.status }), res.status);
   }
   const view = (data as { view?: RoomView } | null)?.view;
   if (view) clock.sample(view.serverNow, sent, received);
@@ -73,8 +77,8 @@ export const api = {
   publicRooms() {
     return request<PublicRoomsResponse>('GET', '/api/rooms');
   },
-  pool() {
-    return request<PoolResponse>('GET', '/api/pool');
+  pool(lang: Lang) {
+    return request<PoolResponse>('GET', `/api/pool?lang=${lang}`);
   },
   createRecap(code: string) {
     return request<RecapCreatedResponse>('POST', `/api/rooms/${encodeURIComponent(code)}/recap`);

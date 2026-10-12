@@ -333,12 +333,15 @@ test('Impressum und Datenschutz sind von der Startseite und im Raum erreichbar',
   await expect(link).toHaveAttribute('target', '_blank');
 });
 
-/** Startseite öffnen und warten, bis sie die offenen Räume abgefragt hat */
-async function homeWithOpenRooms(page: Page): Promise<string[]> {
+/**
+ * Startseite öffnen und warten, bis sie die offenen Räume abgefragt hat. Mit `status` nur Räume in diesem
+ * Stand – der Server hält die Liste ein paar Sekunden vor, kurz nach dem Start steht ein Raum dort noch als wartend.
+ */
+async function homeWithOpenRooms(page: Page, status?: 'lobby' | 'playing'): Promise<string[]> {
   const response = page.waitForResponse((r) => new URL(r.url()).pathname === '/api/rooms' && r.request().method() === 'GET');
   await page.goto('/');
-  const body = (await (await response).json()) as { rooms: { code: string }[] };
-  return body.rooms.map((r) => r.code);
+  const body = (await (await response).json()) as { rooms: { code: string; status: string }[] };
+  return body.rooms.filter((r) => !status || r.status === status).map((r) => r.code);
 }
 
 test('Öffentliche Räume stehen auf der Startseite, auch mitten in der Partie', async ({ browser }) => {
@@ -370,9 +373,10 @@ test('Öffentliche Räume stehen auf der Startseite, auch mitten in der Partie',
   await host.getByRole('button', { name: 'Partie starten' }).click();
   await expect(host.getByText('Runde 1 von 4')).toBeVisible();
 
-  // Die Startseite fragt regelmäßig nach; neu laden geht schneller (der Server hält die Liste kurz vor)
+  // Die Startseite fragt regelmäßig nach; neu laden geht schneller (der Server hält die Liste kurz vor,
+  // darum so lange neu laden, bis der Raum dort als laufend steht)
   await expect(async () => {
-    expect(await homeWithOpenRooms(visitor)).toEqual([code]);
+    expect(await homeWithOpenRooms(visitor, 'playing')).toEqual([code]);
   }).toPass({ timeout: 20_000 });
   const entry = visitor.locator('.open-room', { hasText: code });
   await expect(entry).toBeVisible();

@@ -49,6 +49,7 @@ export const DEFAULT_SETTINGS: Settings = {
   roundType: 'gemischt',
   categories: [...ALL_CATEGORIES],
   heartRound: true,
+  lang: 'de',
 };
 
 /**
@@ -139,6 +140,7 @@ export const BOT_SETTINGS: Settings = {
   roundType: 'gemischt',
   categories: [...ALL_CATEGORIES],
   heartRound: false,
+  lang: 'de',
 };
 /** Josephs Trefferquote: so oft wählt er die richtige Antwort */
 export const BOT_TRUTH_RATE = 0.45;

@@ -1,9 +1,9 @@
-// Cloudflare Worker: API unter /api/*, Einladungslinks /r/CODE mit eigener Link-Vorschau,
-// alles andere liefert die statische App aus.
+// Cloudflare Worker: API unter /api/*, Einladungslinks /r/CODE mit eigener Link-Vorschau, englische Links
+// (?lang=en) mit englischer Vorschau, alles andere liefert die statische App aus.
 
 import { createApi } from './server/api';
 import { D1Store, type D1Like } from './server/d1-store';
-import { HOME, homePreview, inviteCode, invitePreview } from './server/preview';
+import { HOME, homePreview, inviteCode, invitePreview, linkLang } from './server/preview';
 
 interface Env {
   DB: D1Like;
@@ -24,9 +24,15 @@ export default {
     }
     if (request.method === 'GET' || request.method === 'HEAD') {
       const code = inviteCode(url.pathname);
-      if (code) return appPage(request, env, (html) => invitePreview(html, code, url.origin));
-      // Auf Testadressen bekommt auch die Startseite ihr Vorschaubild von dort; auf biblebluff.de bleibt alles statisch
-      if (url.pathname === '/' && url.origin !== HOME) return appPage(request, env, (html) => homePreview(html, url.origin));
+      const lang = linkLang(url);
+      if (code) return appPage(request, env, (html) => invitePreview(html, code, url.origin, lang));
+      // Auf Testadressen bekommt auch die Startseite ihr Vorschaubild von dort; auf biblebluff.de bleibt die
+      // deutsche Startseite statisch. Englische Links (/?lang=en, Entdeckungen /e/…?lang=en) bekommen
+      // englische Vorschau-Texte.
+      const home = url.pathname === '/';
+      if ((home && url.origin !== HOME) || (lang === 'en' && (home || url.pathname.startsWith('/e/')))) {
+        return appPage(request, env, (html) => homePreview(html, url.origin, lang));
+      }
     }
     return env.ASSETS.fetch(request);
   },

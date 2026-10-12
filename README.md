@@ -6,7 +6,7 @@
 
 Bible Bluff ist ein Partyspiel für den Browser: Jede Person spielt auf dem eigenen Handy, ein Fernseher oder Beamer kann zusätzlich die gemeinsame Ansicht zeigen. Alle sehen dieselbe Bibelfrage und erfinden heimlich eine glaubwürdige, aber falsche Antwort. Danach steht die echte Antwort anonym zwischen den Bluffs, und alle tippen auf die vermeintlich richtige. Bei der Aufdeckung zeigt sich, wer worauf hereingefallen ist und was wirklich stimmt.
 
-Die Fragen stammen aus dem *Studienkonzept NT* (Lernblätter zu allen 27 Büchern des Neuen Testaments, freikirchlich-pfingstliche Lernfassung). Dazu kommen geprüfte Fragen aus einem eigenen Fragenpool, auch zu ausgewählten Geschichten des Alten Testaments. Hinzu kommen die in der Fragenwerkstatt freigegebenen Fragen, darunter 30 zu Jesu Botschaft. Der Pool umfasst 186 kuratierte Fragen und 45 Lückentexte, jeweils mit Bibelstelle und einer kurzen Entdeckung.
+Die Fragen stammen aus dem *Studienkonzept NT* (Lernblätter zu allen 27 Büchern des Neuen Testaments, freikirchlich-pfingstliche Lernfassung). Dazu kommen geprüfte Fragen aus einem eigenen Fragenpool, auch zu ausgewählten Geschichten des Alten Testaments. Hinzu kommen die in der Fragenwerkstatt freigegebenen Fragen, darunter 30 zu Jesu Botschaft. Der Pool umfasst 186 kuratierte Fragen und 45 Lückentexte, jeweils mit Bibelstelle und einer kurzen Entdeckung. Auf Englisch gibt es eine erste Fassung mit 64 ausgewählten Fragen und Lückentexten – umschalten lässt sie sich mit der Flagge auf der Startseite (siehe [Englische Fassung](#englische-fassung)).
 
 | Start | Lobby | Bluff schreiben | Abstimmen |
 | --- | --- | --- | --- |
@@ -123,6 +123,23 @@ Die 68 Verse (`src/shared/verses.ts`) stehen im Wortlaut der gemeinfreien **Luth
 ### Neugierig auf Jesus?
 
 Ganz am Ende des Endstands und auf der Entdeckungen-Seite steht eine ruhige Karte für Gäste ohne Glaubenshintergrund. Sie führt zur Seite **`/jesus`**: kurz und ehrlich, wer Jesus war, was er über Gott und sich sagte, warum Kreuz und Ostern wichtig sind und dass Glaube eine Beziehung ist – mit Ideen zum Weiterfragen (Markusevangelium lesen, mit der einladenden Person reden, beten, eine Gruppe besuchen). Ohne Druck und ohne Daten.
+
+### Englische Fassung
+
+| Startseite auf Englisch | Abstimmen auf Englisch |
+| --- | --- |
+| ![Startseite mit gewählter britischer Flagge](docs/screenshots/englisch-start.png) | ![Abstimmung in einem englischen Raum](docs/screenshots/englisch-abstimmen.png) |
+
+Oben rechts auf der Startseite schaltet die britische Flagge auf Englisch (britisches Englisch); voreingestellt ist Deutsch. Die Wahl gilt auf diesem Gerät, Links mit `?lang=en` stellen sie ebenfalls um.
+
+- **Räume haben eine Sprache.** Wer auf Englisch eröffnet, bekommt einen englischen Raum: englischer Raumcode (`LAMP7`), englische Fragen, Spickzettel, Herzensrunde, Auszeichnungen, Entdeckungen und Wochenverse. Im Raum zeigen alle Handys und die Leinwand die Sprache der Partie, auch wenn ein Gerät auf Deutsch steht. Die offenen Räume auf der Startseite erscheinen nur in ihrer Sprache.
+- **Link-Vorschau:** Einladungen in englische Räume tragen `?lang=en` und zeigen eine englische Vorschau (`og-invite-en.jpg`), ebenso `/?lang=en` und englische Entdeckungen-Seiten (`og-en.jpg`).
+- **Fragen:** 64 ausgewählte Fragen und Lückentexte aus dem deutschen Pool (`src/server/en/questions.ts`, Spickzettel in `src/server/en/talk.ts`) mit denselben IDs – „Neues für alle“ kennt eine Frage darum in beiden Sprachen. Bluffs und Schlüsselwörter sind für Englisch neu gebaut, Bibelstellen stehen in englischer Zählung (Jona 2,1 → Jonah 1:17).
+- **Bibeltext:** World English Bible, British Edition (gemeinfrei) – für die Wochenverse (`src/shared/verses-en.ts`), den Kalender und Zitate wie in der ruhigen Minute.
+- **Oberfläche:** Der deutsche Text ist zugleich der Schlüssel. `t('Runde {n} von {total}', …)` holt die englische Fassung aus `src/shared/i18n-en.ts`; für Platzhalter, die Elemente sind (etwa ein fetter Raumcode), gibt es `tj`. Meldungen des Servers kommen über den Header `x-lang` in der Sprache der App. Ein Test prüft, dass jeder Text übersetzt ist, kein Eintrag verwaist und alle Platzhalter stimmen.
+- **Noch deutsch:** die Freigabe-Seite `/admin`; frische Hausbluffs sammelt das Spiel vorerst nur aus deutschen Partien. Impressum und Datenschutz gibt es als Übersetzung, verbindlich ist die deutsche Fassung.
+
+Neue Texte also im Code mit `t('…')` schreiben und die englische Fassung in `src/shared/i18n-en.ts` ergänzen – `npm test` meldet, was fehlt.
 
 ### Neues für alle
 
@@ -281,11 +298,11 @@ Das Logo zeigt eine aufgeschlagene Bibel, daneben „BIBLE“ mit einem lachende
 
 `src/client/public/logo.svg` ist das Logo in den Lernblatt-Farben zum Weitergeben. Favicon und Homescreen-Icons entstehen aus der Bildmarke `src/client/public/logo-mark.svg` (Buch mit Heiligenschein-Smiley) mit `node scripts/render-icons.mjs`: `favicon.ico` und `apple-touch-icon.png` im Wurzelverzeichnis, wo viele Apps von sich aus nachsehen, dazu `icons/bible-bluff*.svg/png` für Browser und Manifest. Die Namen sind seit dem Logo-Wechsel neu, denn Messenger und Browser merken sich Symbole unter ihrer Adresse und zeigten unter den alten Namen noch das frühere Logo mit der Bluffmaske. Die alten Adressen leiten per `public/_redirects` dauerhaft um. Bei einem künftigen Logo-Wechsel die Namen wieder ändern.
 
-Die Vorschaubilder für geteilte Links (`og.jpg` und `og-invite.jpg`, je 1200 × 630 Pixel) entstehen mit `npm run build && node scripts/render-og.mjs` aus der gebauten App, mit dem Logo in See Genezareth. Alles Wichtige steht in der Mitte, weil manche Apps nur einen quadratischen Ausschnitt zeigen.
+Die Vorschaubilder für geteilte Links (`og.jpg` und `og-invite.jpg`, auf Englisch `og-en.jpg` und `og-invite-en.jpg`, je 1200 × 630 Pixel) entstehen mit `npm run build && node scripts/render-og.mjs` aus der gebauten App, mit dem Logo in See Genezareth; mit Dateinamen dahinter nur die genannten. Alles Wichtige steht in der Mitte, weil manche Apps nur einen quadratischen Ausschnitt zeigen.
 
 ## Impressum und Datenschutz
 
-Unter `/impressum` und `/datenschutz` stehen Impressum und Datenschutzerklärung. Links darauf gibt es auf der Startseite, beim Raum-Eröffnen, beim Beitreten, auf den Entdeckungen-Seiten und im Menü eines Raums (dort in einem neuen Tab, damit niemand aus der Partie fällt). Name, Anschrift und E-Mail stehen an einer Stelle in `src/client/screens/Legal.tsx` (`ANBIETER`). Ändert sich etwas daran, was das Spiel speichert, gehört die Datenschutzerklärung in derselben Datei mit angepasst.
+Unter `/impressum` und `/datenschutz` stehen Impressum und Datenschutzerklärung. Links darauf gibt es auf der Startseite, beim Raum-Eröffnen, beim Beitreten, auf den Entdeckungen-Seiten und im Menü eines Raums (dort in einem neuen Tab, damit niemand aus der Partie fällt). Name, Anschrift und E-Mail stehen an einer Stelle in `src/client/screens/Legal.tsx` (`ANBIETER`). Ändert sich etwas daran, was das Spiel speichert, gehört die Datenschutzerklärung in derselben Datei mit angepasst – und die englische Übersetzung in `src/client/screens/LegalEn.tsx`.
 
 ## Fragen ergänzen
 
@@ -314,7 +331,7 @@ Schlüsselwörter werden ohne Umlaute geschrieben (`ae`, `oe`, `ue`, `ss`). Ein 
 
 ```bash
 npm run typecheck
-npm test             # Engine, Textvergleich, Fragenpool, Gesprächsstoff, API, Freigabe, Link-Vorschau, Herzensrunde, Wochenverse (Vitest)
+npm test             # Engine, Textvergleich, Fragenpool, Gesprächsstoff, API, Freigabe, Link-Vorschau, Herzensrunde, Wochenverse, englische Fassung (Vitest)
 npm run test:e2e     # komplette Partien mit mehreren Browsern (Playwright)
 ```
 
@@ -322,8 +339,8 @@ npm run test:e2e     # komplette Partien mit mehreren Browsern (Playwright)
 
 ```
 src/
-  shared/      Typen und Regeln, die Server und Browser teilen
-  server/      Engine, Fragenpool, Textvergleich, API, D1-/Speicher-Anbindung
+  shared/      Typen, Regeln und Übersetzungen (i18n-en.ts), die Server und Browser teilen
+  server/      Engine, Fragenpool, Textvergleich, API, D1-/Speicher-Anbindung (englischer Pool in server/en/)
   worker.ts    Cloudflare-Worker-Einstieg (API, Link-Vorschau für Einladungen)
   client/      Preact-App (Startseite, Lobby, Phasen, Aufdeckung, Leinwand)
 migrations/    D1-Schema

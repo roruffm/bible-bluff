@@ -1,12 +1,14 @@
 // Gefilterte Sicht auf den Raum: Jede Person bekommt nur, was sie gerade sehen darf.
 // Antworten, Bluff-Urheber und Stimmen bleiben bis zur Aufdeckung auf dem Server.
 
+import { translate } from '../shared/i18n';
 import { HEART_QUESTIONS, LISTED_ALIVE_MS, MAX_PLAYERS, POINTS_FAVORITE } from '../shared/rules';
 import type {
   AwardView,
   FavoriteOptionView,
   FinalView,
   HeartView,
+  Lang,
   MeView,
   PersonRef,
   PlayerView,
@@ -54,6 +56,7 @@ export function publicRoom(state: RoomState, ctx: Ctx): PublicRoom | null {
     round: g ? g.roundIndex + 1 : null,
     rounds: g ? g.questionIds.length : state.settings.rounds,
     difficulty: state.settings.difficulty,
+    lang: state.settings.lang,
   };
 }
 
@@ -155,7 +158,8 @@ function buildFavorites(round: RoundRec, meId: string | null, person: (id: strin
 function buildRound(state: RoomState, meId: string | null): RoundView {
   const g = state.game!;
   const round = g.round;
-  const q = getQuestion(round.questionId);
+  const lang = state.settings.lang;
+  const q = getQuestion(round.questionId, lang);
   const phase = g.phase;
   const afterVote = phase === 'reveal' || phase === 'scores';
   const person = personLookup(state);
@@ -203,7 +207,7 @@ function buildRound(state: RoomState, meId: string | null): RoundView {
     myLike: scores && meId ? round.likes?.[meId] ?? null : null,
     myGift: scores && meId ? gifts[meId] ?? null : null,
     // Spickzettel: nur die Spielleitung, erst nach der Auflösung
-    talk: scores && meId !== null && meId === state.hostId ? talkNotes(q.id) : null,
+    talk: scores && meId !== null && meId === state.hostId ? talkNotes(q.id, lang) : null,
   };
 }
 
@@ -215,7 +219,7 @@ function buildHeart(state: RoomState, meId: string | null): HeartView | null {
   const mine = meId ? answers[meId] : undefined;
   return {
     phase: g.phase === 'heart' ? 'write' : 'show',
-    question: HEART_QUESTIONS[g.heart.question] ?? HEART_QUESTIONS[0],
+    question: translate(state.settings.lang, HEART_QUESTIONS[g.heart.question] ?? HEART_QUESTIONS[0]),
     phaseStartedAt: g.phaseStartedAt,
     deadline: g.deadline,
     mine: mine ? { text: mine.text } : null,
@@ -284,6 +288,7 @@ function buildFinal(state: RoomState): FinalView {
     rank: 1 + sorted.filter((o) => o.score > p.score).length,
   }));
 
+  const lang = state.settings.lang;
   const award = (key: AwardView['key'], title: string, text: string, pick: (p: (typeof people)[number]) => number) => {
     const best = Math.max(0, ...people.map(pick));
     if (best <= 0) return null;
@@ -297,15 +302,15 @@ function buildFinal(state: RoomState): FinalView {
   };
 
   const awards = [
-    award('bluffer', 'Bluff-Meister', 'am meisten Leute reingelegt', (p) => p.stats.fooled),
-    award('finder', 'Wahrheitsfinder', 'am häufigsten die Wahrheit erkannt', (p) => p.stats.found),
-    award('trusting', 'Gutgläubigste Seele', 'am öftesten auf Bluffs hereingefallen', (p) => p.stats.fellFor),
+    award('bluffer', translate(lang, 'Bluff-Meister'), translate(lang, 'am meisten Leute reingelegt'), (p) => p.stats.fooled),
+    award('finder', translate(lang, 'Wahrheitsfinder'), translate(lang, 'am häufigsten die Wahrheit erkannt'), (p) => p.stats.found),
+    award('trusting', translate(lang, 'Gutgläubigste Seele'), translate(lang, 'am öftesten auf Bluffs hereingefallen'), (p) => p.stats.fellFor),
     favoriteAward(state),
-    award('neighbor', 'Nächstenliebe', 'die meisten Punkte verschenkt', (p) => p.stats.gifted ?? 0),
+    award('neighbor', translate(lang, 'Nächstenliebe'), translate(lang, 'die meisten Punkte verschenkt'), (p) => p.stats.gifted ?? 0),
   ].filter((a): a is AwardView => a !== null);
 
   const discoveries = (g?.history ?? []).map((h) => {
-    const q = getQuestion(h.questionId);
+    const q = getQuestion(h.questionId, lang);
     return {
       questionId: q.id,
       book: q.book,
@@ -319,15 +324,15 @@ function buildFinal(state: RoomState): FinalView {
     };
   });
 
-  return { ranking, awards, discoveries, recapId: g?.recapId ?? null, talk: g ? buildTalk(g) : null };
+  return { ranking, awards, discoveries, recapId: g?.recapId ?? null, talk: g ? buildTalk(g, lang) : null };
 }
 
 /** Gespräch nach dem Spiel – für alle sichtbar, die Leitung führt durch die Schritte */
-function buildTalk(g: GameRec): TalkView | null {
+function buildTalk(g: GameRec, lang: Lang): TalkView | null {
   if (!g.talk) return null;
   const entry = g.history.find((h) => h.questionId === g.talk!.questionId);
   if (!entry) return null;
-  const q = getQuestion(entry.questionId);
+  const q = getQuestion(entry.questionId, lang);
   return {
     questionId: q.id,
     step: g.talk.step,
@@ -338,7 +343,7 @@ function buildTalk(g: GameRec): TalkView | null {
     answer: q.answer,
     ref: q.ref,
     discovery: q.discovery,
-    notes: talkNotes(q.id),
+    notes: talkNotes(q.id, lang),
     ...missStats(entry),
   };
 }
@@ -353,8 +358,8 @@ function favoriteAward(state: RoomState): AwardView | null {
   const person = personLookup(state);
   return {
     key: 'favorite',
-    title: 'Bester Bluff des Abends',
-    text: 'die meisten Herzen bekommen',
+    title: translate(state.settings.lang, 'Bester Bluff des Abends'),
+    text: translate(state.settings.lang, 'die meisten Herzen bekommen'),
     players: best.authorIds.map(person),
     value: best.likes,
     quote: best.text,

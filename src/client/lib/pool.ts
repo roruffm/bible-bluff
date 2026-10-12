@@ -1,31 +1,36 @@
 // Wie viele Fragen und Lückentexte es je Kategorie gibt – für die Auswahl beim Eröffnen und in der Lobby.
-// Die Zahlen ändern sich nur mit einer neuen Version, darum genügt ein Abruf pro Seitenaufruf.
+// Die Zahlen ändern sich nur mit einer neuen Version, darum genügt ein Abruf je Sprache und Seitenaufruf.
 import { useEffect, useState } from 'preact/hooks';
 import { ALL_CATEGORIES, CATEGORIES } from '../../shared/rules';
-import type { CategoryId, PoolResponse, RoundType, Settings } from '../../shared/types';
+import type { CategoryId, Lang, PoolResponse, RoundType, Settings } from '../../shared/types';
 import { api } from './api';
+import { t } from './i18n';
 
-let cache: PoolResponse | null = null;
-let loading: Promise<PoolResponse | null> | null = null;
+const cache: Partial<Record<Lang, PoolResponse>> = {};
+const loading: Partial<Record<Lang, Promise<PoolResponse | null>>> = {};
 
-export function usePool(): PoolResponse | null {
-  const [pool, setPool] = useState(cache);
+/** Fragen je Kategorie im Pool dieser Sprache (der englische ist kleiner) */
+export function usePool(lang: Lang): PoolResponse | null {
+  const [pool, setPool] = useState<{ lang: Lang; res: PoolResponse } | null>(() => (cache[lang] ? { lang, res: cache[lang]! } : null));
   useEffect(() => {
-    if (cache) return;
+    if (cache[lang]) {
+      setPool({ lang, res: cache[lang]! });
+      return;
+    }
     let alive = true;
-    loading ??= api.pool().then(
-      (res) => (cache = res),
+    const pending = (loading[lang] ??= api.pool(lang).then(
+      (res) => (cache[lang] = res),
       () => null,
-    );
-    loading.then((res) => {
-      if (!res) loading = null; // beim nächsten Mal neu versuchen
-      if (alive && res) setPool(res);
+    ));
+    pending.then((res) => {
+      if (!res) delete loading[lang]; // beim nächsten Mal neu versuchen
+      if (alive && res) setPool({ lang, res });
     });
     return () => {
       alive = false;
     };
-  }, []);
-  return pool;
+  }, [lang]);
+  return pool?.lang === lang ? pool.res : null;
 }
 
 export function categoryCount(pool: PoolResponse, id: CategoryId, roundType: RoundType): number {
@@ -41,28 +46,28 @@ export function poolCount(pool: PoolResponse, settings: Settings): number {
   return settings.categories.reduce((n, id) => n + categoryCount(pool, id, settings.roundType), 0);
 }
 
-/** „Fragen“, „Lückentexte“ oder beides – passend zur Rundenart */
-export function poolNoun(roundType: RoundType): string {
-  if (roundType === 'fragen') return 'Fragen';
-  if (roundType === 'luecken') return 'Lückentexte';
-  return 'Fragen und Lückentexte';
+/** „40 Fragen“, „12 Lückentexte“ oder beides – passend zur Rundenart */
+export function poolAmount(n: number, roundType: RoundType): string {
+  if (roundType === 'fragen') return t('{n} Fragen', { n });
+  if (roundType === 'luecken') return t('{n} Lückentexte', { n });
+  return t('{n} Fragen und Lückentexte', { n });
 }
 
 /** Dasselbe im Dativ: „von 40 Lückentexten“ */
-export function poolNounDative(roundType: RoundType): string {
-  if (roundType === 'fragen') return 'Fragen';
-  if (roundType === 'luecken') return 'Lückentexten';
-  return 'Fragen und Lückentexten';
+export function poolAmountDative(n: number, roundType: RoundType): string {
+  if (roundType === 'fragen') return t('{n} Fragen', { n });
+  if (roundType === 'luecken') return t('{n} Lückentexten', { n });
+  return t('{n} Fragen und Lückentexten', { n });
 }
 
 /** Kurzfassung für Lobby und Joseph-Seite: „8 Runden · Fragen & Lückentexte · alle Kategorien · mit Herzensrunde“ */
 export function settingsSummary(s: Settings): string {
-  const type = s.roundType === 'fragen' ? 'nur Fragen' : s.roundType === 'luecken' ? 'nur Lückentexte' : 'Fragen & Lückentexte';
+  const type = s.roundType === 'fragen' ? t('nur Fragen') : s.roundType === 'luecken' ? t('nur Lückentexte') : t('Fragen & Lückentexte');
   const categories =
     s.categories.length >= ALL_CATEGORIES.length
-      ? 'alle Kategorien'
+      ? t('alle Kategorien')
       : CATEGORIES.filter((c) => s.categories.includes(c.id))
-          .map((c) => c.label)
+          .map((c) => t(c.label))
           .join(', ');
-  return `${s.rounds} Runden · ${type} · ${categories}${s.heartRound ? ' · mit Herzensrunde' : ''}`;
+  return `${t('{n} Runden', { n: s.rounds })} · ${type} · ${categories}${s.heartRound ? ` · ${t('mit Herzensrunde')}` : ''}`;
 }

@@ -79,15 +79,15 @@ describe('Frische Hausbluffs: Freigabe', () => {
     const items = list.body.items as BluffCandidateView[];
     const mine = items.find((i) => i.text.startsWith(BLUFFS[0]))!;
     expect(mine).toMatchObject({ questionId: firstQuestion, fooled: 2, likes: 0, times: 1, status: 'new' });
-    expect(mine.question!.answer).toBe(getQuestion(firstQuestion).answer);
-    expect(mine.question!.houseBluffs).toEqual(getQuestion(firstQuestion).bluffs);
+    expect(mine.question!.answer).toBe(getQuestion(firstQuestion, 'de').answer);
+    expect(mine.question!.houseBluffs).toEqual(getQuestion(firstQuestion, 'de').bluffs);
     // Keine Namen gespeichert
     expect(JSON.stringify(items)).not.toMatch(/Rahel|Jonas|Mirjam/);
 
     const decide = (body: Record<string, unknown>) =>
       t.call('POST', '/api/admin/bluffs', { questionId: mine.questionId, key: mine.key, ...body }, KEY);
-    expect((await decide({ status: 'approved', text: getQuestion(firstQuestion).answer })).body.error.code).toBe('too_close');
-    expect((await decide({ status: 'approved', text: getQuestion(firstQuestion).bluffs[0] })).body.error.code).toBe('duplicate');
+    expect((await decide({ status: 'approved', text: getQuestion(firstQuestion, 'de').answer })).body.error.code).toBe('too_close');
+    expect((await decide({ status: 'approved', text: getQuestion(firstQuestion, 'de').bluffs[0] })).body.error.code).toBe('duplicate');
     expect((await decide({ status: 'bogus', text: mine.text })).status).toBe(400);
     expect((await t.call('POST', '/api/admin/bluffs', { questionId: mine.questionId, key: 'gibt-es-nicht', status: 'approved', text: mine.text }, KEY)).status).toBe(404);
 

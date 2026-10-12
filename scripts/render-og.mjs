@@ -1,9 +1,12 @@
 // Erzeugt die Vorschaubilder für geteilte Links (WhatsApp, Signal, Telegram …), je 1200×630:
-//   og.jpg         – biblebluff.de und alle übrigen Seiten
-//   og-invite.jpg  – Einladungslinks /r/CODE (Titel und Text setzt der Worker, siehe server/preview.ts)
+//   og.jpg            – biblebluff.de und alle übrigen Seiten
+//   og-invite.jpg     – Einladungslinks /r/CODE (Titel und Text setzt der Worker, siehe server/preview.ts)
+//   og-en.jpg         – englische Links (/?lang=en, Entdeckungen /e/…?lang=en)
+//   og-invite-en.jpg  – Einladungen in englische Räume (/r/CODE?lang=en)
 // Das Logo kommt direkt aus der gebauten App im Farbkonzept See Genezareth, so passt es immer zum Spiel.
 // Alles Wichtige steht in der Mitte: Manche Apps zeigen nur einen quadratischen Ausschnitt.
-// Aufruf: npm run build && node scripts/render-og.mjs   (braucht den Playwright-Chromium)
+// Aufruf: npm run build && node scripts/render-og.mjs [dateien …]   (braucht den Playwright-Chromium)
+// Ohne Dateinamen entstehen alle Bilder, sonst nur die genannten (etwa: og-en.jpg og-invite-en.jpg).
 
 import { existsSync, readFileSync } from 'node:fs';
 import { extname, join, normalize } from 'node:path';
@@ -30,7 +33,10 @@ const TYPES = {
 const VARIANTS = [
   { file: 'og.jpg', pill: null, lines: ['Erfinde Bluffs. Finde die Wahrheit.', 'Entdecke die Bibel.'], url: 'biblebluff.de' },
   { file: 'og-invite.jpg', pill: 'Du bist eingeladen!', lines: ['Antippen und mitspielen –', 'ganz ohne Anmeldung.'], url: null },
+  { file: 'og-en.jpg', pill: null, lines: ['Make up bluffs. Find the truth.', 'Discover the Bible.'], url: 'biblebluff.de' },
+  { file: 'og-invite-en.jpg', pill: 'You’re invited!', lines: ['Tap to join –', 'no sign-up needed.'], url: null },
 ];
+const ONLY = process.argv.slice(2);
 
 const STYLE = `
   *, *::before, *::after { animation: none !important; transition: none !important; }
@@ -69,7 +75,7 @@ await page.goto('http://og.local/?farbe=see');
 await page.waitForSelector('.hero .logo svg');
 const logo = await page.evaluate(() => document.querySelector('.hero .logo').outerHTML);
 
-for (const v of VARIANTS) {
+for (const v of VARIANTS.filter((x) => !ONLY.length || ONLY.includes(x.file))) {
   await page.evaluate(
     ({ style, logo, pill, lines, url }) => {
       const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');

@@ -4,15 +4,14 @@ import type { RecapView } from '../../shared/types';
 import { Button, Logo, QuestionText, Toast, upperFirst } from '../components/ui';
 import { WeekVerseCard } from '../components/WeekVerse';
 import { ApiError, api } from '../lib/api';
+import { locale, t, usePartyLang } from '../lib/i18n';
 import { navigate, recapUrl } from '../lib/router';
 import { shareLink } from '../lib/share';
 import { CuriousCard } from './Jesus';
 import { LegalLinks } from './Legal';
 
-const DATE = new Intl.DateTimeFormat('de-DE', { day: 'numeric', month: 'long', year: 'numeric' });
-
 export function recapDate(recap: Pick<RecapView, 'playedAt'>): string {
-  return DATE.format(new Date(recap.playedAt));
+  return new Intl.DateTimeFormat(locale(), { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(recap.playedAt));
 }
 
 /** Entdeckungen zum Mitnehmen: dauerhafte Seite einer Partie, ohne Namen, zum Teilen und Nachlesen. */
@@ -20,13 +19,15 @@ export function RecapPage({ id }: { id: string }) {
   const [recap, setRecap] = useState<RecapView | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  // Die Seite erscheint in der Sprache der Partie (ältere Seiten: Deutsch)
+  usePartyLang(recap ? recap.lang ?? 'de' : null);
 
   useEffect(() => {
     let cancelled = false;
     api
       .recap(id)
       .then((res) => !cancelled && setRecap(res.recap))
-      .catch((err: unknown) => !cancelled && setError(err instanceof ApiError ? err : new ApiError('http', 'Die Seite lädt gerade nicht.', 0)));
+      .catch((err: unknown) => !cancelled && setError(err instanceof ApiError ? err : new ApiError('http', t('Die Seite lädt gerade nicht.'), 0)));
     return () => {
       cancelled = true;
     };
@@ -35,7 +36,7 @@ export function RecapPage({ id }: { id: string }) {
   useEffect(() => {
     if (!recap) return;
     const before = document.title;
-    document.title = `Entdeckungen vom ${recapDate(recap)} – Bible Bluff`;
+    document.title = t('Entdeckungen vom {date} – Bible Bluff', { date: recapDate(recap) });
     return () => {
       document.title = before;
     };
@@ -46,10 +47,10 @@ export function RecapPage({ id }: { id: string }) {
       <main class="page center-page">
         <div class="card gone">
           <Logo small />
-          <h1>{error.status === 404 ? 'Nicht gefunden' : 'Ups'}</h1>
+          <h1>{error.status === 404 ? t('Nicht gefunden') : t('Ups')}</h1>
           <p>{error.message}</p>
           <Button block onClick={() => navigate('/')}>
-            Zur Startseite
+            {t('Zur Startseite')}
           </Button>
         </div>
       </main>
@@ -58,7 +59,7 @@ export function RecapPage({ id }: { id: string }) {
   if (!recap) {
     return (
       <main class="page center-page">
-        <div class="loader" aria-label="Lädt" />
+        <div class="loader" aria-label={t('Lädt')} />
       </main>
     );
   }
@@ -66,9 +67,9 @@ export function RecapPage({ id }: { id: string }) {
   const share = async () =>
     setToast(
       await shareLink({
-        title: 'Bible Bluff – unsere Entdeckungen',
-        text: `${recap.items.length} Entdeckungen aus der Bibel, die wir beim Bible Bluff gemacht haben:`,
-        url: recapUrl(recap.id),
+        title: t('Bible Bluff – unsere Entdeckungen'),
+        text: t('{n} Entdeckungen aus der Bibel, die wir beim Bible Bluff gemacht haben:', { n: recap.items.length }),
+        url: recapUrl(recap.id, recap.lang ?? 'de'),
       }),
     );
 
@@ -76,10 +77,13 @@ export function RecapPage({ id }: { id: string }) {
     <main class="page recap">
       <header class="hero recap-hero">
         <Logo />
-        <p class="eyebrow recap-eyebrow">Partie vom {recapDate(recap)}</p>
-        <h1>Unsere Entdeckungen</h1>
+        <p class="eyebrow recap-eyebrow">{t('Partie vom {date}', { date: recapDate(recap) })}</p>
+        <h1>{t('Unsere Entdeckungen')}</h1>
         <p class="tagline">
-          {recap.items.length} Fragen, {recap.players} Mitspielende – alle Antworten mit Bibelstelle zum Nachlesen.
+          {t('{n} Fragen, {players} Mitspielende – alle Antworten mit Bibelstelle zum Nachlesen.', {
+            n: recap.items.length,
+            players: recap.players,
+          })}
         </p>
       </header>
 
@@ -88,7 +92,7 @@ export function RecapPage({ id }: { id: string }) {
           <li class="recap-item" style={{ '--g': `var(--g-${item.group})` }}>
             <header class="question-meta">
               <span class="book-chip">{item.book}</span>
-              <span class="group-label">{GROUP_LABELS[item.group]}</span>
+              <span class="group-label">{t(GROUP_LABELS[item.group])}</span>
               <span class="recap-num">
                 {i + 1}/{recap.items.length}
               </span>
@@ -101,12 +105,8 @@ export function RecapPage({ id }: { id: string }) {
             <p class="recap-d">{item.discovery}</p>
             {item.favorites.length > 0 && (
               <p class="recap-fav">
-                <span aria-hidden="true">♥</span> Lieblingsbluff der Runde:{' '}
-                {item.favorites.map((f, k) => (
-                  <>
-                    {k > 0 && ' · '}„{f}“
-                  </>
-                ))}
+                <span aria-hidden="true">♥</span> {t('Lieblingsbluff der Runde:')}{' '}
+                {item.favorites.map((f) => t('„{text}“', { text: f })).join(' · ')}
               </p>
             )}
           </li>
@@ -117,14 +117,14 @@ export function RecapPage({ id }: { id: string }) {
 
       <section class="stack">
         <Button variant="gold" block onClick={share}>
-          Seite teilen
+          {t('Seite teilen')}
         </Button>
         <Button variant="ghost" block onClick={() => navigate('/')}>
-          Selbst eine Partie spielen
+          {t('Selbst eine Partie spielen')}
         </Button>
       </section>
       <CuriousCard />
-      <p class="footnote">Diese Seite bleibt erhalten, auch wenn der Spielraum längst geschlossen ist.</p>
+      <p class="footnote">{t('Diese Seite bleibt erhalten, auch wenn der Spielraum längst geschlossen ist.')}</p>
       <LegalLinks />
       <Toast message={toast} onDone={() => setToast(null)} />
     </main>

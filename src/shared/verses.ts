@@ -3,7 +3,8 @@
 // Rechtschreibung (dass statt daß …), sonst unverändert; Teilverse beginnen beim Kern des Satzes.
 // Stellenangaben in der heute üblichen Zählung. Quellen: ebible.org (deu1912), abgeglichen mit bolls.life (LUT).
 
-import type { BookGroup } from './types';
+import type { BookGroup, Lang } from './types';
+import { EN_VERSE_SOURCE, EN_WEEK_VERSES } from './verses-en';
 
 export interface WeekVerse {
   id: string;
@@ -15,6 +16,16 @@ export interface WeekVerse {
 }
 
 export const VERSE_SOURCE = 'Lutherbibel 1912';
+
+/** Übersetzung, aus der die Verse stammen – für Bild, Kalender und Hinweise */
+export function verseSource(lang: Lang): string {
+  return lang === 'en' ? EN_VERSE_SOURCE : VERSE_SOURCE;
+}
+
+/** Die Verse in der Sprache des Raums – auf Englisch dieselben IDs, Bücher auf Englisch */
+export function versesFor(lang: Lang): WeekVerse[] {
+  return lang === 'en' ? EN_WEEK_VERSES : WEEK_VERSES;
+}
 
 export const WEEK_VERSES: WeekVerse[] = [
   // Evangelien
@@ -113,7 +124,8 @@ function spread(key: string): number {
  * Reihenfolge), dann aus derselben Buchgruppe – zuerst für Fragen, deren Buch keinen eigenen Vers hat –,
  * zuletzt Kernverse, in denen Jesus selbst einlädt.
  */
-export function suggestVerses(items: { book: string; group: BookGroup; key?: string }[], max = 4): WeekVerse[] {
+export function suggestVerses(items: { book: string; group: BookGroup; key?: string }[], max = 4, lang: Lang = 'de'): WeekVerse[] {
+  const verses = versesFor(lang);
   const picked: WeekVerse[] = [];
   const take = (pool: WeekVerse[], key: string): boolean => {
     const free = pool.filter((v) => !picked.includes(v));
@@ -121,11 +133,11 @@ export function suggestVerses(items: { book: string; group: BookGroup; key?: str
     return free.length > 0;
   };
   const keyOf = (it: (typeof items)[number], i: number) => it.key ?? `${it.book}-${i}`;
-  const unmatched = items.filter((it, i) => !take(WEEK_VERSES.filter((v) => v.book === it.book), keyOf(it, i)));
+  const unmatched = items.filter((it, i) => !take(verses.filter((v) => v.book === it.book), keyOf(it, i)));
   for (const it of [...unmatched, ...items.filter((it) => !unmatched.includes(it))]) {
-    take(WEEK_VERSES.filter((v) => v.group === it.group), `${keyOf(it, items.indexOf(it))}-gruppe`);
+    take(verses.filter((v) => v.group === it.group), `${keyOf(it, items.indexOf(it))}-gruppe`);
   }
-  for (const id of CORE) take(WEEK_VERSES.filter((v) => v.id === id), id);
+  for (const id of CORE) take(verses.filter((v) => v.id === id), id);
   return picked.slice(0, max);
 }
 

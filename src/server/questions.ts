@@ -15,7 +15,8 @@
 //  kind       – 'gap' für Lückentexte (stehen in lueckentext.ts): prompt ist ein Satz mit der Lücke „___“,
 //               answer und bluffs sind Satzteile, die grammatisch in die Lücke passen
 
-import type { BookGroup } from '../shared/types';
+import type { BookGroup, Lang } from '../shared/types';
+import { EN_QUESTIONS } from './en/questions';
 import { GAP_QUESTIONS } from './lueckentext';
 
 export interface Question {
@@ -2415,16 +2416,26 @@ const CLASSIC: Question[] = [
   },
 ];
 
+/** Der deutsche Pool – der vollständige */
 export const QUESTIONS: Question[] = [...CLASSIC, ...GAP_QUESTIONS];
 
-const BY_ID = new Map(QUESTIONS.map((q) => [q.id, q]));
+const POOLS: Record<Lang, Question[]> = { de: QUESTIONS, en: EN_QUESTIONS };
+const BY_ID: Record<Lang, Map<string, Question>> = {
+  de: new Map(QUESTIONS.map((q) => [q.id, q])),
+  en: new Map(EN_QUESTIONS.map((q) => [q.id, q])),
+};
 
-export function hasQuestion(id: string): boolean {
-  return BY_ID.has(id);
+/** Fragen und Lückentexte in der Sprache eines Raums */
+export function questionsFor(lang: Lang): Question[] {
+  return POOLS[lang];
 }
 
-export function getQuestion(id: string): Question {
-  const q = BY_ID.get(id);
-  if (!q) throw new Error(`Unbekannte Frage: ${id}`);
+export function hasQuestion(id: string, lang: Lang): boolean {
+  return BY_ID[lang].has(id);
+}
+
+export function getQuestion(id: string, lang: Lang): Question {
+  const q = BY_ID[lang].get(id);
+  if (!q) throw new Error(`Unbekannte Frage: ${id} (${lang})`);
   return q;
 }

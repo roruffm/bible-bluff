@@ -1,8 +1,11 @@
 // Impressum und Datenschutzerklärung. Die Angaben zum Anbieter stehen an einer Stelle (ANBIETER),
-// damit sie sich bei einer Änderung nur einmal anpassen lassen.
+// damit sie sich bei einer Änderung nur einmal anpassen lassen. Auf Englisch erscheint eine Übersetzung
+// (LegalEn.tsx); verbindlich ist die deutsche Fassung.
 import type { ComponentChildren } from 'preact';
 import { Button, Logo } from '../components/ui';
+import { currentLang, locale, t } from '../lib/i18n';
 import { navigate } from '../lib/router';
+import { DatenschutzEn, ImpressumEn } from './LegalEn';
 
 const ANBIETER = {
   name: 'Anne Kubbe',
@@ -11,7 +14,12 @@ const ANBIETER = {
   email: 'roruffm@gmail.com',
 };
 
-const STAND = 'Oktober 2026';
+/** Stand der Datenschutzerklärung (Monat, ab 0 gezählt) */
+const STAND = new Date(2026, 9, 1);
+
+function stand(): string {
+  return new Intl.DateTimeFormat(locale(), { month: 'long', year: 'numeric' }).format(STAND);
+}
 
 /** Links auf Impressum und Datenschutz – im Spielraum in neuem Tab, damit niemand aus der Partie fällt */
 export function LegalLinks({ newTab = false }: { newTab?: boolean }) {
@@ -32,10 +40,10 @@ export function LegalLinks({ newTab = false }: { newTab?: boolean }) {
       </a>
     );
   return (
-    <nav class="legal-links" aria-label="Rechtliches">
-      {link('/impressum', 'Impressum')}
+    <nav class="legal-links" aria-label={t('Rechtliches')}>
+      {link('/impressum', t('Impressum'))}
       <span aria-hidden="true">·</span>
-      {link('/datenschutz', 'Datenschutz')}
+      {link('/datenschutz', t('Datenschutz'))}
     </nav>
   );
 }
@@ -49,7 +57,7 @@ function Address() {
       <br />
       {ANBIETER.ort}
       <br />
-      E-Mail: <a href={`mailto:${ANBIETER.email}`}>{ANBIETER.email}</a>
+      {t('E-Mail:')} <a href={`mailto:${ANBIETER.email}`}>{ANBIETER.email}</a>
     </p>
   );
 }
@@ -61,7 +69,7 @@ function LegalShell({ title, children }: { title: string; children: ComponentChi
         <a
           href="/"
           class="legal-logo"
-          aria-label="Zur Startseite"
+          aria-label={t('Zur Startseite')}
           onClick={(e) => {
             e.preventDefault();
             navigate('/');
@@ -73,7 +81,7 @@ function LegalShell({ title, children }: { title: string; children: ComponentChi
       </header>
       <article class="card legal-body">{children}</article>
       <Button variant="ghost" block onClick={() => navigate('/')}>
-        Zur Startseite
+        {t('Zur Startseite')}
       </Button>
       <LegalLinks />
     </main>
@@ -81,6 +89,13 @@ function LegalShell({ title, children }: { title: string; children: ComponentChi
 }
 
 export function ImpressumPage() {
+  if (currentLang() === 'en') {
+    return (
+      <LegalShell title={t('Impressum')}>
+        <ImpressumEn address={<Address />} />
+      </LegalShell>
+    );
+  }
   return (
     <LegalShell title="Impressum">
       <h2>Angaben zum Anbieter</h2>
@@ -110,9 +125,16 @@ export function ImpressumPage() {
 }
 
 export function DatenschutzPage() {
+  if (currentLang() === 'en') {
+    return (
+      <LegalShell title={t('Datenschutz')}>
+        <DatenschutzEn address={<Address />} email={ANBIETER.email} updated={stand()} />
+      </LegalShell>
+    );
+  }
   return (
     <LegalShell title="Datenschutz">
-      <p class="muted small">Stand: {STAND}</p>
+      <p class="muted small">Stand: {stand()}</p>
 
       <h2>Das Wichtigste in Kürze</h2>
       <ul>
@@ -181,8 +203,8 @@ export function DatenschutzPage() {
       <p>
         Das Bild für den Sperrbildschirm entsteht auf deinem Gerät; der Server erfährt nicht, welchen Vers du wählst.
         Tippst du auf „In den Kalender eintragen“, lädt dein Gerät eine Kalenderdatei vom Server. Dabei werden nur der
-        gewählte Vers, das Startdatum und die Uhrzeit übertragen, gespeichert wird davon nichts. Die Termine landen in
-        deinem eigenen Kalender.
+        gewählte Vers, das Startdatum, die Uhrzeit und die Sprache übertragen, gespeichert wird davon nichts. Die
+        Termine landen in deinem eigenen Kalender.
       </p>
 
       <h2>Entdeckungen-Seiten</h2>
@@ -198,8 +220,9 @@ export function DatenschutzPage() {
       <p>
         Nach jeder Partie merkt sich das Spiel Bluffs, die mindestens zwei Leute reingelegt oder zwei Herzen bekommen
         haben: nur den Text und diese Zahlen, ohne Namen. Bluffs, in denen ein Name aus der Runde vorkommt, werden nicht
-        gespeichert. Nach einer Prüfung können sie in späteren Partien als Vorschläge erscheinen. Rechtsgrundlage ist das
-        berechtigte Interesse, das Spiel abwechslungsreich zu halten (Art. 6 Abs. 1 lit. f DSGVO).
+        gespeichert. Nach einer Prüfung können sie in späteren Partien als Vorschläge erscheinen. Das gilt derzeit nur
+        für Partien auf Deutsch. Rechtsgrundlage ist das berechtigte Interesse, das Spiel abwechslungsreich zu halten
+        (Art. 6 Abs. 1 lit. f DSGVO).
       </p>
 
       <h2>Speicherung auf deinem Gerät</h2>
@@ -207,7 +230,7 @@ export function DatenschutzPage() {
       <ul>
         <li>deine Sitzung je Raum (Raumcode, Sitzungskennung, Spitzname), damit Neuladen nichts kostet,</li>
         <li>dein zuletzt verwendeter Spitzname,</li>
-        <li>das gewählte Farbkonzept,</li>
+        <li>das gewählte Farbkonzept und die gewählte Sprache,</li>
         <li>die Nummern von höchstens 300 Fragen, die du schon gesehen hast.</li>
       </ul>
       <p>

@@ -4,6 +4,7 @@ import { ThemePicker } from '../components/ThemePicker';
 import { Avatar, Button, ConfirmButton, Logo, Rules, Toast } from '../components/ui';
 import type { ApiError } from '../lib/api';
 import { type RoomConnection, useRoom, useWakeLock } from '../lib/hooks';
+import { t, tj, usePartyLang } from '../lib/i18n';
 import { useJoinAlert } from '../lib/join-alert';
 import { navigate } from '../lib/router';
 import { markSeen } from '../lib/seen';
@@ -25,15 +26,13 @@ export function RoomPage({ code }: { code: string }) {
     return (
       <main class="page join">
         <header class="page-head">
-          <button class="back" onClick={() => navigate('/')} aria-label="Zur Startseite">
+          <button class="back" onClick={() => navigate('/')} aria-label={t('Zur Startseite')}>
             ←
           </button>
           <Logo small />
         </header>
-        <h1>Mitspielen</h1>
-        <p class="lead">
-          Raum <b class="mono">{code}</b>
-        </p>
+        <h1>{t('Mitspielen')}</h1>
+        <p class="lead">{tj('Raum {code}', { code: <b class="mono">{code}</b> })}</p>
         {note && <p class="notice">{note}</p>}
         <section class="card">
           <JoinForm code={code} onJoined={setSession} />
@@ -61,6 +60,8 @@ export function RoomPage({ code }: { code: string }) {
 function RoomLive({ code, session, onLost }: { code: string; session: Session; onLost: (message: string) => void }) {
   const conn = useRoom(code, session.token);
   const { view, fatal } = conn;
+  // Im Raum gilt die Sprache der Partie
+  usePartyLang(view?.settings.lang);
 
   useEffect(() => {
     if (fatal?.code === 'unknown_session' || fatal?.code === 'not_in_room') onLost(fatal.message);
@@ -77,6 +78,7 @@ function RoomLive({ code, session, onLost }: { code: string; session: Session; o
 export function TvPage({ code }: { code: string }) {
   const conn = useRoom(code, null);
   const { view, fatal } = conn;
+  usePartyLang(view?.settings.lang);
   useWakeLock(Boolean(view && view.status !== 'closed'));
   useEffect(() => {
     document.documentElement.classList.add('tv-mode');
@@ -126,11 +128,11 @@ function GameShell({ view, conn }: { view: RoomView; conn: RoomConnection }) {
             e.preventDefault();
             navigate('/');
           }}
-          aria-label="Bible Bluff – Startseite"
+          aria-label={t('Bible Bluff – Startseite')}
         >
           <Logo small />
         </a>
-        <span class="topbar-code" title="Raumcode">
+        <span class="topbar-code" title={t('Raumcode')}>
           {view.code}
         </span>
         {view.me && (
@@ -140,7 +142,7 @@ function GameShell({ view, conn }: { view: RoomView; conn: RoomConnection }) {
           </span>
         )}
         <button class="topbar-menu" onClick={() => setPanel(true)} aria-haspopup="dialog">
-          {isHost ? 'Leitung' : 'Menü'}
+          {isHost ? t('Leitung') : t('Menü')}
         </button>
       </header>
 
@@ -182,17 +184,17 @@ function TvLobby({ view }: { view: RoomView }) {
     <section class="tv-lobby">
       <div class="tv-lobby-intro">
         <Logo />
-        <p class="tagline">Erfinde Bluffs. Finde die Wahrheit. Entdecke die Bibel.</p>
+        <p class="tagline">{t('Erfinde Bluffs. Finde die Wahrheit. Entdecke die Bibel.')}</p>
         <RoomCodeCard code={view.code} big />
       </div>
       <div class="tv-lobby-players">
         <h2 class="card-title">
-          Dabei <span class="count">{view.players.filter((p) => p.plays).length}</span>
+          {t('Dabei')} <span class="count">{view.players.filter((p) => p.plays).length}</span>
         </h2>
         <PlayerList view={view} />
         <p class="waiting">
           <span class="pulse" aria-hidden="true" />
-          Gleich geht’s los …
+          {t('Gleich geht’s los …')}
         </p>
       </div>
     </section>
@@ -202,16 +204,16 @@ function TvLobby({ view }: { view: RoomView }) {
 function PausedOverlay({ view, conn, display = false }: { view: RoomView; conn: RoomConnection; display?: boolean }) {
   const isHost = Boolean(view.me?.isHost) && !display;
   return (
-    <div class="overlay" role="dialog" aria-modal="true" aria-label="Pause">
+    <div class="overlay" role="dialog" aria-modal="true" aria-label={t('Pause')}>
       <div class="overlay-card pop">
         <p class="overlay-icon" aria-hidden="true">
           ❚❚
         </p>
-        <h2>Pause</h2>
-        <p class="muted">Die Zeit steht still, bis es weitergeht.</p>
+        <h2>{t('Pause')}</h2>
+        <p class="muted">{t('Die Zeit steht still, bis es weitergeht.')}</p>
         {isHost && (
           <Button variant="gold" block onClick={() => conn.act({ type: 'resume' })}>
-            Fortsetzen
+            {t('Fortsetzen')}
           </Button>
         )}
       </div>
@@ -222,7 +224,7 @@ function PausedOverlay({ view, conn, display = false }: { view: RoomView; conn: 
 function OfflineBanner() {
   return (
     <div class="offline" role="status">
-      Verbindung wird wiederhergestellt …
+      {t('Verbindung wird wiederhergestellt …')}
     </div>
   );
 }
@@ -230,7 +232,7 @@ function OfflineBanner() {
 function Loading() {
   return (
     <main class="page center-page">
-      <div class="loader" aria-label="Lädt" />
+      <div class="loader" aria-label={t('Lädt')} />
     </main>
   );
 }
@@ -239,10 +241,10 @@ function Gone({ error, code, closed = false }: { error?: ApiError; code: string;
   useEffect(() => {
     if (closed || error?.code === 'kicked' || error?.code === 'not_found' || error?.code === 'closed') clearSession(code);
   }, [closed, error, code]);
-  const title = closed || error?.code === 'closed' ? 'Raum geschlossen' : error?.code === 'kicked' ? 'Entfernt' : 'Ups';
+  const title = closed || error?.code === 'closed' ? t('Raum geschlossen') : error?.code === 'kicked' ? t('Entfernt') : t('Ups');
   const text = closed
-    ? 'Die Spielleitung hat diesen Raum geschlossen. Danke fürs Mitspielen!'
-    : error?.message ?? 'Etwas ist schiefgelaufen.';
+    ? t('Die Spielleitung hat diesen Raum geschlossen. Danke fürs Mitspielen!')
+    : error?.message ?? t('Etwas ist schiefgelaufen.');
   return (
     <main class="page center-page">
       <div class="card gone">
@@ -250,7 +252,7 @@ function Gone({ error, code, closed = false }: { error?: ApiError; code: string;
         <h1>{title}</h1>
         <p>{text}</p>
         <Button block onClick={() => navigate('/')}>
-          Zur Startseite
+          {t('Zur Startseite')}
         </Button>
       </div>
     </main>
@@ -275,25 +277,25 @@ function Panel({ view, conn, onClose }: { view: RoomView; conn: RoomConnection; 
       await conn.act(action);
       if (close) onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Das ging nicht.');
+      setError(err instanceof Error ? err.message : t('Das ging nicht.'));
     }
   };
 
   const skipLabel: Record<string, string> = {
-    write: 'Schreibzeit jetzt beenden',
-    vote: 'Abstimmung jetzt beenden',
-    reveal: 'Aufdeckung überspringen',
-    scores: 'Nächste Runde',
-    heart: 'Schreibzeit jetzt beenden',
-    heartShow: 'Zum Endstand',
+    write: t('Schreibzeit jetzt beenden'),
+    vote: t('Abstimmung jetzt beenden'),
+    reveal: t('Aufdeckung überspringen'),
+    scores: t('Nächste Runde'),
+    heart: t('Schreibzeit jetzt beenden'),
+    heartShow: t('Zum Endstand'),
   };
 
   return (
     <div class="sheet-backdrop" onClick={onClose}>
-      <aside class="sheet" role="dialog" aria-modal="true" aria-label={isHost ? 'Spielleitung' : 'Menü'} onClick={(e) => e.stopPropagation()}>
+      <aside class="sheet" role="dialog" aria-modal="true" aria-label={isHost ? t('Spielleitung') : t('Menü')} onClick={(e) => e.stopPropagation()}>
         <header class="sheet-head">
-          <h2>{isHost ? 'Spielleitung' : 'Menü'}</h2>
-          <button class="sheet-close" onClick={onClose} aria-label="Schließen">
+          <h2>{isHost ? t('Spielleitung') : t('Menü')}</h2>
+          <button class="sheet-close" onClick={onClose} aria-label={t('Schließen')}>
             ✕
           </button>
         </header>
@@ -306,15 +308,15 @@ function Panel({ view, conn, onClose }: { view: RoomView; conn: RoomConnection; 
 
         {isHost && phase && (
           <section class="sheet-section">
-            <h3>Partie</h3>
+            <h3>{t('Partie')}</h3>
             <div class="stack">
               {view.paused ? (
                 <Button block variant="gold" onClick={run({ type: 'resume' })}>
-                  Fortsetzen
+                  {t('Fortsetzen')}
                 </Button>
               ) : (
                 <Button block variant="secondary" onClick={run({ type: 'pause' })}>
-                  Pausieren
+                  {t('Pausieren')}
                 </Button>
               )}
               <Button block variant="secondary" onClick={run({ type: 'skipPhase' })}>
@@ -322,12 +324,12 @@ function Panel({ view, conn, onClose }: { view: RoomView; conn: RoomConnection; 
               </Button>
               {phase === 'write' && (
                 <Button block variant="secondary" onClick={run({ type: 'swapQuestion' })}>
-                  Andere Frage nehmen
+                  {t('Andere Frage nehmen')}
                 </Button>
               )}
               {phase === 'heart' && view.heart?.canSwap && (
                 <Button block variant="secondary" onClick={run({ type: 'heartSwap' })}>
-                  Andere Frage nehmen
+                  {t('Andere Frage nehmen')}
                 </Button>
               )}
             </div>
@@ -336,46 +338,46 @@ function Panel({ view, conn, onClose }: { view: RoomView; conn: RoomConnection; 
 
         {isHost && (
           <section class="sheet-section">
-            <h3>Raum</h3>
+            <h3>{t('Raum')}</h3>
             <div class="stack">
               <Button block variant="secondary" onClick={run({ type: 'lock', locked: !view.locked }, false)}>
-                {view.locked ? 'Raum wieder öffnen' : 'Raum für Neue sperren'}
+                {view.locked ? t('Raum wieder öffnen') : t('Raum für Neue sperren')}
               </Button>
               <Button block variant="secondary" onClick={run({ type: 'listed', listed: !view.listed }, false)}>
-                {view.listed ? 'Nicht mehr öffentlich zeigen' : 'Öffentlich auf der Startseite zeigen'}
+                {view.listed ? t('Nicht mehr öffentlich zeigen') : t('Öffentlich auf der Startseite zeigen')}
               </Button>
               {view.listed && (
                 <p class="muted small">
                   {view.locked
-                    ? 'Gesperrt: Der Raum erscheint gerade nicht auf der Startseite.'
-                    : 'Der Raum steht auf der Startseite, und alle können beitreten.'}
+                    ? t('Gesperrt: Der Raum erscheint gerade nicht auf der Startseite.')
+                    : t('Der Raum steht auf der Startseite, und alle können beitreten.')}
                 </p>
               )}
               <a class="btn btn-ghost btn-block" href={`/tv/${view.code}?${THEME_PARAM}=${theme}`} target="_blank" rel="noopener">
-                Leinwand-Ansicht öffnen ↗
+                {t('Leinwand-Ansicht öffnen ↗')}
               </a>
             </div>
           </section>
         )}
 
         <section class="sheet-section">
-          <h3>Teilnehmende</h3>
+          <h3>{t('Teilnehmende')}</h3>
           <ul class="manage-list">
             {view.players.map((p) => (
               <li>
                 <Avatar person={p} size="sm" dim={!p.online} />
                 <span class="manage-name">
                   {p.name}
-                  {p.isHost && <small> · Leitung</small>}
+                  {p.isHost && <small> · {t('Leitung')}</small>}
                   {!p.online && <small> · offline</small>}
                 </span>
                 {isHost && p.id !== view.me?.id && (
                   <span class="manage-actions">
-                    <ConfirmButton small variant="ghost" confirm="Übergeben?" onConfirm={run({ type: 'makeHost', playerId: p.id }, false)}>
-                      Leitung geben
+                    <ConfirmButton small variant="ghost" confirm={t('Übergeben?')} onConfirm={run({ type: 'makeHost', playerId: p.id }, false)}>
+                      {t('Leitung geben')}
                     </ConfirmButton>
-                    <ConfirmButton small variant="ghost" confirm="Entfernen?" onConfirm={run({ type: 'kick', playerId: p.id }, false)}>
-                      Entfernen
+                    <ConfirmButton small variant="ghost" confirm={t('Entfernen?')} onConfirm={run({ type: 'kick', playerId: p.id }, false)}>
+                      {t('Entfernen')}
                     </ConfirmButton>
                   </span>
                 )}
@@ -385,28 +387,28 @@ function Panel({ view, conn, onClose }: { view: RoomView; conn: RoomConnection; 
         </section>
 
         <section class="sheet-section">
-          <h3>Farben</h3>
+          <h3>{t('Farben')}</h3>
           <ThemePicker compact />
         </section>
 
         <section class="sheet-section">
           <div class="stack">
             {isHost ? (
-              <ConfirmButton block variant="secondary" confirm="Für alle schließen? Nochmal tippen" onConfirm={run({ type: 'close' })}>
-                Raum schließen
+              <ConfirmButton block variant="secondary" confirm={t('Für alle schließen? Nochmal tippen')} onConfirm={run({ type: 'close' })}>
+                {t('Raum schließen')}
               </ConfirmButton>
             ) : (
               <ConfirmButton
                 block
                 variant="secondary"
-                confirm="Wirklich verlassen? Nochmal tippen"
+                confirm={t('Wirklich verlassen? Nochmal tippen')}
                 onConfirm={async () => {
                   await conn.act({ type: 'leave' }).catch(() => {});
                   clearSession(view.code);
                   navigate('/');
                 }}
               >
-                Raum verlassen
+                {t('Raum verlassen')}
               </ConfirmButton>
             )}
           </div>

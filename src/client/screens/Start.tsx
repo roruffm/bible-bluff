@@ -18,10 +18,12 @@ import {
 import type { CategoryId, PublicRoom, RoundType, Settings } from '../../shared/types';
 import { Guide } from '../components/Guide';
 import { EnterIcon, FriendsIcon } from '../components/Icons';
+import { LangSwitch } from '../components/LangSwitch';
 import { ThemeFold } from '../components/ThemePicker';
 import { Avatar, Button, Logo, Segmented, Toggle } from '../components/ui';
 import { ApiError, api } from '../lib/api';
-import { categoryCount, poolCount, poolNoun, settingsSummary, usePool } from '../lib/pool';
+import { currentLang, preferredLang, t, tj } from '../lib/i18n';
+import { categoryCount, poolAmount, poolCount, settingsSummary, usePool } from '../lib/pool';
 import { navigate } from '../lib/router';
 import { LegalLinks } from './Legal';
 import { type Session, lastRoom, loadSession, rememberedName, saveSession } from '../lib/session';
@@ -33,9 +35,10 @@ export function Home() {
 
   return (
     <main class="page home">
-      <header class="hero">
+      <header class="hero has-lang">
+        <LangSwitch />
         <Logo />
-        <p class="tagline">Erfinde Bluffs. Finde die Wahrheit. Entdecke die Bibel.</p>
+        <p class="tagline">{t('Erfinde Bluffs. Finde die Wahrheit. Entdecke die Bibel.')}</p>
       </header>
 
       {lastSession && (
@@ -47,7 +50,7 @@ export function Home() {
             navigate(`/r/${lastSession.code}`);
           }}
         >
-          Zurück zu Raum <b>{lastSession.code}</b> als {lastSession.name} →
+          {tj('Zurück zu Raum {code} als {name} →', { code: <b>{lastSession.code}</b>, name: lastSession.name })}
         </a>
       )}
 
@@ -59,8 +62,8 @@ export function Home() {
             <EnterIcon />
           </span>
           <div>
-            <h2 id="join-title">Mitspielen</h2>
-            <p class="muted small">Du hast einen Raumcode bekommen? Gib ihn hier ein.</p>
+            <h2 id="join-title">{t('Mitspielen')}</h2>
+            <p class="muted small">{t('Du hast einen Raumcode bekommen? Gib ihn hier ein.')}</p>
           </div>
         </div>
         <JoinForm
@@ -72,7 +75,7 @@ export function Home() {
       </section>
 
       <div class="or">
-        <span>oder selbst starten</span>
+        <span>{t('oder selbst starten')}</span>
       </div>
 
       <section class="card choice" aria-labelledby="create-title">
@@ -81,12 +84,12 @@ export function Home() {
             <FriendsIcon />
           </span>
           <div>
-            <h2 id="create-title">Mit Freunden</h2>
-            <p class="muted small">Du eröffnest einen Raum und leitest die Partie – auf dem Handy oder am Beamer.</p>
+            <h2 id="create-title">{t('Mit Freunden')}</h2>
+            <p class="muted small">{t('Du eröffnest einen Raum und leitest die Partie – auf dem Handy oder am Beamer.')}</p>
           </div>
         </div>
         <Button variant="gold" block onClick={() => navigate('/neu')}>
-          Raum eröffnen
+          {t('Raum eröffnen')}
         </Button>
       </section>
 
@@ -94,14 +97,12 @@ export function Home() {
         <div class="choice-head">
           <JosephPortrait />
           <div>
-            <h2 id="joseph-title">Allein gegen {BOT_NAME}</h2>
-            <p class="muted small">
-              {BOT_NAME} ist ein Bot und hat immer Zeit. Er erfindet Bluffs, rät mit – und ist schlagbar.
-            </p>
+            <h2 id="joseph-title">{t('Allein gegen {bot}', { bot: BOT_NAME })}</h2>
+            <p class="muted small">{t('{bot} ist ein Bot und hat immer Zeit. Er erfindet Bluffs, rät mit – und ist schlagbar.', { bot: BOT_NAME })}</p>
           </div>
         </div>
         <Button block raised onClick={() => navigate('/joseph')}>
-          Gegen {BOT_NAME} spielen
+          {t('Gegen {bot} spielen', { bot: BOT_NAME })}
         </Button>
       </section>
 
@@ -109,7 +110,9 @@ export function Home() {
       <ThemeFold />
 
       <footer class="footnote">
-        Fragen aus allen 27 Büchern des Neuen Testaments und ausgewählten Geschichten des Alten Testaments · freikirchlich-pfingstliche Lernfassung
+        {t(
+          'Fragen aus allen 27 Büchern des Neuen Testaments und ausgewählten Geschichten des Alten Testaments · freikirchlich-pfingstliche Lernfassung',
+        )}
       </footer>
       <LegalLinks />
     </main>
@@ -124,7 +127,7 @@ function JosephPortrait() {
 /** So oft fragt die Startseite nach offenen Räumen, solange sie sichtbar ist */
 const OPEN_ROOMS_POLL_MS = 10_000;
 
-/** Räume, deren Leitung sie öffentlich zeigt. Erscheint nur, wenn es gerade welche gibt. */
+/** Räume, deren Leitung sie öffentlich zeigt – nur die in der gewählten Sprache. Erscheint nur, wenn es gerade welche gibt. */
 function OpenRooms() {
   const [rooms, setRooms] = useState<PublicRoom[]>([]);
 
@@ -149,13 +152,15 @@ function OpenRooms() {
     };
   }, []);
 
-  if (rooms.length === 0) return null;
+  const lang = currentLang();
+  const shown = rooms.filter((r) => (r.lang ?? 'de') === lang);
+  if (shown.length === 0) return null;
   return (
     <section class="card open-rooms" aria-labelledby="open-rooms-title">
-      <h2 id="open-rooms-title">Offene Räume</h2>
-      <p class="muted small">Hier wird gerade gespielt, und neue Leute sind willkommen.</p>
+      <h2 id="open-rooms-title">{t('Offene Räume')}</h2>
+      <p class="muted small">{t('Hier wird gerade gespielt, und neue Leute sind willkommen.')}</p>
       <ul class="open-room-list">
-        {rooms.map((r) => (
+        {shown.map((r) => (
           <li key={r.code}>
             <a
               class="open-room"
@@ -166,11 +171,13 @@ function OpenRooms() {
               }}
             >
               <span class="open-room-text">
-                <b>Raum {r.code}</b>
-                <small>{r.status === 'lobby' ? 'Wartet auf den Start' : `Runde ${r.round} von ${r.rounds} läuft`}</small>
+                <b>{t('Raum {code}', { code: r.code })}</b>
+                <small>
+                  {r.status === 'lobby' ? t('Wartet auf den Start') : t('Runde {round} von {rounds} läuft', { round: r.round ?? 1, rounds: r.rounds })}
+                </small>
                 <small>{roomMeta(r)}</small>
               </span>
-              <span class="open-room-go">Mitspielen</span>
+              <span class="open-room-go">{t('Mitspielen')}</span>
             </a>
           </li>
         ))}
@@ -180,11 +187,13 @@ function OpenRooms() {
 }
 
 function roomMeta(r: PublicRoom) {
-  return `${r.people} ${r.people === 1 ? 'Person' : 'Personen'} · ${difficultyLabel(r.difficulty)}`;
+  const people = r.people === 1 ? t('1 Person') : t('{n} Personen', { n: r.people });
+  return `${people} · ${difficultyLabel(r.difficulty)}`;
 }
 
 function difficultyLabel(value: PublicRoom['difficulty']) {
-  return DIFFICULTY_OPTIONS.find((o) => o.value === value)?.label ?? value;
+  const label = DIFFICULTY_OPTIONS.find((o) => o.value === value)?.label;
+  return label ? t(label) : value;
 }
 
 export function JoinForm(props: {
@@ -200,8 +209,8 @@ export function JoinForm(props: {
 
   const submit = async (wantReclaim = false) => {
     const code = normalizeCode(props.code);
-    if (!code) return setError('Bitte gib den Raumcode ein.');
-    if (!name.trim()) return setError('Bitte gib einen Spitznamen ein.');
+    if (!code) return setError(t('Bitte gib den Raumcode ein.'));
+    if (!name.trim()) return setError(t('Bitte gib einen Spitznamen ein.'));
     setBusy(true);
     setError(null);
     try {
@@ -213,7 +222,7 @@ export function JoinForm(props: {
       if (err instanceof ApiError && err.code === 'name_offline') {
         setReclaim(err.message);
       } else {
-        setError(err instanceof Error ? err.message : 'Beitritt fehlgeschlagen.');
+        setError(err instanceof Error ? err.message : t('Beitritt fehlgeschlagen.'));
       }
     } finally {
       setBusy(false);
@@ -225,7 +234,7 @@ export function JoinForm(props: {
       <div class="stack">
         <p class="notice">{reclaim}</p>
         <Button block onClick={() => submit(true)}>
-          Ja, das bin ich – wieder einsteigen
+          {t('Ja, das bin ich – wieder einsteigen')}
         </Button>
         <Button
           block
@@ -235,7 +244,7 @@ export function JoinForm(props: {
             setName('');
           }}
         >
-          Nein, anderen Namen wählen
+          {t('Nein, anderen Namen wählen')}
         </Button>
       </div>
     );
@@ -251,12 +260,12 @@ export function JoinForm(props: {
     >
       {props.askCode && (
         <label class="field">
-          <span>Raumcode</span>
+          <span>{t('Raumcode')}</span>
           <input
             class="code-input"
             value={props.code}
             onInput={(e) => props.onCode?.(normalizeCode((e.currentTarget as HTMLInputElement).value))}
-            placeholder="z. B. LAMPE7"
+            placeholder={t('z. B. LAMPE7')}
             autocapitalize="characters"
             autocomplete="off"
             spellcheck={false}
@@ -267,11 +276,11 @@ export function JoinForm(props: {
         </label>
       )}
       <label class="field">
-        <span>Dein Spitzname</span>
+        <span>{t('Dein Spitzname')}</span>
         <input
           value={name}
           onInput={(e) => setName((e.currentTarget as HTMLInputElement).value)}
-          placeholder="z. B. Mirjam"
+          placeholder={t('z. B. Mirjam')}
           maxLength={NAME_MAX}
           autocomplete="nickname"
           enterkeyhint="go"
@@ -284,23 +293,26 @@ export function JoinForm(props: {
         </p>
       )}
       <Button type="submit" block raised disabled={busy}>
-        {busy ? 'Trete bei …' : 'Beitreten'}
+        {busy ? t('Trete bei …') : t('Beitreten')}
       </Button>
     </form>
   );
 }
 
-/** Raum eröffnen – oder mit `bot` einen eigenen Raum, in dem Joseph schon mitspielt */
+/**
+ * Raum eröffnen – oder mit `bot` einen eigenen Raum, in dem Joseph schon mitspielt. Der Raum bekommt die
+ * Sprache, die auf der Startseite gewählt ist.
+ */
 export function CreateRoom({ bot = false }: { bot?: boolean }) {
   const [name, setName] = useState(rememberedName());
   const [plays, setPlays] = useState(true);
-  const [settings, setSettings] = useState<Settings>(bot ? BOT_SETTINGS : DEFAULT_SETTINGS);
+  const [settings, setSettings] = useState<Settings>(() => ({ ...(bot ? BOT_SETTINGS : DEFAULT_SETTINGS), lang: preferredLang() }));
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const set = (patch: Partial<Settings>) => setSettings((s) => ({ ...s, ...patch }));
 
   const create = async () => {
-    if (!name.trim()) return setError('Bitte gib einen Spitznamen ein.');
+    if (!name.trim()) return setError(t('Bitte gib einen Spitznamen ein.'));
     setBusy(true);
     setError(null);
     try {
@@ -308,7 +320,7 @@ export function CreateRoom({ bot = false }: { bot?: boolean }) {
       saveSession({ code: res.code, token: res.token, playerId: res.playerId, name: res.view.me?.name ?? name });
       navigate(`/r/${res.code}`, true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Das hat nicht geklappt.');
+      setError(err instanceof Error ? err.message : t('Das hat nicht geklappt.'));
       setBusy(false);
     }
   };
@@ -316,18 +328,19 @@ export function CreateRoom({ bot = false }: { bot?: boolean }) {
   return (
     <main class="page create">
       <header class="page-head">
-        <button class="back" onClick={() => navigate('/')} aria-label="Zurück">
+        <button class="back" onClick={() => navigate('/')} aria-label={t('Zurück')}>
           ←
         </button>
         <Logo small />
       </header>
-      <h1>{bot ? `Gegen ${BOT_NAME} spielen` : 'Raum eröffnen'}</h1>
+      <h1>{bot ? t('Gegen {bot} spielen', { bot: BOT_NAME }) : t('Raum eröffnen')}</h1>
       {bot && (
         <div class="bot-intro">
           <JosephPortrait />
           <p class="lead">
-            {BOT_NAME} schreibt Bluffs und rät mit. Der Raum gehört dir: Du startest, wann du willst, und kannst auch Freunde
-            einladen.
+            {t('{bot} schreibt Bluffs und rät mit. Der Raum gehört dir: Du startest, wann du willst, und kannst auch Freunde einladen.', {
+              bot: BOT_NAME,
+            })}
           </p>
         </div>
       )}
@@ -339,11 +352,11 @@ export function CreateRoom({ bot = false }: { bot?: boolean }) {
         }}
       >
         <label class="field">
-          <span>Dein Spitzname</span>
+          <span>{t('Dein Spitzname')}</span>
           <input
             value={name}
             onInput={(e) => setName((e.currentTarget as HTMLInputElement).value)}
-            placeholder="z. B. Timotheus"
+            placeholder={t('z. B. Timotheus')}
             maxLength={NAME_MAX}
             required
           />
@@ -353,8 +366,8 @@ export function CreateRoom({ bot = false }: { bot?: boolean }) {
           <Toggle
             checked={plays}
             onChange={setPlays}
-            label="Ich spiele mit"
-            hint={plays ? 'Du leitest und spielst auf diesem Handy.' : 'Dieses Gerät leitet nur – ideal für Beamer oder Fernseher.'}
+            label={t('Ich spiele mit')}
+            hint={plays ? t('Du leitest und spielst auf diesem Handy.') : t('Dieses Gerät leitet nur – ideal für Beamer oder Fernseher.')}
           />
         )}
         {!bot && <HeartToggle checked={settings.heartRound} onChange={(heartRound) => set({ heartRound })} />}
@@ -362,7 +375,7 @@ export function CreateRoom({ bot = false }: { bot?: boolean }) {
         {bot ? (
           <details class="more-settings">
             <summary>
-              <span>Einstellungen</span>
+              <span>{t('Einstellungen')}</span>
               <span class="muted small">{settingsSummary(settings)}</span>
             </summary>
             <SettingsFields settings={settings} onChange={set} />
@@ -377,7 +390,7 @@ export function CreateRoom({ bot = false }: { bot?: boolean }) {
           </p>
         )}
         <Button type="submit" variant="gold" block disabled={busy}>
-          {busy ? 'Raum wird eröffnet …' : bot ? `Raum mit ${BOT_NAME} eröffnen` : 'Raum eröffnen'}
+          {busy ? t('Raum wird eröffnet …') : bot ? t('Raum mit {bot} eröffnen', { bot: BOT_NAME }) : t('Raum eröffnen')}
         </Button>
       </form>
       <LegalLinks />
@@ -391,25 +404,27 @@ export function HeartToggle({ checked, onChange }: { checked: boolean; onChange:
     <Toggle
       checked={checked}
       onChange={onChange}
-      label="Herzensrunde am Ende"
+      label={t('Herzensrunde am Ende')}
       hint={
         checked
-          ? 'Zum Schluss eine Runde ohne Punkte: Alle schreiben ehrlich, zum Beispiel was sie an Jesus überrascht hat. Die Antworten erscheinen ohne Namen.'
-          : 'Ohne Herzensrunde: Nach der letzten Runde kommt gleich der Endstand.'
+          ? t(
+              'Zum Schluss eine Runde ohne Punkte: Alle schreiben ehrlich, zum Beispiel was sie an Jesus überrascht hat. Die Antworten erscheinen ohne Namen.',
+            )
+          : t('Ohne Herzensrunde: Nach der letzten Runde kommt gleich der Endstand.')
       }
     />
   );
 }
 
-const ROUND_TYPE_HINTS: Record<RoundType, string> = {
-  fragen: 'Bibelfragen – alle erfinden eine falsche Antwort.',
-  luecken: 'Ein Satz mit Lücke – alle erfinden, was hineingehört.',
-  gemischt: 'Fragen und Lückentexte: etwa jede dritte Runde ist ein Lückentext.',
-};
+function roundTypeHint(type: RoundType): string {
+  if (type === 'fragen') return t('Bibelfragen – alle erfinden eine falsche Antwort.');
+  if (type === 'luecken') return t('Ein Satz mit Lücke – alle erfinden, was hineingehört.');
+  return t('Fragen und Lückentexte: etwa jede dritte Runde ist ein Lückentext.');
+}
 
 export function SettingsFields(props: { settings: Settings; onChange: (patch: Partial<Settings>) => void; disabled?: boolean }) {
   const { settings, onChange, disabled } = props;
-  const pool = usePool();
+  const pool = usePool(settings.lang);
   const available = pool ? poolCount(pool, settings) : null;
   const all = settings.categories.length >= ALL_CATEGORIES.length;
   const toggle = (id: CategoryId) => {
@@ -422,9 +437,9 @@ export function SettingsFields(props: { settings: Settings; onChange: (patch: Pa
   return (
     <div class="settings">
       <div class="field">
-        <span>Runden</span>
+        <span>{t('Runden')}</span>
         <Segmented
-          label="Runden"
+          label={t('Runden')}
           value={settings.rounds}
           options={ROUND_OPTIONS.map((n) => ({ value: n, label: String(n) }))}
           onChange={(rounds) => onChange({ rounds })}
@@ -432,26 +447,26 @@ export function SettingsFields(props: { settings: Settings; onChange: (patch: Pa
         />
       </div>
       <div class="field">
-        <span>Rundenart</span>
+        <span>{t('Rundenart')}</span>
         <Segmented
-          label="Rundenart"
+          label={t('Rundenart')}
           value={settings.roundType}
-          options={ROUND_TYPE_OPTIONS}
+          options={ROUND_TYPE_OPTIONS.map((o) => ({ value: o.value, label: t(o.label) }))}
           onChange={(roundType) => onChange({ roundType })}
           disabled={disabled}
         />
-        <small class="field-hint">{ROUND_TYPE_HINTS[settings.roundType]}</small>
+        <small class="field-hint">{roundTypeHint(settings.roundType)}</small>
       </div>
       <div class="field">
         <span class="field-head">
-          Kategorien
+          {t('Kategorien')}
           {!all && (
             <button type="button" class="link-btn" disabled={disabled} onClick={() => onChange({ categories: [...ALL_CATEGORIES] })}>
-              Alle wählen
+              {t('Alle wählen')}
             </button>
           )}
         </span>
-        <div class="cat-chips" role="group" aria-label="Kategorien">
+        <div class="cat-chips" role="group" aria-label={t('Kategorien')}>
           {CATEGORIES.map((c) => {
             const on = settings.categories.includes(c.id);
             const n = pool ? categoryCount(pool, c.id, settings.roundType) : null;
@@ -463,7 +478,7 @@ export function SettingsFields(props: { settings: Settings; onChange: (patch: Pa
                 disabled={disabled || (n === 0 && !on)}
                 onClick={() => toggle(c.id)}
               >
-                <span>{c.label}</span>
+                <span>{t(c.label)}</span>
                 {n !== null && <small>{n}</small>}
               </button>
             );
@@ -472,25 +487,28 @@ export function SettingsFields(props: { settings: Settings; onChange: (patch: Pa
         {available !== null && (
           <small class={`field-hint${available < settings.rounds ? ' is-warn' : ''}`}>
             {available < settings.rounds
-              ? `Mit dieser Auswahl gibt es nur ${available} ${poolNoun(settings.roundType)} – die Partie hat dann ${available} Runden.`
-              : `${available} ${poolNoun(settings.roundType)} passen zu deiner Auswahl.`}
+              ? t('Mit dieser Auswahl gibt es nur {count} – die Partie hat dann {n} Runden.', {
+                  count: poolAmount(available, settings.roundType),
+                  n: available,
+                })
+              : t('{count} passen zu deiner Auswahl.', { count: poolAmount(available, settings.roundType) })}
           </small>
         )}
       </div>
       <div class="field">
-        <span>Schwierigkeit</span>
+        <span>{t('Schwierigkeit')}</span>
         <Segmented
-          label="Schwierigkeit"
+          label={t('Schwierigkeit')}
           value={settings.difficulty}
-          options={DIFFICULTY_OPTIONS}
+          options={DIFFICULTY_OPTIONS.map((o) => ({ value: o.value, label: t(o.label) }))}
           onChange={(difficulty) => onChange({ difficulty })}
           disabled={disabled}
         />
       </div>
       <div class="field">
-        <span>Zeit zum Bluffen</span>
+        <span>{t('Zeit zum Bluffen')}</span>
         <Segmented
-          label="Zeit zum Bluffen"
+          label={t('Zeit zum Bluffen')}
           value={settings.writeSeconds}
           options={WRITE_OPTIONS.map((n) => ({ value: n, label: `${n} s` }))}
           onChange={(writeSeconds) => onChange({ writeSeconds })}
@@ -498,9 +516,9 @@ export function SettingsFields(props: { settings: Settings; onChange: (patch: Pa
         />
       </div>
       <div class="field">
-        <span>Zeit zum Abstimmen</span>
+        <span>{t('Zeit zum Abstimmen')}</span>
         <Segmented
-          label="Zeit zum Abstimmen"
+          label={t('Zeit zum Abstimmen')}
           value={settings.voteSeconds}
           options={VOTE_OPTIONS.map((n) => ({ value: n, label: `${n} s` }))}
           onChange={(voteSeconds) => onChange({ voteSeconds })}

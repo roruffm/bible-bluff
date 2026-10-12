@@ -173,7 +173,7 @@ describe('Öffentliche Räume', () => {
     t.clock.advance(5000); // Zwischenspeicher der Liste abgelaufen
     const raw = await t.call('GET', '/api/rooms');
     expect(raw.body.rooms).toEqual([
-      { code, people: 2, free: 10, status: 'lobby', round: null, rounds: 4, difficulty: 'gemischt' },
+      { code, people: 2, free: 10, status: 'lobby', round: null, rounds: 4, difficulty: 'gemischt', lang: 'de' },
     ]);
     expect(JSON.stringify(raw.body)).not.toMatch(/Rahel|Jonas/);
 

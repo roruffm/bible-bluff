@@ -15,9 +15,11 @@ export function bluffKey(text: string): string {
 /** Kandidaten aus einer beendeten Partie – ohne Bluffs, die schon Hausbluffs der Frage sind */
 export function candidatesFromGame(state: RoomState): BluffCandidateInput[] {
   const out: BluffCandidateInput[] = [];
+  // Freigabe und Hausbluffs aus echten Partien gibt es vorerst nur auf Deutsch
+  if (state.settings.lang !== 'de') return out;
   for (const h of state.game?.history ?? []) {
-    if (!hasQuestion(h.questionId)) continue;
-    const q = getQuestion(h.questionId);
+    if (!hasQuestion(h.questionId, 'de')) continue;
+    const q = getQuestion(h.questionId, 'de');
     for (const b of h.strong ?? []) {
       const key = bluffKey(b.text);
       if (!key || q.bluffs.some((house) => isDuplicate(house, b.text))) continue;
@@ -29,7 +31,7 @@ export function candidatesFromGame(state: RoomState): BluffCandidateInput[] {
 
 /** Für die Freigabe-Seite: Kandidat samt Frage, Antwort und bisherigen Hausbluffs */
 export function candidateView(row: BluffRow): BluffCandidateView {
-  const q = hasQuestion(row.questionId) ? getQuestion(row.questionId) : null;
+  const q = hasQuestion(row.questionId, 'de') ? getQuestion(row.questionId, 'de') : null;
   return {
     questionId: row.questionId,
     key: row.key,

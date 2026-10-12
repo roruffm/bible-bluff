@@ -47,7 +47,7 @@ function setup(names = ['Host', 'Anna', 'Ben', 'Cleo']) {
 }
 
 function question(state: RoomState) {
-  return getQuestion(state.game!.round.questionId);
+  return getQuestion(state.game!.round.questionId, 'de');
 }
 
 describe('Raum und Beitritt', () => {
@@ -89,7 +89,7 @@ describe('Fragenauswahl', () => {
       const { main, spare } = pickQuestions(classic('gemischt'), new Set(), 8, seeded(seed));
       expect(main).toHaveLength(8);
       expect(spare.length).toBeGreaterThan(0);
-      const qs = main.map(getQuestion);
+      const qs = main.map((id) => getQuestion(id, 'de'));
       expect(new Set(qs.map((q) => q.book)).size).toBe(8);
       expect(qs.filter((q) => q.number).length).toBeLessThanOrEqual(2);
       // gemischt: Schwierigkeit steigt an
@@ -100,7 +100,7 @@ describe('Fragenauswahl', () => {
 
   it('bevorzugt die gewählte Schwierigkeit', () => {
     const { main } = pickQuestions(classic('leicht'), new Set(), 8, seeded(3));
-    const easy = main.map(getQuestion).filter((q) => q.difficulty === 1).length;
+    const easy = main.map((id) => getQuestion(id, 'de')).filter((q) => q.difficulty === 1).length;
     expect(easy).toBeGreaterThanOrEqual(4);
   });
 

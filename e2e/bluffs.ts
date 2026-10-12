@@ -5,3 +5,10 @@ export const SAFE_BLUFFS = {
   mirjam: 'Zwei Becher Ziegenmilch',
   anna: 'Eine Harfe aus Zedernholz',
 } as const;
+
+/** Dasselbe für die englische Partie – geprüft gegen den englischen Fragenpool (tests/english.test.ts) */
+export const SAFE_BLUFFS_EN = {
+  host: 'A neon pink submarine',
+  amara: 'Tartan umbrellas for everyone',
+  ben: 'A clockwork penguin',
+} as const;

@@ -2,7 +2,10 @@
 // an den Server. Format etwa wie ein heutiges Handy (9 : 19,5). Der Vers steht unterhalb der Uhrzeit,
 // die Bildschirmsperre oben anzeigt, und über den Knöpfen am unteren Rand.
 
-import { VERSE_SOURCE, type WeekVerse } from '../../shared/verses';
+import { quoted } from '../../shared/calendar';
+import { translate } from '../../shared/i18n';
+import type { Lang } from '../../shared/types';
+import { type WeekVerse, verseSource } from '../../shared/verses';
 
 const W = 1170;
 const H = 2532;
@@ -40,7 +43,7 @@ export interface VerseImage {
   file: File;
 }
 
-export async function verseImage(verse: WeekVerse): Promise<VerseImage> {
+export async function verseImage(verse: WeekVerse, lang: Lang): Promise<VerseImage> {
   try {
     await Promise.all([document.fonts.load(`600 80px ${FONT}`), document.fonts.load(`800 40px ${FONT}`)]);
   } catch {
@@ -65,7 +68,7 @@ export async function verseImage(verse: WeekVerse): Promise<VerseImage> {
   let lines: string[] = [];
   for (; size >= 48; size -= 4) {
     ctx.font = `600 ${size}px ${FONT}`;
-    lines = wrap(ctx, `„${verse.text}“`, width);
+    lines = wrap(ctx, quoted(verse.text, lang), width);
     if (lines.length * size * 1.34 <= H * 0.4) break;
   }
   const lineHeight = size * 1.34;
@@ -76,7 +79,7 @@ export async function verseImage(verse: WeekVerse): Promise<VerseImage> {
   ctx.textBaseline = 'alphabetic';
   ctx.fillStyle = '#f2c879';
   ctx.font = `800 32px ${FONT}`;
-  ctx.fillText('MEIN VERS FÜR DIE WOCHE', W / 2, top + 32);
+  ctx.fillText(translate(lang, 'MEIN VERS FÜR DIE WOCHE'), W / 2, top + 32);
 
   ctx.fillStyle = '#f6efe0';
   ctx.font = `600 ${size}px ${FONT}`;
@@ -90,13 +93,13 @@ export async function verseImage(verse: WeekVerse): Promise<VerseImage> {
 
   ctx.fillStyle = 'rgba(246, 239, 224, 0.45)';
   ctx.font = `600 28px ${FONT}`;
-  ctx.fillText(`${VERSE_SOURCE} · biblebluff.de`, W / 2, H - 200);
+  ctx.fillText(`${verseSource(lang)} · biblebluff.de`, W / 2, H - 200);
 
   const url = canvas.toDataURL('image/jpeg', 0.9);
   const blob = await new Promise<Blob>((resolve, reject) =>
     canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('Kein Bild'))), 'image/jpeg', 0.9),
   );
-  return { url, file: new File([blob], `vers-${verse.id}.jpg`, { type: 'image/jpeg' }) };
+  return { url, file: new File([blob], `${lang === 'en' ? 'verse' : 'vers'}-${verse.id}.jpg`, { type: 'image/jpeg' }) };
 }
 
 /** Morgen als JJJJMMTT nach der Uhr dieses Handys – ab dann erinnert der Kalender */

@@ -3,6 +3,7 @@
 
 import type { ComponentChildren } from 'preact';
 import { BOT_NAME } from '../../shared/rules';
+import { t, tj } from '../lib/i18n';
 import { navigate } from '../lib/router';
 import { Points, RuleSteps } from './ui';
 
@@ -15,137 +16,145 @@ function Topic({ title, children }: { title: string; children: ComponentChildren
   );
 }
 
+/** Ein Punkt mit fettem Stichwort davor */
+function Item({ label, children }: { label: string; children: ComponentChildren }) {
+  return (
+    <li>
+      <b>{label}</b> {children}
+    </li>
+  );
+}
+
 export function Guide() {
+  const bot = BOT_NAME;
   return (
     <details class="fold guide">
       <summary>
-        <span class="fold-title">So geht’s</span>
-        <span class="fold-hint">Anleitung: Ablauf, Punkte, {BOT_NAME}, Herzensrunde, Gespräch danach</span>
+        <span class="fold-title">{t('So geht’s')}</span>
+        <span class="fold-hint">{t('Anleitung: Ablauf, Punkte, {bot}, Herzensrunde, Gespräch danach', { bot })}</span>
       </summary>
       <div class="fold-body">
         <RuleSteps />
         <Points />
-        <p class="muted small">
-          Bibelwissen hilft, ist aber kein Muss: Gute Einfälle und Menschenkenntnis zählen genauso.
-        </p>
+        <p class="muted small">{t('Bibelwissen hilft, ist aber kein Muss: Gute Einfälle und Menschenkenntnis zählen genauso.')}</p>
 
         <div class="guide-topics">
-          <Topic title="Mit Freunden spielen und leiten">
+          <Topic title={t('Mit Freunden spielen und leiten')}>
+            <Item label={t('Raum eröffnen:')}>
+              {t(
+                'Du wählst Runden, Rundenart (Fragen, Lückentext oder gemischt), Kategorien, Schwierigkeit und Zeiten. Du spielst mit oder leitest nur, etwa am Beamer.',
+              )}
+            </Item>
+            <Item label={t('Beitreten:')}>
+              {t('Die anderen scannen den QR-Code oder geben Raumcode und Spitznamen ein – ohne App und ohne Konto.')}
+            </Item>
+            <Item label={t('Leinwand:')}>
+              {t('Über „Leinwand-Ansicht öffnen“ zeigt ein Fernseher oder Beamer alles groß für alle.')}
+            </Item>
+            <Item label={t('Leitung:')}>
+              {t(
+                'Im Menü „Leitung“ kannst du pausieren, eine Frage tauschen, den Raum sperren oder öffentlich zeigen und die Leitung übergeben.',
+              )}
+            </Item>
+            <Item label={t('Handy gewechselt?')}>
+              {t(
+                'Gib im selben Raum denselben Spitznamen ein, dann spielst du am alten Platz weiter. Neu laden oder kurz offline sein schadet nicht.',
+              )}
+            </Item>
+          </Topic>
+
+          <Topic title={t('Allein gegen {bot}', { bot })}>
             <li>
-              <b>Raum eröffnen:</b> Du wählst Runden, Rundenart (Fragen, Lückentext oder gemischt), Kategorien,
-              Schwierigkeit und Zeiten. Du spielst mit oder leitest nur, etwa am Beamer.
+              {t('{bot} ist ein Bot und hat immer Zeit. Mit „Gegen {bot} spielen“ bekommst du einen eigenen Raum, in dem er schon sitzt.', {
+                bot,
+              })}
             </li>
             <li>
-              <b>Beitreten:</b> Die anderen scannen den QR-Code oder geben Raumcode und Spitznamen ein – ohne App und
-              ohne Konto.
+              {t(
+                'Er schreibt Bluffs, rät mit und verteilt Herzen. Die Wahrheit findet er in knapp der Hälfte der Runden – du kannst ihn also schlagen.',
+              )}
             </li>
+            <li>{t('Du startest, wann du willst, und kannst jederzeit Freunde dazuholen.')}</li>
             <li>
-              <b>Leinwand:</b> Über „Leinwand-Ansicht öffnen“ zeigt ein Fernseher oder Beamer alles groß für alle.
-            </li>
-            <li>
-              <b>Leitung:</b> Im Menü „Leitung“ kannst du pausieren, eine Frage tauschen, den Raum sperren oder
-              öffentlich zeigen und die Leitung übergeben.
-            </li>
-            <li>
-              <b>Handy gewechselt?</b> Gib im selben Raum denselben Spitznamen ein, dann spielst du am alten Platz
-              weiter. Neu laden oder kurz offline sein schadet nicht.
+              {t(
+                'Lieber gleich mit anderen? Zeigt jemand seinen Raum öffentlich, steht er oben unter „Offene Räume“. Ein Tipp, und du bist dabei.',
+              )}
             </li>
           </Topic>
 
-          <Topic title={`Allein gegen ${BOT_NAME}`}>
+          <Topic title={t('Extras in jeder Runde')}>
+            <Item label={t('Keine Idee?')}>{t('Einmal pro Runde gibt es einen Vorschlag für einen Bluff.')}</Item>
+            <Item label={t('Zu nah an der Wahrheit:')}>
+              {t('Stimmt dein Bluff aus Versehen, lehnt das Spiel ihn ab. Dann denkst du dir etwas anderes aus.')}
+            </Item>
+            <Item label={t('Lieblingsbluff:')}>
+              {t('Nach der Auflösung verteilst du ein Herz. Der Bluff mit den meisten Herzen bringt +1 Punkt.')}
+            </Item>
+            <Item label={t('Liebe deinen Nächsten:')}>
+              {t('Einmal pro Runde kannst du einen eigenen Punkt an jemanden verschenken.')}
+            </Item>
+            <Item label={t('Ruhige Minute:')}>
+              {t('Brauchst du eine Pause zum Beten, setzt du eine Runde aus und siehst einen Psalmvers mit einem kurzen Gebetsimpuls.')}
+            </Item>
+          </Topic>
+
+          <Topic title={t('Herzensrunde')}>
             <li>
-              {BOT_NAME} ist ein Bot und hat immer Zeit. Mit „Gegen {BOT_NAME} spielen“ bekommst du einen eigenen Raum, in
-              dem er schon sitzt.
+              {t(
+                'Zum Schluss eine Runde ohne Punkte und ohne Bluffen: Alle beantworten ehrlich eine Frage, etwa „Was hat dich heute an Jesus überrascht?“',
+              )}
             </li>
             <li>
-              Er schreibt Bluffs, rät mit und verteilt Herzen. Die Wahrheit findet er in knapp der Hälfte der Runden – du
-              kannst ihn also schlagen.
+              {t('Die Antworten erscheinen gemischt und ohne Namen. „Diesmal nicht“ ist immer in Ordnung, und mit dem Endstand ist alles gelöscht.')}
             </li>
-            <li>Du startest, wann du willst, und kannst jederzeit Freunde dazuholen.</li>
             <li>
-              Lieber gleich mit anderen? Zeigt jemand seinen Raum öffentlich, steht er oben unter „Offene Räume“. Ein
-              Tipp, und du bist dabei.
+              {t(
+                'Sie ist zunächst eingeschaltet. Die Leitung kann sie beim Eröffnen oder im Warteraum ausschalten. Allein gegen {bot} gibt es keine Herzensrunde.',
+                { bot },
+              )}
             </li>
           </Topic>
 
-          <Topic title="Extras in jeder Runde">
-            <li>
-              <b>Keine Idee?</b> Einmal pro Runde gibt es einen Vorschlag für einen Bluff.
-            </li>
-            <li>
-              <b>Zu nah an der Wahrheit:</b> Stimmt dein Bluff aus Versehen, lehnt das Spiel ihn ab. Dann denkst du dir
-              etwas anderes aus.
-            </li>
-            <li>
-              <b>Lieblingsbluff:</b> Nach der Auflösung verteilst du ein Herz. Der Bluff mit den meisten Herzen bringt +1
-              Punkt.
-            </li>
-            <li>
-              <b>Liebe deinen Nächsten:</b> Einmal pro Runde kannst du einen eigenen Punkt an jemanden verschenken.
-            </li>
-            <li>
-              <b>Ruhige Minute:</b> Brauchst du eine Pause zum Beten, setzt du eine Runde aus und siehst einen Psalmvers
-              mit einem kurzen Gebetsimpuls.
-            </li>
+          <Topic title={t('Nachbesprechung: vom Spiel ins Gespräch')}>
+            <Item label={t('Spickzettel:')}>
+              {t('Nach jeder Auflösung sieht nur die Leitung Hintergrundwissen, eine Gesprächsfrage und einen Querverweis.')}
+            </Item>
+            <Item label={t('Weiter ins Gespräch:')}>
+              {t(
+                'Nach dem Endstand wählt die Leitung eine Frage der Partie, vorgeschlagen ist die, bei der die meisten danebenlagen. Alle Handys und die Leinwand gehen mit.',
+              )}
+            </Item>
+            <Item label={t('Vier Schritte:')}>
+              {t('Lesen, Entdecken, Nachfragen, Mitnehmen. So wird aus dem Spieleabend ein Hauskreisabend ohne Vorbereitung.')}
+            </Item>
+            <li>{t('Das Gespräch ist freiwillig: „Zurück zum Endstand“ beendet es jederzeit.')}</li>
           </Topic>
 
-          <Topic title="Herzensrunde">
-            <li>
-              Zum Schluss eine Runde ohne Punkte und ohne Bluffen: Alle beantworten ehrlich eine Frage, etwa „Was hat
-              dich heute an Jesus überrascht?“
-            </li>
-            <li>
-              Die Antworten erscheinen gemischt und ohne Namen. „Diesmal nicht“ ist immer in Ordnung, und mit dem
-              Endstand ist alles gelöscht.
-            </li>
-            <li>
-              Sie ist zunächst eingeschaltet. Die Leitung kann sie beim Eröffnen oder im Warteraum ausschalten. Allein
-              gegen {BOT_NAME} gibt es keine Herzensrunde.
-            </li>
-          </Topic>
-
-          <Topic title="Nachbesprechung: vom Spiel ins Gespräch">
-            <li>
-              <b>Spickzettel:</b> Nach jeder Auflösung sieht nur die Leitung Hintergrundwissen, eine Gesprächsfrage und
-              einen Querverweis.
-            </li>
-            <li>
-              <b>Weiter ins Gespräch:</b> Nach dem Endstand wählt die Leitung eine Frage der Partie, vorgeschlagen ist
-              die, bei der die meisten danebenlagen. Alle Handys und die Leinwand gehen mit.
-            </li>
-            <li>
-              <b>Vier Schritte:</b> Lesen, Entdecken, Nachfragen, Mitnehmen. So wird aus dem Spieleabend ein
-              Hauskreisabend ohne Vorbereitung.
-            </li>
-            <li>Das Gespräch ist freiwillig: „Zurück zum Endstand“ beendet es jederzeit.</li>
-          </Topic>
-
-          <Topic title="Nach der Partie">
-            <li>
-              <b>Endstand:</b> Siegertreppchen und Auszeichnungen wie Bluff-Meister, Wahrheitsfinder oder Bester Bluff
-              des Abends.
-            </li>
-            <li>
-              <b>Entdeckungen:</b> Eine Seite mit allen Fragen, Antworten und Bibelstellen der Partie – ohne Namen, zum
-              Teilen und Nachlesen.
-            </li>
-            <li>
-              <b>Mein Vers für die Woche:</b> Ein passender Vers als Sperrbildschirm, auf Wunsch mit täglicher
-              Erinnerung im Kalender.
-            </li>
-            <li>
-              <b>Neugierig auf Jesus?</b>{' '}
-              <a
-                href="/jesus"
-                onClick={(e) => {
-                  e.preventDefault();
-                  navigate('/jesus');
-                }}
-              >
-                Eine kurze, ehrliche Seite
-              </a>{' '}
-              für alle, die mehr wissen wollen.
-            </li>
+          <Topic title={t('Nach der Partie')}>
+            <Item label={t('Endstand:')}>
+              {t('Siegertreppchen und Auszeichnungen wie Bluff-Meister, Wahrheitsfinder oder Bester Bluff des Abends.')}
+            </Item>
+            <Item label={t('Entdeckungen:')}>
+              {t('Eine Seite mit allen Fragen, Antworten und Bibelstellen der Partie – ohne Namen, zum Teilen und Nachlesen.')}
+            </Item>
+            <Item label={t('Mein Vers für die Woche:')}>
+              {t('Ein passender Vers als Sperrbildschirm, auf Wunsch mit täglicher Erinnerung im Kalender.')}
+            </Item>
+            <Item label={t('Neugierig auf Jesus?')}>
+              {tj('{link} für alle, die mehr wissen wollen.', {
+                link: (
+                  <a
+                    href="/jesus"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      navigate('/jesus');
+                    }}
+                  >
+                    {t('Eine kurze, ehrliche Seite')}
+                  </a>
+                ),
+              })}
+            </Item>
           </Topic>
         </div>
       </div>
