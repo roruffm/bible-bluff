@@ -143,9 +143,9 @@ export function Home() {
 function QuickPreview({ onPlay, busy }: { onPlay: () => void; busy: boolean }) {
   const [choice, setChoice] = useState<number | null>(null);
   const answers = [
-    t('Er bat um eine Kaffeepause.'),
+    t('Er rief: Kaffeepause!'),
     t('Er fiel aus dem Fenster.'),
-    t('Er hielt die Predigt selbst.'),
+    t('Er löste Paulus ab.'),
   ];
   return (
     <section class="card quick-preview" aria-labelledby="preview-title">
