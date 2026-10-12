@@ -30,8 +30,36 @@ import { type Session, lastRoom, loadSession, rememberedName, saveSession } from
 
 export function Home() {
   const [code, setCode] = useState('');
+  const [quickBusy, setQuickBusy] = useState(false);
+  const [quickError, setQuickError] = useState<string | null>(null);
   const last = lastRoom();
   const lastSession = last ? loadSession(last) : null;
+
+  const quickPlay = async () => {
+    if (quickBusy) return;
+    setQuickBusy(true);
+    setQuickError(null);
+    try {
+      const name = rememberedName().trim() || t('Gast');
+      const settings: Settings = {
+        ...BOT_SETTINGS,
+        rounds: 4,
+        difficulty: 'leicht',
+        roundType: 'fragen',
+        writeSeconds: 90,
+        voteSeconds: 30,
+        lang: preferredLang(),
+      };
+      const res = await api.createRoom(name, true, settings, true);
+      saveSession({ code: res.code, token: res.token, playerId: res.playerId, name: res.view.me?.name ?? name });
+      // Der Raum ist schon gespeichert: Bei einem Fehler kann man ihn in der Lobby selbst starten.
+      await api.action(res.code, res.token, { type: 'start' }).catch(() => {});
+      navigate(`/r/${res.code}`);
+    } catch (err) {
+      setQuickError(err instanceof Error ? err.message : t('Das hat nicht geklappt.'));
+      setQuickBusy(false);
+    }
+  };
 
   return (
     <main class="page home">
@@ -39,7 +67,15 @@ export function Home() {
         <LangSwitch />
         <Logo />
         <p class="tagline">{t('Erfinde Bluffs. Finde die Wahrheit. Entdecke die Bibel.')}</p>
+        <div class="hero-start">
+          <Button variant="gold" block disabled={quickBusy} onClick={quickPlay}>
+            {quickBusy ? t('Spiel startet …') : t('Jetzt sofort spielen')}
+          </Button>
+          <p>{t('Allein gegen Joseph · ohne Anmeldung · direkt zur ersten Frage')}</p>
+        </div>
       </header>
+
+      {quickError && <p class="error" role="alert">{quickError}</p>}
 
       {lastSession && (
         <a
@@ -54,29 +90,9 @@ export function Home() {
         </a>
       )}
 
+      <QuickPreview onPlay={quickPlay} busy={quickBusy} />
+
       <OpenRooms />
-
-      <section class="card choice" aria-labelledby="join-title">
-        <div class="choice-head">
-          <span class="choice-icon is-join">
-            <EnterIcon />
-          </span>
-          <div>
-            <h2 id="join-title">{t('Mitspielen')}</h2>
-            <p class="muted small">{t('Du hast einen Raumcode bekommen? Gib ihn hier ein.')}</p>
-          </div>
-        </div>
-        <JoinForm
-          code={code}
-          onCode={setCode}
-          onJoined={(s) => navigate(`/r/${s.code}`)}
-          askCode
-        />
-      </section>
-
-      <div class="or">
-        <span>{t('oder selbst starten')}</span>
-      </div>
 
       <section class="card choice" aria-labelledby="create-title">
         <div class="choice-head">
@@ -93,17 +109,21 @@ export function Home() {
         </Button>
       </section>
 
-      <section class="card choice" aria-labelledby="joseph-title">
+      <div class="or">
+        <span>{t('oder einem Raum beitreten')}</span>
+      </div>
+
+      <section class="card choice" aria-labelledby="join-title">
         <div class="choice-head">
-          <JosephPortrait />
+          <span class="choice-icon is-join">
+            <EnterIcon />
+          </span>
           <div>
-            <h2 id="joseph-title">{t('Allein gegen {bot}', { bot: BOT_NAME })}</h2>
-            <p class="muted small">{t('{bot} ist ein Bot und hat immer Zeit. Er erfindet Bluffs, rät mit – und ist schlagbar.', { bot: BOT_NAME })}</p>
+            <h2 id="join-title">{t('Mitspielen')}</h2>
+            <p class="muted small">{t('Du hast einen Raumcode bekommen? Gib ihn hier ein.')}</p>
           </div>
         </div>
-        <Button block raised onClick={() => navigate('/joseph')}>
-          {t('Gegen {bot} spielen', { bot: BOT_NAME })}
-        </Button>
+        <JoinForm code={code} onCode={setCode} onJoined={(s) => navigate(`/r/${s.code}`)} askCode />
       </section>
 
       <Guide />
@@ -116,6 +136,50 @@ export function Home() {
       </footer>
       <LegalLinks />
     </main>
+  );
+}
+
+/** Erste Entscheidung ohne Anmeldung oder Zeitdruck: so versteht man den Bluff, bevor man selbst einen schreibt. */
+function QuickPreview({ onPlay, busy }: { onPlay: () => void; busy: boolean }) {
+  const [choice, setChoice] = useState<number | null>(null);
+  const answers = [
+    t('Er bat um eine Kaffeepause.'),
+    t('Er schlief ein und fiel aus dem Fenster.'),
+    t('Er übernahm spontan die Predigt.'),
+  ];
+  return (
+    <section class="card quick-preview" aria-labelledby="preview-title">
+      <p class="eyebrow">{t('Eine Frage zum Ausprobieren')}</p>
+      <h2 id="preview-title">{t('Was geschah Eutychus, als Paulus bis Mitternacht redete?')}</h2>
+      <p class="muted small">{t('Zwei Antworten sind erfunden. Welche steht wirklich in der Bibel?')}</p>
+      <div class="preview-answers">
+        {answers.map((answer, index) => (
+          <button
+            key={index}
+            type="button"
+            class={`preview-answer${choice !== null && index === 1 ? ' is-true' : ''}${choice === index && index !== 1 ? ' is-bluff' : ''}`}
+            onClick={() => setChoice(index)}
+            aria-pressed={choice === index}
+          >
+            <span class="preview-letter">{String.fromCharCode(65 + index)}</span>
+            <span>{answer}</span>
+          </button>
+        ))}
+      </div>
+      {choice !== null && (
+        <div class="preview-reveal" role="status">
+          <b>{choice === 1 ? t('Treffer!') : t('Reingelegt!')}</b>{' '}
+          {t('Eutychus fiel tatsächlich schlafend aus dem Fenster. Paulus ging zu ihm hinab, und der Junge wurde lebend nach Hause gebracht. Apostelgeschichte 20,7–12.')}
+          <p>{t('Im Spiel erfindest du selbst solche Bluffs – und versuchst, Josephs Antwort zu durchschauen.')}</p>
+          <Button variant="gold" block disabled={busy} onClick={onPlay}>
+            {busy ? t('Spiel startet …') : t('Jetzt gegen Joseph spielen')}
+          </Button>
+        </div>
+      )}
+      <button type="button" class="preview-custom" onClick={() => navigate('/joseph')}>
+        {t('Partie mit eigenen Einstellungen starten →')}
+      </button>
+    </section>
   );
 }
 
