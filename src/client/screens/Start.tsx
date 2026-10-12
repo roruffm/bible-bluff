@@ -144,7 +144,7 @@ function QuickPreview({ onPlay, busy }: { onPlay: () => void; busy: boolean }) {
   const [choice, setChoice] = useState<number | null>(null);
   const answers = [
     t('Er bat um eine Kaffeepause.'),
-    t('Er fiel im Schlaf aus dem Fenster.'),
+    t('Er fiel aus dem Fenster.'),
     t('Er hielt die Predigt selbst.'),
   ];
   return (
