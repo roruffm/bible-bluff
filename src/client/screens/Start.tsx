@@ -144,14 +144,14 @@ function QuickPreview({ onPlay, busy }: { onPlay: () => void; busy: boolean }) {
   const [choice, setChoice] = useState<number | null>(null);
   const answers = [
     t('Er bat um eine Kaffeepause.'),
-    t('Er schlief ein und fiel aus dem Fenster.'),
-    t('Er übernahm spontan die Predigt.'),
+    t('Er fiel im Schlaf aus dem Fenster.'),
+    t('Er hielt die Predigt selbst.'),
   ];
   return (
     <section class="card quick-preview" aria-labelledby="preview-title">
       <p class="eyebrow">{t('Eine Frage zum Ausprobieren')}</p>
       <h2 id="preview-title">{t('Was passierte Eutychus bei Paulus’ Predigt?')}</h2>
-      <p class="muted small">{t('Zwei Antworten sind erfunden. Welche stimmt?')}</p>
+      <p class="muted small">{t('Eine Antwort ist echt. Welche?')}</p>
       <div class="preview-answers">
         {answers.map((answer, index) => (
           <button
