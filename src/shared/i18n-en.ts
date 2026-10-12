@@ -31,9 +31,9 @@ export const EN: Record<string, string> = {
   'Eine Frage zum Ausprobieren': 'Try a question',
   'Was passierte Eutychus bei Paulus’ Predigt?': 'What happened to Eutychus during Paul’s sermon?',
   'Eine Antwort ist echt. Welche?': 'Only one answer is real. Which one?',
-  'Er bat um eine Kaffeepause.': 'He asked for a coffee break.',
+  'Er rief: Kaffeepause!': 'He called for a coffee break!',
   'Er fiel aus dem Fenster.': 'He fell out of the window.',
-  'Er hielt die Predigt selbst.': 'He gave the sermon himself.',
+  'Er löste Paulus ab.': 'He took over from Paul.',
   'Treffer!': 'You got it!',
   'Reingelegt!': 'Fooled you!',
   'Eutychus schlief ein und fiel aus dem Fenster. Paulus ging zu ihm hinab; später brachten sie den Jungen lebend nach Hause.':
