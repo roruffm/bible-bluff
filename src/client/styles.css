@@ -621,6 +621,46 @@ textarea {
   margin-top: 22px;
 }
 
+.hero-start .hero-reassurance {
+  margin: 0 0 14px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  opacity: 0.9;
+}
+
+/* Gegen wen es geht und wie man das Spiel anpasst – eine ruhige Zeile unter dem Knopf */
+.hero-opponent {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px 10px;
+  margin-top: 14px;
+  font-size: 0.86rem;
+}
+
+.hero-opponent .avatar {
+  flex: none;
+}
+
+.hero-custom {
+  padding: 4px 2px;
+  border: 0;
+  background: transparent;
+  color: var(--gold);
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.hero-custom:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
 .hero-start p {
   margin: 10px 0 0;
   text-align: center;
@@ -630,51 +670,6 @@ textarea {
   text-wrap: balance;
 }
 
-.hero-start .hero-reassurance {
-  margin: 0 0 16px;
-  font-size: 0.94rem;
-  line-height: 1.5;
-  opacity: 1;
-}
-
-.hero-reassurance span,
-.hero-opponent p span {
-  display: block;
-}
-
-.hero-opponent {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 18px;
-}
-
-.hero-opponent .avatar {
-  flex: none;
-}
-
-.hero-opponent p {
-  min-width: 0;
-  margin: 0;
-  text-align: left;
-  line-height: 1.4;
-  opacity: 1;
-}
-
-.hero-opponent strong {
-  display: block;
-  font-size: 0.95rem;
-}
-
-.hero-opponent p span {
-  opacity: 0.86;
-}
-
-.hero-start .hero-entry-note {
-  margin-top: 12px;
-  font-size: 0.8rem;
-}
 
 .quick-preview h2 {
   margin: 4px 0 8px;
@@ -723,8 +718,7 @@ textarea {
   border-color: var(--primary);
 }
 
-.preview-answer:focus-visible,
-.preview-custom:focus-visible {
+.preview-answer:focus-visible {
   outline: 3px solid var(--gold-2);
   outline-offset: 2px;
 }
@@ -782,21 +776,6 @@ textarea {
   border-top: 1px solid color-mix(in srgb, var(--olive) 30%, transparent);
 }
 
-.preview-custom {
-  display: block;
-  margin: 14px auto 0;
-  padding: 8px;
-  border: 0;
-  background: transparent;
-  color: var(--primary);
-  font: inherit;
-  font-weight: 700;
-  text-decoration: underline;
-  cursor: pointer;
-  text-align: center;
-  line-height: 1.35;
-  text-wrap: balance;
-}
 
 .resume {
   display: block;
@@ -861,23 +840,24 @@ textarea {
   font-size: 0.9rem;
 }
 
-.or {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  color: var(--ink-3);
-  font-size: 0.9rem;
+
+/* Startseite: „Mit Freunden“ – Raum eröffnen und darunter, durch eine feine Linie getrennt, mit Code beitreten */
+.friends-join {
+  margin-top: 22px;
+  padding-top: 20px;
+  border-top: 1.5px solid var(--line);
 }
 
-.or::before,
-.or::after {
-  content: '';
-  flex: 1;
-  height: 1.5px;
-  background: var(--line);
+.friends-join h2 {
+  font-size: 1.1rem;
+  margin-bottom: 2px;
 }
 
-/* Startseite: drei Wege ins Spiel – je Karte ein Bildzeichen, Titel, ein Satz und ein Knopf */
+.friends-join > .muted {
+  margin-bottom: 12px;
+}
+
+/* Kopf einer Startseiten-Karte: Bildzeichen, Titel, ein Satz */
 .choice-head {
   display: flex;
   align-items: center;
@@ -913,10 +893,6 @@ textarea {
   height: 1.9rem;
 }
 
-.choice-icon.is-join {
-  background: color-mix(in srgb, var(--primary) 13%, var(--card));
-  color: var(--primary);
-}
 
 .choice-icon.is-create {
   background: var(--gold);
@@ -936,7 +912,31 @@ textarea {
   margin-bottom: 10px;
 }
 
-/* Startseite: Anleitung und Farben als ruhige Karten zum Aufklappen */
+/* Startseite: Anleitung und Farben als ruhige Zeilen ohne eigenen Kasten */
+.home-more {
+  border-top: 1.5px solid var(--line);
+  border-bottom: 1.5px solid var(--line);
+}
+
+.home-more .fold {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+}
+
+.home-more .fold + .fold {
+  border-top: 1px solid var(--line);
+}
+
+.home-more .fold > summary {
+  padding: 14px 4px;
+}
+
+.home-more .fold-body {
+  padding: 0 4px 18px;
+}
+
+/* Anleitung und Farben zum Aufklappen */
 .fold {
   background: var(--card-2);
   border-radius: var(--radius);

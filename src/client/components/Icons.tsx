@@ -24,19 +24,6 @@ export function BotFace() {
   );
 }
 
-/** Mit Code eintreten: Pfeil durch eine offene Tür */
-export function EnterIcon() {
-  return (
-    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
-      <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M14 4 H18 A2 2 0 0 1 20 6 V18 A2 2 0 0 1 18 20 H14" />
-        <path d="M3.5 12 H14" />
-        <path d="M10 8 L14 12 L10 16" />
-      </g>
-    </svg>
-  );
-}
-
 /** Mit Freunden: zwei Personen */
 export function FriendsIcon() {
   return (
