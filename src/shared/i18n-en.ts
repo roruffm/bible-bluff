@@ -108,6 +108,7 @@ export const EN: Record<string, string> = {
   'Du eröffnest einen Raum und leitest die Partie – auf dem Handy oder am Beamer.':
     'Create a room and host the game – on your phone or on a projector.',
   'Raum eröffnen': 'Create a room',
+  'Allein gegen {bot}': 'Solo against {bot}',
   'Gegen {bot} spielen': 'Play against {bot}',
   'Fragen aus allen 27 Büchern des Neuen Testaments und ausgewählten Geschichten des Alten Testaments · freikirchlich-pfingstliche Lernfassung':
     'Questions from the New Testament and selected Old Testament stories · Bible text: World English Bible (British Edition)',
