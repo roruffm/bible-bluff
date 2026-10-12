@@ -68,10 +68,18 @@ export function Home() {
         <Logo />
         <p class="tagline">{t('Erfinde Bluffs. Finde die Wahrheit. Entdecke die Bibel.')}</p>
         <div class="hero-start">
+          <p class="hero-reassurance">
+            <strong>{t('Kein Bibelprofi? Macht nichts.')}</strong>
+            <span>{t('Gute Bluffs zählen auch.')}</span>
+          </p>
           <Button variant="gold" block disabled={quickBusy} onClick={quickPlay}>
             {quickBusy ? t('Spiel startet …') : t('Jetzt sofort spielen')}
           </Button>
-          <p>{t('Allein gegen Joseph · ohne Anmeldung')}</p>
+          <div class="hero-opponent">
+            <Avatar person={{ id: BOT_ID, name: BOT_NAME, color: BOT_COLOR }} />
+            <p><strong>{BOT_NAME}</strong><span>{t('Dein virtueller Mitspieler')}</span></p>
+          </div>
+          <p class="hero-entry-note">{t('Allein loslegen · ohne Anmeldung')}</p>
         </div>
       </header>
 
@@ -143,14 +151,14 @@ export function Home() {
 function QuickPreview({ onPlay, busy }: { onPlay: () => void; busy: boolean }) {
   const [choice, setChoice] = useState<number | null>(null);
   const answers = [
-    t('Er rief: Kaffeepause!'),
-    t('Er fiel in die Tiefe.'),
-    t('Er löste Paulus ab.'),
+    t('In einem Brotlaib.'),
+    t('Im Maul eines Fisches.'),
+    t('In einem Vogelnest.'),
   ];
   return (
     <section class="card quick-preview" aria-labelledby="preview-title">
       <p class="eyebrow">{t('Probefrage')}</p>
-      <h2 id="preview-title">{t('Was passierte Eutychus bei Paulus’ Predigt?')}</h2>
+      <h2 id="preview-title">{t('Wo sollte Petrus eine Münze finden?')}</h2>
       <p class="muted small">{t('Eine Antwort ist echt. Welche?')}</p>
       <div class="preview-answers">
         {answers.map((answer, index) => (
@@ -169,23 +177,23 @@ function QuickPreview({ onPlay, busy }: { onPlay: () => void; busy: boolean }) {
       {choice !== null && (
         <div class="preview-reveal" role="status">
           <p class="preview-result"><b>{choice === 1 ? t('Treffer!') : t('Reingelegt!')}</b></p>
-          <p>{t('Eutychus schlief ein und fiel aus dem Fenster. Paulus ging zu ihm hinab; später brachten sie den Jungen lebend nach Hause.')}</p>
-          <p class="preview-source">{t('Apostelgeschichte 20,7–12')}</p>
-          <p class="preview-next">{t('Im Spiel erfindest du selbst solche Bluffs – und versuchst, Josephs Antwort zu durchschauen.')}</p>
+          <p>{t('Ein Fisch als Geldbörse! Jesus schickte Petrus angeln: Die Münze im Fischmaul sollte die Tempelsteuer für beide bezahlen.')}</p>
+          <p class="preview-source">{t('Matthäus 17,24–27')}</p>
+          <p class="preview-next">{t('Jetzt bist du dran: Erfinde einen Bluff und leg {bot} rein.', { bot: BOT_NAME })}</p>
           <Button variant="gold" block disabled={busy} onClick={onPlay}>
-            {busy ? t('Spiel startet …') : t('Jetzt gegen Joseph spielen')}
+            {busy ? t('Spiel startet …') : t('Jetzt gegen {bot} spielen', { bot: BOT_NAME })}
           </Button>
         </div>
       )}
-      <button type="button" class="preview-custom" onClick={() => navigate('/joseph')}>
+      <button type="button" class="preview-custom" onClick={() => navigate('/jakob')}>
         {t('Spiel anpassen →')}
       </button>
     </section>
   );
 }
 
-/** Josephs Gesicht für die Startseite und den Anfang einer Partie mit ihm */
-function JosephPortrait() {
+/** Jakobs Gesicht für die Startseite und den Anfang einer Partie mit ihm */
+function JakobPortrait() {
   return <Avatar person={{ id: BOT_ID, name: BOT_NAME, color: BOT_COLOR }} size="lg" />;
 }
 
@@ -365,7 +373,7 @@ export function JoinForm(props: {
 }
 
 /**
- * Raum eröffnen – oder mit `bot` einen eigenen Raum, in dem Joseph schon mitspielt. Der Raum bekommt die
+ * Raum eröffnen – oder mit `bot` einen eigenen Raum, in dem Jakob schon mitspielt. Der Raum bekommt die
  * Sprache, die auf der Startseite gewählt ist.
  */
 export function CreateRoom({ bot = false }: { bot?: boolean }) {
@@ -401,7 +409,7 @@ export function CreateRoom({ bot = false }: { bot?: boolean }) {
       <h1>{bot ? t('Gegen {bot} spielen', { bot: BOT_NAME }) : t('Raum eröffnen')}</h1>
       {bot && (
         <div class="bot-intro">
-          <JosephPortrait />
+          <JakobPortrait />
           <p class="lead">
             {t('{bot} schreibt Bluffs und rät mit. Der Raum gehört dir: Du startest, wann du willst, und kannst auch Freunde einladen.', {
               bot: BOT_NAME,
@@ -463,7 +471,7 @@ export function CreateRoom({ bot = false }: { bot?: boolean }) {
   );
 }
 
-/** Herzensrunde ein oder aus – beim Eröffnen und im Warteraum (nicht in Räumen mit Joseph) */
+/** Herzensrunde ein oder aus – beim Eröffnen und im Warteraum (nicht in Räumen mit Jakob) */
 export function HeartToggle({ checked, onChange }: { checked: boolean; onChange: (on: boolean) => void }) {
   return (
     <Toggle

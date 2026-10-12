@@ -7,7 +7,7 @@ import type { Ctx, RoomState } from '../src/server/state';
 import { buildView, publicRoom } from '../src/server/view';
 import { Clock, seeded } from './helpers';
 
-/** Eigener Raum mit Joseph; online sind Joseph und alle Menschen */
+/** Eigener Raum mit Jakob; online sind Jakob und alle Menschen */
 function setup(guests: string[] = []) {
   const clock = new Clock();
   const rng = seeded(3);
@@ -37,7 +37,7 @@ function setup(guests: string[] = []) {
   };
 }
 
-describe('Joseph spielt mit', () => {
+describe('Jakob spielt mit', () => {
   it('sitzt im eigenen Raum der Person, die ihn eröffnet – privat und von ihr geleitet', () => {
     const g = setup();
     expect(g.state.hostId).toBe('host');
@@ -74,13 +74,13 @@ describe('Joseph spielt mit', () => {
     expect(g.state.game!.phase).toBe('vote');
     const other = g.state.game!.round.options!.find((o) => !o.authorIds.includes('host'))!;
     g.act('host', { type: 'vote', optionId: other.id });
-    // Joseph stimmt sofort mit ab, also beginnt die Aufdeckung
+    // Jakob stimmt sofort mit ab, also beginnt die Aufdeckung
     expect(g.state.game!.phase).toBe('reveal');
     const chosen = g.state.game!.round.options!.find((o) => o.id === g.state.game!.round.votes[BOT_ID])!;
     expect(chosen.authorIds).not.toContain(BOT_ID);
   });
 
-  it('lässt niemanden warten: Wer sofort abgibt, muss nicht auf Joseph warten', () => {
+  it('lässt niemanden warten: Wer sofort abgibt, muss nicht auf Jakob warten', () => {
     const g = setup(['Lea']);
     g.act('host', { type: 'start' });
     g.act('host', { type: 'bluff', text: SAFE_BLUFFS.host });
@@ -101,7 +101,7 @@ describe('Joseph spielt mit', () => {
       g.clock.advance(60_000);
       g.run();
       expect(g.state.game!.phase).toBe('scores');
-      // Joseph verteilt nach kurzer Zeit ein Herz an den Bluff des Menschen
+      // Jakob verteilt nach kurzer Zeit ein Herz an den Bluff des Menschen
       g.clock.advance(8000);
       g.run();
       const liked = g.state.game!.round.options!.find((o) => o.id === g.state.game!.round.likes?.[BOT_ID]);
@@ -109,27 +109,27 @@ describe('Joseph spielt mit', () => {
       g.act('host', { type: 'next' });
     }
     expect(g.state.status).toBe('finished');
-    const joseph = g.state.players.find((p) => p.id === BOT_ID)!;
-    expect(joseph.stats.found + joseph.stats.fellFor).toBe(BOT_SETTINGS.rounds);
+    const jakob = g.state.players.find((p) => p.id === BOT_ID)!;
+    expect(jakob.stats.found + jakob.stats.fellFor).toBe(BOT_SETTINGS.rounds);
     g.act('host', { type: 'playAgain' });
     expect(g.state.status).toBe('lobby');
   });
 
-  it('kann nie leiten: keine Übergabe an Joseph, und ohne Menschen schließt der Raum', () => {
+  it('kann nie leiten: keine Übergabe an Jakob, und ohne Menschen schließt der Raum', () => {
     const g = setup(['Lea']);
     expect(() => g.act('host', { type: 'makeHost', playerId: BOT_ID })).toThrowError(
       expect.objectContaining({ code: 'bad_target' }),
     );
-    // Die Leitung geht beim Verlassen an Lea, nicht an Joseph
+    // Die Leitung geht beim Verlassen an Lea, nicht an Jakob
     g.act('host', { type: 'leave' });
     expect(g.state.hostId).toBe('g0');
     g.act('g0', { type: 'leave' });
     expect(g.state.status).toBe('closed');
   });
 
-  it('lässt sich nicht als Joseph ausgeben', () => {
+  it('lässt sich nicht als Jakob ausgeben', () => {
     const g = setup();
-    expect(() => joinRoom(g.state, { playerId: 'x', name: 'joseph', tokenHash: 't-x' }, g.ctx())).toThrowError(
+    expect(() => joinRoom(g.state, { playerId: 'x', name: 'jakob', tokenHash: 't-x' }, g.ctx())).toThrowError(
       expect.objectContaining({ code: 'name_taken' }),
     );
   });

@@ -13,7 +13,7 @@
 
 import { isCalendarDay, isReminderTime, verseCalendar } from '../shared/calendar';
 import { DEFAULT_LANG, LANG_PARAM, isLang, translate } from '../shared/i18n';
-import { BLUFF_MAX, CATEGORIES, PRESENCE_TOUCH_MS, ROOM_TTL_MS, normalizeCode } from '../shared/rules';
+import { BLUFF_MAX, BOT_NAME, CATEGORIES, PRESENCE_TOUCH_MS, ROOM_TTL_MS, normalizeCode } from '../shared/rules';
 import type {
   Lang,
   Action,
@@ -178,12 +178,14 @@ export function createApi(deps: ApiDeps) {
   async function loadRoom(code: string): Promise<RoomRecord> {
     const rec = await store.load(code);
     if (!rec) throw new GameError('not_found', 'Diesen Raum gibt es nicht (mehr). Prüfe den Code.', 404);
-    // Der frühere gemeinsame Raum mit Joseph ist abgeschaltet – jetzt spielt jede Person in einem eigenen Raum
+    // Der frühere gemeinsame Bot-Raum ist abgeschaltet – jetzt spielt jede Person in einem eigenen Raum
     if (rec.state.botRoom) {
-      throw new GameError('not_found', 'Diesen Raum gibt es nicht mehr. Gegen Joseph spielst du über die Startseite.', 404);
+      throw new GameError('not_found', 'Diesen Raum gibt es nicht mehr. Gegen Jakob spielst du über die Startseite.', 404);
     }
     // Räume aus der Zeit vor Kategorien und Lückentexten
     rec.state.settings = withSettingDefaults(rec.state.settings);
+    // Der Anzeigename gilt auch in bereits gespeicherten Räumen; Spieler-IDs bleiben stabil.
+    for (const player of rec.state.players) if (player.bot) player.name = BOT_NAME;
     return rec;
   }
 
