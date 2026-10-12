@@ -45,6 +45,16 @@ Leinwand-Ansicht (`/tv/RAUMCODE`):
 
 Dadurch kann auch jemand mit wenig Bibelwissen gewinnen, denn gute Einfälle und Menschenkenntnis zählen mit. Am Ende gibt es ein Siegertreppchen und fünf Auszeichnungen (Bluff-Meister, Wahrheitsfinder, Gutgläubigste Seele, Bester Bluff des Abends, Nächstenliebe). Außerdem zeigt der Endstand alle Entdeckungen der Partie zum Nachlesen, und die Leitung kann direkt ins Gespräch überleiten.
 
+### Aufbau der Startseite
+
+Die Startseite bleibt bewusst kurz und hat drei Teile:
+
+1. **Kopfkarte:** Logo, ein Satz zum Spiel, der Hinweis „Kein Bibelprofi? Macht nichts“ und der Hauptknopf „Jetzt sofort spielen“ gegen Jakob. Darunter steht in einer ruhigen Zeile „Spiel anpassen →“.
+2. **Probefrage:** eine Frage zum Ausprobieren, die den Unterschied zwischen Bluff und Wahrheit zeigt.
+3. **Mit Freunden:** eine einzige Karte für Gruppen. Oben eröffnet „Raum eröffnen“ einen Raum, darunter tritt man mit einem Raumcode bei. Der Spitzname wird erst abgefragt, wenn ein Code eingetippt ist.
+
+Gibt es gerade offene Räume, erscheinen sie zwischen Probefrage und Gruppenkarte. „So geht’s“ und „Farben“ stehen darunter als schlichte Zeilen zum Aufklappen, ohne eigenen Kasten.
+
 ### Anleitung auf der Startseite
 
 <img src="docs/screenshots/anleitung.png" width="260" align="right" alt="Aufgeklappte Anleitung mit Ablauf, Punkten und dem Thema „Allein gegen Jakob“">

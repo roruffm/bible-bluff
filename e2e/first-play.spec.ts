@@ -14,3 +14,14 @@ test('new visitor tries a bluff and reaches the first real question without setu
   await expect(page.getByText('Runde 1 von 4')).toBeVisible();
   await expect(page.getByLabel('Deine erfundene Antwort')).toBeVisible();
 });
+
+test('home page asks for a nickname only once a room code is typed', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+
+  await expect(page.getByRole('heading', { name: 'Mitspielen' })).toBeVisible();
+  await expect(page.getByLabel('Dein Spitzname')).toHaveCount(0);
+  await page.getByLabel('Raumcode').fill('lampe7');
+  await expect(page.getByLabel('Raumcode')).toHaveValue('LAMPE7');
+  await expect(page.getByLabel('Dein Spitzname')).toBeVisible();
+});

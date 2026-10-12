@@ -17,7 +17,7 @@ import {
 } from '../../shared/rules';
 import type { CategoryId, PublicRoom, RoundType, Settings } from '../../shared/types';
 import { Guide } from '../components/Guide';
-import { EnterIcon, FriendsIcon } from '../components/Icons';
+import { FriendsIcon } from '../components/Icons';
 import { LangSwitch } from '../components/LangSwitch';
 import { ThemeFold } from '../components/ThemePicker';
 import { Avatar, Button, Logo, Segmented, Toggle } from '../components/ui';
@@ -68,18 +68,17 @@ export function Home() {
         <Logo />
         <p class="tagline">{t('Erfinde Bluffs. Finde die Wahrheit. Entdecke die Bibel.')}</p>
         <div class="hero-start">
-          <p class="hero-reassurance">
-            <strong>{t('Kein Bibelprofi? Macht nichts.')}</strong>
-            <span>{t('Gute Bluffs zählen auch.')}</span>
-          </p>
+          <p class="hero-reassurance">{t('Kein Bibelprofi? Macht nichts – gute Bluffs zählen auch.')}</p>
           <Button variant="gold" block disabled={quickBusy} onClick={quickPlay}>
             {quickBusy ? t('Spiel startet …') : t('Jetzt sofort spielen')}
           </Button>
           <div class="hero-opponent">
-            <Avatar person={{ id: BOT_ID, name: BOT_NAME, color: BOT_COLOR }} />
-            <p><strong>{BOT_NAME}</strong><span>{t('Dein virtueller Mitspieler')}</span></p>
+            <Avatar person={{ id: BOT_ID, name: BOT_NAME, color: BOT_COLOR }} size="sm" />
+            <span>{t('Gegen {bot} · ohne Anmeldung', { bot: BOT_NAME })}</span>
+            <button type="button" class="hero-custom" onClick={() => navigate('/jakob')}>
+              {t('Spiel anpassen →')}
+            </button>
           </div>
-          <p class="hero-entry-note">{t('Allein loslegen · ohne Anmeldung')}</p>
         </div>
       </header>
 
@@ -102,7 +101,7 @@ export function Home() {
 
       <OpenRooms />
 
-      <section class="card choice" aria-labelledby="create-title">
+      <section class="card friends" aria-labelledby="create-title">
         <div class="choice-head">
           <span class="choice-icon is-create">
             <FriendsIcon />
@@ -115,27 +114,17 @@ export function Home() {
         <Button variant="gold" block onClick={() => navigate('/neu')}>
           {t('Raum eröffnen')}
         </Button>
-      </section>
-
-      <div class="or">
-        <span>{t('oder einem Raum beitreten')}</span>
-      </div>
-
-      <section class="card choice" aria-labelledby="join-title">
-        <div class="choice-head">
-          <span class="choice-icon is-join">
-            <EnterIcon />
-          </span>
-          <div>
-            <h2 id="join-title">{t('Mitspielen')}</h2>
-            <p class="muted small">{t('Du hast einen Raumcode? Gib ihn hier ein.')}</p>
-          </div>
+        <div class="friends-join" role="group" aria-labelledby="join-title">
+          <h2 id="join-title">{t('Mitspielen')}</h2>
+          <p class="muted small">{t('Du hast einen Raumcode? Gib ihn hier ein.')}</p>
+          <JoinForm code={code} onCode={setCode} onJoined={(s) => navigate(`/r/${s.code}`)} askCode compact />
         </div>
-        <JoinForm code={code} onCode={setCode} onJoined={(s) => navigate(`/r/${s.code}`)} askCode />
       </section>
 
-      <Guide />
-      <ThemeFold />
+      <div class="home-more">
+        <Guide />
+        <ThemeFold />
+      </div>
 
       <footer class="footnote">
         {t(
@@ -185,9 +174,6 @@ function QuickPreview({ onPlay, busy }: { onPlay: () => void; busy: boolean }) {
           </Button>
         </div>
       )}
-      <button type="button" class="preview-custom" onClick={() => navigate('/jakob')}>
-        {t('Spiel anpassen →')}
-      </button>
     </section>
   );
 }
@@ -274,6 +260,8 @@ export function JoinForm(props: {
   onCode?: (code: string) => void;
   onJoined: (session: Session) => void;
   askCode?: boolean;
+  /** Startseite: Der Spitzname erscheint erst, wenn ein Raumcode eingetippt ist */
+  compact?: boolean;
 }) {
   const [name, setName] = useState(rememberedName());
   const [error, setError] = useState<string | null>(null);
@@ -348,18 +336,20 @@ export function JoinForm(props: {
           />
         </label>
       )}
-      <label class="field">
-        <span>{t('Dein Spitzname')}</span>
-        <input
-          value={name}
-          onInput={(e) => setName((e.currentTarget as HTMLInputElement).value)}
-          placeholder={t('z. B. Mirjam')}
-          maxLength={NAME_MAX}
-          autocomplete="nickname"
-          enterkeyhint="go"
-          required
-        />
-      </label>
+      {(!props.compact || props.code) && (
+        <label class="field">
+          <span>{t('Dein Spitzname')}</span>
+          <input
+            value={name}
+            onInput={(e) => setName((e.currentTarget as HTMLInputElement).value)}
+            placeholder={t('z. B. Mirjam')}
+            maxLength={NAME_MAX}
+            autocomplete="nickname"
+            enterkeyhint="go"
+            required
+          />
+        </label>
+      )}
       {error && (
         <p class="error" role="alert">
           {error}
