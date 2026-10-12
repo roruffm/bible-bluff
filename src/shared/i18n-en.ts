@@ -30,10 +30,10 @@ export const EN: Record<string, string> = {
   'Allein gegen Joseph · ohne Anmeldung': 'Solo against Joseph · no sign-up',
   'Eine Frage zum Ausprobieren': 'Try a question',
   'Was passierte Eutychus bei Paulus’ Predigt?': 'What happened to Eutychus during Paul’s sermon?',
-  'Zwei Antworten sind erfunden. Welche stimmt?': 'Two answers are made up. Which one is true?',
+  'Eine Antwort ist echt. Welche?': 'Only one answer is real. Which one?',
   'Er bat um eine Kaffeepause.': 'He asked for a coffee break.',
-  'Er schlief ein und fiel aus dem Fenster.': 'He fell asleep and out of the window.',
-  'Er übernahm spontan die Predigt.': 'He took over the sermon on the spot.',
+  'Er fiel im Schlaf aus dem Fenster.': 'He fell out of the window in his sleep.',
+  'Er hielt die Predigt selbst.': 'He gave the sermon himself.',
   'Treffer!': 'You got it!',
   'Reingelegt!': 'Fooled you!',
   'Eutychus schlief ein und fiel aus dem Fenster. Paulus ging zu ihm hinab; später brachten sie den Jungen lebend nach Hause.':
