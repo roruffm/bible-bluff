@@ -4,8 +4,8 @@ import { parseRoute } from '../src/client/lib/router';
 import { createApi } from '../src/server/api';
 import { QUESTIONS } from '../src/server/questions';
 import { MemoryStore } from '../src/server/store';
-import { REMINDER_TIMES, isCalendarDay, isReminderTime, verseCalendar } from '../src/shared/calendar';
-import { VERSE_IMPULSES, WEEK_VERSES, suggestVerses } from '../src/shared/verses';
+import { REMINDER_TIMES, dailyImpulses, isCalendarDay, isReminderTime, verseCalendar } from '../src/shared/calendar';
+import { WEEK_VERSES, suggestVerses } from '../src/shared/verses';
 import { Clock, seeded } from './helpers';
 
 const byId = (id: string) => WEEK_VERSES.find((v) => v.id === id)!;
@@ -69,10 +69,14 @@ describe('Kalender-Erinnerungen', () => {
     expect(unfolded).toMatch(/END:VCALENDAR\r\n$/);
   });
 
-  it('enthalten Vers und Tagesgedanken – mit maskierten Kommas und Semikolons', () => {
-    expect(unfolded).toContain('SUMMARY:Mein Vers: Johannes 15\\,15');
+  it('enthalten Vers und jeden Tag einen eigenen Impuls zum Vers – schon im Titel, mit maskierten Kommas und Semikolons', () => {
+    const escaped = (text: string) => text.replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,');
+    const impulses = dailyImpulses('joh-15-15', 'de');
+    expect(impulses).toHaveLength(7);
+    const titles = [...unfolded.matchAll(/^SUMMARY:(.*)$/gm)].map((m) => m[1]);
+    expect(titles).toEqual(impulses.map((impulse) => escaped(`Johannes 15,15: ${impulse}`)));
+    impulses.forEach((impulse, i) => expect(unfolded).toContain(escaped(`Tag ${i + 1}: ${impulse}`)));
     expect(unfolded).toContain('Ich sage hinfort nicht\\, dass ihr Knechte seid\\; denn');
-    for (const impulse of VERSE_IMPULSES) expect(unfolded).toContain(impulse.replace(/,/g, '\\,').replace(/;/g, '\\;'));
   });
 
   it('halten jede Zeile unter 75 Byte und tragen feste Kennungen (kein Doppeleintrag beim zweiten Mal)', () => {

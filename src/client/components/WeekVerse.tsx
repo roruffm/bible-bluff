@@ -1,5 +1,6 @@
-// „Mein Vers für die Woche“: ein Vers passend zur Partie – als Sperrbildschirm-Bild und auf Wunsch mit
-// sieben Kalender-Erinnerungen. Am Endstand und auf der Entdeckungen-Seite; alles bleibt auf dem Handy.
+// „Mein Vers für die Woche“: ein Vers passend zur Partie – als Sperrbildschirm-Bild mit einem zufälligen,
+// abstrakten Motiv („Anderes Motiv“ würfelt neu) und auf Wunsch mit sieben Kalender-Erinnerungen, jeden Tag
+// mit einem eigenen Impuls zum Vers. Am Endstand und auf der Entdeckungen-Seite; alles bleibt auf dem Handy.
 
 import { useEffect, useMemo, useState } from 'preact/hooks';
 import { REMINDER_TIMES, type ReminderTime } from '../../shared/calendar';
@@ -7,6 +8,7 @@ import type { BookGroup } from '../../shared/types';
 import { suggestVerses, verseSource, type WeekVerse } from '../../shared/verses';
 import { currentLang, t } from '../lib/i18n';
 import { type VerseImage, tomorrow, verseImage } from '../lib/verse-image';
+import { randomSeed } from '../lib/wallpaper';
 import { Button, Segmented, Toast } from './ui';
 
 export function WeekVerseCard({ items }: { items: { book: string; group: BookGroup; key?: string }[] }) {
@@ -15,6 +17,8 @@ export function WeekVerseCard({ items }: { items: { book: string; group: BookGro
   const options = useMemo(() => suggestVerses(items, 4, lang), [signature, lang]);
   const [chosen, setChosen] = useState<WeekVerse | null>(null);
   const [image, setImage] = useState<VerseImage | null>(null);
+  /** Zufallszahl für das Motiv – neu bei jedem Vers und bei „Anderes Motiv“ */
+  const [seed, setSeed] = useState(randomSeed);
   const [time, setTime] = useState<ReminderTime>('0730');
   const [toast, setToast] = useState<string | null>(null);
 
@@ -23,13 +27,13 @@ export function WeekVerseCard({ items }: { items: { book: string; group: BookGro
     if (!chosen) return;
     let alive = true;
     setImage(null);
-    verseImage(chosen, lang)
+    verseImage(chosen, lang, seed)
       .then((img) => alive && setImage(img))
       .catch(() => alive && setToast(t('Das Bild ließ sich gerade nicht erstellen.')));
     return () => {
       alive = false;
     };
-  }, [chosen?.id, lang]);
+  }, [chosen?.id, lang, seed]);
 
   const save = async () => {
     if (!image) return;
@@ -65,7 +69,10 @@ export function WeekVerseCard({ items }: { items: { book: string; group: BookGro
             role="radio"
             aria-checked={chosen?.id === v.id}
             class={`verse-choice${chosen?.id === v.id ? ' is-on' : ''}`}
-            onClick={() => setChosen(v)}
+            onClick={() => {
+              setChosen(v);
+              setSeed(randomSeed());
+            }}
           >
             <span class="verse-text">{t('„{text}“', { text: v.text })}</span>
             <span class="verse-ref">{v.ref}</span>
@@ -85,6 +92,9 @@ export function WeekVerseCard({ items }: { items: { book: string; group: BookGro
           <Button block raised disabled={!image} onClick={save}>
             {t('Als Sperrbildschirm sichern')}
           </Button>
+          <Button variant="ghost" small disabled={!image} onClick={() => setSeed(randomSeed())}>
+            ↻ {t('Anderes Motiv')}
+          </Button>
           <p class="muted small center">{t('Im Teilen-Menü „Bild sichern“ wählen, dann in den Fotos als Hintergrund festlegen.')}</p>
           <div class="field">
             <span>{t('Tägliche Erinnerung (7 Tage, ab morgen)')}</span>
@@ -103,7 +113,7 @@ export function WeekVerseCard({ items }: { items: { book: string; group: BookGro
           </a>
           <p class="muted small">
             {t(
-              'Dein Handykalender erinnert dich eine Woche lang an den Vers, jeden Tag mit einem kleinen Gedanken – ohne App und ohne Anmeldung. Wortlaut: {source}.',
+              'Dein Handykalender erinnert dich eine Woche lang an den Vers – jeden Tag mit einem anderen Impuls zum Nachdenken, ohne App und ohne Anmeldung. Wortlaut: {source}.',
               { source: verseSource(lang) },
             )}
           </p>

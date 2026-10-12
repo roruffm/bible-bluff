@@ -9,7 +9,6 @@ import { REMINDER_TIMES } from '../src/shared/calendar';
 import { EN } from '../src/shared/i18n-en';
 import { hasTranslation, isLang, translate } from '../src/shared/i18n';
 import { CATEGORIES, DIFFICULTY_OPTIONS, GROUP_LABELS, HEART_QUESTIONS, ROUND_TYPE_OPTIONS, TALK_STEPS } from '../src/shared/rules';
-import { VERSE_IMPULSES } from '../src/shared/verses';
 
 const SRC = new URL('../src/', import.meta.url).pathname;
 
@@ -45,7 +44,6 @@ const DYNAMIC = [
   ...Object.values(GROUP_LABELS),
   ...TALK_STEPS.flatMap((s) => [s.title, s.prompt]),
   ...HEART_QUESTIONS,
-  ...VERSE_IMPULSES,
   ...REMINDER_TIMES.map((r) => r.label),
   ...THEMES.map((th) => th.name),
 ];
