@@ -46,8 +46,8 @@ export function Home() {
         rounds: 4,
         difficulty: 'leicht',
         roundType: 'fragen',
-        writeSeconds: 45,
-        voteSeconds: 20,
+        writeSeconds: 90,
+        voteSeconds: 30,
         lang: preferredLang(),
       };
       const res = await api.createRoom(name, true, settings, true);
