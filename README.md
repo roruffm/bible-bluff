@@ -116,7 +116,12 @@ Zum Schluss eine Runde ohne Punkte und ohne Bluffen: Alle schreiben ehrlich eine
 
 ### Mein Vers für die Woche
 
-Am Endstand und auf der Entdeckungen-Seite wählt jede Person einen von vier Versen, passend zu den Büchern der Partie (dann zur Buchgruppe, sonst Worte, in denen Jesus selbst einlädt). Daraus entsteht auf dem Handy ein **Sperrbildschirm-Bild** („Als Sperrbildschirm sichern“ öffnet den Teilen-Dialog, sonst wird es gespeichert). Auf Wunsch kommen **sieben Kalender-Erinnerungen** dazu: ab morgen täglich morgens, mittags oder abends, mit dem Vers und einem kurzen Gedanken für den Tag. Das ist eine Kalenderdatei von `/api/kalender`, ganz ohne App und Anmeldung; das iPhone bietet direkt „Alle hinzufügen“ an.
+Am Endstand und auf der Entdeckungen-Seite wählt jede Person einen von vier Versen, passend zu den Büchern der Partie (dann zur Buchgruppe, sonst Worte, in denen Jesus selbst einlädt).
+
+![Sechs Sperrbildschirm-Motive: Aurora, Wellen, Glasfenster, Farbbänder, Kreise und Strahlen](docs/screenshots/sperrbildschirme.webp)
+
+- **Sperrbildschirm-Bild mit Zufallsmotiv.** Jedes Bild bekommt einen eigenen abstrakten Hintergrund: einen von sechs Stilen (Aurora, Wellen, Glasfenster, Farbbänder, Kreise, Strahlen) in einer von 14 abgestimmten Farbpaletten, mit feiner Körnung. Der Vers steht auf einer Milchglas-Fläche unterhalb der Uhrzeit; ein Test prüft, dass die Schrift auf jeder Palette den WCAG-Kontrast 4,5 : 1 erreicht. „↻ Anderes Motiv“ würfelt neu, „Als Sperrbildschirm sichern“ öffnet den Teilen-Dialog (sonst wird das Bild gespeichert). Alles entsteht auf dem Handy (`src/client/lib/wallpaper.ts`), nichts geht an den Server.
+- **Sieben Kalender-Erinnerungen** auf Wunsch: ab morgen täglich morgens, mittags oder abends, jeden Tag mit einem **eigenen Impuls zum Vers** – ein Satz zum Nachdenken, der schon im Titel der Erinnerung steht („Lukas 1,37: Was hältst du in deinem Leben gerade für unmöglich?“). Die sieben Impulse je Vers folgen einem kleinen Wochenbogen: wahrnehmen, verstehen, persönlich werden, ehrlich sein, etwas tun, an andere denken, antworten. Sie stehen in `src/shared/daily-impulses.ts` (englisch: `daily-impulses-en.ts`). Das ist eine Kalenderdatei von `/api/kalender`, ganz ohne App und Anmeldung; das iPhone bietet direkt „Alle hinzufügen“ an.
 
 Die 68 Verse (`src/shared/verses.ts`) stehen im Wortlaut der gemeinfreien **Lutherbibel 1912** mit heutiger Rechtschreibung (ebible.org, abgeglichen mit bolls.life), die Stellenangaben in heutiger Zählung.
 

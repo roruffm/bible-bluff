@@ -1,11 +1,13 @@
 // Sperrbildschirm-Bild zu „Mein Vers für die Woche“ – entsteht ganz auf dem Handy (Canvas), nichts geht
-// an den Server. Format etwa wie ein heutiges Handy (9 : 19,5). Der Vers steht unterhalb der Uhrzeit,
-// die Bildschirmsperre oben anzeigt, und über den Knöpfen am unteren Rand.
+// an den Server. Format etwa wie ein heutiges Handy (9 : 19,5). Der Hintergrund ist jedes Mal ein anderes
+// abstraktes Motiv (lib/wallpaper.ts); der Vers steht auf Milchglas unterhalb der Uhrzeit, die die
+// Bildschirmsperre oben anzeigt, und über den Knöpfen am unteren Rand.
 
 import { quoted } from '../../shared/calendar';
 import { translate } from '../../shared/i18n';
 import type { Lang } from '../../shared/types';
 import { type WeekVerse, verseSource } from '../../shared/verses';
+import { designFor, frostedPanel, paintBackground, textColors } from './wallpaper';
 
 const W = 1170;
 const H = 2532;
@@ -28,12 +30,10 @@ function wrap(ctx: CanvasRenderingContext2D, text: string, width: number): strin
   return lines;
 }
 
-function glow(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, color: string) {
-  const g = ctx.createRadialGradient(x, y, 0, x, y, r);
-  g.addColorStop(0, color);
-  g.addColorStop(1, 'rgba(0,0,0,0)');
-  ctx.fillStyle = g;
-  ctx.fillRect(0, 0, W, H);
+/** Sperrabstand für die kleine Überschrift, wo der Browser ihn kennt */
+function spacing(ctx: CanvasRenderingContext2D, value: string) {
+  const c = ctx as CanvasRenderingContext2D & { letterSpacing?: string };
+  if ('letterSpacing' in c) c.letterSpacing = value;
 }
 
 export interface VerseImage {
@@ -43,7 +43,8 @@ export interface VerseImage {
   file: File;
 }
 
-export async function verseImage(verse: WeekVerse, lang: Lang): Promise<VerseImage> {
+/** Das Bild zum Vers – `seed` bestimmt das Motiv, dieselbe Zahl ergibt dasselbe Bild */
+export async function verseImage(verse: WeekVerse, lang: Lang, seed: number): Promise<VerseImage> {
   try {
     await Promise.all([document.fonts.load(`600 80px ${FONT}`), document.fonts.load(`800 40px ${FONT}`)]);
   } catch {
@@ -54,46 +55,52 @@ export async function verseImage(verse: WeekVerse, lang: Lang): Promise<VerseIma
   canvas.height = H;
   const ctx = canvas.getContext('2d')!;
 
-  const bg = ctx.createLinearGradient(0, 0, 0, H);
-  bg.addColorStop(0, '#1b4565');
-  bg.addColorStop(1, '#0c2536');
-  ctx.fillStyle = bg;
-  ctx.fillRect(0, 0, W, H);
-  glow(ctx, W / 2, H * 0.4, 760, 'rgba(242, 200, 121, 0.17)');
-  glow(ctx, W * 0.92, H * 0.97, 900, 'rgba(18, 133, 122, 0.30)');
+  const design = designFor(seed);
+  paintBackground(ctx, W, H, design);
+  const colors = textColors(design.palette);
 
-  // Vers so groß wie möglich, aber höchstens 40 % der Höhe
-  const width = W - 2 * 140;
-  let size = 88;
+  // Vers so groß wie möglich, aber höchstens 36 % der Höhe
+  const panelW = W - 2 * 80;
+  const pad = 76;
+  const textW = panelW - 2 * pad;
+  let size = 84;
   let lines: string[] = [];
-  for (; size >= 48; size -= 4) {
+  for (; size >= 44; size -= 4) {
     ctx.font = `600 ${size}px ${FONT}`;
-    lines = wrap(ctx, quoted(verse.text, lang), width);
-    if (lines.length * size * 1.34 <= H * 0.4) break;
+    lines = wrap(ctx, quoted(verse.text, lang), textW);
+    if (lines.length * size * 1.32 <= H * 0.36) break;
   }
-  const lineHeight = size * 1.34;
-  const blockHeight = 110 + lines.length * lineHeight + 150;
-  const top = H * 0.57 - blockHeight / 2;
+  const lineHeight = size * 1.32;
+  const panelH = pad + 30 + 56 + lines.length * lineHeight + 30 + 6 + 72 + 16 + 46 + pad - 8;
+  const x = (W - panelW) / 2;
+  const top = Math.round(H * 0.58 - panelH / 2);
+  frostedPanel(ctx, canvas, x, top, panelW, panelH, design.palette.tone);
 
   ctx.textAlign = 'center';
   ctx.textBaseline = 'alphabetic';
-  ctx.fillStyle = '#f2c879';
-  ctx.font = `800 32px ${FONT}`;
-  ctx.fillText(translate(lang, 'MEIN VERS FÜR DIE WOCHE'), W / 2, top + 32);
+  let y = top + pad + 30;
+  ctx.fillStyle = colors.accent;
+  ctx.font = `800 30px ${FONT}`;
+  spacing(ctx, '5px');
+  ctx.fillText(translate(lang, 'MEIN VERS FÜR DIE WOCHE'), W / 2, y);
+  spacing(ctx, '0px');
 
-  ctx.fillStyle = '#f6efe0';
+  y += 56;
+  ctx.fillStyle = colors.text;
   ctx.font = `600 ${size}px ${FONT}`;
-  lines.forEach((line, i) => ctx.fillText(line, W / 2, top + 110 + i * lineHeight + size * 0.9));
+  lines.forEach((line, i) => ctx.fillText(line, W / 2, y + i * lineHeight + size * 0.9));
+  y += lines.length * lineHeight + 30;
 
-  const after = top + 110 + lines.length * lineHeight;
-  ctx.fillStyle = '#f2c879';
-  ctx.fillRect(W / 2 - 40, after + 40, 80, 5);
+  ctx.fillStyle = colors.accent;
+  ctx.fillRect(W / 2 - 44, y, 88, 6);
+  y += 6 + 72;
   ctx.font = `800 50px ${FONT}`;
-  ctx.fillText(verse.ref, W / 2, after + 130);
+  ctx.fillText(verse.ref, W / 2, y);
 
-  ctx.fillStyle = 'rgba(246, 239, 224, 0.45)';
-  ctx.font = `600 28px ${FONT}`;
-  ctx.fillText(`${verseSource(lang)} · biblebluff.de`, W / 2, H - 200);
+  y += 16 + 46;
+  ctx.fillStyle = colors.muted;
+  ctx.font = `600 26px ${FONT}`;
+  ctx.fillText(`${verseSource(lang)} · biblebluff.de`, W / 2, y);
 
   const url = canvas.toDataURL('image/jpeg', 0.9);
   const blob = await new Promise<Blob>((resolve, reject) =>

@@ -140,14 +140,3 @@ export function suggestVerses(items: { book: string; group: BookGroup; key?: str
   for (const id of CORE) take(verses.filter((v) => v.id === id), id);
   return picked.slice(0, max);
 }
-
-/** Ein Gedanke je Tag für die Kalender-Erinnerungen – passt zu jedem Vers */
-export const VERSE_IMPULSES = [
-  'Lies den Vers langsam, zweimal. Welches Wort bleibt bei dir hängen?',
-  'Was sagt dir dieser Vers über Jesus?',
-  'Sprich den Vers heute als Gebet – mit deinen eigenen Worten.',
-  'Wo in deinem Alltag passt dieser Vers heute besonders?',
-  'Erzähl heute jemandem von deinem Vers.',
-  'Danke Jesus für etwas, das dir dieser Vers zeigt.',
-  'Kannst du den Vers inzwischen auswendig? Sag ihn Jesus zum Abschluss der Woche.',
-];

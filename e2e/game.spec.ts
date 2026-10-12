@@ -168,11 +168,21 @@ test('eine komplette Partie auf drei Handys und der Leinwand', async ({ browser 
   await expect(verses.getByRole('radio')).toHaveCount(4);
   await expect(tv.locator('.week-verse')).toHaveCount(0);
   await verses.getByRole('radio').first().click();
-  await expect(verses.locator('.verse-preview img')).toHaveAttribute('src', /^data:image\/jpeg/);
+  const preview = verses.locator('.verse-preview img');
+  await expect(preview).toHaveAttribute('src', /^data:image\/jpeg/);
+  // Jedes Bild ist ein Zufallsmotiv – „Anderes Motiv“ würfelt neu
+  const firstImage = await preview.getAttribute('src');
+  await verses.getByRole('button', { name: /Anderes Motiv/ }).click();
+  await expect.poll(() => preview.getAttribute('src')).not.toBe(firstImage);
+  await expect(preview).toHaveAttribute('src', /^data:image\/jpeg/);
   const calendar = verses.getByRole('link', { name: 'In den Kalender eintragen' });
   const ics = await jonas.request.get((await calendar.getAttribute('href'))!);
   expect(ics.headers()['content-type']).toBe('text/calendar; charset=utf-8');
-  expect((await ics.text()).match(/BEGIN:VEVENT/g)).toHaveLength(7);
+  const unfolded = (await ics.text()).replace(/\r\n /g, '');
+  expect(unfolded.match(/BEGIN:VEVENT/g)).toHaveLength(7);
+  // Jeden Tag ein anderer Impuls zum Vers – schon im Titel der Erinnerung
+  const titles = [...unfolded.matchAll(/^SUMMARY:(.*)$/gm)].map((m) => m[1]);
+  expect(new Set(titles).size).toBe(7);
   // Neugierig auf Jesus? – im Raum in neuem Tab
   await expect(jonas.getByRole('link', { name: 'Mehr erfahren' })).toHaveAttribute('href', '/jesus');
   // Weitersagen: Mitspielende werden eingeladen, selbst eine Runde zu leiten – Leitung und Leinwand nicht

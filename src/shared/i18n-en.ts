@@ -557,6 +557,7 @@ export const EN: Record<string, string> = {
   'Sperrbildschirm mit {ref}: {text}': 'Lock screen with {ref}: {text}',
   'Bild entsteht': 'Creating the image',
   'Als Sperrbildschirm sichern': 'Save as lock screen',
+  'Anderes Motiv': 'New design',
   'Im Teilen-Menü „Bild sichern“ wählen, dann in den Fotos als Hintergrund festlegen.':
     'In the share menu, choose “Save Image”, then set it as your wallpaper in Photos.',
   'Tägliche Erinnerung (7 Tage, ab morgen)': 'Daily reminder (7 days, starting tomorrow)',
@@ -565,19 +566,9 @@ export const EN: Record<string, string> = {
   'Mittags · 12:30': 'Midday · 12:30',
   'Abends · 20:00': 'Evening · 20:00',
   'In den Kalender eintragen': 'Add to calendar',
-  'Dein Handykalender erinnert dich eine Woche lang an den Vers, jeden Tag mit einem kleinen Gedanken – ohne App und ohne Anmeldung. Wortlaut: {source}.':
-    'Your phone’s calendar will remind you of the verse for a week, each day with a short thought – no app, no sign-up. Bible text: {source}.',
-  'Mein Vers: {ref}': 'My verse: {ref}',
+  'Dein Handykalender erinnert dich eine Woche lang an den Vers – jeden Tag mit einem anderen Impuls zum Nachdenken, ohne App und ohne Anmeldung. Wortlaut: {source}.':
+    'Your phone’s calendar will remind you of the verse for a week – each day with a different prompt to think about, no app, no sign-up. Bible text: {source}.',
   'Tag {n}: {impulse}': 'Day {n}: {impulse}',
-  'Lies den Vers langsam, zweimal. Welches Wort bleibt bei dir hängen?':
-    'Read the verse slowly, twice. Which word sticks with you?',
-  'Was sagt dir dieser Vers über Jesus?': 'What does this verse tell you about Jesus?',
-  'Sprich den Vers heute als Gebet – mit deinen eigenen Worten.': 'Pray the verse today – in your own words.',
-  'Wo in deinem Alltag passt dieser Vers heute besonders?': 'Where in your everyday life does this verse fit especially well today?',
-  'Erzähl heute jemandem von deinem Vers.': 'Tell someone about your verse today.',
-  'Danke Jesus für etwas, das dir dieser Vers zeigt.': 'Thank Jesus for something this verse shows you.',
-  'Kannst du den Vers inzwischen auswendig? Sag ihn Jesus zum Abschluss der Woche.':
-    'Do you know the verse by heart yet? Say it to Jesus to round off the week.',
 
   // ───────── Neugierig auf Jesus? und Rechtliches ─────────
   'Neugierig auf Jesus?': 'Curious about Jesus?',

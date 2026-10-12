@@ -1,11 +1,20 @@
 // Kalender-Erinnerungen zu „Mein Vers für die Woche“: sieben Termine ab dem gewählten Tag zur gewählten
-// Uhrzeit, jeweils mit dem Vers und einem Gedanken für den Tag. Die Zeiten stehen ohne Zeitzone in der
-// Datei („floating“): Der Kalender erinnert um 7:30 Uhr dort, wo das Handy gerade ist. Gleiche Termine
-// tragen beim erneuten Hinzufügen dieselbe UID und verdoppeln sich so nicht.
+// Uhrzeit, jeweils mit dem Vers und einem eigenen Impuls zum Nachdenken – sieben je Vers, für jeden Tag
+// ein anderer (src/shared/daily-impulses*.ts). Der Impuls steht schon im Titel, so zeigt ihn die
+// Erinnerung. Die Zeiten stehen ohne Zeitzone in der Datei („floating“): Der Kalender erinnert um 7:30 Uhr
+// dort, wo das Handy gerade ist. Gleiche Termine tragen beim erneuten Hinzufügen dieselbe UID und
+// verdoppeln sich so nicht.
 
+import { DAILY_IMPULSES } from './daily-impulses';
+import { EN_DAILY_IMPULSES } from './daily-impulses-en';
 import { translate } from './i18n';
 import type { Lang } from './types';
-import { VERSE_IMPULSES, type WeekVerse, verseSource } from './verses';
+import { type WeekVerse, verseSource } from './verses';
+
+/** Die sieben Tagesimpulse zu einem Vers (dieselben IDs auf Deutsch und Englisch) */
+export function dailyImpulses(id: string, lang: Lang): readonly string[] {
+  return (lang === 'en' ? EN_DAILY_IMPULSES : DAILY_IMPULSES)[id] ?? [];
+}
 
 export const REMINDER_TIMES = [
   { value: '0730', label: 'Morgens · 7:30' },
@@ -77,21 +86,22 @@ export function verseCalendar(verse: WeekVerse, startDay: string, time: Reminder
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
   ];
-  VERSE_IMPULSES.forEach((impulse, i) => {
+  dailyImpulses(verse.id, lang).forEach((impulse, i) => {
     const day = addDays(startDay, i);
+    const title = `${verse.ref}: ${impulse}`;
     lines.push(
       'BEGIN:VEVENT',
       `UID:vers-${verse.id}-${startDay}-${time}-${i + 1}@biblebluff.de`,
       `DTSTAMP:${dtstamp}`,
       `DTSTART:${day}T${hour}${pad(minute)}00`,
       `DTEND:${day}T${hour}${pad(minute + 10)}00`,
-      `SUMMARY:${escapeText(translate(lang, 'Mein Vers: {ref}', { ref: verse.ref }))}`,
+      `SUMMARY:${escapeText(title)}`,
       `DESCRIPTION:${escapeText(
-        `${quoted(verse.text, lang)}\n${verse.ref} (${verseSource(lang)})\n\n${translate(lang, 'Tag {n}: {impulse}', { n: i + 1, impulse: translate(lang, impulse) })}\n\nbiblebluff.de`,
+        `${quoted(verse.text, lang)}\n${verse.ref} (${verseSource(lang)})\n\n${translate(lang, 'Tag {n}: {impulse}', { n: i + 1, impulse })}\n\nbiblebluff.de`,
       )}`,
       'BEGIN:VALARM',
       'ACTION:DISPLAY',
-      `DESCRIPTION:${escapeText(`${verse.ref}: ${verse.text}`)}`,
+      `DESCRIPTION:${escapeText(title)}`,
       'TRIGGER:PT0M',
       'END:VALARM',
       'END:VEVENT',

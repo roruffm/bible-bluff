@@ -15,7 +15,7 @@ import { MemoryStore } from '../src/server/store';
 import { talkNotes } from '../src/server/talk';
 import { isDuplicate, isTooCloseToTruth } from '../src/server/text';
 import { buildView } from '../src/server/view';
-import { verseCalendar } from '../src/shared/calendar';
+import { dailyImpulses, verseCalendar } from '../src/shared/calendar';
 import { translate } from '../src/shared/i18n';
 import { ALL_CATEGORIES, BLUFF_MAX, GAP, HEART_QUESTIONS } from '../src/shared/rules';
 import type { Settings } from '../src/shared/types';
@@ -188,11 +188,14 @@ describe('Englische Wochenverse', () => {
     const verse = EN_WEEK_VERSES.find((v) => v.id === 'lk-1-37')!;
     const ics = verseCalendar(verse, '20261013', '0730', new Date(Date.UTC(2026, 9, 12)), 'en').replace(/\r\n /g, '');
     expect(ics).toContain('PRODID:-//Bible Bluff//My verse for the week//EN');
-    expect(ics).toContain('SUMMARY:My verse: Luke 1:37');
+    const escaped = (text: string) => text.replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,');
+    const impulses = dailyImpulses('lk-1-37', 'en');
+    expect(impulses).toHaveLength(7);
+    expect(ics).toContain(`SUMMARY:${escaped(`Luke 1:37: ${impulses[0]}`)}`);
     expect(ics).toContain('“For nothing spoken by God is impossible.”');
     expect(ics).toContain('(World English Bible)');
-    expect(ics).toContain('Day 1: Read the verse slowly\\, twice.');
-    expect(ics).toContain('Day 7: Do you know the verse by heart yet?');
+    expect(ics).toContain(escaped(`Day 1: ${impulses[0]}`));
+    expect(ics).toContain(escaped(`Day 7: ${impulses[6]}`));
     expect(ics).not.toMatch(/[äöüß„]/);
   });
 });
@@ -338,9 +341,9 @@ describe('Englische API', () => {
     const res = await t.call('GET', '/api/kalender?vers=jona-2-3&ab=20261013&zeit=2000&lang=en');
     expect(res.status).toBe(200);
     expect(res.headers.get('content-disposition')).toBe('inline; filename="my-verse-for-the-week.ics"');
-    expect(res.text.replace(/\r\n /g, '')).toContain('SUMMARY:My verse: Jonah 2:2');
+    expect(res.text.replace(/\r\n /g, '')).toContain('SUMMARY:Jonah 2:2: ');
     const de = await t.call('GET', '/api/kalender?vers=jona-2-3&ab=20261013&zeit=2000');
-    expect(de.text.replace(/\r\n /g, '')).toContain('SUMMARY:Mein Vers: Jona 2\\,3');
+    expect(de.text.replace(/\r\n /g, '')).toContain('SUMMARY:Jona 2\\,3: ');
   });
 });
 
