@@ -28,7 +28,7 @@ export const EN: Record<string, string> = {
   'Spiel startet …': 'Starting game …',
   'Jetzt sofort spielen': 'Play now',
   'Allein gegen Joseph · ohne Anmeldung': 'Solo against Joseph · no sign-up',
-  'Eine Frage zum Ausprobieren': 'Try a question',
+  'Probefrage': 'Try a question',
   'Was passierte Eutychus bei Paulus’ Predigt?': 'What happened to Eutychus during Paul’s sermon?',
   'Eine Antwort ist echt. Welche?': 'Only one answer is real. Which one?',
   'Er rief: Kaffeepause!': 'He called for a coffee break!',
