@@ -47,12 +47,12 @@ Dadurch kann auch jemand mit wenig Bibelwissen gewinnen, denn gute Einfälle und
 
 ### Anleitung auf der Startseite
 
-<img src="docs/screenshots/anleitung.png" width="260" align="right" alt="Aufgeklappte Anleitung mit Ablauf, Punkten und dem Thema „Allein gegen Joseph“">
+<img src="docs/screenshots/anleitung.png" width="260" align="right" alt="Aufgeklappte Anleitung mit Ablauf, Punkten und dem Thema „Allein gegen Jakob“">
 
 „So geht’s“ steht auf der Startseite zugeklappt, damit sie kurz bleibt; die Zeile nennt, was drinsteht. Aufgeklappt zeigt die Anleitung oben Ablauf und Punkte, darunter Themen, die sich einzeln aufklappen lassen:
 
 - **Mit Freunden spielen und leiten:** Raum eröffnen, Beitreten, Leinwand, Menü „Leitung“, Wiedereinstieg mit demselben Spitznamen
-- **Allein gegen Joseph:** was der Bot kann und wie man stattdessen einem offenen Raum beitritt
+- **Allein gegen Jakob:** was der Bot kann und wie man stattdessen einem offenen Raum beitritt
 - **Extras in jeder Runde:** Vorschlag, „zu nah an der Wahrheit“, Lieblingsbluff, Liebe deinen Nächsten, Ruhige Minute
 - **Herzensrunde:** Ablauf, Anonymität und wer sie ein- und ausschaltet
 - **Nachbesprechung:** Spickzettel der Leitung und „Weiter ins Gespräch“ mit seinen vier Schritten
@@ -112,7 +112,7 @@ Zum Schluss eine Runde ohne Punkte und ohne Bluffen: Alle schreiben ehrlich eine
 - **Die Leitung entscheidet beim Eröffnen** (Schalter „Herzensrunde am Ende“, auch im Warteraum änderbar). Eingeschaltet ist sie zunächst; Mitspielende sehen im Warteraum „mit Herzensrunde“.
 - Die Leitung kann die Frage wechseln, solange noch niemand fertig ist, die Schreibzeit beenden und zum Endstand weiterschalten.
 - **Anonym und flüchtig:** Wer was geschrieben hat, speichert der Server nur bis zum Zeigen; danach bleiben nur die gemischten Texte, und mit dem Endstand ist alles gelöscht. Die Antworten kommen weder auf die Entdeckungen-Seite noch zu den gesammelten Bluffs.
-- Allein mit Joseph gibt es keine Herzensrunde (ohne Namen ergibt sie erst ab zwei Menschen Sinn). Räume, die vor dieser Funktion eröffnet wurden, spielen ohne.
+- Allein mit Jakob gibt es keine Herzensrunde (ohne Namen ergibt sie erst ab zwei Menschen Sinn). Räume, die vor dieser Funktion eröffnet wurden, spielen ohne.
 
 ### Mein Vers für die Woche
 
@@ -191,22 +191,22 @@ Wer keine eigene Gruppe hat, kann trotzdem mitspielen: Die Leitung kann ihren Ra
 - **Bescheid für die Leitung.** Tritt jemand einem öffentlichen Raum bei, vibriert das Handy der Leitung kurz und zeigt etwa „Hanna ist beigetreten“. Auf dem iPhone, das Webseiten keine Vibration erlaubt, erklingt stattdessen ein leiser Zweiklang. Damit das auch beim Warten klappt, bleibt der Bildschirm der Leitung an, solange ihr Raum öffentlich ist. Ist das Handy gesperrt oder der Raum im Hintergrund, kann eine Webseite weder vibrieren noch nachfragen; die Meldung kommt dann beim Zurückkehren.
 - **Sparsam.** Die Startseite fragt alle 10 Sekunden nach, solange sie sichtbar ist, und der Worker hält die Liste 4 Sekunden vor. Die Liste erscheint nur, wenn es gerade offene Räume gibt.
 
-### Allein gegen Joseph
+### Allein gegen Jakob
 
-Wer gerade keine Gruppe hat, tippt auf der Startseite auf **„Gegen Joseph spielen“** (Seite `/joseph`). Dann entsteht ein **eigener, privater Raum**, in dem Joseph schon sitzt. Joseph ist ein Bot. Die Person leitet den Raum wie jeden anderen: Sie wählt Runden und Schwierigkeit (vorgeschlagen sind 6 Runden, gemischt), startet, wann sie will, und kann auch Freunde einladen. So kann jede Person jederzeit allein mit Joseph spielen, ohne auf andere zu treffen.
+Wer gerade keine Gruppe hat, startet mit **„Jetzt sofort spielen“** direkt vier leichte Runden in einem eigenen, privaten Raum mit Jakob. Die Startseite stellt Jakob als virtuellen Mitspieler vor und lädt auch Menschen ohne viel Bibelwissen ein. Die Probefrage zur Münze im Fischmaul (Matthäus 17,24–27) zeigt den Unterschied zwischen Bluff und Wahrheit. Unter **„Spiel anpassen →“** (Seite `/jakob`) lassen sich Runden und Schwierigkeit selbst wählen; dort sind 6 gemischte Runden vorgeschlagen. Alte Links zu `/joseph` funktionieren weiterhin. Die Person leitet den Raum und kann auch Freunde einladen.
 
-- **Bluffen:** Joseph schreibt nach ein paar Sekunden Bedenkzeit einen Hausbluff zur Frage. Sobald alle Menschen abgegeben haben, zieht er sofort nach, damit niemand auf ihn warten muss.
-- **Raten:** Joseph findet die Wahrheit in etwa 45 Prozent der Runden. Seinen eigenen Bluff wählt er nie.
+- **Bluffen:** Jakob schreibt nach ein paar Sekunden Bedenkzeit einen Hausbluff zur Frage. Sobald alle Menschen abgegeben haben, zieht er sofort nach, damit niemand auf ihn warten muss.
+- **Raten:** Jakob findet die Wahrheit in etwa 45 Prozent der Runden. Seinen eigenen Bluff wählt er nie.
 - **Herzen:** Nach der Auflösung verteilt er ein Herz an einen Bluff der Menschen.
-- **Nur Mitspieler:** Joseph ist immer verbunden, kann aber nie die Leitung übernehmen. Gehen alle Menschen, schließt der Raum. Wer „Joseph“ heißen will, muss sich einen anderen Namen suchen.
-- **Ohne laufenden Prozess:** Joseph zieht wie alles andere „im Vorbeigehen“, wenn ein Handy nachfragt.
+- **Nur Mitspieler:** Jakob ist immer verbunden, kann aber nie die Leitung übernehmen. Gehen alle Menschen, schließt der Raum. Wer „Jakob“ heißen will, muss sich einen anderen Namen suchen.
+- **Ohne laufenden Prozess:** Jakob zieht wie alles andere „im Vorbeigehen“, wenn ein Handy nachfragt.
 
 ### Weitersagen
 
 Bible Bluff verbreitet sich über Gruppen, die es gespielt haben. Darum hilft das Spiel beim Weitersagen:
 
 - **Link-Vorschau.** Wer biblebluff.de in WhatsApp, Signal oder Telegram teilt, bekommt eine Vorschau mit Logo, kurzem Satz und großem Bild (`og.jpg`). Einladungslinks in einen Raum (`/r/LAMPE7`) zeigen stattdessen „Du bist eingeladen – Raum LAMPE7“ mit eigenem Bild (`og-invite.jpg`). Dafür laufen diese Links zuerst durch den Worker (`run_worker_first` in `wrangler.toml`). Er liefert dieselbe App aus und tauscht nur Titel, Text und Bild der Vorschau aus (`src/server/preview.ts`). Auf Testadressen (Vorschau je Pull-Request, workers.dev) holt auch die Startseite ihr Vorschaubild von dort statt von biblebluff.de; auf biblebluff.de selbst bleibt sie rein statisch. Der lokale Server macht es genauso. Suchmaschinen bleiben laut `robots.txt` weiter draußen; die Vorschau-Dienste von Messengern und sozialen Netzwerken dürfen Einladungslinks lesen.
-- **Einladung am Spielende.** Mitspielende sehen nach der Partie die Karte „Leite selbst eine Runde“ mit „Eigenen Raum eröffnen“ und „Link an deine Gruppe schicken“. Nach einer Partie gegen Joseph heißt die Karte „Jetzt mit Freunden spielen“; „Nochmal gegen Joseph“ geht weiterhin. Die Leitung einer Gruppe und die Leinwand sehen keine solche Karte.
+- **Einladung am Spielende.** Mitspielende sehen nach der Partie die Karte „Leite selbst eine Runde“ mit „Eigenen Raum eröffnen“ und „Link an deine Gruppe schicken“. Nach einer Partie gegen Jakob heißt die Karte „Jetzt mit Freunden spielen“; „Nochmal gegen Jakob“ geht weiterhin. Die Leitung einer Gruppe und die Leinwand sehen keine solche Karte.
 
 ### Verbindungsabbrüche
 
