@@ -297,9 +297,9 @@ test('Startseite: Anleitung und Farben klappen auf', async ({ browser }) => {
 
   // Die Themen klappen einzeln auf
   const topic = (title: string) => guide.locator('details.guide-topic').filter({ has: page.locator('summary', { hasText: title }) });
-  await expect(topic('Allein gegen Joseph').getByText('Er schreibt Bluffs, rät mit')).toBeHidden();
-  await topic('Allein gegen Joseph').locator('summary').click();
-  await expect(topic('Allein gegen Joseph').getByText('Er schreibt Bluffs, rät mit')).toBeVisible();
+  await expect(topic('Allein gegen Jakob').getByText('Er schreibt Bluffs, rät mit')).toBeHidden();
+  await topic('Allein gegen Jakob').locator('summary').click();
+  await expect(topic('Allein gegen Jakob').getByText('Er schreibt Bluffs, rät mit')).toBeVisible();
   await topic('Herzensrunde').locator('summary').click();
   await expect(topic('Herzensrunde').getByText('ohne Namen')).toBeVisible();
   await topic('Nachbesprechung').locator('summary').click();
@@ -437,17 +437,17 @@ test('Ohne Vibration (wie auf dem iPhone) meldet ein Ton den Beitritt', async ({
   await expect.poll(() => host.evaluate(() => (window as unknown as { tones: number }).tones)).toBe(2);
 });
 
-test('Allein gegen Joseph: eigener Raum von der Startseite aus, danach weiter mit Freunden', async ({ browser }) => {
+test('Allein gegen Jakob: eigener Raum von der Startseite aus, danach weiter mit Freunden', async ({ browser }) => {
   const page = await phone(browser, 'gast');
   await page.goto('/');
   await page.getByRole('button', { name: 'Spiel anpassen →' }).click();
-  await page.waitForURL('**/joseph');
+  await page.waitForURL('**/jakob');
   await page.getByLabel('Dein Spitzname').fill('Hanna');
-  await page.getByRole('button', { name: 'Raum mit Joseph eröffnen' }).click();
+  await page.getByRole('button', { name: 'Raum mit Jakob eröffnen' }).click();
   await page.waitForURL(/\/r\/[A-Z]+\d+$/);
   const code = page.url().split('/r/')[1];
 
-  await expect(page.locator('.player', { hasText: 'Joseph' })).toContainText('Bot');
+  await expect(page.locator('.player', { hasText: 'Jakob' })).toContainText('Bot');
   // Der Raum ist privat: Er steht nicht unter „Offene Räume“
   const other = await phone(browser, 'andere');
   expect(await homeWithOpenRooms(other)).not.toContain(code);
@@ -455,13 +455,13 @@ test('Allein gegen Joseph: eigener Raum von der Startseite aus, danach weiter mi
   await page.getByRole('button', { name: 'Partie starten' }).click();
   await expect(page.getByText('Runde 1 von 6')).toBeVisible();
 
-  // Sobald Hanna abgibt, zieht Joseph sofort nach – die Abstimmung beginnt
+  // Sobald Hanna abgibt, zieht Jakob sofort nach – die Abstimmung beginnt
   await page.getByLabel('Deine erfundene Antwort').fill(SAFE_BLUFFS.host);
   await page.getByRole('button', { name: 'Bluff abgeben' }).click();
   await expect(page.getByText('Welche Antwort stimmt?')).toBeVisible();
   await page.locator('.option:not(.is-mine)').first().click();
 
-  // Joseph stimmt ebenfalls sofort ab, also wird aufgedeckt; Hanna leitet und schaltet weiter
+  // Jakob stimmt ebenfalls sofort ab, also wird aufgedeckt; Hanna leitet und schaltet weiter
   await expect(page.locator('.reveal-head')).toContainText('Aufdeckung');
   const skip = page.getByRole('button', { name: 'Weiter ›' });
   await expect(async () => {
@@ -483,7 +483,7 @@ test('Allein gegen Joseph: eigener Raum von der Startseite aus, danach weiter mi
   // Am Ende lädt das Spiel ein, als Nächstes mit Freunden zu spielen
   await expect(page.getByRole('heading', { name: 'Endstand' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Jetzt mit Freunden spielen' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Nochmal gegen Joseph' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Nochmal gegen Jakob' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Neue Partie mit allen' })).toHaveCount(0);
   await page.getByRole('button', { name: 'Raum für Freunde eröffnen' }).click();
   await page.waitForURL('**/neu');
