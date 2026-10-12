@@ -548,6 +548,10 @@ textarea {
   padding-top: 58px;
 }
 
+.hero .logo {
+  margin-inline: auto;
+}
+
 .lang-switch {
   position: absolute;
   top: 10px;
@@ -604,6 +608,13 @@ textarea {
   opacity: 0.92;
 }
 
+.home .tagline {
+  margin-inline: auto;
+  text-align: center;
+  line-height: 1.4;
+  text-wrap: balance;
+}
+
 .hero-start {
   position: relative;
   z-index: 1;
@@ -616,12 +627,18 @@ textarea {
   font-size: 0.86rem;
   color: var(--cream);
   opacity: 0.86;
+  text-wrap: balance;
 }
 
 .quick-preview h2 {
   margin: 4px 0 8px;
   font-size: clamp(1.25rem, 5vw, 1.65rem);
   line-height: 1.25;
+  text-wrap: balance;
+}
+
+.quick-preview > .muted {
+  text-wrap: pretty;
 }
 
 .quick-preview .eyebrow {
@@ -648,6 +665,11 @@ textarea {
   font: inherit;
   text-align: left;
   cursor: pointer;
+}
+
+.preview-answer span:last-child {
+  min-width: 0;
+  text-wrap: pretty;
 }
 
 .preview-answer:hover,
@@ -694,7 +716,24 @@ textarea {
 }
 
 .preview-reveal p {
-  margin: 12px 0;
+  margin: 10px 0;
+  text-wrap: pretty;
+}
+
+.preview-reveal .preview-result {
+  margin-top: 0;
+  font-size: 1.1rem;
+}
+
+.preview-reveal .preview-source {
+  margin-top: -4px;
+  color: var(--ink-2);
+  font-size: 0.8rem;
+}
+
+.preview-reveal .preview-next {
+  padding-top: 12px;
+  border-top: 1px solid color-mix(in srgb, var(--olive) 30%, transparent);
 }
 
 .preview-custom {
@@ -708,6 +747,9 @@ textarea {
   font-weight: 700;
   text-decoration: underline;
   cursor: pointer;
+  text-align: center;
+  line-height: 1.35;
+  text-wrap: balance;
 }
 
 .resume {
@@ -800,6 +842,15 @@ textarea {
 .choice-head h2 {
   font-size: 1.35rem;
   margin-bottom: 4px;
+}
+
+.choice-head > div {
+  min-width: 0;
+}
+
+.choice-head p,
+.footnote {
+  text-wrap: pretty;
 }
 
 .choice-icon {

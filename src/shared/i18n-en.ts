@@ -27,21 +27,22 @@ export const EN: Record<string, string> = {
   'Gast': 'Guest',
   'Spiel startet …': 'Starting game …',
   'Jetzt sofort spielen': 'Play now',
-  'Allein gegen Joseph · ohne Anmeldung · direkt zur ersten Frage': 'Solo against Joseph · no sign-up · straight to the first question',
-  'Eine Frage zum Ausprobieren': 'Try a question',
-  'Was geschah Eutychus, als Paulus bis Mitternacht redete?': 'What happened to Eutychus while Paul spoke until midnight?',
-  'Zwei Antworten sind erfunden. Welche steht wirklich in der Bibel?': 'Two answers are made up. Which one is actually in the Bible?',
-  'Er bat um eine Kaffeepause.': 'He asked for a coffee break.',
-  'Er schlief ein und fiel aus dem Fenster.': 'He fell asleep and out of the window.',
-  'Er übernahm spontan die Predigt.': 'He took over the sermon on the spot.',
+  'Allein gegen Joseph · ohne Anmeldung': 'Solo against Joseph · no sign-up',
+  'Probefrage': 'Try a question',
+  'Was passierte Eutychus bei Paulus’ Predigt?': 'What happened to Eutychus during Paul’s sermon?',
+  'Eine Antwort ist echt. Welche?': 'Only one answer is real. Which one?',
+  'Er rief: Kaffeepause!': 'He called for a coffee break!',
+  'Er fiel in die Tiefe.': 'He fell from a height.',
+  'Er löste Paulus ab.': 'He took over from Paul.',
   'Treffer!': 'You got it!',
   'Reingelegt!': 'Fooled you!',
-  'Eutychus fiel tatsächlich schlafend aus dem Fenster. Paulus ging zu ihm hinab, und der Junge wurde lebend nach Hause gebracht. Apostelgeschichte 20,7–12.':
-    'Eutychus really did fall asleep and tumble out of the window. Paul went down to him, and the young man was taken home alive. Acts 20:7–12.',
+  'Eutychus schlief ein und fiel aus dem Fenster. Paulus ging zu ihm hinab; später brachten sie den Jungen lebend nach Hause.':
+    'Eutychus fell asleep and tumbled out of the window. Paul went down to him; later they took the young man home alive.',
+  'Apostelgeschichte 20,7–12': 'Acts 20:7–12',
   'Im Spiel erfindest du selbst solche Bluffs – und versuchst, Josephs Antwort zu durchschauen.':
     'In the game, you invent bluffs like these and try to spot Joseph’s answer.',
   'Jetzt gegen Joseph spielen': 'Play against Joseph now',
-  'Partie mit eigenen Einstellungen starten →': 'Choose your own game settings →',
+  'Spiel anpassen →': 'Customise the game →',
   'oder einem Raum beitreten': 'or join a room',
   'Raum': 'Room',
   'Raum {code}': 'Room {code}',
@@ -103,10 +104,10 @@ export const EN: Record<string, string> = {
 
   // ───────── Startseite ─────────
   'Zurück zu Raum {code} als {name} →': 'Back to room {code} as {name} →',
-  'Du hast einen Raumcode bekommen? Gib ihn hier ein.': 'Got a room code? Enter it here.',
+  'Du hast einen Raumcode? Gib ihn hier ein.': 'Got a room code? Enter it here.',
   'Mit Freunden': 'With friends',
-  'Du eröffnest einen Raum und leitest die Partie – auf dem Handy oder am Beamer.':
-    'Create a room and host the game – on your phone or on a projector.',
+  'Spiele mit Freunden – auch am Beamer.':
+    'Play with friends – on a projector too.',
   'Raum eröffnen': 'Create a room',
   'Allein gegen {bot}': 'Solo against {bot}',
   'Gegen {bot} spielen': 'Play against {bot}',

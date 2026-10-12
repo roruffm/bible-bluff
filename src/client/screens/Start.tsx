@@ -71,7 +71,7 @@ export function Home() {
           <Button variant="gold" block disabled={quickBusy} onClick={quickPlay}>
             {quickBusy ? t('Spiel startet …') : t('Jetzt sofort spielen')}
           </Button>
-          <p>{t('Allein gegen Joseph · ohne Anmeldung · direkt zur ersten Frage')}</p>
+          <p>{t('Allein gegen Joseph · ohne Anmeldung')}</p>
         </div>
       </header>
 
@@ -101,7 +101,7 @@ export function Home() {
           </span>
           <div>
             <h2 id="create-title">{t('Mit Freunden')}</h2>
-            <p class="muted small">{t('Du eröffnest einen Raum und leitest die Partie – auf dem Handy oder am Beamer.')}</p>
+            <p class="muted small">{t('Spiele mit Freunden – auch am Beamer.')}</p>
           </div>
         </div>
         <Button variant="gold" block onClick={() => navigate('/neu')}>
@@ -120,7 +120,7 @@ export function Home() {
           </span>
           <div>
             <h2 id="join-title">{t('Mitspielen')}</h2>
-            <p class="muted small">{t('Du hast einen Raumcode bekommen? Gib ihn hier ein.')}</p>
+            <p class="muted small">{t('Du hast einen Raumcode? Gib ihn hier ein.')}</p>
           </div>
         </div>
         <JoinForm code={code} onCode={setCode} onJoined={(s) => navigate(`/r/${s.code}`)} askCode />
@@ -143,15 +143,15 @@ export function Home() {
 function QuickPreview({ onPlay, busy }: { onPlay: () => void; busy: boolean }) {
   const [choice, setChoice] = useState<number | null>(null);
   const answers = [
-    t('Er bat um eine Kaffeepause.'),
-    t('Er schlief ein und fiel aus dem Fenster.'),
-    t('Er übernahm spontan die Predigt.'),
+    t('Er rief: Kaffeepause!'),
+    t('Er fiel in die Tiefe.'),
+    t('Er löste Paulus ab.'),
   ];
   return (
     <section class="card quick-preview" aria-labelledby="preview-title">
-      <p class="eyebrow">{t('Eine Frage zum Ausprobieren')}</p>
-      <h2 id="preview-title">{t('Was geschah Eutychus, als Paulus bis Mitternacht redete?')}</h2>
-      <p class="muted small">{t('Zwei Antworten sind erfunden. Welche steht wirklich in der Bibel?')}</p>
+      <p class="eyebrow">{t('Probefrage')}</p>
+      <h2 id="preview-title">{t('Was passierte Eutychus bei Paulus’ Predigt?')}</h2>
+      <p class="muted small">{t('Eine Antwort ist echt. Welche?')}</p>
       <div class="preview-answers">
         {answers.map((answer, index) => (
           <button
@@ -168,16 +168,17 @@ function QuickPreview({ onPlay, busy }: { onPlay: () => void; busy: boolean }) {
       </div>
       {choice !== null && (
         <div class="preview-reveal" role="status">
-          <b>{choice === 1 ? t('Treffer!') : t('Reingelegt!')}</b>{' '}
-          {t('Eutychus fiel tatsächlich schlafend aus dem Fenster. Paulus ging zu ihm hinab, und der Junge wurde lebend nach Hause gebracht. Apostelgeschichte 20,7–12.')}
-          <p>{t('Im Spiel erfindest du selbst solche Bluffs – und versuchst, Josephs Antwort zu durchschauen.')}</p>
+          <p class="preview-result"><b>{choice === 1 ? t('Treffer!') : t('Reingelegt!')}</b></p>
+          <p>{t('Eutychus schlief ein und fiel aus dem Fenster. Paulus ging zu ihm hinab; später brachten sie den Jungen lebend nach Hause.')}</p>
+          <p class="preview-source">{t('Apostelgeschichte 20,7–12')}</p>
+          <p class="preview-next">{t('Im Spiel erfindest du selbst solche Bluffs – und versuchst, Josephs Antwort zu durchschauen.')}</p>
           <Button variant="gold" block disabled={busy} onClick={onPlay}>
             {busy ? t('Spiel startet …') : t('Jetzt gegen Joseph spielen')}
           </Button>
         </div>
       )}
       <button type="button" class="preview-custom" onClick={() => navigate('/joseph')}>
-        {t('Partie mit eigenen Einstellungen starten →')}
+        {t('Spiel anpassen →')}
       </button>
     </section>
   );

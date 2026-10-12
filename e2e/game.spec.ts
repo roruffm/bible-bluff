@@ -430,7 +430,7 @@ test('Ohne Vibration (wie auf dem iPhone) meldet ein Ton den Beitritt', async ({
 test('Allein gegen Joseph: eigener Raum von der Startseite aus, danach weiter mit Freunden', async ({ browser }) => {
   const page = await phone(browser, 'gast');
   await page.goto('/');
-  await page.getByRole('button', { name: 'Partie mit eigenen Einstellungen starten →' }).click();
+  await page.getByRole('button', { name: 'Spiel anpassen →' }).click();
   await page.waitForURL('**/joseph');
   await page.getByLabel('Dein Spitzname').fill('Hanna');
   await page.getByRole('button', { name: 'Raum mit Joseph eröffnen' }).click();
