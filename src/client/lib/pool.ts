@@ -2,6 +2,7 @@
 // Die Zahlen ändern sich nur mit einer neuen Version, darum genügt ein Abruf je Sprache und Seitenaufruf.
 import { useEffect, useState } from 'preact/hooks';
 import { ALL_CATEGORIES, CATEGORIES } from '../../shared/rules';
+import { TOPIC_PACKS } from '../../shared/topic-packs';
 import type { CategoryId, Lang, PoolResponse, RoundType, Settings } from '../../shared/types';
 import { api } from './api';
 import { t } from './i18n';
@@ -43,6 +44,14 @@ export function categoryCount(pool: PoolResponse, id: CategoryId, roundType: Rou
 
 /** Wie viele Fragen zur Auswahl passen */
 export function poolCount(pool: PoolResponse, settings: Settings): number {
+  if (settings.topicPack) {
+    const pack = pool.packs?.find((p) => p.id === settings.topicPack);
+    if (!pack) return 0;
+    if (settings.categories.length >= ALL_CATEGORIES.length) {
+      return settings.roundType === 'fragen' ? pack.questions : settings.roundType === 'luecken' ? pack.gaps : pack.questions + pack.gaps;
+    }
+    return settings.categories.reduce((n, id) => n + categoryCount(pack, id, settings.roundType), 0);
+  }
   return settings.categories.reduce((n, id) => n + categoryCount(pool, id, settings.roundType), 0);
 }
 
@@ -69,5 +78,6 @@ export function settingsSummary(s: Settings): string {
       : CATEGORIES.filter((c) => s.categories.includes(c.id))
           .map((c) => t(c.label))
           .join(', ');
-  return `${t('{n} Runden', { n: s.rounds })} · ${type} · ${categories}${s.heartRound ? ` · ${t('mit Herzensrunde')}` : ''}`;
+  const pack = TOPIC_PACKS.find((p) => p.id === s.topicPack);
+  return `${t('{n} Runden', { n: s.rounds })} · ${type} · ${pack ? `${t(pack.label)} · ` : ''}${categories}${s.heartRound ? ` · ${t('mit Herzensrunde')}` : ''}`;
 }

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import { BOT_NAME, POINTS_FAVORITE, POINTS_GIFT, TALK_STEPS, heartRoundAhead } from '../../shared/rules';
 import type { RoomView, TalkNotes, TalkView } from '../../shared/types';
 import { FriendsIcon } from '../components/Icons';
+import { BluffStory } from '../components/BluffStory';
 import { WeekVerseCard } from '../components/WeekVerse';
 import { QRCode } from '../components/QR';
 import { Avatar, Button, ConfirmButton, QuestionText, Toast, formatSeconds, upperFirst } from '../components/ui';
@@ -28,8 +29,8 @@ export function ScoresPhase({ view, conn, display = false }: { view: RoomView; c
     .filter((p) => p.plays)
     .sort((a, b) => b.score - a.score || a.name.localeCompare(b.name, locale()));
   const me = display ? null : view.me;
-  // Wer nur leitet, zeigt die Punkte-Phase oft am Beamer – dann bleibt der Spickzettel erst zugeklappt
-  const presenter = Boolean(view.me && !view.me.plays);
+  const mine = me?.plays ? results.get(me.id) : null;
+  const gain = mine ? mine.truth + mine.bluff + mine.favorite + mine.giftsIn.length * POINTS_GIFT - (mine.giftOut ? POINTS_GIFT : 0) : 0;
   const [toast, setToast] = useState<string | null>(null);
 
   // „Liebe deinen Nächsten“: Beschenkte bekommen einen Hinweis
@@ -50,22 +51,51 @@ export function ScoresPhase({ view, conn, display = false }: { view: RoomView; c
         <h2 class="discovery-question">
           <QuestionText prompt={round.question.prompt} fill={answer.text} />
         </h2>
+        <p class="eyebrow answer-label">{t('Richtige Antwort')}</p>
         <p class="discovery-answer">
           <span aria-hidden="true">✓</span> {upperFirst(answer.text)}
         </p>
         <p class="discovery-ref">{answer.ref}</p>
+      </article>
+
+      {mine && (
+        <section class="round-gain" aria-live="polite">
+          <div><p class="eyebrow">{t('Dein Punktegewinn')}</p><strong>{gain >= 0 ? '+' : ''}{gain} <span>{Math.abs(gain) === 1 ? t('Punkt') : t('Punkte')}</span></strong></div>
+          <div class="round-gain-total">{t('Insgesamt {n} Punkte', { n: view.players.find((p) => p.id === me?.id)?.score ?? 0 })}</div>
+          {mine.favorite > 0 && <p class="muted small">{t('Mit +{n} für deinen Lieblingsbluff – noch vorläufig.', { n: mine.favorite })}</p>}
+          {mine.quiet && <p class="muted small">{t('Ruhige Minute')}</p>}
+        </section>
+      )}
+
+      <footer class="next-bar">
+        {isHost ? (
+          <Button variant="gold" block onClick={() => conn.act({ type: 'next' })}>
+            {!last ? t('Nächste Runde') : heartNext ? t('Zur Herzensrunde') : t('Zum Endstand')}
+          </Button>
+        ) : null}
+        {round.deadline && (
+          <p class="muted small center">
+            {view.paused
+              ? t('Pausiert.')
+              : isHost
+                ? t('{next} automatisch in {time}.', { next: upcoming, time: formatSeconds(left) })
+                : t('{next} automatisch in {time} – oder wenn die Spielleitung weitertippt.', { next: upcoming, time: formatSeconds(left) })}
+          </p>
+        )}
+      </footer>
+
+      <details class="card result-fold" open={display}>
+        <summary>{t('Entdeckung')}</summary>
         <div class="merksatz">
           <span class="merksatz-label">{t('Entdeckung')}</span>
           <p>{answer.discovery}</p>
         </div>
-      </article>
+      </details>
 
-      {round.talk && isHost && <TalkNotesCard notes={round.talk} open={!presenter} />}
+      {round.talk && isHost && <TalkNotesCard notes={round.talk} open={false} />}
 
-      <FavoritesCard view={view} conn={conn} display={display} />
-
-      <section class="card scoreboard">
-        <h2 class="card-title">{t('Punktestand')}</h2>
+      <details class="card scoreboard result-fold" open={display}>
+        <summary>{t('Punktestand')}</summary>
         <ol>
           {ranked.map((p, i) => {
             const r = results.get(p.id);
@@ -113,9 +143,13 @@ export function ScoresPhase({ view, conn, display = false }: { view: RoomView; c
             );
           })}
         </ol>
-      </section>
+      </details>
 
-      {me?.plays && <GiftCard view={view} conn={conn} />}
+      <details class="card result-fold round-extras" open={display}>
+        <summary>{t('Bluffs und Extras')}</summary>
+        <FavoritesCard view={view} conn={conn} display={display} />
+
+        {me?.plays && <GiftCard view={view} conn={conn} />}
 
       {me?.plays &&
         !last &&
@@ -130,24 +164,8 @@ export function ScoresPhase({ view, conn, display = false }: { view: RoomView; c
           <QuietOffer conn={conn} next />
         ))}
 
+      </details>
       <Toast message={toast} onDone={() => setToast(null)} />
-
-      <footer class="next-bar">
-        {isHost ? (
-          <Button variant="gold" block onClick={() => conn.act({ type: 'next' })}>
-            {!last ? t('Nächste Runde') : heartNext ? t('Zur Herzensrunde') : t('Zum Endstand')}
-          </Button>
-        ) : null}
-        {round.deadline && (
-          <p class="muted small center">
-            {view.paused
-              ? t('Pausiert.')
-              : isHost
-                ? t('{next} automatisch in {time}.', { next: upcoming, time: formatSeconds(left) })
-                : t('{next} automatisch in {time} – oder wenn die Spielleitung weitertippt.', { next: upcoming, time: formatSeconds(left) })}
-          </p>
-        )}
-      </footer>
     </section>
   );
 }
@@ -370,6 +388,7 @@ export function FinalScreen({ view, conn, display = false }: { view: RoomView; c
                     : t('♥ {n} Herzen in einer Runde', { n: a.value })
                   : `${upperFirst(a.text)} · ${a.value}×`}
               </p>
+              {a.key === 'favorite' && !display && <BluffStory award={a} />}
             </article>
           ))}
         </section>

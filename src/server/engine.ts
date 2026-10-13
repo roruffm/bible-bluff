@@ -1,5 +1,7 @@
 // Spiel-Engine: reine Zustandsübergänge. Kein Netzwerk, keine Datenbank, keine Uhr.
 // Zeit, Zufall und Präsenz kommen über den Ctx herein.
+import { TOPIC_PACKS } from '../shared/topic-packs';
+import { inTopicPack } from './topic-packs';
 
 import {
   ALL_CATEGORIES,
@@ -263,6 +265,12 @@ export function sanitizeSettings(input: Partial<Settings> | undefined, base: Set
     if (typeof input.heartRound !== 'boolean') throw new GameError('bad_settings', 'Ungültige Angabe zur Herzensrunde.', 400);
     s.heartRound = input.heartRound;
   }
+  if (input.topicPack !== undefined) {
+    if (input.topicPack !== null && !TOPIC_PACKS.some((p) => p.id === input.topicPack)) {
+      throw new GameError('bad_settings', 'Unbekanntes Themenpaket.', 400);
+    }
+    s.topicPack = input.topicPack;
+  }
   if (input.lang !== undefined) {
     if (!isLang(input.lang)) throw new GameError('bad_settings', 'Unbekannte Sprache.', 400);
     s.lang = input.lang;
@@ -390,6 +398,7 @@ export interface QuestionFilter {
   categories: CategoryId[];
   /** ohne Angabe: Deutsch */
   lang?: Lang;
+  topicPack?: Settings['topicPack'];
 }
 
 function isGap(q: Question): boolean {
@@ -404,9 +413,9 @@ function inCategories(q: Question, categories: CategoryId[]): boolean {
 }
 
 /** Alle Fragen, die zu Kategorien und Rundenart passen */
-export function matchingQuestions(filter: Pick<QuestionFilter, 'roundType' | 'categories' | 'lang'>): Question[] {
+export function matchingQuestions(filter: Pick<QuestionFilter, 'roundType' | 'categories' | 'lang' | 'topicPack'>): Question[] {
   return questionsFor(filter.lang ?? 'de').filter(
-    (q) => inCategories(q, filter.categories) && (filter.roundType === 'gemischt' || isGap(q) === (filter.roundType === 'luecken')),
+    (q) => inTopicPack(q, filter.topicPack) && inCategories(q, filter.categories) && (filter.roundType === 'gemischt' || isGap(q) === (filter.roundType === 'luecken')),
   );
 }
 
@@ -765,7 +774,10 @@ function settleRound(s: RoomState) {
       awarded.add(authorId);
     }
   }
-  const favorites: FavoriteRec[] = leaders.map((o) => ({ text: o.text, authorIds: o.authorIds, likes: counts.get(o.id) ?? 0 }));
+  const favorites: FavoriteRec[] = leaders.map((o) => ({
+    text: o.text, authorIds: o.authorIds, likes: counts.get(o.id) ?? 0,
+    fooled: Object.values(round.votes).filter((id) => id === o.id).length,
+  }));
   if (current) current.favorites = favorites;
 }
 

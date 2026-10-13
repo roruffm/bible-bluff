@@ -2,8 +2,10 @@
 // eigenen Worten, ohne Zitate aus urheberrechtlich geschützten Übersetzungen.
 
 import type { TalkNotes } from '../../shared/types';
+import { EXTRA_EN_TALK } from './topic-expansion';
 
 export const EN_TALK: Record<string, TalkNotes> = {
+  ...EXTRA_EN_TALK,
   'mt-muenze': {
     background: 'The temple tax went back to the half shekel in Exodus 30:13; in Jesus’ day every adult Jewish man paid it once a year. The stater coin in the fish was worth four drachmas – exactly the tax for two.',
     question: 'When is it better to give up a right so as not to offend others – and when not?',

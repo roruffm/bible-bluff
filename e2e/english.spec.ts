@@ -109,6 +109,7 @@ test('ein englischer Raum: Einladung, eine Runde, Punktestand', async ({ browser
 
   await expect(host.getByText('Scores')).toBeVisible({ timeout: 40_000 });
   await expect(host.locator('.talk-notes')).toContainText('Cheat sheet for the host');
+  await amara.locator('.result-fold').filter({ has: amara.locator('summary', { hasText: /^Discovery$/ }) }).locator('summary').click();
   await expect(amara.locator('.merksatz')).toContainText('Discovery');
   for (const [p, where] of [
     [host, 'Punkte der Leitung'],

@@ -15,8 +15,10 @@ import {
   WRITE_OPTIONS,
   normalizeCode,
 } from '../../shared/rules';
+import { TOPIC_PACKS } from '../../shared/topic-packs';
 import type { CategoryId, PublicRoom, RoundType, Settings } from '../../shared/types';
 import { Guide } from '../components/Guide';
+import { BluffPractice } from '../components/BluffPractice';
 import { EnterIcon, FriendsIcon } from '../components/Icons';
 import { LangSwitch } from '../components/LangSwitch';
 import { ThemeFold } from '../components/ThemePicker';
@@ -174,10 +176,11 @@ function QuickPreview({ onPlay, busy }: { onPlay: () => void; busy: boolean }) {
             <span>{answer}</span>
           </button>
         ))}
+        <BluffPractice onReveal={() => setChoice(3)} />
       </div>
       {choice !== null && (
         <div class="preview-reveal" role="status">
-          <p class="preview-result"><b>{choice === 1 ? t('Treffer!') : t('Reingelegt!')}</b></p>
+          <p class="preview-result"><b>{choice === 3 ? t('Jetzt kennst du beide Seiten: raten und bluffen!') : choice === 1 ? t('Treffer!') : t('Reingelegt!')}</b></p>
           <p>{t('Ein Fisch als Geldbörse! Jesus schickte Petrus angeln: Die Münze im Fischmaul sollte die Tempelsteuer für beide bezahlen.')}</p>
           <p class="preview-source">{t('Matthäus 17,24–27')}</p>
           <p class="preview-next">{t('Jetzt bist du dran: Erfinde einen Bluff und leg {bot} rein.', { bot: BOT_NAME })}</p>
@@ -529,6 +532,20 @@ export function SettingsFields(props: { settings: Settings; onChange: (patch: Pa
         <small class="field-hint">{roundTypeHint(settings.roundType)}</small>
       </div>
       <div class="field">
+        <span>{t('Themenpakete')}</span>
+        <div class="topic-packs" role="group" aria-label={t('Themenpakete')}>
+          <button type="button" class={`topic-pack topic-pack-all${!settings.topicPack ? ' is-on' : ''}`} aria-pressed={!settings.topicPack} disabled={disabled} onClick={() => onChange({ topicPack: null })}>
+            <strong>{t('Alle Themen')}</strong><small>{t('Deine Bibelbereiche frei kombinieren.')}</small>
+          </button>
+          {TOPIC_PACKS.map((p) => {
+            const n = pool?.packs ? poolCount(pool, { ...settings, categories: ALL_CATEGORIES, topicPack: p.id }) : null;
+            return <button type="button" class={`topic-pack${settings.topicPack === p.id ? ' is-on' : ''}`} aria-pressed={settings.topicPack === p.id} disabled={disabled || n === 0} onClick={() => onChange({ topicPack: p.id, categories: [...ALL_CATEGORIES] })}>
+              <strong>{t(p.label)}</strong><small>{t(p.hint)}</small>{n !== null && <span>{poolAmount(n, settings.roundType)}</span>}
+            </button>;
+          })}
+        </div>
+      </div>
+      <div class="field">
         <span class="field-head">
           {t('Kategorien')}
           {!all && (
@@ -540,7 +557,8 @@ export function SettingsFields(props: { settings: Settings; onChange: (patch: Pa
         <div class="cat-chips" role="group" aria-label={t('Kategorien')}>
           {CATEGORIES.map((c) => {
             const on = settings.categories.includes(c.id);
-            const n = pool ? categoryCount(pool, c.id, settings.roundType) : null;
+            const scoped = settings.topicPack ? pool?.packs?.find((p) => p.id === settings.topicPack) : pool;
+            const n = scoped ? categoryCount(scoped, c.id, settings.roundType) : null;
             return (
               <button
                 type="button"

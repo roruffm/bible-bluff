@@ -1,4 +1,4 @@
-// Englischer Fragenpool (britisches Englisch, Stufe 1): 64 ausgewählte Fragen und Lückentexte aus dem
+// Englischer Fragenpool (britisches Englisch): 88 ausgewählte Fragen und Lückentexte aus dem
 // deutschen Pool, mit denselben IDs. So zählt „Neues für alle“ eine Frage als bekannt, egal in welcher
 // Sprache sie gespielt wurde. Übertragen und angepasst, nicht Wort für Wort: Bluffs, die auf Englisch nicht
 // funktionieren, sind ersetzt, und die Schlüsselwörter („accept“) sind eigens für englische Antworten gebaut.
@@ -6,8 +6,10 @@
 // (British Edition, gemeinfrei).
 
 import type { Question } from '../questions';
+import { EXTRA_EN_QUESTIONS } from './topic-expansion';
 
 export const EN_QUESTIONS: Question[] = [
+  ...EXTRA_EN_QUESTIONS,
   {
     id: 'mt-muenze',
     book: 'Matthew',

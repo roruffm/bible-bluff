@@ -354,7 +354,7 @@ describe('Ganze Partie', () => {
 
 describe('Lieblingsbluff', () => {
   /** Eine Runde bis zur Punkte-Phase: Anna und Ben bluffen getrennt, Cleo zusammen mit dem Host */
-  function toScores() {
+  function toScores(fooled = false) {
     const g = setup();
     g.act('host', { type: 'start' });
     g.act('anna', { type: 'bluff', text: 'Ein Sack voller Linsen' });
@@ -364,7 +364,7 @@ describe('Lieblingsbluff', () => {
     const opts = g.state.game!.round.options!;
     const truth = opts.find((o) => o.kind === 'truth')!;
     const by = (id: string) => opts.find((o) => o.authorIds.includes(id))!;
-    for (const id of IDS) g.act(id, { type: 'vote', optionId: truth.id });
+    for (const id of IDS) g.act(id, { type: 'vote', optionId: fooled && ['anna', 'ben'].includes(id) ? by('cleo').id : truth.id });
     expect(() => g.act('anna', { type: 'like', optionId: by('ben').id })).toThrowError(
       expect.objectContaining({ code: 'phase_over' }),
     );
@@ -419,7 +419,7 @@ describe('Lieblingsbluff', () => {
     expect(score(g.state, 'host')).toBe(before.host + POINTS_FAVORITE);
     expect(score(g.state, 'anna')).toBe(before.anna);
     expect(g.state.game!.history[0].favorites).toEqual([
-      { text: 'Ein Mantel aus Kamelhaar', authorIds: by('cleo').authorIds, likes: 2 },
+      { text: 'Ein Mantel aus Kamelhaar', authorIds: by('cleo').authorIds, likes: 2, fooled: 0 },
     ]);
     // Neue Runde: keine Herzen, keine Liste
     const next = buildView(g.state, 'anna', g.ctx(), 6);
@@ -468,6 +468,20 @@ describe('Lieblingsbluff', () => {
     // Gleichstand mit je zwei Herzen → der frühere gewinnt
     expect(award).toMatchObject({ title: 'Bester Bluff des Abends', value: 2, quote: 'Zwölf Fässer mit Wein 1' });
     expect(award.players.map((p) => p.id)).toEqual(['ben']);
+    expect(award.story).toEqual({ prompt: getQuestion(g.state.game!.history[1].questionId, 'de').prompt, fooled: 0 });
+  });
+
+  it('merkt die tatsächlichen Stimmen unabhängig von Herzen und bleibt bei alten Runden ehrlich', () => {
+    const { g, by } = toScores(true);
+    const prompt = getQuestion(g.state.game!.round.questionId, 'de').prompt;
+    g.act('anna', { type: 'like', optionId: by('cleo').id });
+    g.act('host', { type: 'next' });
+    g.state.status = 'finished';
+    const award = buildView(g.state, 'host', g.ctx(), 9).final!.awards.find((a) => a.key === 'favorite')!;
+    expect(award.value).toBe(1);
+    expect(award.story).toEqual({ prompt, fooled: 2 });
+    delete g.state.game!.history[0].favorites![0].fooled;
+    expect(buildView(g.state, 'host', g.ctx(), 10).final!.awards.find((a) => a.key === 'favorite')!.story).toEqual({ prompt, fooled: null });
   });
 
   it('streicht das Herz einer entfernten Person', () => {
