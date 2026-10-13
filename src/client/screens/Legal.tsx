@@ -42,6 +42,7 @@ export function LegalLinks({ newTab = false }: { newTab?: boolean }) {
   return (
     <nav class="legal-links" aria-label={t('Rechtliches')}>
       {link('/impressum', t('Impressum'))}
+      <span aria-hidden="true">·</span>
       {link('/datenschutz', t('Datenschutz'))}
     </nav>
   );
