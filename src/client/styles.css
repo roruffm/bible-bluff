@@ -971,19 +971,8 @@ textarea {
 }
 
 .home .legal-links {
-  gap: 12px;
   padding: 17px 0 6px;
   border-top: 1px solid var(--line);
-  font-size: 0.625rem;
-}
-
-.home .legal-links a {
-  color: var(--ink-3);
-  text-decoration: none;
-}
-
-.home .legal-links a:hover {
-  text-decoration: underline;
 }
 
 @media (max-width: 360px) {
@@ -1309,14 +1298,9 @@ textarea {
 /* ── Impressum und Datenschutz ── */
 .legal-links {
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
   gap: 10px;
-  font-size: 0.85rem;
-  color: var(--ink-3);
-}
-.legal-links a {
-  color: var(--ink-2);
-  text-underline-offset: 3px;
 }
 .legal-hero {
   display: flex;
@@ -1356,7 +1340,6 @@ textarea {
   gap: 4px;
 }
 .legal-body a {
-  color: inherit;
   overflow-wrap: anywhere;
 }
 .legal-address {
@@ -1484,17 +1467,43 @@ textarea {
   gap: 10px;
 }
 
-.link-btn {
-  border: 0;
-  background: none;
-  padding: 0;
+.link-btn,
+.legal-links a,
+.legal-body a,
+.guide a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  max-width: 100%;
+  padding: 8px 12px;
+  border: 1px solid color-mix(in srgb, var(--plum) 35%, var(--line));
+  border-radius: var(--radius-sm);
+  background: var(--plum-soft);
   font: inherit;
   font-size: 0.85rem;
   font-weight: 700;
-  color: var(--ink-2);
-  text-decoration: underline;
-  text-underline-offset: 3px;
+  color: var(--plum-text);
+  text-decoration: none;
   cursor: pointer;
+  transition: background 0.15s;
+}
+
+.link-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.legal-links a {
+  font-size: 0.75rem;
+}
+
+.link-btn:hover:not(:disabled),
+.legal-links a:hover,
+.legal-body a:hover,
+.guide a:hover,
+.btn-ghost:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--plum-soft) 85%, var(--plum) 15%);
 }
 
 /* Kategorien: mehrere wählbar, mindestens eine */
@@ -1542,7 +1551,10 @@ textarea {
 }
 
 .cat-chip:focus-visible,
-.link-btn:focus-visible {
+.link-btn:focus-visible,
+.legal-links a:focus-visible,
+.legal-body a:focus-visible,
+.guide a:focus-visible {
   outline: 3px solid var(--gold-2);
   outline-offset: 2px;
 }
@@ -1688,13 +1700,9 @@ textarea {
 }
 
 .btn-ghost {
-  padding: 0 8px;
-  background: transparent;
-  border-color: transparent;
-  color: var(--ink-2);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  text-decoration-thickness: 1.5px;
+  background: var(--plum-soft);
+  border-color: color-mix(in srgb, var(--plum) 35%, var(--line));
+  color: var(--plum-text);
 }
 
 .btn-danger {
@@ -4772,11 +4780,6 @@ html.tv-mode body {
   --logo-glint: #ffffff;
 }
 
-/* Am Spielende zum Weitersagen einladen (Results.tsx, SpreadCard) */
-.spread-card .btn-ghost {
-  margin-top: 6px;
-}
-
 /* Mein Vers für die Woche (components/WeekVerse.tsx) */
 .verse-choices {
   display: grid;
@@ -4925,9 +4928,10 @@ html.tv-mode body {
 .final-section-content { padding-bottom: 18px; }
 .final-section-content > .card, .final-section-content > .side-card { border: 0; box-shadow: none; padding: 0; background: transparent; }
 .final-verse .week-verse > .card-title { display: none; }
+.final-curious { padding: 12px 0; border-top: 1px solid var(--line); }
 .final-section .ranking { margin: 0; padding: 0; list-style: none; }
 .final-section .award { animation: none; border: 1px solid var(--line); }
-.final-footer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px; }
+.final-footer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; }
 .final-footer .btn { min-height: 44px; }
 .tv .final-overview, .tv .final-sections, .tv .final > .award-favorite { grid-column: 1 / -1; }
 .tv .final-sections { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 2vw; }

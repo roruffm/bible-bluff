@@ -9,7 +9,6 @@ export const EN: Record<string, string> = {
   'Alle Platzierungen': 'All places',
   'Weitere Auszeichnungen': 'More awards',
   'Entdeckungen zum Nachlesen': 'Discoveries to revisit',
-  'Mehr entdecken und teilen': 'Discover more and share',
   'Themenpakete': 'Topic packs',
   'Alle Themen': 'All topics',
   'Deine Bibelbereiche frei kombinieren.': 'Choose any combination of Bible sections.',
@@ -517,11 +516,6 @@ export const EN: Record<string, string> = {
   'Kennt ihr Bible Bluff? Alle erfinden Antworten auf eine Bibelfrage – wer findet die echte? Lasst uns das mal zusammen spielen!':
     'Have you come across Bible Bluff? Everyone makes up answers to a Bible question – who can spot the real one? Let’s play it together sometime!',
   'Jetzt mit Freunden spielen': 'Now play with friends',
-  'Leite selbst eine Runde': 'Host a game yourself',
-  'Gegen {bot} geübt – mit echten Menschen wird es erst richtig lustig. Eröffne einen Raum und lade Freunde, Familie oder deine Jugendgruppe ein.':
-    'Warmed up against {bot}? It gets really fun with real people. Create a room and invite friends, family or your youth group.',
-  'Hat’s dir gefallen? Spiel es mit deiner Jugendgruppe, deiner Familie oder im Hauskreis – kostenlos und ohne Anmeldung.':
-    'Enjoyed it? Play it with your youth group, your family or your small group – free, with no sign-up.',
   'Raum für Freunde eröffnen': 'Create a room for friends',
   'Eigenen Raum eröffnen': 'Create your own room',
   'Link an deine Gruppe schicken': 'Send the link to your group',
