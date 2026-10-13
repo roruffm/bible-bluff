@@ -632,8 +632,8 @@ textarea {
   width: max-content;
   margin: 0;
   padding: 2px;
-  border-radius: 9px;
-  background: color-mix(in srgb, var(--cream) 5%, transparent);
+  border-radius: 0;
+  background: transparent;
 }
 
 .home .lang-switch button {
@@ -641,14 +641,20 @@ textarea {
   min-width: 44px;
   min-height: 44px;
   padding: 8px;
-  border-radius: 6px;
+  border-radius: 0;
   font-size: 0.625rem;
+}
+
+.home .lang-switch button.is-on {
+  background: transparent;
 }
 
 .home .lang-switch .flag {
   display: block;
-  width: 26px;
-  height: 18px;
+  width: 20px;
+  height: 14px;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .home .hero .logo {
