@@ -14,7 +14,10 @@ async function createRoom(page: Page, name: string, plays = true): Promise<strin
   await page.goto('/');
   await page.getByRole('button', { name: /Mit Freunden spielen/ }).click();
   await page.getByLabel('Dein Spitzname').fill(name);
-  if (!plays) await page.getByText('Ich spiele mit').click();
+  if (!plays) {
+    await page.getByText('Weitere Einstellungen', { exact: true }).click();
+    await page.getByText('Ich spiele mit').click();
+  }
   await page.getByRole('radiogroup', { name: 'Runden' }).getByRole('radio', { name: '4', exact: true }).click();
   await page.getByRole('button', { name: 'Raum eröffnen' }).click();
   await page.waitForURL(/\/r\/[A-Z]+\d+$/);
@@ -176,7 +179,7 @@ test('eine komplette Partie auf drei Handys und der Leinwand', async ({ browser 
   await expect(host.locator('.final-personal')).toContainText('Dein Ergebnis');
   await expect(host.getByRole('button', { name: 'Neue Partie mit allen' })).toBeInViewport();
   await expect(host.locator('.final-section[open]')).toHaveCount(0);
-  await expect(tv.locator('.final-section:not([open])')).toHaveCount(0);
+  await expect(tv.locator('.display-slide')).toBeVisible();
   await host.screenshot({ path: testInfo.outputPath('final-compact.png'), fullPage: true });
   await jonas.locator('.final-verse > summary').click();
   // Mein Vers für die Woche: passend zur Partie, als Bild und als Kalender-Erinnerung
@@ -414,6 +417,7 @@ test('Öffentliche Räume stehen auf der Startseite, auch mitten in der Partie',
   expect(await homeWithOpenRooms(visitor)).toEqual([]);
   await expect(visitor.locator('.open-rooms')).toHaveCount(0);
 
+  await host.getByText('Einstellungen ändern', { exact: true }).click();
   await host.getByText('Öffentlich zeigen', { exact: true }).click();
   await expect(host.getByText('Der Raum steht auf der Startseite')).toBeVisible();
   const jonas = await phone(browser, 'jonas');
@@ -469,6 +473,7 @@ test('Ohne Vibration (wie auf dem iPhone) meldet ein Ton den Beitritt', async ({
   });
   const code = await createRoom(host, 'Rahel');
   // Antippen (mit dem Finger, nicht der Maus) schaltet den Ton frei
+  await host.getByText('Einstellungen ändern', { exact: true }).click();
   await host.getByText('Öffentlich zeigen', { exact: true }).tap();
   await expect(host.getByText('Der Raum steht auf der Startseite')).toBeVisible();
 
@@ -555,6 +560,7 @@ test('Lückentext aus gewählten Kategorien: Lücke, eingesetzte Antworten, Aufl
   await host.goto('/neu');
   await host.getByLabel('Dein Spitzname').fill('Rahel');
   await host.getByRole('radiogroup', { name: 'Runden' }).getByRole('radio', { name: '4', exact: true }).click();
+  await host.getByText('Weitere Einstellungen', { exact: true }).click();
   await host.getByRole('radiogroup', { name: 'Rundenart' }).getByRole('radio', { name: 'Lückentext' }).click();
   // Nur Evangelien und Altes Testament
   const chips = host.getByRole('group', { name: 'Kategorien' });

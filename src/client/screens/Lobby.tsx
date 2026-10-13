@@ -82,7 +82,7 @@ export function Lobby({ view, conn }: { view: RoomView; conn: RoomConnection }) 
   const change = async (patch: { settings?: Partial<Settings>; hostPlays?: boolean }) => {
     setError(null);
     try {
-      await conn.act({ type: 'settings', ...patch });
+      await conn.act({ type: 'settings', ...patch }, { inline: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : t('Das ging nicht.'));
     }
@@ -91,7 +91,7 @@ export function Lobby({ view, conn }: { view: RoomView; conn: RoomConnection }) 
   const setListed = async (listed: boolean) => {
     setError(null);
     try {
-      await conn.act({ type: 'listed', listed });
+      await conn.act({ type: 'listed', listed }, { inline: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : t('Das ging nicht.'));
     }
@@ -100,7 +100,7 @@ export function Lobby({ view, conn }: { view: RoomView; conn: RoomConnection }) 
   const start = async () => {
     setError(null);
     try {
-      await conn.act({ type: 'start' });
+      await conn.act({ type: 'start' }, { inline: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : t('Start fehlgeschlagen.'));
     }
@@ -136,45 +136,32 @@ export function Lobby({ view, conn }: { view: RoomView; conn: RoomConnection }) 
         )}
       </section>
 
-      {isHost ? (
-        <section class="card">
-          <h2 class="card-title">{t('Einstellungen')}</h2>
-          <Toggle
-            checked={view.hostPlays}
-            onChange={(hostPlays) => change({ hostPlays })}
-            label={t('Ich spiele mit')}
-            hint={view.hostPlays ? t('Du leitest und spielst.') : t('Du leitest nur – dieses Gerät zeigt die gemeinsame Ansicht.')}
-          />
-          <Toggle
-            checked={view.listed}
-            onChange={setListed}
-            label={t('Öffentlich zeigen')}
-            hint={
-              !view.listed
-                ? t('Nur wer den Code oder Link hat, kommt herein. Schalte das nur ein, wenn Fremde willkommen sind.')
-                : view.locked
-                  ? t('Solange der Raum gesperrt ist, erscheint er nicht auf der Startseite.')
-                  : t(
-                      'Der Raum steht auf der Startseite, und alle können beitreten. Lass ihn offen, dann meldet sich dein Handy, wenn jemand dazukommt.',
-                    )
-            }
-          />
-          {!withBot && <HeartToggle checked={view.settings.heartRound} onChange={(heartRound) => change({ settings: { heartRound } })} />}
-          <SettingsFields settings={view.settings} onChange={(settings) => change({ settings })} />
-        </section>
-      ) : (
-        <section class="card summary">
-          <h2 class="card-title">{t('Partie')}</h2>
-          <p>{settingsSummary(view.settings)}</p>
-          <p class="muted small">
-            {t('Schwierigkeit {level} · {write} s bluffen · {vote} s abstimmen', {
-              level: difficultyName(view.settings.difficulty),
-              write: view.settings.writeSeconds,
-              vote: view.settings.voteSeconds,
-            })}
-          </p>
-        </section>
-      )}
+      <section class="card summary lobby-summary">
+        <h2 class="card-title">{t('Partie')}</h2>
+        <p>{settingsSummary(view.settings)}</p>
+        <p class="muted small">
+          {t('Schwierigkeit {level} · {write} s bluffen · {vote} s abstimmen', {
+            level: difficultyName(view.settings.difficulty), write: view.settings.writeSeconds, vote: view.settings.voteSeconds,
+          })}
+        </p>
+        {isHost && (
+          <details class="more-settings lobby-settings">
+            <summary>{t('Einstellungen ändern')}</summary>
+            <div class="settings">
+              <Toggle checked={view.hostPlays} onChange={(hostPlays) => change({ hostPlays })} label={t('Ich spiele mit')}
+                hint={view.hostPlays ? t('Du leitest und spielst.') : t('Du leitest nur – dieses Gerät zeigt die gemeinsame Ansicht.')} />
+              <Toggle checked={view.listed} onChange={setListed} label={t('Öffentlich zeigen')}
+                hint={!view.listed
+                  ? t('Nur wer den Code oder Link hat, kommt herein. Schalte das nur ein, wenn Fremde willkommen sind.')
+                  : view.locked
+                    ? t('Solange der Raum gesperrt ist, erscheint er nicht auf der Startseite.')
+                    : t('Der Raum steht auf der Startseite, und alle können beitreten. Lass ihn offen, dann meldet sich dein Handy, wenn jemand dazukommt.')} />
+              {!withBot && <HeartToggle checked={view.settings.heartRound} onChange={(heartRound) => change({ settings: { heartRound } })} />}
+              <SettingsFields settings={view.settings} onChange={(settings) => change({ settings })} />
+            </div>
+          </details>
+        )}
+      </section>
 
       {error && (
         <p class="error" role="alert">
@@ -204,7 +191,7 @@ export function Lobby({ view, conn }: { view: RoomView; conn: RoomConnection }) 
         </p>
       )}
 
-      <Rules compact />
+      <details class="more-settings lobby-rules"><summary>{t('Spielregeln')}</summary><Rules compact /></details>
     </section>
   );
 }

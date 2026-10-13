@@ -230,6 +230,7 @@ export function DatenschutzPage() {
       <ul>
         <li>deine Sitzung je Raum (Raumcode, Sitzungskennung, Spitzname), damit Neuladen nichts kostet,</li>
         <li>dein zuletzt verwendeter Spitzname,</li>
+        <li>ein ungesendeter Bluff-Entwurf im aktuellen Browser-Tab, bis du ihn abgibst oder die Runde endet,</li>
         <li>das gewählte Farbkonzept und die gewählte Sprache,</li>
         <li>die Nummern von höchstens 300 Fragen, die du schon gesehen hast.</li>
       </ul>

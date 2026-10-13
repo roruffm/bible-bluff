@@ -3,6 +3,7 @@ import { BLUFF_MAX } from '../../shared/rules';
 import type { RoomView } from '../../shared/types';
 import { Button, Progress, QuestionCard, QuestionText, Timer } from '../components/ui';
 import { type RoomConnection, useServerNow } from '../lib/hooks';
+import { clearDraft, draftKey, loadDraft, saveDraft } from '../lib/draft';
 import { t } from '../lib/i18n';
 
 const LETTERS = 'ABCDEFGHIJKLMN';
@@ -12,8 +13,11 @@ export function WritePhase({ view, conn, display = false }: { view: RoomView; co
   const me = view.me;
   const canWrite = Boolean(me?.plays) && !display;
   const quiet = canWrite && me?.quiet === 'now';
-  const [text, setText] = useState(round.myBluff ?? '');
-  const [editing, setEditing] = useState(!round.myBluff);
+  const key = draftKey(view.code, me?.id ?? '');
+  const roundId = `${round.writeStartedAt}:${round.index}:${round.question.id}`;
+  const restored = canWrite ? loadDraft(key, roundId, round.myBluff) : null;
+  const [text, setText] = useState(restored ?? round.myBluff ?? '');
+  const [editing, setEditing] = useState(restored !== null || !round.myBluff);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const autoSent = useRef(false);
@@ -22,30 +26,35 @@ export function WritePhase({ view, conn, display = false }: { view: RoomView; co
 
   // Neue Frage → Eingabe zurücksetzen
   useEffect(() => {
-    setText(round.myBluff ?? '');
-    setEditing(!round.myBluff);
+    const draft = canWrite ? loadDraft(key, roundId, round.myBluff) : null;
+    setText(draft ?? round.myBluff ?? '');
+    setEditing(draft !== null || !round.myBluff);
     setError(null);
     autoSent.current = false;
-  }, [round.index, round.question.id]);
+  }, [key, roundId]);
+
+  const edit = (value: string) => {
+    setText(value);
+    saveDraft(key, roundId, value);
+  };
 
   // Kurz vor Schluss: einen fertigen, aber noch nicht abgeschickten Entwurf retten
   useEffect(() => {
-    if (!canWrite || quiet || !editing || autoSent.current || view.paused || round.deadline === null) return;
+    if (!canWrite || quiet || busy || !editing || autoSent.current || view.paused || round.deadline === null) return;
     const draft = text.trim();
-    if (!draft || draft === round.myBluff || round.deadline - now > 1500) return;
+    if (!draft || draft === round.myBluff || round.deadline - now > 1500 || round.deadline <= now) return;
     autoSent.current = true;
-    conn
-      .act({ type: 'bluff', text: draft })
-      .then(() => setEditing(false))
-      .catch(() => {});
+    submit();
   }, [now]);
 
   const submit = async () => {
+    if (busy) return;
     if (!text.trim()) return setError(t('Schreib zuerst einen Bluff.'));
     setBusy(true);
     setError(null);
     try {
-      await conn.act({ type: 'bluff', text });
+      await conn.act({ type: 'bluff', text }, { inline: true });
+      clearDraft(key);
       setEditing(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : t('Abgabe fehlgeschlagen.'));
@@ -57,9 +66,9 @@ export function WritePhase({ view, conn, display = false }: { view: RoomView; co
   const suggest = async () => {
     setError(null);
     try {
-      const res = await conn.act({ type: 'suggest' });
+      const res = await conn.act({ type: 'suggest' }, { inline: true });
       if (res.suggestion) {
-        setText(res.suggestion);
+        edit(res.suggestion);
         setEditing(true);
         inputRef.current?.focus();
       }
@@ -90,11 +99,12 @@ export function WritePhase({ view, conn, display = false }: { view: RoomView; co
               <textarea
                 ref={inputRef}
                 value={text}
+                disabled={busy}
                 maxLength={BLUFF_MAX}
                 rows={2}
                 placeholder={gap ? t('Nur der fehlende Teil – glaubwürdig, aber falsch …') : t('Glaubwürdig, aber falsch …')}
                 autocapitalize={gap ? 'off' : 'sentences'}
-                onInput={(e) => setText((e.currentTarget as HTMLTextAreaElement).value)}
+                onInput={(e) => edit((e.currentTarget as HTMLTextAreaElement).value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
@@ -157,7 +167,7 @@ export function VotePhase({ view, conn, display = false }: { view: RoomView; con
     setPending(optionId);
     setError(null);
     try {
-      await conn.act({ type: 'vote', optionId });
+      await conn.act({ type: 'vote', optionId }, { inline: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : t('Stimme nicht angekommen.'));
     } finally {
@@ -225,7 +235,7 @@ export function QuietScreen({ view, conn }: { view: RoomView; conn: RoomConnecti
   const back = async () => {
     setError(null);
     try {
-      await conn.act({ type: 'quiet', on: false });
+      await conn.act({ type: 'quiet', on: false }, { inline: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : t('Das ging nicht.'));
     }
@@ -260,7 +270,7 @@ export function QuietOffer({ conn, next = false }: { conn: RoomConnection; next?
   const start = async () => {
     setError(null);
     try {
-      await conn.act({ type: 'quiet', on: true });
+      await conn.act({ type: 'quiet', on: true }, { inline: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : t('Das ging nicht.'));
     }

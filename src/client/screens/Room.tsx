@@ -154,8 +154,21 @@ function GameShell({ view, conn }: { view: RoomView; conn: RoomConnection }) {
       </main>
 
       {panel && <Panel view={view} conn={conn} onClose={() => setPanel(false)} />}
+      {conn.actionError && <ActionErrorNotice conn={conn} />}
       <Toast message={joinNote} onDone={() => setJoinNote(null)} />
     </div>
+  );
+}
+
+function ActionErrorNotice({ conn }: { conn: RoomConnection }) {
+  return (
+    <aside class="action-error" role="alert">
+      <p><strong>{t('Aktion fehlgeschlagen')}</strong><span>{conn.actionError}</span></p>
+      <div class="row">
+        <Button small onClick={conn.retryAction}>{t('Erneut versuchen')}</Button>
+        <Button small variant="ghost" onClick={conn.dismissActionError}>{t('Schließen')}</Button>
+      </div>
+    </aside>
   );
 }
 
@@ -274,7 +287,7 @@ function Panel({ view, conn, onClose }: { view: RoomView; conn: RoomConnection; 
   const run = (action: Parameters<RoomConnection['act']>[0], close = true) => async () => {
     setError(null);
     try {
-      await conn.act(action);
+      await conn.act(action, { inline: true });
       if (close) onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : t('Das ging nicht.'));
@@ -403,7 +416,7 @@ function Panel({ view, conn, onClose }: { view: RoomView; conn: RoomConnection; 
                 variant="secondary"
                 confirm={t('Wirklich verlassen? Nochmal tippen')}
                 onConfirm={async () => {
-                  await conn.act({ type: 'leave' }).catch(() => {});
+                  await conn.act({ type: 'leave' });
                   clearSession(view.code);
                   navigate('/');
                 }}

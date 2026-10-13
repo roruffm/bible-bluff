@@ -3,6 +3,8 @@ import type { Action, RoomView } from '../../shared/types';
 import { ApiError, api, isFatal } from './api';
 import { clock } from './clock';
 import { t } from './i18n';
+import { clearDraft, draftKey } from './draft';
+import { actionPhase } from './action-state';
 
 /** Server-Zeit, die sich regelmäßig aktualisiert (für Timer und die Aufdeckung). */
 export function useServerNow(intervalMs = 250): number {
@@ -40,7 +42,10 @@ export interface RoomConnection {
   view: RoomView | null;
   fatal: ApiError | null;
   offline: boolean;
-  act: (action: Action) => Promise<{ suggestion?: string }>;
+  act: (action: Action, options?: { inline?: boolean }) => Promise<{ suggestion?: string }>;
+  actionError: string | null;
+  retryAction: () => Promise<void>;
+  dismissActionError: () => void;
   refresh: () => void;
 }
 
@@ -52,11 +57,17 @@ export function useRoom(code: string, token: string | null): RoomConnection {
   const [view, setView] = useState<RoomView | null>(null);
   const [fatal, setFatal] = useState<ApiError | null>(null);
   const [offline, setOffline] = useState(false);
+  const [failed, setFailed] = useState<{ action: Action; message: string; phase: string } | null>(null);
+  const failedRef = useRef<typeof failed>(null);
   const viewRef = useRef<RoomView | null>(null);
   const keyRef = useRef('');
   const pollRef = useRef<() => void>(() => {});
 
   const apply = (next: RoomView) => {
+    if (next.me && (next.status !== 'playing' || next.round?.phase !== 'write' || next.heart)) {
+      clearDraft(draftKey(code, next.me.id));
+    }
+    if (failedRef.current && failedRef.current.phase !== actionPhase(next)) dismissActionError();
     const key = viewKey(next);
     if (key === keyRef.current) return;
     keyRef.current = key;
@@ -114,6 +125,8 @@ export function useRoom(code: string, token: string | null): RoomConnection {
     viewRef.current = null;
     setView(null);
     setFatal(null);
+    dismissActionError();
+    setOffline(false);
     poll();
     document.addEventListener('visibilitychange', onVisible);
     window.addEventListener('online', onVisible);
@@ -125,19 +138,47 @@ export function useRoom(code: string, token: string | null): RoomConnection {
     };
   }, [code, token]);
 
-  const act = async (action: Action) => {
+  const dismissActionError = () => {
+    failedRef.current = null;
+    setFailed(null);
+  };
+  const fail = (action: Action, phase: string, err: unknown) => {
+    const failure = { action, phase, message: err instanceof Error ? err.message : t('Das ging nicht.') };
+    failedRef.current = failure;
+    setFailed(failure);
+  };
+
+  const act = async (action: Action, options: { inline?: boolean } = {}) => {
     if (!token) throw new ApiError('unknown_session', t('Bitte tritt zuerst bei.'), 401);
+    const phase = actionPhase(viewRef.current);
     try {
       const res = await api.action(code, token, action);
+      dismissActionError();
       apply(res.view);
       return { suggestion: res.suggestion };
     } catch (err) {
       if (isFatal(err) && (err as ApiError).code !== 'not_host') setFatal(err as ApiError);
+      else if (!options.inline && phase === actionPhase(viewRef.current)) fail(action, phase, err);
       throw err;
     }
   };
 
-  return { view, fatal, offline, act, refresh: () => pollRef.current() };
+  const retryAction = async () => {
+    const failure = failedRef.current;
+    if (!failure) return;
+    try {
+      // Erst prüfen, ob die ursprüngliche Aktion trotz verloren gegangener Antwort schon wirksam war.
+      const res = await api.state(code, token);
+      apply(res.view);
+      if (actionPhase(res.view) !== failure.phase) return;
+      await act(failure.action);
+    } catch (err) {
+      if (isFatal(err) && err.code !== 'not_host') setFatal(err);
+      else if (failedRef.current === failure) fail(failure.action, failure.phase, err);
+    }
+  };
+
+  return { view, fatal, offline, act, actionError: failed?.message ?? null, retryAction, dismissActionError, refresh: () => pollRef.current() };
 }
 
 /** Kurzes Vibrieren auf Android – iOS ignoriert das stillschweigend. */
