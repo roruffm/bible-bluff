@@ -12,6 +12,8 @@
 //   POST /api/admin/bluffs           Kandidaten freigeben oder ablehnen (nur mit ADMIN_KEY)
 
 import { isCalendarDay, isReminderTime, verseCalendar } from '../shared/calendar';
+import { ALL_CATEGORIES } from '../shared/rules';
+import { TOPIC_PACKS } from '../shared/topic-packs';
 import { DEFAULT_LANG, LANG_PARAM, isLang, translate } from '../shared/i18n';
 import { BLUFF_MAX, BOT_NAME, CATEGORIES, PRESENCE_TOUCH_MS, ROOM_TTL_MS, normalizeCode } from '../shared/rules';
 import type {
@@ -241,6 +243,15 @@ export function createApi(deps: ApiDeps) {
     const param = url.searchParams.get(LANG_PARAM);
     const lang = isLang(param) ? param : DEFAULT_LANG;
     const res: PoolResponse = {
+      packs: TOPIC_PACKS.map((p) => {
+        const all = matchingQuestions({ roundType: 'gemischt', categories: ALL_CATEGORIES, topicPack: p.id, lang });
+        const gaps = all.filter((q) => q.kind === 'gap').length;
+        return { id: p.id, questions: all.length - gaps, gaps, categories: CATEGORIES.map((c) => {
+          const subset = matchingQuestions({ roundType: 'gemischt', categories: [c.id], topicPack: p.id, lang });
+          const gaps = subset.filter((q) => q.kind === 'gap').length;
+          return { id: c.id, questions: subset.length - gaps, gaps };
+        }) };
+      }),
       categories: CATEGORIES.map((c) => {
         const all = matchingQuestions({ roundType: 'gemischt', categories: [c.id], lang });
         const gaps = all.filter((q) => q.kind === 'gap').length;

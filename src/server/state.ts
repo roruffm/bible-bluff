@@ -79,6 +79,8 @@ export interface FavoriteRec {
   text: string;
   authorIds: string[];
   likes: number;
+  /** Fehlt bei vor dieser Funktion abgeschlossenen Runden. */
+  fooled?: number;
 }
 
 /** Bluff, der viele reingelegt oder viele Herzen bekommen hat – Kandidat für frische Hausbluffs */

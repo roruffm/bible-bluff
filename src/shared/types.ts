@@ -9,6 +9,7 @@ export type RoomStatus = 'lobby' | 'playing' | 'finished' | 'closed';
 export type RoundType = 'fragen' | 'luecken' | 'gemischt';
 /** Auswählbare Kategorien (Zuordnung zu den Buchgruppen in rules.ts) */
 export type CategoryId = 'evangelien' | 'apg' | 'paulus' | 'briefe' | 'offenbarung' | 'at';
+export type TopicPackId = 'kaum' | 'tiere' | 'essen' | 'neulinge';
 
 /** Sprache eines Raums und der Oberfläche: Deutsch (Standard) oder britisches Englisch */
 export type Lang = 'de' | 'en';
@@ -21,6 +22,8 @@ export interface Settings {
   roundType: RoundType;
   /** mindestens eine; alle gewählt = der ganze Fragenpool */
   categories: CategoryId[];
+  /** Kuratiertes Themenpaket; ohne Angabe bleibt der ganze Kategorienpool verfügbar. */
+  topicPack?: TopicPackId | null;
   /** Herzensrunde am Ende – die Leitung entscheidet beim Eröffnen (in Räumen mit Joseph aus) */
   heartRound: boolean;
   /** Sprache der Fragen und Texte im Raum – folgt beim Eröffnen der Sprache der Startseite */
@@ -228,6 +231,8 @@ export interface AwardView {
   value: number;
   /** Lieblingsbluff: der Bluff selbst */
   quote?: string;
+  /** Nur für den Lieblingsbluff: die konkrete Runde, nicht die Gesamtstatistik des Urhebers. */
+  story?: { prompt: string; fooled: number | null };
 }
 
 export interface DiscoveryView {
@@ -339,6 +344,7 @@ export interface RoomView {
 /** Wie viele Fragen und Lückentexte es je Kategorie gibt – für die Auswahl beim Eröffnen */
 export interface PoolResponse {
   categories: { id: CategoryId; questions: number; gaps: number }[];
+  packs?: { id: TopicPackId; questions: number; gaps: number; categories: PoolResponse['categories'] }[];
 }
 
 /** Freigabe-Seite: ein starker Bluff aus echten Partien */

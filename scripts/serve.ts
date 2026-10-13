@@ -71,10 +71,15 @@ const server = http.createServer(async (req, res) => {
 
 server.listen(PORT, HOST, () => {
   console.log(`\n  Bible Bluff läuft auf http://localhost:${PORT}`);
-  for (const list of Object.values(networkInterfaces())) {
-    for (const net of list ?? []) {
-      if (net.family === 'IPv4' && !net.internal) console.log(`  Im WLAN:            http://${net.address}:${PORT}`);
+  // Die optionale WLAN-Anzeige darf den Server in eingeschränkten Umgebungen nicht beenden.
+  try {
+    for (const list of Object.values(networkInterfaces())) {
+      for (const net of list ?? []) {
+        if (net.family === 'IPv4' && !net.internal) console.log(`  Im WLAN:            http://${net.address}:${PORT}`);
+      }
     }
+  } catch {
+    // localhost funktioniert auch ohne Zugriff auf die Netzwerkschnittstellen.
   }
   console.log('');
 });

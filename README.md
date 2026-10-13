@@ -6,7 +6,7 @@
 
 Bible Bluff ist ein Partyspiel für den Browser: Jede Person spielt auf dem eigenen Handy, ein Fernseher oder Beamer kann zusätzlich die gemeinsame Ansicht zeigen. Alle sehen dieselbe Bibelfrage und erfinden heimlich eine glaubwürdige, aber falsche Antwort. Danach steht die echte Antwort anonym zwischen den Bluffs, und alle tippen auf die vermeintlich richtige. Bei der Aufdeckung zeigt sich, wer worauf hereingefallen ist und was wirklich stimmt.
 
-Die Fragen stammen aus dem *Studienkonzept NT* (Lernblätter zu allen 27 Büchern des Neuen Testaments, freikirchlich-pfingstliche Lernfassung). Dazu kommen geprüfte Fragen aus einem eigenen Fragenpool, auch zu ausgewählten Geschichten des Alten Testaments. Hinzu kommen die in der Fragenwerkstatt freigegebenen Fragen, darunter 30 zu Jesu Botschaft. Der Pool umfasst 186 kuratierte Fragen und 45 Lückentexte, jeweils mit Bibelstelle und einer kurzen Entdeckung. Auf Englisch gibt es eine erste Fassung mit 64 ausgewählten Fragen und Lückentexten – umschalten lässt sie sich mit der Flagge auf der Startseite (siehe [Englische Fassung](#englische-fassung)).
+Die Fragen stammen aus dem *Studienkonzept NT* (Lernblätter zu allen 27 Büchern des Neuen Testaments, freikirchlich-pfingstliche Lernfassung). Dazu kommen geprüfte Fragen aus einem eigenen Fragenpool, auch zu ausgewählten Geschichten des Alten Testaments. Hinzu kommen die in der Fragenwerkstatt freigegebenen Fragen, darunter 30 zu Jesu Botschaft. Der Pool umfasst 186 kuratierte Fragen und 45 Lückentexte, jeweils mit Bibelstelle und einer kurzen Entdeckung. Auf Englisch gibt es eine erste Fassung mit 88 ausgewählten Fragen und Lückentexten – umschalten lässt sie sich mit der Flagge auf der Startseite (siehe [Englische Fassung](#englische-fassung)).
 
 | Start | Lobby | Bluff schreiben | Abstimmen |
 | --- | --- | --- | --- |
@@ -139,7 +139,7 @@ Oben rechts auf der Startseite schaltet die britische Flagge auf Englisch (briti
 
 - **Räume haben eine Sprache.** Wer auf Englisch eröffnet, bekommt einen englischen Raum: englischer Raumcode (`LAMP7`), englische Fragen, Spickzettel, Herzensrunde, Auszeichnungen, Entdeckungen und Wochenverse. Im Raum zeigen alle Handys und die Leinwand die Sprache der Partie, auch wenn ein Gerät auf Deutsch steht. Die offenen Räume auf der Startseite erscheinen nur in ihrer Sprache.
 - **Link-Vorschau:** Einladungen in englische Räume tragen `?lang=en` und zeigen eine englische Vorschau (`og-invite-en.jpg`), ebenso `/?lang=en` und englische Entdeckungen-Seiten (`og-en.jpg`).
-- **Fragen:** 64 ausgewählte Fragen und Lückentexte aus dem deutschen Pool (`src/server/en/questions.ts`, Spickzettel in `src/server/en/talk.ts`) mit denselben IDs – „Neues für alle“ kennt eine Frage darum in beiden Sprachen. Bluffs und Schlüsselwörter sind für Englisch neu gebaut, Bibelstellen stehen in englischer Zählung (Jona 2,1 → Jonah 1:17).
+- **Fragen:** 88 ausgewählte Fragen und Lückentexte aus dem deutschen Pool (`src/server/en/questions.ts`, Spickzettel in `src/server/en/talk.ts`) mit denselben IDs – „Neues für alle“ kennt eine Frage darum in beiden Sprachen. Bluffs und Schlüsselwörter sind für Englisch neu gebaut, Bibelstellen stehen in englischer Zählung (Jona 2,1 → Jonah 1:17).
 - **Bibeltext:** World English Bible, British Edition (gemeinfrei) – für die Wochenverse (`src/shared/verses-en.ts`), den Kalender und Zitate wie in der ruhigen Minute.
 - **Oberfläche:** Der deutsche Text ist zugleich der Schlüssel. `t('Runde {n} von {total}', …)` holt die englische Fassung aus `src/shared/i18n-en.ts`; für Platzhalter, die Elemente sind (etwa ein fetter Raumcode), gibt es `tj`. Meldungen des Servers kommen über den Header `x-lang` in der Sprache der App. Ein Test prüft, dass jeder Text übersetzt ist, kein Eintrag verwaist und alle Platzhalter stimmen.
 - **Noch deutsch:** die Freigabe-Seite `/admin`; frische Hausbluffs sammelt das Spiel vorerst nur aus deutschen Partien. Impressum und Datenschutz gibt es als Übersetzung, verbindlich ist die deutsche Fassung.
@@ -352,3 +352,13 @@ migrations/    D1-Schema
 scripts/       lokaler Node-Server, App-Icons und Vorschaubilder
 tests/ e2e/    Unit- und End-to-End-Tests
 ```
+
+### Themenpakete und Blufftraining
+
+Beim Eröffnen und in der Lobby gibt es vier Themenpakete: **Kaum zu glauben**, **Tiere der Bibel**, **Essen und Wunder** und **Für Bibelneulinge**. Die Auswahl zeigt die Anzahl zur gewählten Rundenart; Bibelbereiche lassen sich weiter eingrenzen. Die Auswahl wirkt serverseitig auch auf Ersatzfragen und „Neues für alle“. Alte Räume spielen unverändert mit ihren bisherigen Kategorien. Der englische Pool enthält nun 88 Fragen und Lückentexte samt Gesprächsimpulsen.
+
+Die Probefrage hat eine vierte, selbst geschriebene Antwort. Die Lernhilfe gibt Beispiele, erkennt doppelte Antworten und warnt vor einem Bluff, der zu nah an der echten Antwort liegt. Sie verspricht keine automatische Bewertung der Überzeugungskraft.
+
+Nach jeder Runde stehen richtige Antwort, eigener Punktegewinn und „Nächste Runde“ oben. Entdeckung, Punktestand, Gesprächsimpulse und Extras sind auf dem Handy zunächst zugeklappt; auf der Leinwand bleiben Entdeckung, Punktestand und Bluffs offen.
+
+Beim **Besten Bluff des Abends** erstellt ein Klick eine Story-Karte in 1080 × 1920 mit Frage, Bluff, tatsächlicher Zahl der hereingefallenen Personen, Original-Logo und biblebluff.de. Namen sind standardmäßig aus und können ergänzt werden. Die Karte entsteht lokal, lässt sich über das Handy teilen oder als PNG herunterladen. Bei früher abgeschlossenen Runden ohne gespeicherte Stimmenzahl zeigt sie die gesicherten Herzen statt einer erfundenen Zahl.

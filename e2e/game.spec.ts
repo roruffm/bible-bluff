@@ -39,7 +39,7 @@ async function hostAction(host: Page, label: string | RegExp) {
   await expect(host.locator('.sheet')).toHaveCount(0);
 }
 
-test('eine komplette Partie auf drei Handys und der Leinwand', async ({ browser }) => {
+test('eine komplette Partie auf drei Handys und der Leinwand', async ({ browser }, testInfo) => {
   const host = await phone(browser, 'host');
   const code = await createRoom(host, 'Rahel');
   await expect(host.locator('.room-code')).toHaveText(code);
@@ -97,7 +97,14 @@ test('eine komplette Partie auf drei Handys und der Leinwand', async ({ browser 
 
   // Punkte und Entdeckung
   await expect(host.getByText('Punktestand')).toBeVisible({ timeout: 30_000 });
+  await expect(host.locator('.round-gain')).toBeVisible();
+  await expect(host.getByRole('button', { name: 'Nächste Runde' })).toBeInViewport();
+  await host.screenshot({ path: testInfo.outputPath('round-results.png'), fullPage: true });
+  await host.locator('.result-fold').filter({ has: host.locator('summary', { hasText: /^Entdeckung$/ }) }).locator('summary').click();
   await expect(host.locator('.merksatz')).toBeVisible();
+  await host.locator('.scoreboard > summary').click();
+  await host.locator('.round-extras > summary').click();
+  await jonas.locator('.round-extras > summary').click();
   const row = (page: Page, name: string) =>
     page.locator('.score-row').filter({ has: page.locator('.score-name', { hasText: new RegExp(`^${name}$`) }) });
   const rahelRow = row(host, 'Rahel');
@@ -143,7 +150,10 @@ test('eine komplette Partie auf drei Handys und der Leinwand', async ({ browser 
     await hostAction(host, 'Abstimmung jetzt beenden');
     await hostAction(host, 'Aufdeckung überspringen');
     await expect(host.getByText('Punktestand')).toBeVisible();
-    if (round === 2) await expect(row(host, 'Mirjam').locator('.delta.is-quiet')).toBeVisible();
+    if (round === 2) {
+      await host.locator('.scoreboard > summary').click();
+      await expect(row(host, 'Mirjam').locator('.delta.is-quiet')).toBeVisible();
+    }
     await host.getByRole('button', { name: round === 4 ? 'Zur Herzensrunde' : 'Nächste Runde' }).click();
   }
 
@@ -199,6 +209,19 @@ test('eine komplette Partie auf drei Handys und der Leinwand', async ({ browser 
   await expect(host.locator('.discoveries li')).toHaveCount(4);
   await expect(host.getByText('Bluff-Meister')).toBeVisible();
   await expect(host.locator('.award-favorite')).toContainText(SAFE_BLUFFS.host);
+  const award = host.locator('.award-favorite');
+  await award.getByRole('button', { name: 'Story-Karte erstellen' }).click();
+  await expect(award.locator('.story-preview img')).toBeVisible();
+  await expect(award.getByRole('checkbox', { name: /Namen auf der Karte zeigen/ })).not.toBeChecked();
+  const download = host.waitForEvent('download');
+  await award.getByRole('button', { name: 'Bild herunterladen' }).click();
+  const storyDownload = await download;
+  expect(storyDownload.suggestedFilename()).toBe('bible-bluff-story.png');
+  await storyDownload.saveAs(testInfo.outputPath('bluff-story.png'));
+  await award.getByText('Namen auf der Karte zeigen', { exact: true }).click();
+  await expect(award.getByRole('checkbox', { name: /Namen auf der Karte zeigen/ })).toBeChecked();
+  await expect(award.locator('.story-preview img')).toBeVisible();
+
   await expect(host.locator('.award-neighbor')).toContainText('Rahel');
 
   // Vom Spiel ins Gespräch: Die Leitung führt, alle Geräte gehen mit

@@ -78,7 +78,7 @@ export const api = {
     return request<PublicRoomsResponse>('GET', '/api/rooms');
   },
   pool(lang: Lang) {
-    return request<PoolResponse>('GET', `/api/pool?lang=${lang}`);
+    return request<PoolResponse>('GET', `/api/pool?lang=${lang}&v=2`);
   },
   createRecap(code: string) {
     return request<RecapCreatedResponse>('POST', `/api/rooms/${encodeURIComponent(code)}/recap`);

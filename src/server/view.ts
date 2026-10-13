@@ -350,9 +350,13 @@ function buildTalk(g: GameRec, lang: Lang): TalkView | null {
 
 /** Bester Bluff des Abends: die meisten Herzen in einer Runde; bei Gleichstand der frühere */
 function favoriteAward(state: RoomState): AwardView | null {
-  let best: { text: string; authorIds: string[]; likes: number } | null = null;
+  let best: { text: string; authorIds: string[]; likes: number; fooled?: number } | null = null;
+  let questionId: string | null = null;
   for (const h of state.game?.history ?? []) {
-    for (const f of h.favorites ?? []) if (!best || f.likes > best.likes) best = f;
+    for (const f of h.favorites ?? []) if (!best || f.likes > best.likes) {
+      best = f;
+      questionId = h.questionId;
+    }
   }
   if (!best) return null;
   const person = personLookup(state);
@@ -363,5 +367,6 @@ function favoriteAward(state: RoomState): AwardView | null {
     players: best.authorIds.map(person),
     value: best.likes,
     quote: best.text,
+    story: { prompt: getQuestion(questionId!, state.settings.lang).prompt, fooled: best.fooled ?? null },
   };
 }
