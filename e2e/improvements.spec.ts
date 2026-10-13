@@ -153,6 +153,12 @@ test('twelve-player display fits lobby, write, vote, scores, heart and final int
   await r.act({ type: 'next' });
   await expect(tv.getByRole('heading', { name: 'Herzensrunde', exact: true })).toBeVisible();
   await fits(tv);
+  // Diese Personen spielen per API statt auf zwölf echten, regelmäßig abfragenden Handys.
+  // Auch auf langsameren CI-Rechnern müssen alle als verbunden gelten, bevor die erste Antwort kommt.
+  for (const p of r.players) {
+    const state = await request.get(`/api/rooms/${r.host.code}`, { headers: { authorization: `Bearer ${p.token}` } });
+    expect(state.ok()).toBe(true);
+  }
   for (const p of r.players) await r.act({ type: 'heart', text: 'Dass Jesus Menschen ernst nimmt und auch in schwierigen Momenten bei ihnen bleibt.' }, p);
   await expect(tv.locator('.heart-answer')).toHaveCount(2);
   await fits(tv);
