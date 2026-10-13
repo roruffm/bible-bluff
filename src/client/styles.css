@@ -43,7 +43,8 @@
   /* Rollen, die sich je Farbkonzept anpassen lassen */
   --primary: var(--brown);
   --on-primary: var(--cream);
-  /* Kante unter erhabenen Knöpfen (.btn-raised) */
+  /* Gemeinsame 3D-Kante unter allen Knöpfen */
+  --button-edge: color-mix(in srgb, var(--line) 60%, var(--ink) 40%);
   --raised-edge: color-mix(in srgb, var(--primary) 42%, #000);
   --seg-on: var(--brown);
   --on-seg-on: var(--cream);
@@ -686,7 +687,6 @@ textarea {
   border-radius: 12px;
   font-size: 0.9375rem;
   line-height: 1.35;
-  box-shadow: 0 2px 0 var(--gold-2);
 }
 
 .hero-start .btn > span:not(.avatar) {
@@ -852,9 +852,11 @@ textarea {
   align-items: center;
   width: 100%;
   gap: 12px;
-  padding: 17px 0;
+  padding: 12px;
+  margin: 12px 0;
   border: 0;
-  background: transparent;
+  border-radius: var(--radius-sm);
+  background: var(--card-2);
   color: var(--ink);
   text-align: left;
   text-decoration: none;
@@ -938,7 +940,7 @@ textarea {
   padding: 8px 9px;
   border: 0;
   border-radius: 8px;
-  background: transparent;
+  background: var(--paper-2);
   color: var(--ink-2);
   font-size: 0.75rem;
   font-weight: 600;
@@ -1445,7 +1447,7 @@ textarea {
 .segmented button.is-on {
   background: var(--seg-on);
   color: var(--on-seg-on);
-  box-shadow: 0 2px 6px -2px rgba(0, 0, 0, 0.4);
+  --button-edge: var(--raised-edge);
 }
 
 /* Hinweis unter einem Einstellungsfeld */
@@ -1471,6 +1473,7 @@ textarea {
 .legal-links a,
 .legal-body a,
 .guide a {
+  --button-edge: color-mix(in srgb, var(--plum) 75%, var(--ink) 25%);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1536,6 +1539,7 @@ textarea {
 }
 
 .cat-chip.is-on {
+  --button-edge: var(--raised-edge);
   background: var(--seg-on);
   border-color: var(--seg-on);
   color: var(--on-seg-on);
@@ -1640,10 +1644,6 @@ textarea {
   user-select: none;
 }
 
-.btn:active:not(:disabled) {
-  transform: scale(0.97);
-}
-
 .btn:disabled {
   opacity: 0.45;
   cursor: not-allowed;
@@ -1667,31 +1667,22 @@ textarea {
 }
 
 .btn-primary {
+  --button-edge: var(--raised-edge);
   background: var(--primary);
   color: var(--on-primary);
 }
 
 .btn-gold {
+  --button-edge: var(--on-gold);
   background: var(--gold);
   color: var(--on-gold);
   border-color: var(--on-gold);
-  box-shadow: 0 3px 0 var(--on-gold);
-}
-
-.btn-gold:active:not(:disabled) {
-  box-shadow: 0 1px 0 var(--on-gold);
-  transform: translateY(2px);
 }
 
 /* Erhabene Knöpfe wie „Raum eröffnen“ – die Kante ist eine dunklere Stufe der Knopffarbe */
 .btn-raised {
+  --button-edge: var(--raised-edge);
   border-color: var(--raised-border, var(--raised-edge));
-  box-shadow: 0 3px 0 var(--raised-edge);
-}
-
-.btn-raised:active:not(:disabled) {
-  box-shadow: 0 1px 0 var(--raised-edge);
-  transform: translateY(2px);
 }
 
 .btn-secondary {
@@ -1700,12 +1691,14 @@ textarea {
 }
 
 .btn-ghost {
+  --button-edge: color-mix(in srgb, var(--plum) 75%, var(--ink) 25%);
   background: var(--plum-soft);
   border-color: color-mix(in srgb, var(--plum) 35%, var(--line));
   color: var(--plum-text);
 }
 
 .btn-danger {
+  --button-edge: color-mix(in srgb, var(--rust) 65%, #000);
   background: var(--rust);
   color: var(--on-rust);
 }
@@ -1800,7 +1793,7 @@ textarea {
 
 .theme-option.is-on {
   border-color: var(--ink);
-  box-shadow: 0 0 0 2px var(--ink);
+  box-shadow: var(--button-shadow), 0 0 0 2px var(--ink);
 }
 
 .theme-swatch {
@@ -1925,6 +1918,7 @@ textarea {
 }
 
 .topbar-menu {
+  --button-edge: color-mix(in srgb, var(--brown) 65%, #000);
   border: 1.5px solid var(--chrome-line);
   background: transparent;
   color: var(--cream);
@@ -2104,6 +2098,7 @@ textarea {
 }
 
 .code-card .btn-secondary {
+  --button-edge: color-mix(in srgb, var(--brown) 65%, #000);
   background: transparent;
   color: var(--cream);
   border-color: var(--chrome-line);
@@ -2547,7 +2542,6 @@ textarea {
 .option.is-mine {
   border-style: dashed;
   background: transparent;
-  box-shadow: none;
   color: var(--ink-2);
 }
 
@@ -4949,3 +4943,32 @@ html.tv-mode body {
 }
 @media (max-width: 760px) { .tv .final-sections { grid-template-columns: 1fr; } }
 @media (prefers-reduced-motion: reduce) { .final .podium-place { animation: none; } }
+
+/* Alle Buttonformen teilen dieselbe Tiefe. Die Sprachwahl bleibt ein reines Flaggensymbol. */
+button:not(.lang-switch button),
+a.btn,
+.resume,
+.open-room,
+.link-btn,
+.legal-links a,
+.legal-body a,
+.guide a,
+summary.home-way,
+summary.preview-answer {
+  --button-shadow: 0 3px 0 var(--button-edge);
+  box-shadow: var(--button-shadow);
+  transition: transform 0.08s, background 0.15s, opacity 0.15s;
+}
+
+button:not(.lang-switch button):active:not(:disabled),
+a.btn:active,
+.resume:active,
+.open-room:active,
+.legal-links a:active,
+.legal-body a:active,
+.guide a:active,
+summary.home-way:active,
+summary.preview-answer:active {
+  box-shadow: 0 1px 0 var(--button-edge);
+  transform: translateY(2px);
+}
