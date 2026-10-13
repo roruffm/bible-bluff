@@ -973,8 +973,19 @@ textarea {
 }
 
 .home .legal-links {
+  gap: 12px;
   padding: 17px 0 6px;
   border-top: 1px solid var(--line);
+  font-size: 0.625rem;
+}
+
+.home .legal-links a {
+  color: var(--ink-3);
+  text-decoration: none;
+}
+
+.home .legal-links a:hover {
+  text-decoration: underline;
 }
 
 @media (max-width: 360px) {
@@ -1303,6 +1314,12 @@ textarea {
   flex-wrap: wrap;
   justify-content: center;
   gap: 10px;
+  font-size: 0.85rem;
+  color: var(--ink-3);
+}
+.legal-links a {
+  color: var(--ink-2);
+  text-underline-offset: 3px;
 }
 .legal-hero {
   display: flex;
@@ -1470,7 +1487,6 @@ textarea {
 }
 
 .link-btn,
-.legal-links a,
 .legal-body a,
 .guide a {
   --button-edge: color-mix(in srgb, var(--plum) 75%, var(--ink) 25%);
@@ -1497,12 +1513,7 @@ textarea {
   cursor: not-allowed;
 }
 
-.legal-links a {
-  font-size: 0.75rem;
-}
-
 .link-btn:hover:not(:disabled),
-.legal-links a:hover,
 .legal-body a:hover,
 .guide a:hover,
 .btn-ghost:hover:not(:disabled) {
@@ -1556,7 +1567,6 @@ textarea {
 
 .cat-chip:focus-visible,
 .link-btn:focus-visible,
-.legal-links a:focus-visible,
 .legal-body a:focus-visible,
 .guide a:focus-visible {
   outline: 3px solid var(--gold-2);
@@ -4950,7 +4960,6 @@ a.btn,
 .resume,
 .open-room,
 .link-btn,
-.legal-links a,
 .legal-body a,
 .guide a,
 summary.home-way,
@@ -4964,7 +4973,6 @@ button:not(.lang-switch button):active:not(:disabled),
 a.btn:active,
 .resume:active,
 .open-room:active,
-.legal-links a:active,
 .legal-body a:active,
 .guide a:active,
 summary.home-way:active,
