@@ -31,16 +31,16 @@ function FlagUk() {
   );
 }
 
-const OPTIONS: { lang: Lang; code: string; name: string; flag: () => JSX.Element }[] = [
-  { lang: 'de', code: 'DE', name: 'Deutsch', flag: FlagDe },
-  { lang: 'en', code: 'EN', name: 'English', flag: FlagUk },
+const OPTIONS: { lang: Lang; name: string; flag: () => JSX.Element }[] = [
+  { lang: 'de', name: 'Deutsch', flag: FlagDe },
+  { lang: 'en', name: 'English', flag: FlagUk },
 ];
 
 export function LangSwitch() {
   const current = preferredLang();
   return (
     <div class="lang-switch" role="radiogroup" aria-label="Sprache · Language">
-      {OPTIONS.map(({ lang, code, name, flag: Flag }) => (
+      {OPTIONS.map(({ lang, name, flag: Flag }) => (
         <button
           type="button"
           role="radio"
@@ -53,7 +53,6 @@ export function LangSwitch() {
           data-lang={lang}
         >
           <Flag />
-          <span aria-hidden="true">{code}</span>
         </button>
       ))}
     </div>

@@ -617,7 +617,7 @@ textarea {
 
 .home .hero {
   border-radius: 20px;
-  padding: 18px 22px 24px;
+  padding: 8px 22px 24px;
   box-shadow: 0 8px 24px -18px color-mix(in srgb, var(--ink) 50%, transparent);
 }
 
@@ -626,28 +626,34 @@ textarea {
 }
 
 .home .lang-switch {
-  position: static;
+  position: absolute;
+  top: 4px;
+  right: 8px;
   width: max-content;
-  margin-left: auto;
+  margin: 0;
+  padding: 2px;
   border-radius: 9px;
   background: color-mix(in srgb, var(--cream) 5%, transparent);
 }
 
 .home .lang-switch button {
-  min-width: 32px;
-  min-height: 28px;
-  padding: 5px 8px;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 8px;
   border-radius: 6px;
   font-size: 0.625rem;
 }
 
 .home .lang-switch .flag {
-  display: none;
+  display: block;
+  width: 26px;
+  height: 18px;
 }
 
 .home .hero .logo {
   width: min(100%, 207px);
-  margin: 10px auto 14px;
+  margin: 22px auto 14px;
 }
 
 .home .tagline {
