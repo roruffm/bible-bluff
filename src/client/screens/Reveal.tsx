@@ -7,6 +7,7 @@ import type { RevealStepView, RoomView } from '../../shared/types';
 import { Avatar, Button, PersonChip, QuestionText } from '../components/ui';
 import { buzz, type RoomConnection, useServerNow } from '../lib/hooks';
 import { t } from '../lib/i18n';
+import { DisplayRest } from './Display';
 
 export function RevealPhase({ view, conn, display = false }: { view: RoomView; conn: RoomConnection; display?: boolean }) {
   const round = view.round!;
@@ -39,7 +40,7 @@ export function RevealPhase({ view, conn, display = false }: { view: RoomView; c
         {step.kind === 'intro' && <Intro />}
         {step.kind === 'bluff' && <BluffStep step={step} local={local} meId={meId} prompt={gapPrompt} />}
         {step.kind === 'truth' && <TruthStep step={step} local={local} meId={meId} prompt={gapPrompt} />}
-        {step.kind === 'rest' && <RestStep step={step} meId={meId} />}
+        {step.kind === 'rest' && <RestStep step={step} meId={meId} display={display} paused={Boolean(view.paused)} />}
       </div>
 
       <footer class="reveal-foot">
@@ -218,7 +219,8 @@ function TruthStep({
   );
 }
 
-function RestStep({ step, meId }: { step: Extract<RevealStepView, { kind: 'rest' }>; meId: string | null }) {
+function RestStep({ step, meId, display, paused }: { step: Extract<RevealStepView, { kind: 'rest' }>; meId: string | null; display: boolean; paused: boolean }) {
+  if (display) return <DisplayRest step={step} paused={paused} />;
   return (
     <div class="reveal-rest">
       <p class="reveal-label">{t('Darauf ist niemand hereingefallen')}</p>

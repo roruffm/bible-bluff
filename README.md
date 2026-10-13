@@ -359,6 +359,19 @@ Beim Eröffnen und in der Lobby gibt es vier Themenpakete: **Kaum zu glauben**, 
 
 Die Probefrage hat eine vierte, selbst geschriebene Antwort. Die Lernhilfe gibt Beispiele, erkennt doppelte Antworten und warnt vor einem Bluff, der zu nah an der echten Antwort liegt. Sie verspricht keine automatische Bewertung der Überzeugungskraft.
 
-Nach jeder Runde stehen richtige Antwort, eigener Punktegewinn und „Nächste Runde“ oben. Entdeckung, Punktestand, Gesprächsimpulse und Extras sind auf dem Handy zunächst zugeklappt; auf der Leinwand bleiben Entdeckung, Punktestand und Bluffs offen.
+Nach jeder Runde stehen richtige Antwort, eigener Punktegewinn und „Nächste Runde“ oben. Entdeckung, Punktestand, Gesprächsimpulse und Extras sind auf dem Handy zunächst zugeklappt; auf der Leinwand bleiben richtige Antwort und Punktestand sichtbar. Entdeckung und jeweils zwei Bluffs wechseln in einer eigenen Karte; die Anzeige lässt sich anhalten und manuell weiterblättern.
 
 Beim **Besten Bluff des Abends** erstellt ein Klick eine Story-Karte in 1080 × 1920 mit Frage, Bluff, tatsächlicher Zahl der hereingefallenen Personen, Original-Logo und biblebluff.de. Namen sind standardmäßig aus und können ergänzt werden. Die Karte entsteht lokal, lässt sich über das Handy teilen oder als PNG herunterladen. Bei früher abgeschlossenen Runden ohne gespeicherte Stimmenzahl zeigt sie die gesicherten Herzen statt einer erfundenen Zahl.
+
+
+### Raum, Lobby und Leinwand
+
+Beim Eröffnen einer Gruppenpartie stehen Spitzname, Rundenzahl und Themenpaket direkt bereit. „Weitere Einstellungen“ öffnet Leitung/Mitspielen, Herzensrunde, Rundenart, Bibelbereiche, Schwierigkeit und Zeiten. Die Lobby fasst die aktive Partie zusammen; „Einstellungen ändern“ öffnet die vorhandenen Optionen. Der Startknopf bleibt erreichbar, Spielregeln sind aufklappbar.
+
+Die Leinwand zeigt bis zu zwölf Personen ohne lange Seitenstapel. Am Endstand wechseln Platzierungen, Auszeichnungen und jeweils zwei Entdeckungen automatisch; der QR-Code zur Entdeckungen-Seite bleibt sichtbar. Herzensantworten erscheinen ohne Namen in Zweiergruppen. „Anzeige anhalten“ hält nur den Ansichtswechsel an; die Spielleitung pausiert die Partie weiterhin über ihr Menü.
+
+### Entwürfe und fehlgeschlagene Aktionen
+
+Ungesendete Bluff-Entwürfe liegen im `sessionStorage` des aktuellen Browser-Tabs, getrennt nach Raum, Person und stabiler Rundenkennung. Neuladen und Pausen erhalten sie. Erfolgreiche Abgabe, eine neue Frage und das Rundenende entfernen den alten Entwurf. Bereits vom Server bestätigte Texte werden auch nach einer verlorenen HTTP-Antwort als abgeschickt erkannt.
+
+Aktionen ohne eigenen Fehlerbereich zeigen bei Fehlern einen bleibenden Hinweis mit „Erneut versuchen“. Vor der Wiederholung wird der Serverstand abgefragt. Hat sich die Phase bereits geändert, wird die alte Aktion nicht erneut gesendet. Formulare und Leitungsmenü behalten ihre Rückmeldungen direkt am Eingabebereich.

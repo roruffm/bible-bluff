@@ -42,6 +42,7 @@ for (const lang of ['de', 'en'] as const) {
     await page.getByLabel(lang === 'en' ? 'Your nickname' : 'Dein Spitzname').fill('Test');
     await page.getByRole('button', { name: lang === 'en' ? 'Create a room' : 'Raum eröffnen', exact: true }).click();
     await page.waitForURL(/\/r\/[A-Z]+\d+$/);
+    await page.getByText(lang === 'en' ? 'Change settings' : 'Einstellungen ändern', { exact: true }).click();
     await expect(page.locator('.topic-pack.is-on')).toContainText(lang === 'en' ? 'Animals of the Bible' : 'Tiere der Bibel');
   });
 }

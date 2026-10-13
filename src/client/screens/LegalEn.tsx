@@ -141,6 +141,7 @@ export function DatenschutzEn({ address, email, updated }: { address: ComponentC
       <ul>
         <li>your session for each room (room code, session ID, nickname), so reloading doesn’t cost you anything,</li>
         <li>the nickname you used last,</li>
+        <li>an unsent bluff draft in the current browser tab, until you submit it or the round ends,</li>
         <li>the colour scheme and language you chose,</li>
         <li>the numbers of up to 300 questions you’ve already seen.</li>
       </ul>

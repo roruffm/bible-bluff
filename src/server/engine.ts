@@ -517,9 +517,10 @@ export function pickQuestions(
 
 // ───────────────────────── Phasen ─────────────────────────
 
-function newRound(index: number, questionId: string): RoundRec {
+function newRound(index: number, questionId: string, now: number): RoundRec {
   return {
     index,
+    writeStartedAt: now,
     questionId,
     bluffs: {},
     options: null,
@@ -550,7 +551,7 @@ function startGame(s: RoomState, ctx: Ctx) {
     phase: 'write',
     phaseStartedAt: ctx.now,
     deadline: null,
-    round: newRound(0, main[0]),
+    round: newRound(0, main[0], ctx.now),
     history: [],
   };
   startRound(s, 0, ctx);
@@ -570,7 +571,7 @@ function startRound(s: RoomState, index: number, ctx: Ctx) {
   // „Ruhige Minute“ vorbei: wer eine frühere Runde ausgesetzt hat, ist wieder dabei
   for (const p of s.players) if (p.quietRound !== undefined && p.quietRound < index) delete p.quietRound;
   g.roundIndex = index;
-  g.round = newRound(index, questionId);
+  g.round = newRound(index, questionId, ctx.now);
   g.phase = 'write';
   g.phaseStartedAt = ctx.now;
   g.deadline = ctx.now + s.settings.writeSeconds * 1000;

@@ -4,6 +4,18 @@
 // Ein Test prüft, dass jeder verwendete Text hier steht und jeder Eintrag noch verwendet wird.
 
 export const EN: Record<string, string> = {
+  'Weitere Einstellungen': 'More settings',
+  'Einstellungen ändern': 'Change settings',
+  'Spielregeln': 'Game rules',
+  'Aktion fehlgeschlagen': 'Action failed',
+  'Erneut versuchen': 'Try again',
+  'Leinwand-Ansichten': 'Display views',
+  'Vorherige Ansicht': 'Previous view',
+  'Nächste Ansicht': 'Next view',
+  'Ansicht {n} von {total}': 'View {n} of {total}',
+  'Anzeige fortsetzen': 'Resume display',
+  'Anzeige anhalten': 'Hold display',
+  'Herzen für euren Lieblingsbluff vergebt ihr auf dem Handy.': 'Give hearts to your favourite bluff on your phone.',
   'Dein Ergebnis': 'Your result',
   'Platz {n}': 'Place {n}',
   'Alle Platzierungen': 'All places',

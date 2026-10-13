@@ -12,6 +12,7 @@ import { currentLang, langQuery, locale, t, tj } from '../lib/i18n';
 import { navigate, recapUrl } from '../lib/router';
 import { shareLink } from '../lib/share';
 import { QuietOffer } from './Play';
+import { DisplayFinal, DisplayScores } from './Display';
 
 export function ScoresPhase({ view, conn, display = false }: { view: RoomView; conn: RoomConnection; display?: boolean }) {
   const round = view.round!;
@@ -42,6 +43,8 @@ export function ScoresPhase({ view, conn, display = false }: { view: RoomView; c
     const names = fresh.map((p) => p.name).join(' & ');
     setToast(fresh.length === 1 ? t('{names} hat dir einen Punkt geschenkt ♥', { names }) : t('{names} haben dir einen Punkt geschenkt ♥', { names }));
   }, [giftsForMe.map((p) => p.id).join(','), round.index]);
+
+  if (display) return <DisplayScores key={`${round.writeStartedAt}:${round.index}`} view={view} />;
 
   return (
     <section class={`phase scores stack${display ? ' is-display' : ''}`}>
@@ -196,7 +199,7 @@ function GiftCard({ view, conn }: { view: RoomView; conn: RoomConnection }) {
   const give = async (playerId: string) => {
     setError(null);
     try {
-      await conn.act({ type: 'gift', playerId });
+      await conn.act({ type: 'gift', playerId }, { inline: true });
       setChoosing(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : t('Das Geschenk kam nicht an.'));
@@ -278,7 +281,7 @@ function FavoritesCard({ view, conn, display }: { view: RoomView; conn: RoomConn
     setPending(myLike === optionId ? null : optionId);
     setError(null);
     try {
-      await conn.act({ type: 'like', optionId });
+      await conn.act({ type: 'like', optionId }, { inline: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : t('Herz nicht angekommen.'));
     } finally {
@@ -342,6 +345,7 @@ export function FinalScreen({ view, conn, display = false }: { view: RoomView; c
   const favourite = final.awards.find((a) => a.key === 'favorite');
   const otherAwards = final.awards.filter((a) => a.key !== 'favorite');
   if (final.talk) return <TalkScreen view={view} conn={conn} talk={final.talk} display={display} />;
+  if (display) return <DisplayFinal view={view} recap={<RecapShare view={view} display />} />;
 
   return (
     <section class={`phase final stack${display ? ' is-display' : ''}`}>
@@ -628,7 +632,7 @@ function TalkScreen({ view, conn, talk, display }: { view: RoomView; conn: RoomC
   const act = async (action: Parameters<RoomConnection['act']>[0]) => {
     setError(null);
     try {
-      await conn.act(action);
+      await conn.act(action, { inline: true });
       setChoosing(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : t('Das ging nicht.'));

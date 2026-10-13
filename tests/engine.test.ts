@@ -50,6 +50,23 @@ function question(state: RoomState) {
   return getQuestion(state.game!.round.questionId, 'de');
 }
 
+describe('Stabile Kennung für Bluff-Entwürfe', () => {
+  it('bleibt beim Pausieren gleich und wechselt bei einer Ersatzfrage', () => {
+    const g = setup();
+    g.act('host', { type: 'start' });
+    const started = buildView(g.state, 'host', g.ctx(), 1).round!.writeStartedAt;
+    g.act('host', { type: 'pause' });
+    g.clock.advance(20_000);
+    g.act('host', { type: 'resume' });
+    const resumed = buildView(g.state, 'host', g.ctx(), 1).round!;
+    expect(resumed.writeStartedAt).toBe(started);
+    expect(resumed.phaseStartedAt).toBeGreaterThan(started);
+    g.clock.advance(1000);
+    g.act('host', { type: 'swapQuestion' });
+    expect(buildView(g.state, 'host', g.ctx(), 1).round!.writeStartedAt).toBeGreaterThan(started);
+  });
+});
+
 describe('Raum und Beitritt', () => {
   it('verhindert doppelte Namen und erlaubt den Wiedereinstieg', () => {
     const g = setup(['Host', 'Anna']);

@@ -7,6 +7,7 @@ import type { RoomView } from '../../shared/types';
 import { Button, Progress, Timer } from '../components/ui';
 import type { RoomConnection } from '../lib/hooks';
 import { t } from '../lib/i18n';
+import { DisplayHeart } from './Display';
 
 export function HeartPhase({ view, conn, display = false }: { view: RoomView; conn: RoomConnection; display?: boolean }) {
   return view.heart!.phase === 'write' ? (
@@ -36,7 +37,7 @@ function HeartWrite({ view, conn, display }: { view: RoomView; conn: RoomConnect
     setBusy(true);
     setError(null);
     try {
-      await conn.act({ type: 'heart', text: value });
+      await conn.act({ type: 'heart', text: value }, { inline: true });
       setEditing(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : t('Das ging nicht.'));
@@ -48,7 +49,7 @@ function HeartWrite({ view, conn, display }: { view: RoomView; conn: RoomConnect
   const swap = async () => {
     setError(null);
     try {
-      await conn.act({ type: 'heartSwap' });
+      await conn.act({ type: 'heartSwap' }, { inline: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : t('Das ging nicht.'));
     }
@@ -150,12 +151,13 @@ function HeartShow({ view, conn, display }: { view: RoomView; conn: RoomConnecti
   const next = async () => {
     setError(null);
     try {
-      await conn.act({ type: 'next' });
+      await conn.act({ type: 'next' }, { inline: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : t('Das ging nicht.'));
     }
   };
-  const step = display ? 1800 : 1100;
+  if (display) return <DisplayHeart view={view} onNext={isHost ? next : undefined} />;
+  const step = 1100;
 
   return (
     <section class={`phase heart heart-show stack${display ? ' is-display' : ''}`}>

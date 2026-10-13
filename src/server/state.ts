@@ -59,6 +59,8 @@ export type StepRec =
 
 export interface RoundRec {
   index: number;
+  /** Fehlt bei älteren, bereits laufenden Partien. */
+  writeStartedAt?: number;
   questionId: string;
   bluffs: Record<string, { text: string; at: number }>;
   options: OptionRec[] | null;

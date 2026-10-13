@@ -1,3 +1,4 @@
+import type { ComponentChildren } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
 import {
   ALL_CATEGORIES,
@@ -436,16 +437,6 @@ export function CreateRoom({ bot = false }: { bot?: boolean }) {
           />
         </label>
 
-        {!bot && (
-          <Toggle
-            checked={plays}
-            onChange={setPlays}
-            label={t('Ich spiele mit')}
-            hint={plays ? t('Du leitest und spielst auf diesem Handy.') : t('Dieses Gerät leitet nur – ideal für Beamer oder Fernseher.')}
-          />
-        )}
-        {!bot && <HeartToggle checked={settings.heartRound} onChange={(heartRound) => set({ heartRound })} />}
-
         {bot ? (
           <details class="more-settings">
             <summary>
@@ -455,7 +446,13 @@ export function CreateRoom({ bot = false }: { bot?: boolean }) {
             <SettingsFields settings={settings} onChange={set} />
           </details>
         ) : (
-          <SettingsFields settings={settings} onChange={set} />
+          <SettingsFields settings={settings} onChange={set} compact extra={
+            <>
+              <Toggle checked={plays} onChange={setPlays} label={t('Ich spiele mit')}
+                hint={plays ? t('Du leitest und spielst auf diesem Handy.') : t('Dieses Gerät leitet nur – ideal für Beamer oder Fernseher.')} />
+              <HeartToggle checked={settings.heartRound} onChange={(heartRound) => set({ heartRound })} />
+            </>
+          } />
         )}
 
         {error && (
@@ -496,8 +493,8 @@ function roundTypeHint(type: RoundType): string {
   return t('Fragen und Lückentexte: etwa jede dritte Runde ist ein Lückentext.');
 }
 
-export function SettingsFields(props: { settings: Settings; onChange: (patch: Partial<Settings>) => void; disabled?: boolean }) {
-  const { settings, onChange, disabled } = props;
+export function SettingsFields(props: { settings: Settings; onChange: (patch: Partial<Settings>) => void; disabled?: boolean; compact?: boolean; extra?: ComponentChildren }) {
+  const { settings, onChange, disabled, compact = false, extra } = props;
   const pool = usePool(settings.lang);
   const available = pool ? poolCount(pool, settings) : null;
   const all = settings.categories.length >= ALL_CATEGORIES.length;
@@ -508,18 +505,9 @@ export function SettingsFields(props: { settings: Settings; onChange: (patch: Pa
     const next = on ? settings.categories.filter((c) => c !== id) : [...settings.categories, id];
     onChange({ categories: ALL_CATEGORIES.filter((c) => next.includes(c)) });
   };
-  return (
+  const advanced = (
     <div class="settings">
-      <div class="field">
-        <span>{t('Runden')}</span>
-        <Segmented
-          label={t('Runden')}
-          value={settings.rounds}
-          options={ROUND_OPTIONS.map((n) => ({ value: n, label: String(n) }))}
-          onChange={(rounds) => onChange({ rounds })}
-          disabled={disabled}
-        />
-      </div>
+      {extra}
       <div class="field">
         <span>{t('Rundenart')}</span>
         <Segmented
@@ -530,20 +518,6 @@ export function SettingsFields(props: { settings: Settings; onChange: (patch: Pa
           disabled={disabled}
         />
         <small class="field-hint">{roundTypeHint(settings.roundType)}</small>
-      </div>
-      <div class="field">
-        <span>{t('Themenpakete')}</span>
-        <div class="topic-packs" role="group" aria-label={t('Themenpakete')}>
-          <button type="button" class={`topic-pack topic-pack-all${!settings.topicPack ? ' is-on' : ''}`} aria-pressed={!settings.topicPack} disabled={disabled} onClick={() => onChange({ topicPack: null })}>
-            <strong>{t('Alle Themen')}</strong><small>{t('Deine Bibelbereiche frei kombinieren.')}</small>
-          </button>
-          {TOPIC_PACKS.map((p) => {
-            const n = pool?.packs ? poolCount(pool, { ...settings, categories: ALL_CATEGORIES, topicPack: p.id }) : null;
-            return <button type="button" class={`topic-pack${settings.topicPack === p.id ? ' is-on' : ''}`} aria-pressed={settings.topicPack === p.id} disabled={disabled || n === 0} onClick={() => onChange({ topicPack: p.id, categories: [...ALL_CATEGORIES] })}>
-              <strong>{t(p.label)}</strong><small>{t(p.hint)}</small>{n !== null && <span>{poolAmount(n, settings.roundType)}</span>}
-            </button>;
-          })}
-        </div>
       </div>
       <div class="field">
         <span class="field-head">
@@ -573,16 +547,7 @@ export function SettingsFields(props: { settings: Settings; onChange: (patch: Pa
             );
           })}
         </div>
-        {available !== null && (
-          <small class={`field-hint${available < settings.rounds ? ' is-warn' : ''}`}>
-            {available < settings.rounds
-              ? t('Mit dieser Auswahl gibt es nur {count} – die Partie hat dann {n} Runden.', {
-                  count: poolAmount(available, settings.roundType),
-                  n: available,
-                })
-              : t('{count} passen zu deiner Auswahl.', { count: poolAmount(available, settings.roundType) })}
-          </small>
-        )}
+
       </div>
       <div class="field">
         <span>{t('Schwierigkeit')}</span>
@@ -614,6 +579,50 @@ export function SettingsFields(props: { settings: Settings; onChange: (patch: Pa
           disabled={disabled}
         />
       </div>
+    </div>
+  );
+  return (
+    <div class="settings">
+      <div class="field">
+        <span>{t('Runden')}</span>
+        <Segmented
+          label={t('Runden')}
+          value={settings.rounds}
+          options={ROUND_OPTIONS.map((n) => ({ value: n, label: String(n) }))}
+          onChange={(rounds) => onChange({ rounds })}
+          disabled={disabled}
+        />
+      </div>
+      <div class="field">
+        <span>{t('Themenpakete')}</span>
+        <div class={`topic-packs${compact ? ' is-compact' : ''}`} role="group" aria-label={t('Themenpakete')}>
+          <button type="button" class={`topic-pack topic-pack-all${!settings.topicPack ? ' is-on' : ''}`} aria-pressed={!settings.topicPack} disabled={disabled} onClick={() => onChange({ topicPack: null })}>
+            <strong>{t('Alle Themen')}</strong><small>{t('Deine Bibelbereiche frei kombinieren.')}</small>
+          </button>
+          {TOPIC_PACKS.map((p) => {
+            const n = pool?.packs ? poolCount(pool, { ...settings, categories: ALL_CATEGORIES, topicPack: p.id }) : null;
+            return <button type="button" class={`topic-pack${settings.topicPack === p.id ? ' is-on' : ''}`} aria-pressed={settings.topicPack === p.id} disabled={disabled || n === 0} onClick={() => onChange({ topicPack: p.id, categories: [...ALL_CATEGORIES] })}>
+              <strong>{t(p.label)}</strong><small>{t(p.hint)}</small>{n !== null && <span>{poolAmount(n, settings.roundType)}</span>}
+            </button>;
+          })}
+        </div>
+      </div>
+        {available !== null && (
+          <small class={`field-hint${available < settings.rounds ? ' is-warn' : ''}`}>
+            {available < settings.rounds
+              ? t('Mit dieser Auswahl gibt es nur {count} – die Partie hat dann {n} Runden.', {
+                  count: poolAmount(available, settings.roundType),
+                  n: available,
+                })
+              : t('{count} passen zu deiner Auswahl.', { count: poolAmount(available, settings.roundType) })}
+          </small>
+        )}
+      {compact ? (
+        <details class="more-settings advanced-settings">
+          <summary>{t('Weitere Einstellungen')}</summary>
+          {advanced}
+        </details>
+      ) : advanced}
     </div>
   );
 }

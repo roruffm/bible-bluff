@@ -183,6 +183,8 @@ export interface FavoriteOptionView {
 
 export interface RoundView {
   index: number;
+  /** Stabiler Schreibbeginn: bleibt auch nach einer Pause gleich. */
+  writeStartedAt: number;
   total: number;
   phase: Phase;
   phaseStartedAt: number;

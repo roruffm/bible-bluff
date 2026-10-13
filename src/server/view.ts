@@ -170,6 +170,7 @@ function buildRound(state: RoomState, meId: string | null): RoundView {
 
   return {
     index: g.roundIndex,
+    writeStartedAt: round.writeStartedAt ?? 0,
     total: g.questionIds.length,
     phase,
     phaseStartedAt: g.phaseStartedAt,
