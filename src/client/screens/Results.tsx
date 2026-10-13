@@ -2,7 +2,6 @@ import type { ComponentChildren } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { BOT_NAME, POINTS_FAVORITE, POINTS_GIFT, TALK_STEPS, heartRoundAhead } from '../../shared/rules';
 import type { AwardView, RoomView, TalkNotes, TalkView } from '../../shared/types';
-import { FriendsIcon } from '../components/Icons';
 import { BluffStory } from '../components/BluffStory';
 import { WeekVerseCard } from '../components/WeekVerse';
 import { QRCode } from '../components/QR';
@@ -12,7 +11,6 @@ import { type RoomConnection, useServerNow } from '../lib/hooks';
 import { currentLang, langQuery, locale, t, tj } from '../lib/i18n';
 import { navigate, recapUrl } from '../lib/router';
 import { shareLink } from '../lib/share';
-import { CuriousCard } from './Jesus';
 import { QuietOffer } from './Play';
 
 export function ScoresPhase({ view, conn, display = false }: { view: RoomView; conn: RoomConnection; display?: boolean }) {
@@ -447,17 +445,18 @@ export function FinalScreen({ view, conn, display = false }: { view: RoomView; c
         )}
 
         {!display && (
-          <FinalFold title={t('Mehr entdecken und teilen')} className="final-extras">
-            {isHost && withBot && <SpreadCard friends action={false} />}
-            {!isHost && <SpreadCard action={false} />}
-            <CuriousCard newTab />
-          </FinalFold>
+          <div class="final-curious">
+            <a class="btn btn-ghost btn-block" href={`/jesus${langQuery()}`} target="_blank" rel="noopener">
+              {t('Neugierig auf Jesus?')} <span aria-hidden="true">↗</span>
+            </a>
+          </div>
         )}
       </section>
 
       {!display && (
         <footer class="final-footer">
           <Button variant="ghost" small onClick={() => navigate('/')}>{t('Zur Startseite')}</Button>
+          {!isHost && <ShareGameButton />}
           {isHost && <ConfirmButton variant="ghost" small confirm={t('Wirklich schließen? Nochmal tippen')} onConfirm={() => conn.act({ type: 'close' })}>{t('Raum schließen')}</ConfirmButton>}
         </footer>
       )}
@@ -489,11 +488,8 @@ function FinalFold({ title, meta, className, open = false, children }: {
   );
 }
 
-/**
- * Am Spielende zum Weitersagen einladen – so kommt das Spiel in weitere Gruppen: Wer mitgespielt hat,
- * kann selbst eine Runde leiten; wer gegen Joseph gespielt hat (`friends`), als Nächstes mit Freunden.
- */
-function SpreadCard({ friends = false, action = true }: { friends?: boolean; action?: boolean }) {
+/** Den Spiellink weitergeben, ohne die Jesus-Infoseite hinter zusätzlichen Aktionen zu verstecken. */
+function ShareGameButton() {
   const [toast, setToast] = useState<string | null>(null);
   const share = async () =>
     setToast(
@@ -505,33 +501,10 @@ function SpreadCard({ friends = false, action = true }: { friends?: boolean; act
       }),
     );
   return (
-    <section class="card choice spread-card" aria-labelledby="spread-title">
-      <div class="choice-head">
-        <span class="choice-icon is-create">
-          <FriendsIcon />
-        </span>
-        <div>
-          <h2 id="spread-title">{friends ? t('Jetzt mit Freunden spielen') : t('Leite selbst eine Runde')}</h2>
-          <p class="muted small">
-            {friends
-              ? t(
-                  'Gegen {bot} geübt – mit echten Menschen wird es erst richtig lustig. Eröffne einen Raum und lade Freunde, Familie oder deine Jugendgruppe ein.',
-                  { bot: BOT_NAME },
-                )
-              : t('Hat’s dir gefallen? Spiel es mit deiner Jugendgruppe, deiner Familie oder im Hauskreis – kostenlos und ohne Anmeldung.')}
-          </p>
-        </div>
-      </div>
-      {action && <Button variant="gold" block onClick={() => navigate('/neu')}>
-        {friends ? t('Raum für Freunde eröffnen') : t('Eigenen Raum eröffnen')}
-      </Button>}
-      {!friends && (
-        <Button variant="ghost" block onClick={share}>
-          {t('Link an deine Gruppe schicken')}
-        </Button>
-      )}
+    <>
+      <Button variant="ghost" small onClick={share}>{t('Link an deine Gruppe schicken')}</Button>
       <Toast message={toast} onDone={() => setToast(null)} />
-    </section>
+    </>
   );
 }
 

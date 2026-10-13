@@ -199,14 +199,19 @@ test('eine komplette Partie auf drei Handys und der Leinwand', async ({ browser 
   // Jeden Tag ein anderer Impuls zum Vers – schon im Titel der Erinnerung
   const titles = [...unfolded.matchAll(/^SUMMARY:(.*)$/gm)].map((m) => m[1]);
   expect(new Set(titles).size).toBe(7);
-  await jonas.locator('.final-extras > summary').click();
-  // Neugierig auf Jesus? – im Raum in neuem Tab
-  await expect(jonas.getByRole('link', { name: 'Mehr erfahren' })).toHaveAttribute('href', '/jesus');
-  // Weitersagen: Mitspielende werden eingeladen, selbst eine Runde zu leiten – Leitung und Leinwand nicht
-  await expect(jonas.getByRole('heading', { name: 'Leite selbst eine Runde' })).toBeVisible();
+  // Neugierig auf Jesus? führt mit einem Klick zur Infoseite, ohne vorher ein Extra aufzuklappen.
+  const curious = jonas.getByRole('link', { name: 'Neugierig auf Jesus?' });
+  await expect(curious).toBeVisible();
+  await expect(curious).toHaveAttribute('href', '/jesus');
+  const jesusOpened = jonas.waitForEvent('popup');
+  await curious.click();
+  const jesus = await jesusOpened;
+  await expect(jesus.getByRole('heading', { name: 'Neugierig auf Jesus?' })).toBeVisible();
+  await jesus.close();
+  // Weitersagen bleibt als kompakter Button für Mitspielende erreichbar.
   await expect(jonas.getByRole('button', { name: 'Link an deine Gruppe schicken' })).toBeVisible();
-  await expect(host.locator('.spread-card')).toHaveCount(0);
-  await expect(tv.locator('.spread-card')).toHaveCount(0);
+  await expect(host.getByRole('link', { name: 'Neugierig auf Jesus?' })).toBeVisible();
+  await expect(tv.getByRole('link', { name: 'Neugierig auf Jesus?' })).toHaveCount(0);
   await jonas.getByRole('button', { name: 'Eigenen Raum eröffnen' }).click();
   await jonas.waitForURL('**/neu');
   await expect(jonas.getByLabel('Dein Spitzname')).toHaveValue('Jonas');
