@@ -173,6 +173,12 @@ test('eine komplette Partie auf drei Handys und der Leinwand', async ({ browser 
   await host.getByRole('button', { name: 'Zum Endstand' }).click();
 
   for (const p of [host, jonas, mirjam, tv]) await expect(p.getByRole('heading', { name: 'Endstand' })).toBeVisible();
+  await expect(host.locator('.final-personal')).toContainText('Dein Ergebnis');
+  await expect(host.getByRole('button', { name: 'Neue Partie mit allen' })).toBeInViewport();
+  await expect(host.locator('.final-section[open]')).toHaveCount(0);
+  await expect(tv.locator('.final-section:not([open])')).toHaveCount(0);
+  await host.screenshot({ path: testInfo.outputPath('final-compact.png'), fullPage: true });
+  await jonas.locator('.final-verse > summary').click();
   // Mein Vers für die Woche: passend zur Partie, als Bild und als Kalender-Erinnerung
   const verses = jonas.locator('.week-verse');
   await expect(verses.getByRole('radio')).toHaveCount(4);
@@ -193,6 +199,7 @@ test('eine komplette Partie auf drei Handys und der Leinwand', async ({ browser 
   // Jeden Tag ein anderer Impuls zum Vers – schon im Titel der Erinnerung
   const titles = [...unfolded.matchAll(/^SUMMARY:(.*)$/gm)].map((m) => m[1]);
   expect(new Set(titles).size).toBe(7);
+  await jonas.locator('.final-extras > summary').click();
   // Neugierig auf Jesus? – im Raum in neuem Tab
   await expect(jonas.getByRole('link', { name: 'Mehr erfahren' })).toHaveAttribute('href', '/jesus');
   // Weitersagen: Mitspielende werden eingeladen, selbst eine Runde zu leiten – Leitung und Leinwand nicht
@@ -207,6 +214,7 @@ test('eine komplette Partie auf drei Handys und der Leinwand', async ({ browser 
   await expect(jonas.getByRole('heading', { name: 'Endstand' })).toBeVisible();
   await expect(host.locator('.podium-place')).toHaveCount(3);
   await expect(host.locator('.discoveries li')).toHaveCount(4);
+  await host.locator('.final-awards > summary').click();
   await expect(host.getByText('Bluff-Meister')).toBeVisible();
   await expect(host.locator('.award-favorite')).toContainText(SAFE_BLUFFS.host);
   const award = host.locator('.award-favorite');
@@ -225,6 +233,7 @@ test('eine komplette Partie auf drei Handys und der Leinwand', async ({ browser 
   await expect(host.locator('.award-neighbor')).toContainText('Rahel');
 
   // Vom Spiel ins Gespräch: Die Leitung führt, alle Geräte gehen mit
+  await host.locator('.final-talk > summary').click();
   await host.getByRole('button', { name: 'Weiter ins Gespräch' }).click();
   for (const p of [host, jonas, mirjam, tv]) await expect(p.getByRole('heading', { name: 'Lesen' })).toBeVisible();
   await expect(tv.locator('.talk-step.is-current')).toContainText('Schlagt');
@@ -236,6 +245,7 @@ test('eine komplette Partie auf drei Handys und der Leinwand', async ({ browser 
 
   // Entdeckungen zum Mitnehmen: QR-Code auf der Leinwand, eigene Seite ohne Namen
   await expect(tv.locator('.recap-share svg.qr')).toBeVisible({ timeout: 10_000 });
+  await mirjam.locator('.final-discoveries > summary').click();
   await mirjam.getByRole('button', { name: 'Ansehen' }).click();
   await mirjam.waitForURL(/\/e\/[a-z2-9]{10}$/);
   await expect(mirjam.getByRole('heading', { name: 'Unsere Entdeckungen' })).toBeVisible();

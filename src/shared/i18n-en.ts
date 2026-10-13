@@ -4,6 +4,12 @@
 // Ein Test prüft, dass jeder verwendete Text hier steht und jeder Eintrag noch verwendet wird.
 
 export const EN: Record<string, string> = {
+  'Dein Ergebnis': 'Your result',
+  'Platz {n}': 'Place {n}',
+  'Alle Platzierungen': 'All places',
+  'Weitere Auszeichnungen': 'More awards',
+  'Entdeckungen zum Nachlesen': 'Discoveries to revisit',
+  'Mehr entdecken und teilen': 'Discover more and share',
   'Themenpakete': 'Topic packs',
   'Alle Themen': 'All topics',
   'Deine Bibelbereiche frei kombinieren.': 'Choose any combination of Bible sections.',
@@ -500,7 +506,6 @@ export const EN: Record<string, string> = {
   'die meisten Punkte verschenkt': 'gave away the most points',
   'Bester Bluff des Abends': 'Bluff of the Night',
   'die meisten Herzen bekommen': 'got the most hearts',
-  'Eure Entdeckungen zum Nachlesen': 'Your discoveries to look back on',
   'Vom Spiel ins Gespräch': 'From game to conversation',
   'Die Frage, bei der die meisten danebenlagen, in vier Schritten vertiefen: Lesen, Entdecken, Nachfragen, Mitnehmen. Alle Handys und die Leinwand gehen mit.':
     'Explore the question most people got wrong in four steps: Read, Discover, Dig deeper, Take away. All phones and the big screen follow along.',

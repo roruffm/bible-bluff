@@ -1,6 +1,7 @@
+import type { ComponentChildren } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { BOT_NAME, POINTS_FAVORITE, POINTS_GIFT, TALK_STEPS, heartRoundAhead } from '../../shared/rules';
-import type { RoomView, TalkNotes, TalkView } from '../../shared/types';
+import type { AwardView, RoomView, TalkNotes, TalkView } from '../../shared/types';
 import { FriendsIcon } from '../components/Icons';
 import { BluffStory } from '../components/BluffStory';
 import { WeekVerseCard } from '../components/WeekVerse';
@@ -339,124 +340,152 @@ export function FinalScreen({ view, conn, display = false }: { view: RoomView; c
   const withBot = view.players.some((p) => p.bot);
   const podium = final.ranking.slice(0, 3);
   const order = [podium[1], podium[0], podium[2]].filter(Boolean);
+  const mine = !display ? final.ranking.find((p) => p.id === view.me?.id) : null;
+  const favourite = final.awards.find((a) => a.key === 'favorite');
+  const otherAwards = final.awards.filter((a) => a.key !== 'favorite');
   if (final.talk) return <TalkScreen view={view} conn={conn} talk={final.talk} display={display} />;
 
   return (
-    <section class={`phase final stack-lg${display ? ' is-display' : ''}`}>
-      <header class="final-head">
-        <p class="eyebrow">{t('Partie beendet')}</p>
-        <h1>{t('Endstand')}</h1>
-        {/* Auf der Leinwand gleich oben sichtbar – dort scrollt niemand */}
-        {display && <RecapShare view={view} display />}
-      </header>
-
-      <div class="podium" aria-label={t('Siegertreppchen')}>
-        {order.map((p) => (
-          <div class={`podium-place place-${p.rank}`}>
-            <Avatar person={p} size="lg" />
-            <span class="podium-name">{p.name}</span>
-            <span class="podium-score">{p.score === 1 ? t('1 Punkt') : t('{n} Punkte', { n: p.score })}</span>
-            <span class="podium-block">{p.rank}</span>
+    <section class={`phase final stack${display ? ' is-display' : ''}`}>
+      <section class="card final-overview stack">
+        <header class="final-head">
+          <div class="final-heading">
+            <p class="eyebrow">{t('Partie beendet')}</p>
+            <h1>{t('Endstand')}</h1>
           </div>
-        ))}
-      </div>
+          {display && <RecapShare view={view} display />}
+        </header>
 
-      {final.ranking.length > 3 && (
-        <ol class="ranking card" start={4}>
-          {final.ranking.slice(3).map((p) => (
-            <li class={p.id === view.me?.id ? 'is-me' : ''}>
-              <span class="rank">{p.rank}.</span>
-              <Avatar person={p} size="sm" />
-              <span class="score-name">{p.name}</span>
-              <span class="score-total">{p.score}</span>
-            </li>
+        <div class="podium" aria-label={t('Siegertreppchen')}>
+          {order.map((p) => (
+            <div class={`podium-place place-${p.rank}${p.id === mine?.id ? ' is-me' : ''}`}>
+              <Avatar person={p} size="lg" />
+              <span class="podium-name">{p.name}</span>
+              <span class="podium-score">{p.score === 1 ? t('1 Punkt') : t('{n} Punkte', { n: p.score })}</span>
+              <span class="podium-block">{p.rank}</span>
+            </div>
           ))}
-        </ol>
-      )}
+        </div>
 
-      {final.awards.length > 0 && (
-        <section class="awards">
-          {final.awards.map((a) => (
-            <article class={`award award-${a.key}`}>
-              <p class="award-title">{a.title}</p>
-              {a.quote && <p class="award-quote">{t('„{text}“', { text: a.quote })}</p>}
-              <p class="award-people">{a.players.map((p) => p.name).join(' & ')}</p>
-              <p class="award-text">
-                {a.quote
-                  ? a.value === 1
-                    ? t('♥ 1 Herz in einer Runde')
-                    : t('♥ {n} Herzen in einer Runde', { n: a.value })
-                  : `${upperFirst(a.text)} · ${a.value}×`}
-              </p>
-              {a.key === 'favorite' && !display && <BluffStory award={a} />}
-            </article>
-          ))}
-        </section>
-      )}
+        {mine && (
+          <div class="final-personal">
+            <div><p class="eyebrow">{t('Dein Ergebnis')}</p><strong>{t('Platz {n}', { n: mine.rank })}</strong></div>
+            <span>{mine.score === 1 ? t('1 Punkt') : t('{n} Punkte', { n: mine.score })}</span>
+          </div>
+        )}
 
-      <section class="card discoveries">
-        <h2 class="card-title">{t('Eure Entdeckungen zum Nachlesen')}</h2>
-        <ol>
-          {final.discoveries.map((d) => (
-            <li>
-              <p class="d-ref">{d.ref}</p>
-              <p class="d-q">
-                <QuestionText prompt={d.prompt} fill={d.answer} />
-              </p>
-              <p class="d-a">✓ {upperFirst(d.answer)}</p>
-              <p class="d-text">{d.discovery}</p>
-            </li>
-          ))}
-        </ol>
-        {!display && <RecapShare view={view} display={false} />}
+        {!display && (
+          <div class="final-actions stack">
+            {isHost ? (
+              <>
+                {withBot && <><h2 class="card-title">{t('Jetzt mit Freunden spielen')}</h2><Button variant="gold" block onClick={() => navigate('/neu')}>{t('Raum für Freunde eröffnen')}</Button></>}
+                <Button variant={withBot ? 'secondary' : 'gold'} block onClick={() => conn.act({ type: 'playAgain' })}>
+                  {withBot ? t('Nochmal gegen {bot}', { bot: BOT_NAME }) : t('Neue Partie mit allen')}
+                </Button>
+              </>
+            ) : (
+              <>
+                <p class="muted small center">{t('Vielleicht startet die Spielleitung gleich eine neue Partie …')}</p>
+                <Button variant="gold" block onClick={() => navigate('/neu')}>{t('Eigenen Raum eröffnen')}</Button>
+              </>
+            )}
+          </div>
+        )}
       </section>
 
-      {!display && final.discoveries.length > 0 && (
-        <WeekVerseCard items={final.discoveries.map((d) => ({ book: d.book, group: d.group, key: d.questionId }))} />
-      )}
+      {favourite && <FinalAward award={favourite} display={display} />}
+
+      <section class="card final-sections">
+        {final.ranking.length > 3 && (
+          <FinalFold title={t('Alle Platzierungen')} meta={String(final.ranking.length)} className="final-ranking" open={display}>
+            <ol class="ranking">
+              {final.ranking.map((p) => (
+                <li class={p.id === view.me?.id ? 'is-me' : ''}>
+                  <span class="rank">{p.rank}.</span><Avatar person={p} size="sm" />
+                  <span class="score-name">{p.name}</span><span class="score-total">{p.score}</span>
+                </li>
+              ))}
+            </ol>
+          </FinalFold>
+        )}
+
+        {otherAwards.length > 0 && (
+          <FinalFold title={t('Weitere Auszeichnungen')} meta={String(otherAwards.length)} className="final-awards" open={display}>
+            <div class="awards">{otherAwards.map((a) => <FinalAward award={a} display={display} />)}</div>
+          </FinalFold>
+        )}
+
+        {final.discoveries.length > 0 && (
+          <FinalFold title={t('Entdeckungen zum Nachlesen')} meta={String(final.discoveries.length)} className="final-discoveries" open={display}>
+            <div class="discoveries">
+              <ol>
+                {final.discoveries.map((d) => (
+                  <li>
+                    <p class="d-ref">{d.ref}</p>
+                    <p class="d-q"><QuestionText prompt={d.prompt} fill={d.answer} /></p>
+                    <p class="d-a">✓ {upperFirst(d.answer)}</p>
+                    <p class="d-text">{d.discovery}</p>
+                  </li>
+                ))}
+              </ol>
+              {!display && <RecapShare view={view} display={false} />}
+            </div>
+          </FinalFold>
+        )}
+
+        {isHost && final.discoveries.length > 0 && (
+          <FinalFold title={t('Vom Spiel ins Gespräch')} className="final-talk">
+            <p class="muted small">{t('Die Frage, bei der die meisten danebenlagen, in vier Schritten vertiefen: Lesen, Entdecken, Nachfragen, Mitnehmen. Alle Handys und die Leinwand gehen mit.')}</p>
+            <Button block onClick={() => conn.act({ type: 'talk' })}>{t('Weiter ins Gespräch')}</Button>
+          </FinalFold>
+        )}
+
+        {!display && final.discoveries.length > 0 && (
+          <FinalFold title={t('Mein Vers für die Woche')} className="final-verse">
+            <WeekVerseCard items={final.discoveries.map((d) => ({ book: d.book, group: d.group, key: d.questionId }))} />
+          </FinalFold>
+        )}
+
+        {!display && (
+          <FinalFold title={t('Mehr entdecken und teilen')} className="final-extras">
+            {isHost && withBot && <SpreadCard friends action={false} />}
+            {!isHost && <SpreadCard action={false} />}
+            <CuriousCard newTab />
+          </FinalFold>
+        )}
+      </section>
 
       {!display && (
-        <footer class="stack">
-          {isHost && withBot && <SpreadCard friends />}
-          {isHost && final.discoveries.length > 0 && (
-            <section class="card talk-invite">
-              <h2 class="card-title">{t('Vom Spiel ins Gespräch')}</h2>
-              <p class="muted small">
-                {t(
-                  'Die Frage, bei der die meisten danebenlagen, in vier Schritten vertiefen: Lesen, Entdecken, Nachfragen, Mitnehmen. Alle Handys und die Leinwand gehen mit.',
-                )}
-              </p>
-              <Button block onClick={() => conn.act({ type: 'talk' })}>
-                {t('Weiter ins Gespräch')}
-              </Button>
-            </section>
-          )}
-          {isHost ? (
-            <>
-              {/* Mit Joseph ist „mit Freunden spielen“ der nächste Schritt – nochmal gegen ihn geht trotzdem */}
-              <Button variant={withBot ? 'secondary' : 'gold'} block onClick={() => conn.act({ type: 'playAgain' })}>
-                {withBot ? t('Nochmal gegen {bot}', { bot: BOT_NAME }) : t('Neue Partie mit allen')}
-              </Button>
-              <ConfirmButton block confirm={t('Wirklich schließen? Nochmal tippen')} onConfirm={() => conn.act({ type: 'close' })}>
-                {t('Raum schließen')}
-              </ConfirmButton>
-            </>
-          ) : (
-            <>
-              <p class="waiting">
-                <span class="pulse" aria-hidden="true" />
-                {t('Vielleicht startet die Spielleitung gleich eine neue Partie …')}
-              </p>
-              <SpreadCard />
-            </>
-          )}
-          <Button variant="ghost" block onClick={() => navigate('/')}>
-            {t('Zur Startseite')}
-          </Button>
-          <CuriousCard newTab />
+        <footer class="final-footer">
+          <Button variant="ghost" small onClick={() => navigate('/')}>{t('Zur Startseite')}</Button>
+          {isHost && <ConfirmButton variant="ghost" small confirm={t('Wirklich schließen? Nochmal tippen')} onConfirm={() => conn.act({ type: 'close' })}>{t('Raum schließen')}</ConfirmButton>}
         </footer>
       )}
     </section>
+  );
+}
+
+/** Ein Lachmoment bleibt sichtbar; alle weiteren Auszeichnungen stehen im aufklappbaren Bereich. */
+function FinalAward({ award: a, display }: { award: AwardView; display: boolean }) {
+  return (
+    <article class={`award award-${a.key}`}>
+      <p class="award-title">{a.title}</p>
+      {a.quote && <p class="award-quote">{t('„{text}“', { text: a.quote })}</p>}
+      <p class="award-people">{a.players.map((p) => p.name).join(' & ')}</p>
+      <p class="award-text">{a.quote ? a.value === 1 ? t('♥ 1 Herz in einer Runde') : t('♥ {n} Herzen in einer Runde', { n: a.value }) : `${upperFirst(a.text)} · ${a.value}×`}</p>
+      {a.key === 'favorite' && !display && <BluffStory award={a} />}
+    </article>
+  );
+}
+
+function FinalFold({ title, meta, className, open = false, children }: {
+  title: string; meta?: string; className: string; open?: boolean; children: ComponentChildren;
+}) {
+  return (
+    <details class={`final-section ${className}`} open={open}>
+      <summary><span>{title}</span>{meta && <small class="final-count">{meta}</small>}<span class="final-fold-mark" aria-hidden="true" /></summary>
+      <div class="final-section-content stack">{children}</div>
+    </details>
   );
 }
 
@@ -464,7 +493,7 @@ export function FinalScreen({ view, conn, display = false }: { view: RoomView; c
  * Am Spielende zum Weitersagen einladen – so kommt das Spiel in weitere Gruppen: Wer mitgespielt hat,
  * kann selbst eine Runde leiten; wer gegen Joseph gespielt hat (`friends`), als Nächstes mit Freunden.
  */
-function SpreadCard({ friends = false }: { friends?: boolean }) {
+function SpreadCard({ friends = false, action = true }: { friends?: boolean; action?: boolean }) {
   const [toast, setToast] = useState<string | null>(null);
   const share = async () =>
     setToast(
@@ -493,9 +522,9 @@ function SpreadCard({ friends = false }: { friends?: boolean }) {
           </p>
         </div>
       </div>
-      <Button variant="gold" block onClick={() => navigate('/neu')}>
+      {action && <Button variant="gold" block onClick={() => navigate('/neu')}>
         {friends ? t('Raum für Freunde eröffnen') : t('Eigenen Raum eröffnen')}
-      </Button>
+      </Button>}
       {!friends && (
         <Button variant="ghost" block onClick={share}>
           {t('Link an deine Gruppe schicken')}
