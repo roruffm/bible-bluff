@@ -30,6 +30,8 @@ import { type Session, lastRoom, loadSession, rememberedName, saveSession } from
 
 export function Home() {
   const [code, setCode] = useState('');
+  const [showGuide, setShowGuide] = useState(false);
+  const [showColors, setShowColors] = useState(false);
   const [quickBusy, setQuickBusy] = useState(false);
   const [quickError, setQuickError] = useState<string | null>(null);
   const last = lastRoom();
@@ -66,20 +68,16 @@ export function Home() {
       <header class="hero has-lang">
         <LangSwitch />
         <Logo />
-        <p class="tagline">{t('Erfinde Bluffs. Finde die Wahrheit. Entdecke die Bibel.')}</p>
+        <p class="tagline">{t('Bibelwissen hilft. Bluffen auch.')}</p>
         <div class="hero-start">
-          <p class="hero-reassurance">
-            <strong>{t('Kein Bibelprofi? Macht nichts.')}</strong>
-            <span>{t('Gute Bluffs zählen auch.')}</span>
-          </p>
           <Button variant="gold" block disabled={quickBusy} onClick={quickPlay}>
-            {quickBusy ? t('Spiel startet …') : t('Jetzt sofort spielen')}
-          </Button>
-          <div class="hero-opponent">
             <Avatar person={{ id: BOT_ID, name: BOT_NAME, color: BOT_COLOR }} />
-            <p><strong>{BOT_NAME}</strong><span>{t('Dein virtueller Mitspieler')}</span></p>
-          </div>
-          <p class="hero-entry-note">{t('Allein loslegen · ohne Anmeldung')}</p>
+            <span>{quickBusy ? t('Spiel startet …') : t('Jetzt gegen {bot} spielen', { bot: BOT_NAME })}</span>
+            <svg class="hero-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M5 12h14M13 6l6 6-6 6" />
+            </svg>
+          </Button>
+          <p class="hero-entry-note">{t('Virtueller Mitspieler · ohne Anmeldung')}</p>
         </div>
       </header>
 
@@ -102,48 +100,51 @@ export function Home() {
 
       <OpenRooms />
 
-      <section class="card choice" aria-labelledby="create-title">
-        <div class="choice-head">
+      <section class="card home-ways">
+        <button type="button" class="home-way" onClick={() => navigate('/neu')}>
           <span class="choice-icon is-create">
             <FriendsIcon />
           </span>
-          <div>
-            <h2 id="create-title">{t('Mit Freunden')}</h2>
-            <p class="muted small">{t('Spiele mit Freunden – auch am Beamer.')}</p>
-          </div>
-        </div>
-        <Button variant="gold" block onClick={() => navigate('/neu')}>
-          {t('Raum eröffnen')}
-        </Button>
-      </section>
-
-      <div class="or">
-        <span>{t('oder einem Raum beitreten')}</span>
-      </div>
-
-      <section class="card choice" aria-labelledby="join-title">
-        <div class="choice-head">
-          <span class="choice-icon is-join">
-            <EnterIcon />
+          <span class="home-way-text">
+            <strong>{t('Mit Freunden spielen')}</strong>
+            <small>{t('Raum eröffnen')}</small>
           </span>
-          <div>
-            <h2 id="join-title">{t('Mitspielen')}</h2>
-            <p class="muted small">{t('Du hast einen Raumcode? Gib ihn hier ein.')}</p>
+          <Chevron />
+        </button>
+        <details class="home-join">
+          <summary class="home-way">
+            <span class="choice-icon is-join">
+              <EnterIcon />
+            </span>
+            <span class="home-way-text">
+              <strong>{t('Einem Spiel beitreten')}</strong>
+              <small>{t('Raumcode eingeben')}</small>
+            </span>
+            <Chevron />
+          </summary>
+          <div class="home-join-form">
+            <JoinForm code={code} onCode={setCode} onJoined={(s) => navigate(`/r/${s.code}`)} askCode />
           </div>
-        </div>
-        <JoinForm code={code} onCode={setCode} onJoined={(s) => navigate(`/r/${s.code}`)} askCode />
+        </details>
       </section>
 
-      <Guide />
-      <ThemeFold />
-
-      <footer class="footnote">
-        {t(
-          'Fragen aus allen 27 Büchern des Neuen Testaments und ausgewählten Geschichten des Alten Testaments · freikirchlich-pfingstliche Lernfassung',
-        )}
-      </footer>
+      <nav class="home-tools" aria-label={t('Anleitung und Einstellungen')}>
+        <button type="button" aria-expanded={showGuide} aria-controls="home-guide" onClick={() => setShowGuide(!showGuide)}>{t('So geht’s')}</button>
+        <button type="button" onClick={() => navigate('/jakob')}>{t('Spiel anpassen')}</button>
+        <button type="button" aria-expanded={showColors} aria-controls="home-colors" onClick={() => setShowColors(!showColors)}>{t('Farben')}</button>
+      </nav>
+      <div id="home-guide" hidden={!showGuide}><Guide /></div>
+      <div id="home-colors" hidden={!showColors}><ThemeFold /></div>
       <LegalLinks />
     </main>
+  );
+}
+
+function Chevron() {
+  return (
+    <svg class="home-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="m9 6 6 6-6 6" />
+    </svg>
   );
 }
 
@@ -185,9 +186,6 @@ function QuickPreview({ onPlay, busy }: { onPlay: () => void; busy: boolean }) {
           </Button>
         </div>
       )}
-      <button type="button" class="preview-custom" onClick={() => navigate('/jakob')}>
-        {t('Spiel anpassen →')}
-      </button>
     </section>
   );
 }

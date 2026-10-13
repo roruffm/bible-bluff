@@ -38,23 +38,23 @@ export function ThemePicker({ compact = false }: { compact?: boolean }) {
   );
 }
 
-/** Startseite: die Farbauswahl zugeklappt, in der Zeile steht das gewählte Farbkonzept */
+/** Farbauswahl hinter dem Link „Farben“ auf der Startseite. */
 export function ThemeFold() {
   const [theme] = useTheme();
   const info = themeInfo(theme);
   return (
-    <details class="fold colors">
-      <summary>
+    <section class="fold colors" aria-labelledby="colors-title">
+      <h2 class="home-panel-heading" id="colors-title">
         <span class="fold-title">{t('Farben')}</span>
         <span class="fold-hint">
           <Swatch theme={info} mini />
           {t(info.name)}
         </span>
-      </summary>
+      </h2>
       <div class="fold-body">
         <ThemePicker compact />
         <p class="muted small">{t('Gilt nur auf diesem Gerät. Jede Person wählt ihre Farben selbst.')}</p>
       </div>
-    </details>
+    </section>
   );
 }

@@ -12,7 +12,7 @@ async function phone(browser: Browser, name: string): Promise<Page> {
 
 async function createRoom(page: Page, name: string, plays = true): Promise<string> {
   await page.goto('/');
-  await page.getByRole('button', { name: 'Raum eröffnen' }).click();
+  await page.getByRole('button', { name: /Mit Freunden spielen/ }).click();
   await page.getByLabel('Dein Spitzname').fill(name);
   if (!plays) await page.getByText('Ich spiele mit').click();
   await page.getByRole('radiogroup', { name: 'Runden' }).getByRole('radio', { name: '4', exact: true }).click();
@@ -279,19 +279,20 @@ test('Neugierig auf Jesus? – eine eigene, ruhige Seite', async ({ browser }) =
   await expect(page.getByRole('heading', { name: 'Glaube ist eine Beziehung' })).toBeVisible();
   await expect(page.getByRole('link', { name: '„Hoffnung für alle“' })).toHaveAttribute('href', /bibleserver\.com\/HFA\/Markus1/);
   await page.getByRole('button', { name: 'Zur Startseite' }).click();
-  await expect(page.getByRole('button', { name: 'Raum eröffnen' })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Mit Freunden spielen/ })).toBeVisible();
 });
 
 test('Startseite: Anleitung und Farben klappen auf', async ({ browser }) => {
   const page = await phone(browser, 'gast');
   await page.goto('/');
 
-  // Zugeklappt bleibt die Seite kurz, die Zeile sagt, was drinsteht
-  const guide = page.locator('details.guide');
-  const guideHead = guide.locator(':scope > summary');
-  await expect(guideHead).toContainText('Herzensrunde');
+  // Die kompakte Linkzeile öffnet die vollständige Anleitung.
+  const guide = page.locator('.guide');
+  const guideHead = page.getByRole('button', { name: 'So geht’s', exact: true });
+  await expect(guideHead).toHaveAttribute('aria-expanded', 'false');
   await expect(guide.getByText('Bluff schreiben.')).toBeHidden();
   await guideHead.click();
+  await expect(guideHead).toHaveAttribute('aria-expanded', 'true');
   await expect(guide.getByText('Bluff schreiben.')).toBeVisible();
   await expect(guide.getByText('für den Bluff mit den meisten Herzen')).toBeVisible();
 
@@ -309,17 +310,20 @@ test('Startseite: Anleitung und Farben klappen auf', async ({ browser }) => {
   await expect(page).toHaveURL(/\/jesus$/);
   await expect(page.getByRole('heading', { name: 'Neugierig auf Jesus?' })).toBeVisible();
 
-  // Farben: zugeklappt steht das gewählte Konzept in der Zeile, die Wahl bleibt gespeichert
+  // Die Farbauswahl bleibt hinter „Farben“ erreichbar und wird gespeichert.
   await page.goto('/');
-  const colors = page.locator('details.colors');
-  await expect(colors.locator('summary')).toContainText('See Genezareth');
+  const colors = page.locator('.colors');
+  const colorsButton = page.getByRole('button', { name: 'Farben', exact: true });
   await expect(colors.getByRole('radiogroup', { name: 'Farbkonzept' })).toBeHidden();
-  await colors.locator('summary').click();
+  await colorsButton.click();
   await colors.getByRole('radio', { name: 'Nachtquiz' }).click();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'nacht');
-  await expect(colors.locator('summary')).toContainText('Nachtquiz');
+  await expect(colors.locator('h2')).toContainText('Nachtquiz');
+  await colorsButton.click();
+  await expect(colors).toBeHidden();
   await page.reload();
-  await expect(page.locator('details.colors summary')).toContainText('Nachtquiz');
+  await colorsButton.click();
+  await expect(colors.getByRole('radio', { name: 'Nachtquiz' })).toHaveAttribute('aria-checked', 'true');
 });
 
 test('Impressum und Datenschutz sind von der Startseite und im Raum erreichbar', async ({ browser }) => {
@@ -440,7 +444,7 @@ test('Ohne Vibration (wie auf dem iPhone) meldet ein Ton den Beitritt', async ({
 test('Allein gegen Jakob: eigener Raum von der Startseite aus, danach weiter mit Freunden', async ({ browser }) => {
   const page = await phone(browser, 'gast');
   await page.goto('/');
-  await page.getByRole('button', { name: 'Spiel anpassen →' }).click();
+  await page.getByRole('button', { name: 'Spiel anpassen' }).click();
   await page.waitForURL('**/jakob');
   await page.getByLabel('Dein Spitzname').fill('Hanna');
   await page.getByRole('button', { name: 'Raum mit Jakob eröffnen' }).click();
