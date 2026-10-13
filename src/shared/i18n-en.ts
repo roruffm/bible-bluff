@@ -4,6 +4,13 @@
 // Ein Test prüft, dass jeder verwendete Text hier steht und jeder Eintrag noch verwendet wird.
 
 export const EN: Record<string, string> = {
+  'Bibelwissen hilft. Bluffen auch.': 'Bible knowledge helps. So does bluffing.',
+  'Virtueller Mitspieler · ohne Anmeldung': 'Virtual opponent · no sign-up',
+  'Mit Freunden spielen': 'Play with friends',
+  'Einem Spiel beitreten': 'Join a game',
+  'Raumcode eingeben': 'Enter a room code',
+  'Anleitung und Einstellungen': 'Instructions and settings',
+  'Spiel anpassen': 'Customise the game',
   // ───────── Allgemein ─────────
   '„{text}“': '“{text}”',
   'Das ging nicht.': 'That didn’t work.',
@@ -26,11 +33,6 @@ export const EN: Record<string, string> = {
   'Erfinde Bluffs. Finde die Wahrheit. Entdecke die Bibel.': 'Make up bluffs. Find the truth. Discover the Bible.',
   'Gast': 'Guest',
   'Spiel startet …': 'Starting game …',
-  'Jetzt sofort spielen': 'Play now',
-  'Kein Bibelprofi? Macht nichts.': 'Not a Bible expert? No problem.',
-  'Gute Bluffs zählen auch.': 'Good bluffs count too.',
-  'Dein virtueller Mitspieler': 'Your virtual opponent',
-  'Allein loslegen · ohne Anmeldung': 'Play solo · no sign-up',
   'Probefrage': 'Try a question',
   'Wo sollte Petrus eine Münze finden?': 'Where was Peter told to find a coin?',
   'Eine Antwort ist echt. Welche?': 'Only one answer is real. Which one?',
@@ -45,8 +47,6 @@ export const EN: Record<string, string> = {
   'Jetzt bist du dran: Erfinde einen Bluff und leg {bot} rein.':
     'Your turn: invent a bluff and fool {bot}.',
   'Jetzt gegen {bot} spielen': 'Play against {bot} now',
-  'Spiel anpassen →': 'Customise the game →',
-  'oder einem Raum beitreten': 'or join a room',
   'Raum': 'Room',
   'Raum {code}': 'Room {code}',
   'Raumcode': 'Room code',
@@ -107,10 +107,6 @@ export const EN: Record<string, string> = {
 
   // ───────── Startseite ─────────
   'Zurück zu Raum {code} als {name} →': 'Back to room {code} as {name} →',
-  'Du hast einen Raumcode? Gib ihn hier ein.': 'Got a room code? Enter it here.',
-  'Mit Freunden': 'With friends',
-  'Spiele mit Freunden – auch am Beamer.':
-    'Play with friends – on a projector too.',
   'Raum eröffnen': 'Create a room',
   'Allein gegen {bot}': 'Solo against {bot}',
   'Gegen {bot} spielen': 'Play against {bot}',
@@ -159,8 +155,6 @@ export const EN: Record<string, string> = {
 
   // ───────── Anleitung ─────────
   'So geht’s': 'How to play',
-  'Anleitung: Ablauf, Punkte, {bot}, Herzensrunde, Gespräch danach':
-    'Guide: how it works, points, {bot}, heart-to-heart, talking afterwards',
   'Bluff schreiben.': 'Write a bluff.',
   'Alle sehen dieselbe Bibelfrage und erfinden heimlich eine glaubwürdige, aber falsche Antwort.':
     'Everyone sees the same Bible question and secretly makes up a believable but wrong answer.',

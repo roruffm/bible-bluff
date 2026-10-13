@@ -1,5 +1,4 @@
-// Anleitung auf der Startseite: zugeklappt, damit die Seite kurz bleibt. Aufgeklappt stehen oben die
-// Grundregeln und Punkte, darunter Themen zum Aufklappen – von der Leitung über Joseph bis zum Gespräch danach.
+// Anleitung über „So geht’s“: Grundregeln und Punkte, darunter Themen zum Aufklappen.
 
 import type { ComponentChildren } from 'preact';
 import { BOT_NAME } from '../../shared/rules';
@@ -28,11 +27,8 @@ function Item({ label, children }: { label: string; children: ComponentChildren 
 export function Guide() {
   const bot = BOT_NAME;
   return (
-    <details class="fold guide">
-      <summary>
-        <span class="fold-title">{t('So geht’s')}</span>
-        <span class="fold-hint">{t('Anleitung: Ablauf, Punkte, {bot}, Herzensrunde, Gespräch danach', { bot })}</span>
-      </summary>
+    <section class="fold guide" aria-labelledby="guide-title">
+      <h2 class="home-panel-heading" id="guide-title">{t('So geht’s')}</h2>
       <div class="fold-body">
         <RuleSteps />
         <Points />
@@ -157,7 +153,8 @@ export function Guide() {
             </Item>
           </Topic>
         </div>
+        <p class="muted small">{t('Fragen aus allen 27 Büchern des Neuen Testaments und ausgewählten Geschichten des Alten Testaments · freikirchlich-pfingstliche Lernfassung')}</p>
       </div>
-    </details>
+    </section>
   );
 }
