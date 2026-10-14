@@ -1,6 +1,7 @@
 // Cloudflare-D1-Anbindung. Nur die Methoden, die wir wirklich brauchen, als schmale Schnittstelle.
 
-import type { BluffStatus, RecapView } from '../shared/types';
+import type { BluffStatus, NicknameView, NicknamesResponse, RecapView } from '../shared/types';
+import { NICKNAMES_SCHEMA, nicknameKey, nicknamePage, type NicknameQuery } from './nicknames';
 import type { RoomState } from './state';
 import type { BluffCandidateInput, BluffRow, RoomRecord, RoomStore } from './store';
 
@@ -102,12 +103,56 @@ export class D1Store implements RoomStore {
     return (res.meta.changes ?? 0) === 1;
   }
 
-  async update(code: string, state: RoomState, expectedVersion: number, now: number): Promise<boolean> {
-    const res = await this.db
+  async update(code: string, state: RoomState, expectedVersion: number, now: number, playedNames: string[] = []): Promise<boolean> {
+    const update = this.db
       .prepare('UPDATE rooms SET state = ?, version = version + 1, updated_at = ? WHERE code = ? AND version = ?')
-      .bind(JSON.stringify(state), now, code, expectedVersion)
-      .run();
-    return (res.meta.changes ?? 0) === 1;
+      .bind(JSON.stringify(state), now, code, expectedVersion);
+    if (!playedNames.length) return ((await update.run()).meta.changes ?? 0) === 1;
+    // D1 batch ist eine Transaktion. Nur bei passender Raumversion werden Namen UND Raum gespeichert.
+    // Ein Konflikt oder Fehler kann deshalb weder falsche Einträge noch verlorene Erfassungen erzeugen.
+    const res = await this.withNicknames(() => this.db.batch([
+      ...playedNames.map((name) => this.db.prepare(
+        'INSERT INTO played_nicknames (nickname_key, name, first_played_at, last_played_at) ' +
+        'SELECT ?, ?, ?, ? WHERE EXISTS (SELECT 1 FROM rooms WHERE code = ? AND version = ?) ' +
+        'ON CONFLICT(nickname_key) DO UPDATE SET ' +
+        'name = CASE WHEN excluded.last_played_at >= last_played_at THEN excluded.name ELSE name END, ' +
+        'first_played_at = MIN(first_played_at, excluded.first_played_at), ' +
+        'last_played_at = MAX(last_played_at, excluded.last_played_at)',
+      ).bind(nicknameKey(name), name, now, now, code, expectedVersion)),
+      update,
+    ]));
+    return (res[res.length - 1].meta?.changes ?? 0) === 1;
+  }
+
+  private async withNicknames<T>(fn: () => Promise<T>): Promise<T> {
+    try {
+      return await fn();
+    } catch (err) {
+      if (!isMissingTable(err)) throw err;
+      await this.db.batch(NICKNAMES_SCHEMA.map((sql) => this.db.prepare(sql)));
+      return fn();
+    }
+  }
+
+  async listNicknames(query: NicknameQuery): Promise<NicknamesResponse> {
+    const search = nicknameKey(query.search);
+    // instr behandelt auch %, _ und Anführungszeichen als gewöhnlichen Suchtext.
+    const [count, rows] = await this.withNicknames(() => this.db.batch<Record<string, unknown>>([
+      this.db.prepare('SELECT COUNT(*) AS total FROM played_nicknames WHERE instr(nickname_key, ?) > 0').bind(search),
+      this.db.prepare(
+        'SELECT nickname_key, name, first_played_at, last_played_at FROM played_nicknames ' +
+        'WHERE instr(nickname_key, ?) > 0 ORDER BY last_played_at DESC, nickname_key LIMIT ? OFFSET ?',
+      ).bind(search, query.limit, query.offset),
+    ]));
+    const items: NicknameView[] = rows.results.map((row) => ({
+      key: String(row.nickname_key), name: String(row.name),
+      firstPlayedAt: Number(row.first_played_at), lastPlayedAt: Number(row.last_played_at),
+    }));
+    return nicknamePage(items, Number(count.results[0]?.total ?? 0), query);
+  }
+
+  async deleteNickname(key: string): Promise<void> {
+    await this.withNicknames(() => this.db.prepare('DELETE FROM played_nicknames WHERE nickname_key = ?').bind(key).run());
   }
 
   async touch(code: string, playerId: string, now: number): Promise<void> {

@@ -648,6 +648,7 @@ export const EN: Record<string, string> = {
   'Da ist etwas schiefgelaufen. Bitte nochmal versuchen.': 'Something went wrong. Please try again.',
   'Anfrage zu groß.': 'Request too large.',
   'Ungültige Anfrage.': 'Invalid request.',
+  'Ungültige Suche.': 'Invalid search.',
   'Diesen Raum gibt es nicht (mehr). Prüfe den Code.': 'This room doesn’t exist (any more). Check the code.',
   'Diesen Raum gibt es nicht mehr. Gegen Jakob spielst du über die Startseite.':
     'This room no longer exists. You can play against Jakob from the home page.',

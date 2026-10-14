@@ -154,7 +154,15 @@ Bei einem Bluff-Spiel verdirbt eine bekannte Frage die Runde: Wer die Antwort no
 
 Jede Frage hat drei vorbereitete Hausbluffs, die auch der Vorschlagsknopf liefert. Wer öfter spielt, erkennt sie irgendwann. Deshalb sammelt das Spiel nach jeder Partie Bluffs, die mindestens zwei Leute reingelegt oder zwei Herzen bekommen haben, als Kandidaten: ohne Namen, und ohne Bluffs, in denen ein Name aus dem Raum vorkommt.
 
-Auf **`/admin`** prüfst du die Kandidaten, korrigierst bei Bedarf den Text und nimmst sie auf oder lehnst sie ab. Erst aufgenommene Bluffs ergänzen die Hausbluffs und Vorschläge ihrer Frage. Das Spiel lehnt ab, was zu nah an der richtigen Antwort liegt oder schon ein Hausbluff ist.
+Auf **`/admin` → Hausbluffs** prüfst du die Kandidaten, korrigierst bei Bedarf den Text und nimmst sie auf oder lehnst sie ab. Erst aufgenommene Bluffs ergänzen die Hausbluffs und Vorschläge ihrer Frage. Das Spiel lehnt ab, was zu nah an der richtigen Antwort liegt oder schon ein Hausbluff ist.
+
+### Gespielte Nicknamen im Adminbereich
+
+Unter **`/admin` → Nicknamen** steht eine durchsuchbare Liste der gespielten Spitznamen mit erstem und letztem Erfassungszeitpunkt (deutsche Ortszeit). Jeder menschliche Mitspieler wird beim Spielstart einmal pro Partie erfasst, ebenso spätere Beitritte. Bot, reine Spielleitungen und lediglich wartende Lobbygäste werden nicht gesammelt. Groß-/Kleinschreibung und gleichwertige Unicode-Schreibweisen werden zusammengeführt; ein Nickname ist ausdrücklich keine eindeutige Person.
+
+Die separate Tabelle `played_nicknames` bleibt nach dem Aufräumen der Spielräume erhalten. Sie enthält keine Raumcodes, Spielzüge oder Sitzungskennungen. Suche, Blättern und Entfernen nutzen denselben `ADMIN_KEY` wie die Bluff-Freigabe; ohne gültigen Schlüssel ist auch die API gesperrt. Nach dem Entfernen wird der Eintrag nicht durch bloßes Neuladen derselben Partie wiederhergestellt. Eine neue Teilnahme kann ihn erneut erfassen.
+
+Die Erfassung beginnt mit dieser Funktion. In noch laufenden Altpartien erfolgt sie beim nächsten gespeicherten Zustandswechsel; bereits gelöschte Räume sind nicht rekonstruierbar. Migration: `0005_played_nicknames.sql`. Falls sie in einer Vorschau oder beim Ausrollen noch fehlt, legt die D1-Anbindung die neue Tabelle selbst an. Raumzustand und Nicknamen werden gemeinsam in einer Transaktion gespeichert, damit fehlgeschlagene oder konkurrierende Spielstarts keine falschen Einträge hinterlassen.
 
 Die Seite braucht einen Schlüssel: Lege im Cloudflare-Dashboard unter **Workers & Pages → bible-bluff → Settings → Variables and Secrets** ein Secret `ADMIN_KEY` an, am besten eine lange Zufallsfolge. Ohne diesen Schlüssel ist die Freigabe abgeschaltet. Lokal geht es mit `ADMIN_KEY=… npm start`.
 

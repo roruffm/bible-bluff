@@ -10,6 +10,7 @@
 //   GET  /api/kalender?vers=&ab=&zeit=  Kalenderdatei: sieben Erinnerungen an „Mein Vers für die Woche“
 //   GET  /api/admin/bluffs           Kandidaten für frische Hausbluffs (nur mit ADMIN_KEY)
 //   POST /api/admin/bluffs           Kandidaten freigeben oder ablehnen (nur mit ADMIN_KEY)
+//   GET/POST /api/admin/nicknames    Gespielte Nicknamen lesen/entfernen (nur mit ADMIN_KEY)
 
 import { isCalendarDay, isReminderTime, verseCalendar } from '../shared/calendar';
 import { ALL_CATEGORIES } from '../shared/rules';
@@ -221,7 +222,14 @@ export function createApi(deps: ApiDeps) {
       Object.assign(ctx.presence, botPresence(rec.state, ctx.now));
       const out = fn(rec, ctx);
       if (!out.next) return { state: rec.state, version: rec.version, ctx, ...out };
-      if (await store.update(code, out.next, rec.version, ctx.now)) {
+      const recorded = out.next.game?.nicknameRecordedIds ?? [];
+      const participants = out.next.status === 'playing' && out.next.game
+        ? out.next.players.filter((p) => p.plays && !p.bot && !recorded.includes(p.id))
+        : [];
+      if (participants.length && out.next.game) {
+        out.next.game.nicknameRecordedIds = [...recorded, ...participants.map((p) => p.id)];
+      }
+      if (await store.update(code, out.next, rec.version, ctx.now, participants.map((p) => p.name))) {
         // Genau ein Schreibvorgang beendet die Partie – dann die starken Bluffs einsammeln
         if (out.next.status === 'finished' && rec.state.status !== 'finished') await collectBluffs(out.next, ctx.now);
         return { state: out.next, version: rec.version + 1, ctx, ...out };
@@ -447,6 +455,25 @@ export function createApi(deps: ApiDeps) {
     return json(res);
   }
 
+  async function nicknamesRoute(request: Request, url: URL): Promise<Response> {
+    await requireAdmin(request);
+    if (request.method === 'GET') {
+      const search = (url.searchParams.get('q') ?? '').trim();
+      const rawOffset = url.searchParams.get('offset') ?? '0';
+      if (search.length > 80 || !/^\d{1,7}$/.test(rawOffset)) {
+        throw new GameError('bad_query', 'Ungültige Suche.', 400);
+      }
+      return json(await store.listNicknames({ search, offset: Number(rawOffset), limit: 50 }));
+    }
+    const body = await readJson(request);
+    // Unicode-Normalisierung kann einen kurzen Spitznamen deutlich verlängern.
+    if (body.action !== 'delete' || typeof body.key !== 'string' || !body.key || body.key.length > 512) {
+      throw new GameError('bad_action', 'Ungültige Anfrage.', 400);
+    }
+    await store.deleteNickname(body.key);
+    return json({ ok: true });
+  }
+
   async function decideBluffRoute(request: Request): Promise<Response> {
     await requireAdmin(request);
     const body = await readJson(request);
@@ -500,6 +527,9 @@ export function createApi(deps: ApiDeps) {
       if (parts[1] === 'admin' && parts[2] === 'bluffs' && parts.length === 3) {
         if (method === 'GET') return await listBluffsRoute(request, url);
         if (method === 'POST') return await decideBluffRoute(request);
+      }
+      if (parts[1] === 'admin' && parts[2] === 'nicknames' && parts.length === 3 && ['GET', 'POST'].includes(method)) {
+        return await nicknamesRoute(request, url);
       }
       throw new GameError('not_found', 'Nicht gefunden.', 404);
     } catch (err) {

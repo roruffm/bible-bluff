@@ -4,6 +4,7 @@ import type {
   BluffListResponse,
   BluffStatus,
   Lang,
+  NicknamesResponse,
   PoolResponse,
   PublicRoomsResponse,
   RecapCreatedResponse,
@@ -88,6 +89,12 @@ export const api = {
   },
   adminBluffs(key: string, status: BluffStatus) {
     return request<BluffListResponse>('GET', `/api/admin/bluffs?status=${status}`, undefined, key);
+  },
+  adminNicknames(key: string, search: string, offset: number) {
+    return request<NicknamesResponse>('GET', `/api/admin/nicknames?${new URLSearchParams({ q: search, offset: String(offset) })}`, undefined, key);
+  },
+  adminDeleteNickname(key: string, nicknameKey: string) {
+    return request<{ ok: true }>('POST', '/api/admin/nicknames', { action: 'delete', key: nicknameKey }, key);
   },
   adminDecide(key: string, decision: { questionId: string; key: string; status: BluffStatus; text: string }) {
     return request<{ ok: true }>('POST', '/api/admin/bluffs', decision, key);

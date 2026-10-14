@@ -55,6 +55,7 @@ export function DatenschutzEn({ address, email, updated }: { address: ComponentC
         <li>You don’t need an account to play – just a nickname.</li>
         <li>There are no cookies, no analytics or advertising services, and your data is never passed on for advertising.</li>
         <li>Game rooms are deleted once they haven’t been used for 24 hours.</li>
+        <li>Nicknames used in games are stored separately in a protected list for the administrator.</li>
         <li>A room is only public if the host deliberately shows it on the home page.</li>
       </ul>
 
@@ -90,6 +91,20 @@ export function DatenschutzEn({ address, email, updated }: { address: ComponentC
         This data is only used for the game. The legal basis is providing the game you want to use (Art. 6(1)(b) GDPR).
         Game rooms are deleted once they haven’t been used for 24 hours. Please use a nickname, and don’t write personal
         details about yourself or others in your bluffs.
+      </p>
+
+      <h2>Nicknames used in games</h2>
+      <p>
+        From the start of a game, a separate list stores each human participant’s nickname and the first and most
+        recent time it was recorded. People joining an ongoing game are included; the bot and hosts who do not play
+        are not. The administrator uses this list to see which nicknames have played. It contains no room codes,
+        session IDs, IP addresses or links to bluffs, votes or heart-to-heart answers. Only the administrator with
+        the admin key can access it. Equivalent spellings are grouped without identifying individual people.
+      </p>
+      <p>
+        This list remains after game rooms are deleted, until the administrator removes an entry. You can request
+        removal by emailing <a href={`mailto:${email}`}>{email}</a> with the nickname. The nickname may be recorded
+        again if it is used to play another game.
       </p>
 
       <h2>Public rooms</h2>

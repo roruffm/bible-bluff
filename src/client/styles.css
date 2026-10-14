@@ -3918,6 +3918,16 @@ html[lang='en'] .reveal-text::after {
   color: var(--ink-2);
 }
 
+.admin-search { align-items: end; }
+.admin-search .field { flex: 1; min-width: 0; }
+.admin-search > .btn, .admin-nickname-summary > .btn { flex: 0 0 auto; }
+.admin-nickname-summary { justify-content: space-between; align-items: center; }
+.admin-nickname-name { overflow-wrap: anywhere; min-width: 0; }
+.admin-nickname .btn { flex-shrink: 0; }
+.admin-nickname-dates { display: flex; flex-wrap: wrap; gap: 12px 28px; margin: 8px 0 0; }
+.admin-nickname-dates dt { color: var(--ink-2); }
+.admin-nickname-dates dd { margin: 3px 0 0; font-weight: 700; }
+
 /* ───────── Overlays ───────── */
 
 .overlay {
