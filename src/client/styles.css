@@ -3920,6 +3920,7 @@ html[lang='en'] .reveal-text::after {
 
 .admin-search { align-items: end; }
 .admin-search .field { flex: 1; min-width: 0; }
+.admin-search > .btn, .admin-nickname-summary > .btn { flex: 0 0 auto; }
 .admin-nickname-summary { justify-content: space-between; align-items: center; }
 .admin-nickname-name { overflow-wrap: anywhere; min-width: 0; }
 .admin-nickname .btn { flex-shrink: 0; }
