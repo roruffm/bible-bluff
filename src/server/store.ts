@@ -1,8 +1,9 @@
 // Speicher-Schnittstelle. Raumzustand wird mit Versionsnummer gespeichert (optimistische Sperre):
 // Ein Update gelingt nur, wenn niemand dazwischen geschrieben hat.
 
-import type { BluffStatus, RecapView } from '../shared/types';
+import type { BluffStatus, NicknameView, NicknamesResponse, RecapView } from '../shared/types';
 import type { RoomState } from './state';
+import { nicknameKey, nicknamePage, type NicknameQuery } from './nicknames';
 
 /** Starker Bluff aus einer echten Partie – Kandidat für frische Hausbluffs */
 export interface BluffCandidateInput {
@@ -35,7 +36,9 @@ export interface RoomStore {
   /** false, wenn der Code schon vergeben ist */
   insert(code: string, state: RoomState, now: number): Promise<boolean>;
   /** false bei Versionskonflikt */
-  update(code: string, state: RoomState, expectedVersion: number, now: number): Promise<boolean>;
+  update(code: string, state: RoomState, expectedVersion: number, now: number, playedNames?: string[]): Promise<boolean>;
+  listNicknames(query: NicknameQuery): Promise<NicknamesResponse>;
+  deleteNickname(key: string): Promise<void>;
   touch(code: string, playerId: string, now: number): Promise<void>;
   cleanup(updatedBefore: number): Promise<void>;
   /** Entdeckungen-Seite dauerhaft ablegen; eine schon vorhandene ID bleibt unverändert */
@@ -61,6 +64,7 @@ export class MemoryStore implements RoomStore {
   private presence = new Map<string, Map<string, number>>();
   private recaps = new Map<string, string>();
   private bluffs = new Map<string, BluffRow>();
+  private nicknames = new Map<string, NicknameView>();
 
   async load(code: string): Promise<RoomRecord | null> {
     const row = this.rooms.get(code);
@@ -91,11 +95,32 @@ export class MemoryStore implements RoomStore {
     return true;
   }
 
-  async update(code: string, state: RoomState, expectedVersion: number, now: number): Promise<boolean> {
+  async update(code: string, state: RoomState, expectedVersion: number, now: number, playedNames: string[] = []): Promise<boolean> {
     const row = this.rooms.get(code);
     if (!row || row.version !== expectedVersion) return false;
     this.rooms.set(code, { json: JSON.stringify(state), version: expectedVersion + 1, updatedAt: now });
+    for (const name of playedNames) {
+      const key = nicknameKey(name);
+      const existing = this.nicknames.get(key);
+      this.nicknames.set(key, {
+        key,
+        name: !existing || now >= existing.lastPlayedAt ? name : existing.name,
+        firstPlayedAt: Math.min(existing?.firstPlayedAt ?? now, now),
+        lastPlayedAt: Math.max(existing?.lastPlayedAt ?? now, now),
+      });
+    }
     return true;
+  }
+
+  async listNicknames(query: NicknameQuery): Promise<NicknamesResponse> {
+    const rows = [...this.nicknames.values()]
+      .filter((row) => row.key.includes(nicknameKey(query.search)))
+      .sort((a, b) => b.lastPlayedAt - a.lastPlayedAt || (a.key < b.key ? -1 : a.key > b.key ? 1 : 0));
+    return nicknamePage(rows.slice(query.offset, query.offset + query.limit).map((row) => ({ ...row })), rows.length, query);
+  }
+
+  async deleteNickname(key: string): Promise<void> {
+    this.nicknames.delete(key);
   }
 
   async touch(code: string, playerId: string, now: number): Promise<void> {

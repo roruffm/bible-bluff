@@ -368,6 +368,20 @@ export interface BluffListResponse {
   items: BluffCandidateView[];
 }
 
+/** Nur im geschützten Adminbereich; keine Zuordnung zu Räumen oder Spielzügen. */
+export interface NicknameView {
+  key: string;
+  name: string;
+  firstPlayedAt: number;
+  lastPlayedAt: number;
+}
+
+export interface NicknamesResponse {
+  items: NicknameView[];
+  total: number;
+  nextOffset: number | null;
+}
+
 export interface ApiErrorBody {
   error: { code: string; message: string };
 }

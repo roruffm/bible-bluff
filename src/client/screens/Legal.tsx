@@ -141,6 +141,7 @@ export function DatenschutzPage() {
         <li>Zum Mitspielen brauchst du kein Konto, nur einen Spitznamen.</li>
         <li>Es gibt keine Cookies, keine Analyse- oder Werbedienste und keine Weitergabe deiner Daten für Werbung.</li>
         <li>Spielräume werden gelöscht, wenn sie 24 Stunden lang nicht mehr genutzt wurden.</li>
+        <li>Gespielte Spitznamen werden separat in einer geschützten Liste für die Administration gespeichert.</li>
         <li>Ein Raum ist nur dann öffentlich, wenn die Spielleitung ihn bewusst auf der Startseite zeigt.</li>
       </ul>
 
@@ -177,6 +178,21 @@ export function DatenschutzPage() {
         Diese Daten dienen nur dem Spiel. Rechtsgrundlage ist die Bereitstellung des Spiels, das du nutzen möchtest
         (Art. 6 Abs. 1 lit. b DSGVO). Spielräume werden gelöscht, wenn sie 24 Stunden lang nicht mehr genutzt wurden.
         Bitte verwende einen Spitznamen und schreibe keine persönlichen Angaben über dich oder andere in Bluffs.
+      </p>
+
+      <h2>Gespielte Spitznamen</h2>
+      <p>
+        Ab Spielstart speichert eine separate Liste den Spitznamen menschlicher Mitspielender sowie den ersten und
+        letzten Erfassungszeitpunkt. Auch spätere Beitritte zu einer laufenden Partie werden erfasst; der Bot und
+        Personen, die nur leiten, nicht. Die Liste dient der Administration als Übersicht, welche Nicknamen gespielt
+        haben. Sie enthält keine Raumcodes, Sitzungskennungen, IP-Adressen oder Zuordnung zu Bluffs, Stimmen und
+        Herzensantworten. Nur die Administration mit ihrem Schlüssel kann sie einsehen. Gleiche Schreibweisen werden
+        zusammengeführt, ohne damit Personen zu identifizieren.
+      </p>
+      <p>
+        Diese Liste bleibt auch nach dem Löschen der Spielräume bestehen, bis die Administration einen Eintrag entfernt.
+        Du kannst die Entfernung unter Angabe des Spitznamens per E-Mail an <a href={`mailto:${ANBIETER.email}`}>{ANBIETER.email}</a> anfragen.
+        Bei einer erneuten Spielteilnahme kann der Spitzname wieder in die Liste aufgenommen werden.
       </p>
 
       <h2>Öffentliche Räume</h2>

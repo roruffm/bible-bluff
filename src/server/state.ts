@@ -119,6 +119,8 @@ export interface HeartRec {
 }
 
 export interface GameRec {
+  /** Bereits in dieser Partie erfasste Personen; bleibt nur im kurzlebigen Raumzustand. */
+  nicknameRecordedIds?: string[];
   questionIds: string[];
   spareIds: string[];
   roundIndex: number;

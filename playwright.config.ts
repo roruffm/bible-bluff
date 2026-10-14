@@ -15,6 +15,7 @@ export default defineConfig({
     trace: 'retain-on-failure',
   },
   webServer: {
+    env: { ADMIN_KEY: 'playwright-admin-key' },
     command: `npm run build && PORT=${PORT} node --import tsx scripts/serve.ts`,
     url: `http://localhost:${PORT}/api/health`,
     reuseExistingServer: !process.env.CI,
