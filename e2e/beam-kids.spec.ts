@@ -128,9 +128,9 @@ test('Kids: alle Showfragen passen bei 800×600, 4:3, 720p und Full HD',async({p
       const problems:string[]=[];
       for(const selector of ['#kids-question','.kids-answer-text','.is-revealed .kids-discovery p','#kids-regroup-title','.kids-regroup-instruction']) document.querySelectorAll<HTMLElement>(selector).forEach(el=>{
         const range=document.createRange();range.selectNodeContents(el);const text=range.getBoundingClientRect(),box=(selector.includes('discovery')?el.closest('.kids-bottom')!:el).getBoundingClientRect();
-        if(text.left<box.left-1||text.right>box.right+1||text.top<box.top-1||text.bottom>box.bottom+1) problems.push(`${selector}: ${el.textContent}`);
+        if(text.left<box.left-1||text.right>box.right+1||text.top<box.top-1||text.bottom>box.bottom+1) problems.push(`${innerWidth}×${innerHeight} ${selector}: ${el.textContent}; Text ${JSON.stringify({left:text.left,right:text.right,top:text.top,bottom:text.bottom})}; Box ${JSON.stringify({left:box.left,right:box.right,top:box.top,bottom:box.bottom})}`);
       });
-      for(const el of document.querySelectorAll('.kids-status,.kids-answers,.kids-bottom,.kids-show-story,.kids-regroup-content')) {const box=el.getBoundingClientRect();if(box.bottom>innerHeight+1||box.left<0||box.right>innerWidth+1)problems.push(`Außerhalb: ${el.className}`);}
+      for(const el of document.querySelectorAll('.kids-status,.kids-answers,.kids-bottom,.kids-show-story,.kids-regroup-content,.kids-regroup-operator')) {const box=el.getBoundingClientRect();if(box.bottom>innerHeight+1||box.left<0||box.right>innerWidth+1)problems.push(`Außerhalb: ${el.className}`);}
       if(document.documentElement.scrollWidth>innerWidth)problems.push('Breite');return problems;
     });expect(issues).toEqual([]);
   }
