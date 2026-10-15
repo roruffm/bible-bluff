@@ -23,6 +23,9 @@ export function KidsPage() {
   const [fullscreenError, setFullscreenError] = useState('');
   const root = useRef<HTMLElement>(null);
   const primary = useRef<HTMLButtonElement>(null);
+  const current = useRef({ game, showExit });
+  // Tastendrücke lesen den gerade gerenderten Zustand, auch vor dem nächsten Effect/Frame.
+  current.current = { game, showExit };
   const canFullscreen = typeof document !== 'undefined' && document.fullscreenEnabled;
   const act = (action: KidsAction) => setGame((g) => g ? updateKidsGame(g, action, Date.now()) : g);
 
@@ -48,6 +51,7 @@ export function KidsPage() {
   }, [game?.phase, game?.index, showExit]);
   useEffect(() => {
     const key = (e: KeyboardEvent) => {
+      const { game, showExit } = current.current;
       if (!game || showExit || e.repeat || e.altKey || e.ctrlKey || e.metaKey) return;
       const tag = (e.target as HTMLElement)?.tagName;
       if (['INPUT', 'SELECT', 'TEXTAREA'].includes(tag)) return;
@@ -58,7 +62,7 @@ export function KidsPage() {
     };
     window.addEventListener('keydown', key);
     return () => window.removeEventListener('keydown', key);
-  }, [game?.phase, showExit]);
+  }, []);
 
   const toggleFullscreen = async () => {
     try {
