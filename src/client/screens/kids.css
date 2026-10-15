@@ -271,10 +271,11 @@
 .kids-show-story h1 { font-size: clamp(29px,min(4vw,6.5vh),90px); font-weight: 900; line-height: 1.08; text-wrap: balance; }
 .kids-show-story > p { font-size: clamp(18px,min(2vw,3.3vh),38px); line-height: 1.25; }
 .kids-show-story .kids-controls { justify-content: center; }
-.kids-team-badges { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; width: 100%; }
-.kids-team-badges > div { padding: 12px 6px; background: #fffdf8; border: 2px solid #b4ceca; border-radius: 16px; }
-.kids-team-badges b { display: block; font-size: clamp(17px,2vw,30px); margin-bottom: 5px; }
-.kids-team-badges span { font-size: clamp(11px,1.15vw,20px); }
+.kids-team-badges { display: grid; gap: 8px; width: 100%; }
+.kids-team-badges > div { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 10px; padding: 10px 14px; background: #fffdf8; border: 2px solid #b4ceca; border-radius: 16px; }
+.kids-team-badges b { display: block; font-size: clamp(22px,min(2.8vw,4vh),48px); font-weight: 900; line-height: 1.15; text-align: left; }
+.kids-team-badges .kids-group-name,.kids-team-badges .kids-group-name > span { font-size: inherit; }
+.kids-team-badges .kids-group-ages { font-size: clamp(16px,min(1.8vw,2.6vh),30px); font-weight: 700; white-space: nowrap; }
 .kids-final-bonuses { display: flex; gap: 20px; width: 100%; }
 .kids-final-bonuses > span { flex: 1; border: 2px solid #12324a; border-radius: 15px; background: #e8e0f2; padding: 15px; font-size: clamp(14px,1.6vw,28px); }
 .kids-final-bonuses > span+span { background: #cdeedc; }
@@ -332,7 +333,9 @@
   .kids-show-stage .kids-bottom { display: flex; }
   .kids-show-stage .kids-discovery div p { font-size: 17px; }
   .kids-show-story > p { font-size: 20px; }
-  .kids-team-badges { gap: 6px; }
+  .kids-team-badges > div { grid-template-columns: 1fr; gap: 4px; }
+  .kids-team-badges b { text-align: center; font-size: clamp(24px,6vw,36px); }
+  .kids-team-badges .kids-group-ages { font-size: 18px; }
   .kids-show-stage .has-pictures .kids-answer { display: grid; grid-template-columns: 30px 100px 1fr; min-height: 125px; align-items: center; gap: 10px; }
   .kids-show-stage .has-pictures .kids-number { position: static; font-size: 38px; }
   .kids-show-stage .has-pictures .kids-story-picture { width: 100px; height: 90px; margin: 0; }
@@ -551,7 +554,6 @@
 .kids-show-teams { flex-wrap: wrap; }
 .kids-show-teams > span { padding-inline: 10px; }
 .kids-show-teams .kids-group-name { font-size: 15px; }
-.kids-team-badges b { font-size: clamp(14px,min(1.6vw,2.4vh),28px); }
 .kids-team-badges .kids-group-name { justify-content: center; }
 .kids-team-score > div > span { display: inline-flex; align-items: center; gap: 3px; }
 .kids-team-score > div { font-size: clamp(9px,1.05vw,18px); }

@@ -9,6 +9,8 @@ test('Kids: neue Gruppennamen tragen bei jedem Auftreten ihr festes Symbol',asyn
   }
   await page.getByRole('button',{name:'Show vorbereiten',exact:false}).click();
   await expect(page.locator('.kids-team-badges .kids-group-symbol')).toHaveCount(3);
+  await expect(page.locator('.kids-team-badges .kids-group-ages')).toHaveText(['3–5 Jahre','6–8 Jahre','9–11 Jahre']);
+  await expect(page.locator('.kids-show-interlude')).not.toContainText(/Die Spürnasen|Die Rätselknacker|Die Bluffjäger/);
   await expect(page.locator('.kids-team-score .kids-group-symbol')).toHaveCount(3);
   await expect(page.locator('.kids-round-counter [data-group="minis"]')).toHaveText('Glühwürmchen');
   await page.getByRole('button',{name:'Spiel mit Punktestand abschließen',exact:true}).click();

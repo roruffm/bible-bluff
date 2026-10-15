@@ -10,10 +10,10 @@ export interface KidsShowQuestion extends KidsQuestion {
   direction: string;
 }
 export const KIDS_GROUPS = {
-  minis: { name: 'Glühwürmchen', title: 'Die Spürnasen', ages: '3–5 Jahre', symbol: 'firefly' },
-  mittis: { name: 'Leuchtsterne', title: 'Die Rätselknacker', ages: '6–8 Jahre', symbol: 'star' },
-  maxis: { name: 'Fackelträger', title: 'Die Bluffjäger', ages: '9–11 Jahre', symbol: 'torch' },
-  all: { name: 'Alle gemeinsam', title: 'Das BibleBluff-Team', ages: 'Alle Kinder', symbol: '♥' },
+  minis: { name: 'Glühwürmchen', ages: '3–5 Jahre', symbol: 'firefly' },
+  mittis: { name: 'Leuchtsterne', ages: '6–8 Jahre', symbol: 'star' },
+  maxis: { name: 'Fackelträger', ages: '9–11 Jahre', symbol: 'torch' },
+  all: { name: 'Alle gemeinsam', ages: 'Alle Kinder', symbol: '♥' },
 } as const;
 export const KIDS_CHAPTERS = ['Die erste Spur', 'Der Bluff schlägt zurück', 'Die letzte Chance'] as const;
 const from = (sourceId: string) => KIDS_QUESTIONS.find((q) => q.sourceId === sourceId)!;
