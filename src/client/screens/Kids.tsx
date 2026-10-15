@@ -8,7 +8,7 @@ import { QRCode } from '../components/QR';
 import { ProfessorBluff, professorMood, professorSays, ShowControls, ShowScoreboard, StoryPicture, Treasure } from '../components/KidsShow';
 import { KIDS_CHAPTERS, KIDS_GROUPS, kidsAnswerPicture } from '../../shared/kids-show-questions';
 import { kidsControlUrl, useKidsRemote } from '../lib/kids-remote';
-import { enableKidsSound, playKidsScene, playProfessorVoice } from '../lib/kids-sound';
+import { enableKidsSound, playKidsScene } from '../lib/kids-sound';
 import { createKidsGame, kidsPrimaryAction, kidsResultPoints, kidsScores, updateKidsGame, type KidsAction, type KidsGame } from '../lib/kids';
 import { navigate } from '../lib/router';
 import './kids.css';
@@ -49,12 +49,6 @@ export function KidsPage() {
     return ()=>{ cancelled=true; stop(); };
   }, [game?.phase, game?.cueSeq, sound]);
   useEffect(() => {
-    if (!game?.voiceSeq || !game.voiceKey || sound !== 'on') return;
-    let active = true, stop = () => {};
-    void playProfessorVoice(game.voiceKey).then(halt => { if (active) stop = halt; else halt(); }).catch(() => { if (active) setFullscreenError('Professor-Ton nicht verfügbar. Bitte Klang und Audiodatei prüfen.'); });
-    return () => { active = false; stop(); };
-  }, [game?.voiceSeq, game?.voiceKey, sound]);
-  useEffect(() => {
     if (!game || showExit || showPair || toolsOpen) return;
     if (presentation || game.phase === 'judging' || game.phase === 'moving') root.current?.focus({ preventScroll: true });
     else primary.current?.focus({ preventScroll: true });
@@ -75,7 +69,7 @@ export function KidsPage() {
   const toggleFullscreen = async () => { try { setFullscreenError(''); if (document.fullscreenElement) await document.exitFullscreen(); else await root.current?.requestFullscreen(); } catch { setFullscreenError('Nutze das Vollbild deines Browsers.'); } };
   const toggleSound = async () => { if (sound === 'on') { setSound('off'); return; } try { await enableKidsSound(); setSound('on'); } catch { setFullscreenError('Klang hier nicht verfügbar. Die Gruppen können die Geräusche selbst machen.'); } };
   const exit = () => { void remote.disconnect(); setShowExit(false); setShowPair(false); setToolsOpen(false); setPresentation(false); setGame(null); };
-  const pair = async () => { if (!game) return; if (sound !== 'on') { try { await enableKidsSound(); setSound('on'); } catch { setSound('off'); } } setToolsOpen(false); setShowPair(true); if (!remote.active) { const paused = updateKidsGame(game, 'pause', Date.now()); setGame(paused); await remote.connect(paused, false); } };
+  const pair = async () => { if (!game) return; setToolsOpen(false); setShowPair(true); if (!remote.active) { const paused = updateKidsGame(game, 'pause', Date.now()); setGame(paused); await remote.connect(paused, false); } };
   const round = game?.rounds[game.index];
   const revealed = game?.phase === 'revealed', finished = game?.phase === 'finished';
   const interlude = game && ['welcome','chapter','superbluff','finished'].includes(game.phase);

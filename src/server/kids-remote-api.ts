@@ -1,6 +1,5 @@
 import { updateKidsGame, type KidsGame, type KidsPhase, type KidsResult } from '../shared/kids-game';
 import { KIDS_SCENE_MS } from '../shared/kids-scenes';
-import { availableProfessorVoices } from '../shared/professor-voice';
 import { KIDS_SHOW_QUESTIONS } from '../shared/kids-show-questions';
 import { packKidsGame, type KidsRemoteAction, type KidsRemoteView } from '../shared/kids-remote';
 import { GameError } from './state';
@@ -8,7 +7,7 @@ import type { KidsRemoteRecord, KidsRemoteStore } from './kids-remote-store';
 
 export const KIDS_REMOTE_TTL = 6 * 60 * 60 * 1000;
 const PHASES: KidsPhase[] = ['welcome', 'chapter', 'superbluff', 'reading', 'scene', 'moving', 'paused', 'locked', 'returning', 'judging', 'revealed', 'finished'];
-const ACTIONS: KidsRemoteAction[] = ['start', 'pause', 'resume', 'return', 'ready', 'correct', 'participated', 'none', 'next', 'scene', 'end-scene', 'voice'];
+const ACTIONS: KidsRemoteAction[] = ['start', 'pause', 'resume', 'return', 'ready', 'correct', 'participated', 'none', 'next', 'scene', 'end-scene'];
 const response = (data: unknown, status = 200) => new Response(JSON.stringify(data), { status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', 'x-content-type-options': 'nosniff' } });
 const token = (bytes = 24) => Array.from(crypto.getRandomValues(new Uint8Array(bytes)), (b) => b.toString(16).padStart(2, '0')).join('');
 async function hash(value: string) { return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value))), (b) => b.toString(16).padStart(2, '0')).join(''); }
@@ -49,8 +48,6 @@ function unpack(value: unknown, now: number): KidsGame {
   if (!Array.isArray(game.results) || game.results.length !== 10 || !game.results.every((r, i) => i < index || (i === index && ['revealed', 'finished'].includes(phase)) ? ['correct', 'participated', 'none'].includes(r) : r === null)) return badRequest();
   if ((phase === 'welcome' && index !== 0) || (phase === 'chapter' && (index === 9 || index % 3 !== 0)) || (['superbluff', 'finished'].includes(phase) && index !== 9)) return badRequest();
   if (!Number.isSafeInteger(game.cueSeq) || Number(game.cueSeq) < 0 || Number(game.cueSeq) > 1000) return badRequest();
-  if (game.voiceSeq !== undefined && (!Number.isSafeInteger(game.voiceSeq) || Number(game.voiceSeq) < 0 || Number(game.voiceSeq) > 1000)) return badRequest();
-  if (game.voiceKey !== undefined && game.voiceKey !== null && (typeof game.voiceKey !== 'string' || !/^[a-z0-9-]{1,32}$/.test(game.voiceKey))) return badRequest();
   let sceneRemainingMs=0;
   if (phase === 'scene') {
     if (!rounds[index].question.scene || typeof game.sceneRemainingMs !== 'number' || !Number.isFinite(game.sceneRemainingMs) || game.sceneRemainingMs < 0 || game.sceneRemainingMs > KIDS_SCENE_MS) return badRequest();
@@ -59,7 +56,7 @@ function unpack(value: unknown, now: number): KidsGame {
   }
   if (game.remainingMs === 0 && (phase === 'moving' || phase === 'paused')) phase = 'locked';
   const remainingMs = ['welcome', 'chapter', 'superbluff', 'reading', 'scene'].includes(phase) ? 30000 : ['locked', 'returning', 'judging', 'revealed', 'finished'].includes(phase) ? 0 : game.remainingMs;
-  return { rounds, index, phase, remainingMs, deadline: phase === 'scene' ? now + sceneRemainingMs : phase === 'moving' ? now + remainingMs : null, results: game.results as (KidsResult | null)[], cueSeq: Number(game.cueSeq), voiceSeq: Number(game.voiceSeq ?? 0), voiceKey: typeof game.voiceKey === 'string' ? game.voiceKey : null };
+  return { rounds, index, phase, remainingMs, deadline: phase === 'scene' ? now + sceneRemainingMs : phase === 'moving' ? now + remainingMs : null, results: game.results as (KidsResult | null)[], cueSeq: Number(game.cueSeq) };
 }
 
 export function createKidsRemoteApi(store: KidsRemoteStore, now: () => number) {
@@ -97,12 +94,7 @@ export function createKidsRemoteApi(store: KidsRemoteStore, now: () => number) {
       if (!ACTIONS.includes(data.action as KidsRemoteAction) || !Number.isInteger(data.version)) return badRequest();
       if (data.version !== rec.version) throw new GameError('remote_conflict', 'Der Spielstand hat sich geändert. Bitte noch einmal tippen.', 409);
       const current = updateKidsGame(rec.game, 'tick', actionNow);
-      const next = data.action === 'voice'
-        ? (() => {
-            if (typeof data.voiceKey !== 'string' || !availableProfessorVoices(current).includes(data.voiceKey) || (current.voiceSeq ?? 0) >= 1000) return badRequest();
-            return { ...current, voiceSeq: (current.voiceSeq ?? 0) + 1, voiceKey: data.voiceKey };
-          })()
-        : updateKidsGame(current, data.action as Exclude<KidsRemoteAction, 'voice'>, actionNow);
+      const next = updateKidsGame(current, data.action as KidsRemoteAction, actionNow);
       if (next === current) throw new GameError('remote_phase', 'Dieser Schritt ist jetzt noch nicht möglich.', 409);
       if (!await store.update(id, rec.version, next, rec.easy)) throw new GameError('remote_conflict', 'Der Spielstand hat sich geändert. Bitte noch einmal tippen.', 409);
       return response(view({ ...rec, game: next, version: rec.version + 1 }, actionNow));
