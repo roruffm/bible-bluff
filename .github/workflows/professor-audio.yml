@@ -1,0 +1,39 @@
+name: Import Professor Bluff recordings
+on:
+  push:
+    paths: ['.professor-audio-import.json']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download ElevenLabs voice files
+        run: |
+          if [ ! -f .professor-audio-import.json ]; then exit 0; fi
+          python3 - <<'PY'
+          import json, pathlib, re, urllib.request
+          entries=json.loads(pathlib.Path('.professor-audio-import.json').read_text())['files']
+          target=pathlib.Path('src/client/public/professor-bluff')
+          target.mkdir(parents=True, exist_ok=True)
+          for key, url in entries.items():
+              assert re.fullmatch(r'[a-z0-9-]{1,32}',key),key
+              assert url.startswith('https://storage.googleapis.com/xi-backend/'),key
+              with urllib.request.urlopen(url,timeout=90) as response:
+                  audio=response.read()
+              assert len(audio)>1500 and (audio[:3]==b'ID3' or audio[0] == 255),key
+              (target/(key+'.mp3')).write_bytes(audio)
+              print('Imported',key,len(audio))
+          PY
+      - name: Store recordings permanently
+        run: |
+          if [ ! -f .professor-audio-import.json ]; then exit 0; fi
+          rm .professor-audio-import.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A .professor-audio-import.json src/client/public/professor-bluff
+          git diff --cached --quiet && exit 0
+          git commit -m "Import ElevenLabs Professor Bluff sound clips"
+          git push

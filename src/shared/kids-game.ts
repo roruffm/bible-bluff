@@ -9,7 +9,7 @@ export function kidsResultPoints(result: KidsResult | null): number { return res
 export interface KidsRound { question: KidsShowQuestion; answers: string[]; correctIndex: number }
 export interface KidsGame {
   rounds: KidsRound[]; index: number; phase: KidsPhase; remainingMs: number; deadline: number | null;
-  results: (KidsResult | null)[]; cueSeq: number;
+  results: (KidsResult | null)[]; cueSeq: number; voiceSeq?: number; voiceKey?: string | null;
 }
 export type KidsAction = 'start' | 'pause' | 'resume' | 'tick' | 'return' | 'ready' | 'correct' | 'participated' | 'none' | 'next' | 'scene' | 'end-scene';
 
@@ -25,7 +25,7 @@ export function createKidsGame(random: () => number = Math.random): KidsGame {
     const answers = shuffle(question.distractors, random); answers.splice(correctIndex, 0, question.answer);
     return { question, answers, correctIndex };
   });
-  return { rounds, index: 0, phase: 'welcome', remainingMs: 30000, deadline: null, results: rounds.map(() => null), cueSeq: 0 };
+  return { rounds, index: 0, phase: 'welcome', remainingMs: 30000, deadline: null, results: rounds.map(() => null), cueSeq: 0, voiceSeq: 0, voiceKey: null };
 }
 export function kidsScores(game: KidsGame) {
   const groups = { minis: 0, mittis: 0, maxis: 0 };
