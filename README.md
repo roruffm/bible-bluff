@@ -22,8 +22,12 @@ lokal erzeugte Klangbilder; Eltern und andere Gruppen machen Geräusche und Pant
   dem Finale. Professor endet mit 73, Kinder mit Vielfachen von fünf: Gleichstand unmöglich.
 - Ein Schatzteil pro aufgelöster Runde: eine Krone, umringt von vielen Kindern. Am Ende öffnen alle gemeinsam die Botschaft über
   Jesu Einladung an Kinder (Markus 10,14), unabhängig vom Ergebnis des Punkteduells.
-- Professor mit spielstandsabhängigen Kommentaren und Animationen; Jubel nach jeder
-  Auflösung. Die Einstellung für reduzierte Bewegung wird berücksichtigt.
+- Professor mit spielstandsabhängigen Kommentaren. Jede Auflösung hat eine eigene Showbühne:
+  bei 5 oder 10 Punkten erschrickt er mit einem neuen Spruch, bei 0 Punkten macht er Mut.
+  Die richtige Antwort und die Erklärung bleiben dabei sichtbar. Die Animation wartet auf
+  die Spielleitung; reduzierte Bewegung wird berücksichtigt.
+- Vollbild direkt über **Vollbild** in der Kopfzeile. Größere Figuren, farbige Punktekarten
+  und eine klare Aufteilung für Frage, Auflösung und Professor auf der Leinwand.
 - Mausbedienung über **Maus** ein-/ausblenden. Leertaste oder Pfeil rechts: weiter;
   P: Pause/fortsetzen; H: Mausknöpfe. Während der Wertung: 1 = Mehrheit richtig,
   2 = mindestens ein Kind richtig, 0 = keiner richtig.

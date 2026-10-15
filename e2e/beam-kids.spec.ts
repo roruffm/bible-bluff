@@ -120,25 +120,25 @@ test('Kids: Smartphone synchronisiert Maus, Wertung, Neuladen und Netzabbruch',a
   await expect(page.getByRole('button',{name:'30 Sekunden starten',exact:true})).toBeEnabled();
   await context.close();
 });
-test('Kids: alle Showfragen passen bei 800×600, 4:3, 720p und Full HD',async({page})=>{
+test('Kids: alle Showfragen passen bei 800×600, 4:3, 720p, Full HD und 1440p',async({page})=>{
   await page.addInitScript(()=>{Math.random=()=>0;}); await page.goto('/kids'); await begin(page); await page.clock.install();
-  const viewports=[{width:800,height:600},{width:1024,height:768},{width:1280,height:720},{width:1920,height:1080}];
+  const viewports=[{width:800,height:600},{width:1024,height:768},{width:1280,height:720},{width:1920,height:1080},{width:2560,height:1440}];
   async function check() {
     const issues=await page.evaluate(()=>{
       const problems:string[]=[];
-      for(const selector of ['#kids-question','.kids-answer-text','.is-revealed .kids-discovery p','#kids-regroup-title','.kids-regroup-instruction']) document.querySelectorAll<HTMLElement>(selector).forEach(el=>{
-        const range=document.createRange();range.selectNodeContents(el);const text=range.getBoundingClientRect(),box=(selector.includes('discovery')?el.closest('.kids-bottom')!:el).getBoundingClientRect();
+      for(const selector of ['#kids-question','.kids-answer-text','.is-revealed .kids-discovery p','#kids-regroup-title','.kids-regroup-instruction','#kids-reveal-title','.kids-reaction-quote','.kids-reaction-caption']) document.querySelectorAll<HTMLElement>(selector).forEach(el=>{
+        const range=document.createRange();range.selectNodeContents(el);const text=range.getBoundingClientRect(),box=(selector.includes('discovery')?el.closest('.kids-discovery')!:el).getBoundingClientRect();
         if(text.left<box.left-1||text.right>box.right+1||text.top<box.top-1||text.bottom>box.bottom+1) problems.push(`${innerWidth}×${innerHeight} ${selector}: ${el.textContent}; Text ${JSON.stringify({left:text.left,right:text.right,top:text.top,bottom:text.bottom})}; Box ${JSON.stringify({left:box.left,right:box.right,top:box.top,bottom:box.bottom})}`);
       });
-      for(const el of document.querySelectorAll('.kids-status,.kids-answers,.kids-bottom,.kids-show-story,.kids-regroup-content,.kids-regroup-operator')) {const box=el.getBoundingClientRect();if(box.bottom>innerHeight+1||box.left<0||box.right>innerWidth+1)problems.push(`Außerhalb: ${el.className}`);}
+      for(const el of document.querySelectorAll('.kids-status,.kids-answers,.kids-bottom,.kids-show-story,.kids-show-host,.kids-regroup-content,.kids-regroup-operator,.kids-reveal-result,.kids-reaction,.kids-reveal-footer')) {const box=el.getBoundingClientRect();if(box.bottom>innerHeight+1||box.left<0||box.right>innerWidth+1)problems.push(`Außerhalb: ${el.className}`);}
       if(document.documentElement.scrollWidth>innerWidth)problems.push('Breite');return problems;
     });expect(issues).toEqual([]);
   }
   for(let i=0;i<10;i++) {
-    const ys:Record<number,number[]>={};
-    for(const viewport of viewports){await page.setViewportSize(viewport);await check();ys[viewport.width]=await page.locator('.kids-answer').evaluateAll(els=>els.map(el=>el.getBoundingClientRect().y));}
+    const answers=await page.locator('.kids-answer-text').allTextContents();
+    for(const viewport of viewports){await page.setViewportSize(viewport);await check();}
     await resolve(page,'Mindestens ein Kind richtig · +5',async()=>{for(const viewport of viewports){await page.setViewportSize(viewport);await check();const professor=await page.locator('.kids-regroup-professor .bluff-professor').boundingBox();expect(professor!.width).toBeGreaterThan(160);}});
-    for(const viewport of viewports){await page.setViewportSize(viewport);await check();expect(await page.locator('.kids-answer').evaluateAll(els=>els.map(el=>el.getBoundingClientRect().y))).toEqual(ys[viewport.width]);}
+    for(const viewport of viewports){await page.setViewportSize(viewport);await check();const field=Number(await page.locator('.kids-reveal .kids-number').innerText());expect(await page.locator('.kids-reveal .kids-answer-text').innerText()).toBe(answers[field-1]);}
     await page.getByRole('button',{name:i===9?'Schatz öffnen':i===8?'Zum Superbluff':i===2||i===5?'Nächstes Kapitel':'Nächste Aufgabe',exact:true}).click();
     if(i===2||i===5||i===8) {
       for(const viewport of viewports){await page.setViewportSize(viewport);await check();}
@@ -147,4 +147,36 @@ test('Kids: alle Showfragen passen bei 800×600, 4:3, 720p und Full HD',async({p
   }
   for(const viewport of viewports){await page.setViewportSize(viewport);await check();}
   await expect(page.getByRole('heading',{name:'Euer Teamgeist ist der Schatz!'})).toBeVisible();
+});
+
+test('Kids: Vollbild und Professor-Reaktion bei null, fünf und zehn Punkten',async({page})=>{
+  await page.emulateMedia({reducedMotion:'no-preference'});
+  await page.goto('/kids'); await begin(page);
+  if(await page.evaluate(()=>document.fullscreenEnabled)) {
+    await page.getByRole('button',{name:'Vollbild einschalten',exact:true}).click();
+    await expect(page.locator('.kids-page')).toHaveClass(/is-fullscreen/);
+    await page.getByRole('button',{name:'Vollbild ausschalten',exact:true}).click();
+    await expect(page.locator('.kids-page')).not.toHaveClass(/is-fullscreen/);
+  }
+  await page.clock.install();
+  let previous='';
+  for(const [label,points,mood] of [['Keiner richtig · +0',0,'kind'],['Mindestens ein Kind richtig · +5',5,'startled'],['Mehrheit richtig · +10',10,'startled']] as const) {
+    await resolve(page,label);
+    await expect(page.locator('.kids-reveal')).toHaveAttribute('data-points',String(points));
+    await expect(page.locator('.kids-reaction-art > .bluff-professor')).toHaveClass(new RegExp(`mood-${mood}`));
+    const quote=await page.locator('.kids-reaction-quote').innerText(); expect(quote).not.toBe(previous); previous=quote;
+    if(points===0) {
+      await expect(page.getByRole('img',{name:'Professor Bluff macht euch Mut',exact:true})).toBeVisible();
+      await expect(page.locator('.kids-celebration')).toHaveCount(0);
+      expect(await page.locator('.kids-reaction-art .bluff-body').evaluate(el=>getComputedStyle(el).animationName)).toBe('bluff-comfort');
+    } else {
+      await expect(page.getByRole('img',{name:'Professor Bluff erschrickt über eure Punkte',exact:true})).toBeVisible();
+      await expect(page.locator('.kids-reaction-caption')).toHaveText(`+${points} für euer Team!`);
+      expect(await page.locator('.kids-reaction-art > .bluff-professor').evaluate(el=>getComputedStyle(el).animationName)).toBe('bluff-startle');
+    }
+    await page.emulateMedia({reducedMotion:'reduce'});
+    expect(await page.locator('.kids-reaction-art .bluff-body').evaluate(el=>getComputedStyle(el).animationName)).toBe('none');
+    await page.emulateMedia({reducedMotion:'no-preference'});
+    await page.getByRole('button',{name:points===10?'Nächstes Kapitel':'Nächste Aufgabe',exact:true}).click();
+  }
 });

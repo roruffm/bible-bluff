@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { QUESTIONS } from '../src/server/questions';
+import { kidsRoundReaction } from '../src/client/lib/kids-reactions';
 import { KIDS_SHOW_QUESTIONS } from '../src/shared/kids-show-questions';
 import { createKidsGame, kidsPrimaryAction, kidsScores, updateKidsGame, type KidsGame, type KidsResult } from '../src/shared/kids-game';
 
@@ -64,6 +65,14 @@ describe('Die große Bluff-Jagd', () => {
       expect(s.team).toBe(result==='correct' ? 100 : result==='participated' ? 50 : 0);
       expect(Object.values(s.groups).every(n=>n<=30)).toBe(true);
     }
+  });
+  it('reagiert auf Punkte der aktuellen Runde, auch bei gegenteiligem Gesamtstand', () => {
+    const ahead={...createKidsGame(),phase:'revealed' as const,index:1,results:['correct','none',...Array(8).fill(null)] as KidsGame['results']};
+    expect(kidsRoundReaction(ahead)).toMatchObject({mood:'kind',points:0});
+    const behind={...createKidsGame(),phase:'revealed' as const,index:8,results:[...Array(8).fill('none'),'participated',null] as KidsGame['results']};
+    expect(kidsRoundReaction(behind)).toMatchObject({mood:'startled',points:5});
+    behind.results[8]='correct';
+    expect(kidsRoundReaction(behind)).toMatchObject({mood:'startled',points:10});
   });
   it('gibt genau einen Familienjoker in Kapitel zwei und keine zusätzlichen Punkte', () => {
     let g=reading(); expect(updateKidsGame(g,'joker',0)).toBe(g);
