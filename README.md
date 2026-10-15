@@ -2,6 +2,24 @@
 
 # Bible Bluff
 
+## BibleBluff Kids
+
+Über das Kids-Logo oben links auf der Startseite oder direkt unter `/kids` erreichbar.
+Ein reines Beamer-Spiel für Kinder von 6 bis 12 Jahren: Im Raum werden drei Felder mit
+1, 2 und 3 markiert. Die Spielleitung liest eine Frage mit drei Antworten vor und startet
+danach die 30 Sekunden Bewegungszeit. Bei Stopp bleiben alle stehen. Erst auf Knopfdruck
+wird die richtige Antwort mit einer fröhlichen Animation, kurzer Erklärung und Bibelstelle
+aufgedeckt. Es gibt keine Anmeldung, Smartphones, Räume oder digitale Erfassung der Kinder.
+
+- 28 aus dem bestehenden deutschen Pool ausgewählte und kindgerecht umformulierte Fragen;
+  jede behält ihre `sourceId` und Bibelstelle. Das Hauptspiel erhält keinen zusätzlichen Poolzugriff.
+- 6, 10 oder 15 Fragen, bunt gemischt oder extra leicht; keine Wiederholung innerhalb einer Partie.
+- Richtige Antworten werden auf die drei Felder verteilt; Feldfarben und Nummern bleiben fest.
+- Leertaste oder Pfeil rechts: starten / aufdecken / weiter. P: Pause / fortsetzen.
+- Vollbild über den Knopf im Kopfbereich, sofern der Browser es unterstützt.
+- Vier wechselnde Jubelanimationen; bei reduzierter Bewegung bleibt die Auflösung ruhig.
+- Alle bleiben bis zum gemeinsamen Finale dabei; keine digitalen Punkte oder Ausscheidungsrunden.
+
 **Erfinde Bluffs. Finde die Wahrheit. Entdecke die Bibel.**
 
 Bible Bluff ist ein Partyspiel für den Browser: Jede Person spielt auf dem eigenen Handy, ein Fernseher oder Beamer kann zusätzlich die gemeinsame Ansicht zeigen. Alle sehen dieselbe Bibelfrage und erfinden heimlich eine glaubwürdige, aber falsche Antwort. Danach steht die echte Antwort anonym zwischen den Bluffs, und alle tippen auf die vermeintlich richtige. Bei der Aufdeckung zeigt sich, wer worauf hereingefallen ist und was wirklich stimmt.
