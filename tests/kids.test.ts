@@ -1,87 +1,78 @@
 import { describe, expect, it } from 'vitest';
-import { KIDS_QUESTIONS } from '../src/shared/kids-questions';
 import { QUESTIONS } from '../src/server/questions';
-import { createKidsGame, kidsPrimaryAction, updateKidsGame } from '../src/client/lib/kids';
+import { KIDS_SHOW_QUESTIONS } from '../src/shared/kids-show-questions';
+import { createKidsGame, kidsPrimaryAction, kidsScores, updateKidsGame, type KidsGame, type KidsResult } from '../src/shared/kids-game';
 
-describe('Kids-Fragenpool', () => {
-  it('enthält nur einzeln ausgewählte Fragen mit passender Herkunft und genau einer richtigen Antwort', () => {
-    expect(KIDS_QUESTIONS.length).toBe(28);
-    expect(new Set(KIDS_QUESTIONS.map((q) => q.sourceId)).size).toBe(KIDS_QUESTIONS.length);
-    for (const q of KIDS_QUESTIONS) {
-      const source = QUESTIONS.find((candidate) => candidate.id === q.sourceId);
-      expect(source, q.sourceId).toBeDefined();
-      expect(q.ref).toBe(source!.ref);
-      expect(q.prompt.length).toBeLessThan(100);
-      expect(q.distractors).toHaveLength(2);
-      expect(new Set([q.answer, ...q.distractors].map((s) => s.toLowerCase())).size).toBe(3);
-      expect(q.explanation.length).toBeGreaterThan(30);
+const reading = () => updateKidsGame(updateKidsGame(createKidsGame(), 'next', 0), 'next', 0);
+function resolve(g: KidsGame, result: KidsResult) {
+  for (const action of ['start','tick','return','ready',result] as const) g = updateKidsGame(g, action, action==='start' ? 0 : 30000);
+  return g;
+}
+describe('Die große Bluff-Jagd', () => {
+  it('wählt neun altersgerechte Aufgaben und ein gemeinsames Finale aus dem bestehenden Pool', () => {
+    expect(KIDS_SHOW_QUESTIONS).toHaveLength(10);
+    expect(KIDS_SHOW_QUESTIONS.map(q=>q.group)).toEqual(['minis','mittis','maxis','minis','mittis','maxis','minis','mittis','maxis','all']);
+    for (const q of KIDS_SHOW_QUESTIONS) {
+      const source = QUESTIONS.find(s=>s.id===q.sourceId);
+      expect(source, q.sourceId).toBeDefined(); expect(q.ref).toBe(source!.ref);
+      expect(new Set([q.answer,...q.distractors]).size).toBe(3);
+      expect(q.pictures).toHaveLength(3); expect(q.direction.length).toBeGreaterThan(30);
+      if (q.group==='minis') expect(q.scene).toBeDefined();
     }
-    expect(KIDS_QUESTIONS.filter((q) => q.level === 1).length).toBeGreaterThanOrEqual(15);
+    const game=createKidsGame(()=>0); const positions=[0,0,0];
+    game.rounds.slice(0,9).forEach(r=>{positions[r.correctIndex]++; expect(r.answers[r.correctIndex]).toBe(r.question.answer);});
+    expect(positions).toEqual([3,3,3]);
   });
-  it('zieht ohne Wiederholungen, mischt die Antwortpositionen und begrenzt auf den leichten Pool', () => {
-    for (const count of [6, 10, 15]) {
-      const game = createKidsGame(count, true);
-      expect(game.rounds).toHaveLength(count);
-      expect(new Set(game.rounds.map((r) => r.question.sourceId)).size).toBe(count);
-      expect(game.rounds.every((r) => r.question.level === 1)).toBe(true);
-      const counts = [0, 0, 0];
-      for (const round of game.rounds) {
-        expect(round.answers).toHaveLength(3);
-        expect(round.answers[round.correctIndex]).toBe(round.question.answer);
-        expect(round.answers.filter((answer) => answer === round.question.answer)).toHaveLength(1);
-        counts[round.correctIndex]++;
+  it('gibt nach dem Vorlesen 30 Sekunden, pausiert und verlangt den Rückweg vor der Wertung', () => {
+    let g=reading();
+    expect(updateKidsGame(g,'correct',0)).toBe(g);
+    g=updateKidsGame(g,'start',1000); g=updateKidsGame(g,'pause',6500);
+    expect(g.remainingMs).toBe(24500); expect(updateKidsGame(g,'tick',999999)).toBe(g);
+    g=updateKidsGame(g,'resume',100000);
+    expect(updateKidsGame(g,'tick',124499).phase).toBe('moving');
+    g=updateKidsGame(g,'tick',124500); expect(g.phase).toBe('locked');
+    expect(updateKidsGame(g,'correct',124500)).toBe(g);
+    g=updateKidsGame(g,'return',124500); expect(g.phase).toBe('returning');
+    expect(updateKidsGame(g,'correct',124500)).toBe(g);
+    g=updateKidsGame(g,'ready',124500); g=updateKidsGame(g,'correct',124500);
+    expect(g.phase).toBe('revealed'); expect(kidsScores(g).team).toBe(10); expect(kidsScores(g).professor).toBe(7);
+    expect(updateKidsGame(g,'correct',124500)).toBe(g);
+  });
+  it('wertet alle Gruppen gemeinsam, öffnet Kapitel und zählt den Finalangriff genau einmal', () => {
+    let g=reading();
+    for(let i=0;i<9;i++) {
+      g=resolve(g,i<4 ? 'correct':'participated');
+      g=updateKidsGame(g,'next',30000);
+      if(i===2 || i===5) { expect(g.phase).toBe('chapter'); g=updateKidsGame(g,'next',30000); }
+    }
+    expect(g.phase).toBe('superbluff'); expect(kidsScores(g).team).toBe(65); expect(kidsScores(g).professor).toBe(73);
+    expect(kidsScores(g).pieces).toBe(9); expect(kidsScores(g).groups).toEqual({minis:25,mittis:20,maxis:20});
+    g=updateKidsGame(g,'next',30000); expect(kidsScores(g).professor).toBe(73);
+    g=resolve(g,'correct'); expect(kidsScores(g).team).toBe(75);
+    g=updateKidsGame(g,'next',30000); expect(g.phase).toBe('finished'); expect(kidsScores(g).professor).toBe(73);
+  });
+  it('hat feste Punkte für alle Resultate und feiert den vollständigen Schatz auch bei einer Niederlage', () => {
+    for (const result of ['correct','participated','none'] as const) {
+      let g=reading();
+      for(let i=0;i<10;i++) {
+        g=resolve(g,i===9 && result==='participated' ? 'none':result);
+        g=updateKidsGame(g,'next',30000);
+        if(['chapter','superbluff'].includes(g.phase)) g=updateKidsGame(g,'next',30000);
       }
-      expect(Math.max(...counts) - Math.min(...counts)).toBeLessThanOrEqual(1);
+      expect(g.phase).toBe('finished'); const s=kidsScores(g);
+      expect(s.professor).toBe(73); expect(s.pieces).toBe(9);
+      expect(s.team).toBe(result==='correct' ? 100 : result==='participated' ? 45 : 0);
+      expect(Object.values(s.groups).every(n=>n<=30)).toBe(true);
     }
   });
-});
-
-describe('Kids-Beamerablauf', () => {
-  it('gibt volle 30 Sekunden nach dem Vorlesen und deckt erst nach Ablauf bewusst auf', () => {
-    let g = createKidsGame(6);
-    expect(g.phase).toBe('reading');
-    expect(updateKidsGame(g, 'tick', 999999)).toBe(g);
-    expect(updateKidsGame(g, 'reveal', 999999)).toBe(g);
-    g = updateKidsGame(g, 'start', 100000);
-    g = updateKidsGame(g, 'tick', 129999);
-    expect(g.phase).toBe('moving');
-    expect(g.remainingMs).toBe(1);
-    expect(updateKidsGame(g, 'reveal', 129999)).toBe(g);
-    g = updateKidsGame(g, 'tick', 130000);
-    expect(g.phase).toBe('locked');
-    expect(g.remainingMs).toBe(0);
-    g = updateKidsGame(g, 'reveal', 135000);
-    expect(g.phase).toBe('revealed');
-    expect(updateKidsGame(g, 'tick', 999999)).toBe(g);
-    g = updateKidsGame(g, 'next', 140000);
-    expect(g.index).toBe(1);
-    expect(g.phase).toBe('reading');
-    expect(g.remainingMs).toBe(30000);
-  });
-  it('rechnet nach Tabwechsel mit der echten Deadline und friert nur bei ausdrücklicher Pause ein', () => {
-    let g = updateKidsGame(createKidsGame(6), 'start', 1000);
-    expect(updateKidsGame(g, 'tick', 200000).phase).toBe('locked');
-    g = updateKidsGame(g, 'pause', 6500);
-    expect(g.phase).toBe('paused');
-    expect(g.remainingMs).toBe(24500);
-    expect(updateKidsGame(g, 'tick', 100000)).toBe(g);
-    g = updateKidsGame(g, 'resume', 100000);
-    expect(g.deadline).toBe(124500);
-    expect(updateKidsGame(g, 'tick', 124500).phase).toBe('locked');
-  });
-  it('beendet nach der letzten Auflösung und lässt keine Fragen überspringen', () => {
-    let g = createKidsGame(6);
-    expect(updateKidsGame(g, 'next', 0)).toBe(g);
-    for (let i = 0; i < 6; i++) {
-      g = updateKidsGame(g, 'start', 0);
-      g = updateKidsGame(g, 'tick', 30000);
-      g = updateKidsGame(g, 'reveal', 30000);
-      g = updateKidsGame(g, 'next', 30000);
-    }
-    expect(g.phase).toBe('finished');
-    expect(g.index).toBe(5);
-    expect(kidsPrimaryAction('moving')).toBeNull();
-    expect(kidsPrimaryAction('locked')).toBe('reveal');
-    expect(kidsPrimaryAction('revealed')).toBe('next');
+  it('gibt genau einen Familienjoker in Kapitel zwei und keine zusätzlichen Punkte', () => {
+    let g=reading(); expect(updateKidsGame(g,'joker',0)).toBe(g);
+    for(let i=0;i<3;i++) g=updateKidsGame(resolve(g,'correct'),'next',30000);
+    g=updateKidsGame(g,'next',30000); const before=kidsScores(g);
+    g=updateKidsGame(g,'joker',30000); expect(g.jokerFor).toBe(3); expect(kidsScores(g)).toEqual(before);
+    expect(updateKidsGame(g,'joker',30000)).toBe(g);
+    expect(updateKidsGame(g,'scene',30000).cueSeq).toBe(g.cueSeq+1);
+    expect(kidsPrimaryAction('judging')).toBeNull();
+    expect(kidsPrimaryAction('locked')).toBe('return');
   });
 });

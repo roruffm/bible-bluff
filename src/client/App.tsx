@@ -3,6 +3,7 @@ import { useRoute } from './lib/router';
 import { AdminPage } from './screens/Admin';
 import { JesusPage } from './screens/Jesus';
 import { KidsPage } from './screens/Kids';
+import { KidsControlPage } from './screens/KidsControl';
 import { DatenschutzPage, ImpressumPage } from './screens/Legal';
 import { RecapPage } from './screens/Recap';
 import { RoomPage, TvPage } from './screens/Room';
@@ -15,6 +16,8 @@ export function App() {
   switch (route.name) {
     case 'kids':
       return <KidsPage />;
+    case 'kids-control':
+      return <KidsControlPage />;
     case 'create':
       return <CreateRoom key={route.bot ? 'bot' : 'room'} bot={route.bot} />;
     case 'room':

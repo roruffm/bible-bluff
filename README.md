@@ -2,23 +2,39 @@
 
 # Bible Bluff
 
-## BibleBluff Kids
+## BibleBluff Kids – Die große Bluff-Jagd
 
 Über das Kids-Logo oben links auf der Startseite oder direkt unter `/kids` erreichbar.
-Ein reines Beamer-Spiel für Kinder von 6 bis 12 Jahren: Im Raum werden drei Felder mit
-1, 2 und 3 markiert. Die Spielleitung liest eine Frage mit drei Antworten vor und startet
-danach die 30 Sekunden Bewegungszeit. Bei Stopp bleiben alle stehen. Erst auf Knopfdruck
-wird die richtige Antwort mit einer fröhlichen Animation, kurzer Erklärung und Bibelstelle
-aufgedeckt. Es gibt keine Anmeldung, Smartphones, Räume oder digitale Erfassung der Kinder.
+Die ca. 45-minütige Beamer-Show ersetzt das bisherige kurze Kids-Spiel. Minis (3–5),
+Mittis (6–8) und Maxis (9–11) spielen gemeinsam gegen den liebenswerten Professor Bluff.
+Pro Kapitel kommt jede Altersgruppe einmal dran: neun Aufgaben aus dem bestehenden
+Fragenpool und ein gemeinsamer Superbluff. Für Minis gibt es animierte Bilder und kurze,
+lokal erzeugte Klangbilder; Eltern und andere Gruppen machen Geräusche und Pantomime.
 
-- 28 aus dem bestehenden deutschen Pool ausgewählte und kindgerecht umformulierte Fragen;
-  jede behält ihre `sourceId` und Bibelstelle. Das Hauptspiel erhält keinen zusätzlichen Poolzugriff.
-- 6, 10 oder 15 Fragen, bunt gemischt oder extra leicht; keine Wiederholung innerhalb einer Partie.
-- Richtige Antworten werden auf die drei Felder verteilt; Feldfarben und Nummern bleiben fest.
-- Leertaste oder Pfeil rechts: starten / aufdecken / weiter. P: Pause / fortsetzen.
-- Vollbild über den Knopf im Kopfbereich, sofern der Browser es unterstützt.
-- Vier wechselnde Jubelanimationen; bei reduzierter Bewegung bleibt die Auflösung ruhig.
-- Alle bleiben bis zum gemeinsamen Finale dabei; keine digitalen Punkte oder Ausscheidungsrunden.
+- Drei nummerierte Felder im Raum, 30 Sekunden nach dem Vorlesen. Andere Gruppen bleiben
+  in ihren Bereichen. Eltern dürfen Minis begleiten. Keine Kinderkonten oder Einzelwertung.
+- Nach Stopp merken sich Helfer die Mehrheit. **Zurück in die Gruppen → Alle sind zurück**
+  schaltet erst danach die Wertung frei. Nur das gemeinsame Resultat wird erfasst.
+- Kinderteam: +5 Mitmachen und +5 für die richtige Mehrheit; maximal 30 je Altersgruppe.
+  Professor: immer +7 je Runde. Einmal in Kapitel 2 kann ein Familienjoker einen Hinweis
+  freischalten, ohne zusätzliche Punkte. Keine heimliche Anpassung der Wertung.
+- Superbluff: Professor +10, Kinder bei gemeinsam gelöster Aufgabe +10. Endstand erst nach
+  dem Finale. Professor endet mit 73, Kinder mit Vielfachen von fünf: Gleichstand unmöglich.
+- Ein Schatzteil pro aufgelöster Runde. Am Ende öffnen alle gemeinsam die Botschaft über
+  Jesu Einladung an Kinder (Markus 10,14), unabhängig vom Ergebnis des Punkteduells.
+- Professor mit spielstandsabhängigen Kommentaren und Animationen; Jubel nach jeder
+  Auflösung. Die Einstellung für reduzierte Bewegung wird berücksichtigt.
+- Mausbedienung über **Maus** ein-/ausblenden. Leertaste oder Pfeil rechts: weiter;
+  P: Pause/fortsetzen; H: Mausknöpfe. Während der Wertung: 1 = Mehrheit richtig,
+  2 = Mitgemacht, 0 = keine Teilnahme (im Finale 0 = nicht gelöst).
+- Smartphone der Spielleitung: **Bedienung → Smartphone verbinden**, QR-Code scannen.
+  Start, Pause, Rückweg, Mehrheitswertung, Familienjoker, Szene und Revanche steuern denselben
+  Stand wie die Maus. Regiehinweise bleiben auf der Fernbedienung. Klang am Beamer aktivieren.
+- Befristete Links mit getrennten Zugriffsschlüsseln, Hashes in D1 und versionierten
+  Spielzügen gegen Doppelklicks. Wiederverbindung nach Neuladen und Netzabbruch.
+  Ohne Smartphone-Verbindung läuft die Show lokal ohne Serverzugriff.
+- Moderation, Beamer-Bedienung, Gruppenhelfer und genügend Platz inklusive begleitender
+  Eltern einplanen. Helferplan und Ablauf stehen in der Vorbereitung.
 
 **Erfinde Bluffs. Finde die Wahrheit. Entdecke die Bibel.**
 
