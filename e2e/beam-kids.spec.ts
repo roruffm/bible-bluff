@@ -51,25 +51,30 @@ test('Kids: Startseitenlogo, 30 Sekunden, Pause, Rückweg und gemeinsame Wertung
   await expect(page.locator('.kids-round-counter')).toContainText('Mittis');
   await expect(page.locator('.kids-clock')).toHaveAttribute('aria-label','30 Sekunden');
 });
-test('Kids: vollständige Show, Familienjoker, Superbluff und gemeinsamer Schatz',async({page})=>{
+test('Kids: vollständige Show mit Bildern, ohne Joker und mit gemeinsamem Abschluss',async({page})=>{
   const requests:string[]=[]; page.on('request',r=>{if(r.url().includes('/api/'))requests.push(r.url());});
   await page.goto('/kids'); await begin(page); await page.clock.install();
   for(let i=0;i<10;i++) {
-    if(i===3) { await page.getByRole('button',{name:'Familienjoker',exact:true}).click(); await expect(page.locator('.kids-discovery')).toContainText('Familienjoker:'); }
-    if(i===4) await expect(page.getByRole('button',{name:'Familienjoker',exact:true})).toHaveCount(0);
+    await expect(page.getByRole('button',{name:/Familienjoker/})).toHaveCount(0);
+    await expect(page.locator('.kids-answer > .kids-story-picture')).toHaveCount(3);
+    const motifs=await page.locator('.kids-answer > .kids-story-picture').evaluateAll(els=>els.map(el=>el.getAttribute('data-motif')));
+    expect(new Set(motifs).size).toBe(3);
     await resolve(page,'Mehrheit richtig · +10');
     await expect(page.locator('.kids-answer.is-correct')).toHaveCount(1);
     await page.getByRole('button',{name:i===9?'Schatz öffnen':i===8?'Zum Superbluff':i===2||i===5?'Nächstes Kapitel':'Nächste Aufgabe',exact:true}).click();
     if(i===2||i===5) await page.getByRole('button',{name:'Erste Aufgabe im Kapitel',exact:true}).click();
     if(i===8) { await expect(page.getByTestId('team-score')).toHaveText('?'); await expect(page.getByText('ALARM! Der Superbluff!',{exact:true})).toBeVisible(); await page.getByRole('button',{name:'Gemeinsam ins Finale',exact:true}).click(); }
   }
-  await expect(page.getByRole('heading',{name:'Ihr habt den Bluff geknackt!'})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Gemeinsam seid ihr stark!'})).toBeVisible();
   await expect(page.locator('.kids-show-story').getByRole('img',{name:'Eine goldene Krone, umringt von zwölf fröhlichen Kindern'})).toBeVisible();
   await expect(page.getByTestId('team-score')).toHaveText('100'); await expect(page.getByTestId('prof-score')).toHaveText('73');
   await expect(page.getByText('Bei Jesus sind wir willkommen.',{exact:true})).toBeVisible();
   await expect(page.locator('.kids-show-story .kids-treasure-tiles .is-found')).toHaveCount(9);
-  await page.getByRole('button',{name:'Revanche!',exact:false}).click();
-  await expect(page.getByTestId('team-score')).toHaveText('0');
+  await expect(page.getByRole('button',{name:/Revanche|Vorbereitung/})).toHaveCount(0);
+  await expect(page.locator('.kids-finale-seal')).toHaveText('♥ ALLE GEHÖREN DAZU ♥');
+  await expect(page.locator('.kids-show-host .bluff-professor')).toHaveClass(/mood-kind/);
+  await page.keyboard.press('ArrowRight');
+  await expect(page.getByTestId('team-score')).toHaveText('100');
   expect(requests).toEqual([]);
 });
 test('Kids: reine Beameransicht ist über Maus und Tastatur bedienbar',async({page})=>{
@@ -96,6 +101,8 @@ test('Kids: Smartphone synchronisiert Maus, Wertung, Neuladen und Netzabbruch',a
   await phone.goto(url!);
   await expect(phone.getByText('Mit der Beamer-Partie verbunden',{exact:true})).toBeVisible();
   await expect(phone.getByRole('heading',{name:question})).toBeVisible();
+  await expect(phone.locator('.kids-remote-answers .kids-story-picture')).toHaveCount(3);
+  await expect(phone.getByRole('button',{name:/Familienjoker|Revanche/})).toHaveCount(0);
   await phone.getByRole('button',{name:'30 Sekunden starten',exact:true}).click();
   await expect(page.getByText('1, 2 oder 3? Ab in euer Feld!',{exact:true})).toBeVisible();
   await page.getByRole('button',{name:'Ⅱ Pause',exact:true}).click();
@@ -126,19 +133,20 @@ test('Kids: alle Showfragen passen bei 800×600, 4:3, 720p, Full HD und 1440p',a
   async function check() {
     const issues=await page.evaluate(()=>{
       const problems:string[]=[];
-      for(const selector of ['#kids-question','.kids-answer-text','.is-revealed .kids-discovery p','#kids-regroup-title','.kids-regroup-instruction','#kids-reveal-title','.kids-reaction-quote','.kids-reaction-caption']) document.querySelectorAll<HTMLElement>(selector).forEach(el=>{
+      for(const selector of ['#kids-question','.kids-answer-text','.is-revealed .kids-discovery p','#kids-regroup-title','.kids-regroup-instruction','#kids-reveal-title','.kids-reaction-quote','.kids-reaction-caption','.kids-farewell']) document.querySelectorAll<HTMLElement>(selector).forEach(el=>{
         const range=document.createRange();range.selectNodeContents(el);const text=range.getBoundingClientRect(),box=(selector.includes('discovery')?el.closest('.kids-discovery')!:el).getBoundingClientRect();
         if(text.left<box.left-1||text.right>box.right+1||text.top<box.top-1||text.bottom>box.bottom+1) problems.push(`${innerWidth}×${innerHeight} ${selector}: ${el.textContent}; Text ${JSON.stringify({left:text.left,right:text.right,top:text.top,bottom:text.bottom})}; Box ${JSON.stringify({left:box.left,right:box.right,top:box.top,bottom:box.bottom})}`);
       });
-      for(const el of document.querySelectorAll('.kids-status,.kids-answers,.kids-bottom,.kids-show-story,.kids-show-host,.kids-regroup-content,.kids-regroup-operator,.kids-reveal-result,.kids-reaction,.kids-reveal-footer')) {const box=el.getBoundingClientRect();if(box.bottom>innerHeight+1||box.left<0||box.right>innerWidth+1)problems.push(`Außerhalb: ${el.className}`);}
+      for(const el of document.querySelectorAll('.kids-answer > .kids-story-picture,.kids-reveal-answer > .kids-story-picture,.kids-status,.kids-answers,.kids-bottom,.kids-show-story,.kids-show-host,.kids-regroup-content,.kids-regroup-operator,.kids-reveal-result,.kids-reaction,.kids-reveal-footer')) {const box=el.getBoundingClientRect();if(el.matches('.kids-story-picture') && box.height<45)problems.push(`Bild zu klein: ${el.getAttribute('data-motif')}`);if(box.bottom>innerHeight+1||box.left<0||box.right>innerWidth+1)problems.push(`Außerhalb: ${el.className}`);}
       if(document.documentElement.scrollWidth>innerWidth)problems.push('Breite');return problems;
     });expect(issues).toEqual([]);
   }
   for(let i=0;i<10;i++) {
     const answers=await page.locator('.kids-answer-text').allTextContents();
+    const motifs=await page.locator('.kids-answer > .kids-story-picture').evaluateAll(els=>els.map(el=>el.getAttribute('data-motif')));
     for(const viewport of viewports){await page.setViewportSize(viewport);await check();}
     await resolve(page,'Mindestens ein Kind richtig · +5',async()=>{for(const viewport of viewports){await page.setViewportSize(viewport);await check();const professor=await page.locator('.kids-regroup-professor .bluff-professor').boundingBox();expect(professor!.width).toBeGreaterThan(160);}});
-    for(const viewport of viewports){await page.setViewportSize(viewport);await check();const field=Number(await page.locator('.kids-reveal .kids-number').innerText());expect(await page.locator('.kids-reveal .kids-answer-text').innerText()).toBe(answers[field-1]);}
+    for(const viewport of viewports){await page.setViewportSize(viewport);await check();const field=Number(await page.locator('.kids-reveal .kids-number').innerText());expect(await page.locator('.kids-reveal .kids-answer-text').innerText()).toBe(answers[field-1]);await expect(page.locator('.kids-reveal .kids-story-picture')).toHaveAttribute('data-motif',motifs[field-1]!);}
     await page.getByRole('button',{name:i===9?'Schatz öffnen':i===8?'Zum Superbluff':i===2||i===5?'Nächstes Kapitel':'Nächste Aufgabe',exact:true}).click();
     if(i===2||i===5||i===8) {
       for(const viewport of viewports){await page.setViewportSize(viewport);await check();}
@@ -146,7 +154,7 @@ test('Kids: alle Showfragen passen bei 800×600, 4:3, 720p, Full HD und 1440p',a
     }
   }
   for(const viewport of viewports){await page.setViewportSize(viewport);await check();}
-  await expect(page.getByRole('heading',{name:'Euer Teamgeist ist der Schatz!'})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Gemeinsam seid ihr stark!'})).toBeVisible();
 });
 
 test('Kids: Vollbild und Professor-Reaktion bei null, fünf und zehn Punkten',async({page})=>{

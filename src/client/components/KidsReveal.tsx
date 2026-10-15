@@ -6,13 +6,12 @@ import { ProfessorBluff, ShowControls, StoryPicture } from './KidsShow';
 
 export function KidsReveal({ game, act, disabled, primaryRef, children }: { game: KidsGame; act: (action: Exclude<KidsAction,'tick'>)=>void; disabled:boolean; primaryRef:RefObject<HTMLButtonElement>; children?:ComponentChildren }) {
   const round=game.rounds[game.index], reaction=kidsRoundReaction(game);
-  const picture=round.question.group==='minis' || game.index===9;
   return <section class={`kids-reveal is-revealed reaction-${reaction.mood}`} aria-labelledby="kids-reveal-title" data-points={reaction.points}>
     <div class="kids-reveal-result">
       <header><p class="kids-eyebrow">AUFGELÖST · {KIDS_GROUPS[round.question.group].name}</p><h1 id="kids-reveal-title">Feld {round.correctIndex+1} ist richtig!</h1></header>
-      <div class={`kids-answer kids-reveal-answer kids-field-${round.correctIndex+1} is-correct${picture ? ' has-picture' : ''}`}>
+      <div class={`kids-answer kids-reveal-answer kids-field-${round.correctIndex+1} is-correct has-picture`}>
         <span class="kids-number">{round.correctIndex+1}</span>
-        {picture && <StoryPicture motif={round.question.pictures[0]}/>}
+        <StoryPicture motif={round.question.pictures[0]}/>
         <span class="kids-answer-text">{round.question.answer}</span><span class="kids-correct-mark">✓ Entdeckt!</span>
       </div>
       <div class="kids-discovery"><div><p>{round.question.explanation}</p><small>{round.question.ref}</small></div></div>

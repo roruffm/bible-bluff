@@ -107,21 +107,31 @@ describe('Kids-Fernbedienung', () => {
       (g: ReturnType<typeof packKidsGame>) => { g.rounds[1] = g.rounds[0]; },
       (g: ReturnType<typeof packKidsGame>) => { g.remainingMs = -1; },
       (g: ReturnType<typeof packKidsGame>) => { g.results[0] = 'correct'; },
-      (g: ReturnType<typeof packKidsGame>) => { g.jokerFor = 3; },
     ]) {
       const game = packKidsGame(reading(), t.clock.now); change(game);
       expect((await t.call('POST', '/api/kids-remotes', { game, easy: true })).status).toBe(400);
     }
     expect((await t.call('POST', '/api/kids-remotes', { long: 'x'.repeat(9000) })).status).toBe(413);
   });
-  it('kann nach dem Finale über die Fernbedienung eine neue Show starten', async () => {
+  it('beendet die Show ohne Revanche und akzeptiert keine Familienjoker', async () => {
     const t = setup();
     const game = { ...reading(), phase: 'finished' as const, index: 9, remainingMs: 0, results: Array(10).fill('correct') };
     const made = await t.create(game);
-    const next = await t.call('POST', `/api/kids-remotes/${made.id}/action`, { action: 'restart', version: 1 }, made.remoteToken);
-    expect(next.body.game.phase).toBe('welcome'); expect(next.body.game.index).toBe(0);
-    expect(next.body.game.rounds).toHaveLength(10);
-    expect(next.body.game.results.every(r=>r===null)).toBe(true);
+    for (const action of ['restart','joker']) {
+      expect((await t.call('POST', `/api/kids-remotes/${made.id}/action`, { action, version: 1 }, made.remoteToken)).status).toBe(400);
+    }
+    const saved=await t.call('GET', `/api/kids-remotes/${made.id}`, undefined, made.ownerToken);
+    expect(saved.body.game.phase).toBe('finished');
+    expect(saved.body.version).toBe(1);
+  });
+  it('verwendet nach einem Update auch für bestehende Sitzungen die aktuellen Antwortbilder', async () => {
+    const store=new MemoryKidsRemoteStore(), t=setup(store), made=await t.create();
+    const record=(await store.load(made.id))!;
+    record.game.rounds[5].question.pictures=['donkey','leaf','ark'];
+    await store.update(made.id,record.version,record.game,true);
+    const read=await t.call('GET',`/api/kids-remotes/${made.id}`,undefined,made.remoteToken);
+    expect(read.body.game.rounds[5].question.pictures).toEqual(['donkey','raven','camel']);
+    expect(read.body.game.rounds.map(r=>r.answers)).toEqual(made.game.rounds.map(r=>r.answers));
   });
   it('vergibt auch im Finale fünf Punkte für mindestens ein richtiges Kind und bewahrt sie beim Neuladen', async () => {
     const t = setup();
