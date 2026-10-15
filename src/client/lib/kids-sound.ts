@@ -5,6 +5,32 @@ export async function enableKidsSound() {
   if (context.state === 'suspended') await context.resume();
   if (context.state !== 'running') throw new Error('Klang nicht verfügbar');
 }
+
+const professorBuffers = new Map<string, Promise<AudioBuffer>>();
+/** Ein Abbruch verhindert auch, dass eine noch ladende Aufnahme später losspielt. */
+export async function playProfessorVoice(key: string, signal: AbortSignal, onEnded: () => void) {
+  if (!/^(welcome|intro|chapter[23]|superbluff|win|lose|startled-[0-9]|comfort-[0-9])$/.test(key) || !context || context.state !== 'running') throw new Error('Professor-Ton bitte am Beamer aktivieren.');
+  const ctx = context;
+  let buffer = professorBuffers.get(key);
+  if (!buffer) {
+    buffer = fetch(`/professor-bluff/${key}.mp3`).then(response => {
+      if (!response.ok) throw new Error('Diese Professor-Aufnahme konnte nicht geladen werden.');
+      return response.arrayBuffer();
+    }).then(bytes => ctx.decodeAudioData(bytes));
+    professorBuffers.set(key, buffer);
+    void buffer.catch(() => { if (professorBuffers.get(key) === buffer) professorBuffers.delete(key); });
+  }
+  const decoded = await buffer;
+  if (signal.aborted) return;
+  if (ctx.state !== 'running') throw new Error('Professor-Ton bitte am Beamer aktivieren.');
+  const source = ctx.createBufferSource();
+  source.buffer = decoded;
+  source.connect(ctx.destination);
+  const stop = () => { try { source.stop(); } catch { /* Bereits beendet. */ } };
+  signal.addEventListener('abort', stop, { once: true });
+  source.onended = () => { signal.removeEventListener('abort', stop); source.disconnect(); onEnded(); };
+  source.start();
+}
 /** Eigene zehnsekündige Geräuschkulissen, passend zu den drei sichtbaren Handlungsschritten. */
 export function playKidsScene(motif: KidsSceneMotif, elapsedMs=0):()=>void {
   if (!context || context.state !== 'running' || elapsedMs>=KIDS_SCENE_MS) return ()=>{};

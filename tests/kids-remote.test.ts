@@ -30,6 +30,18 @@ function setup(store: KidsRemoteStore = new MemoryKidsRemoteStore()) {
 }
 
 describe('Kids-Fernbedienung', () => {
+  it('überträgt manuelles Abspielen und Stoppen ohne den Countdown oder Punkte zu ändern', async () => {
+    const t=setup(), made=await t.create(), path=`/api/kids-remotes/${made.id}`;
+    const play=await t.call('POST',path+'/action',{action:'speak',version:1},made.remoteToken);
+    expect(play.status).toBe(200);expect(play.body.game).toMatchObject({phase:'reading',remainingMs:30000,voiceSeq:1,voicePlaying:true,voiceCue:'reading:0'});
+    expect(kidsScores(play.body.game)).toEqual(kidsScores(made.game));
+    const read=await t.call('GET',path,undefined,made.ownerToken);expect(read.body.game.voiceSeq).toBe(1);
+    const stop=await t.call('POST',path+'/action',{action:'stop-speech',version:2},made.remoteToken);
+    expect(stop.body.game).toMatchObject({voiceSeq:2,voicePlaying:false,phase:'reading',remainingMs:30000});
+    expect((await t.call('POST',path+'/action',{action:'speak',version:2},made.remoteToken)).status).toBe(409);
+    const scene=await t.call('POST',path+'/action',{action:'scene',version:3},made.remoteToken);
+    expect(scene.status).toBe(200);expect((await t.call('POST',path+'/action',{action:'speak',version:4},made.remoteToken)).status).toBe(409);
+  });
   it('behält die laufende Frage und erlaubt nur den beiden Schlüsseln Zugriff', async () => {
     const t = setup();
     let game = updateKidsGame(reading(), 'start', t.clock.now);

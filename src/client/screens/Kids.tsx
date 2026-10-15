@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from 'preact/hooks';
+import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { KidsScene } from '../components/KidsScene';
+import { KidsVoiceButton, KidsVoiceProvider } from '../components/KidsVoice';
 import { KIDS_SCENE_MS } from '../../shared/kids-scenes';
 import { KidsFinish, KidsFinishDialog } from '../components/KidsFinish';
 import { KidsReveal } from '../components/KidsReveal';
@@ -34,6 +35,11 @@ export function KidsPage() {
   current.current = { game, showExit, showPair, showFinish, toolsOpen, act };
   const canFullscreen = typeof document !== 'undefined' && document.fullscreenEnabled;
   useEffect(() => { const old = document.title; document.title = 'BibleBluff Kids · Die große Bluff-Jagd'; return () => { document.title = old; }; }, []);
+  useLayoutEffect(() => {
+    if (!game) return;
+    root.current?.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [game?.phase, game?.index]);
   useEffect(() => { const sync = () => setFullscreen(!!document.fullscreenElement); document.addEventListener('fullscreenchange', sync); return () => document.removeEventListener('fullscreenchange', sync); }, []);
   useEffect(() => {
     if (game?.phase !== 'moving' && game?.phase !== 'scene') return;
@@ -71,7 +77,8 @@ export function KidsPage() {
   const toggleFullscreen = async () => { try { setFullscreenError(''); if (document.fullscreenElement) await document.exitFullscreen(); else await root.current?.requestFullscreen(); } catch { setFullscreenError('Nutze das Vollbild deines Browsers.'); } };
   const toggleSound = async () => { if (sound === 'on') { setSound('off'); return; } try { await enableKidsSound(); setSound('on'); } catch { setFullscreenError('Klang hier nicht verfügbar. Die Gruppen können die Geräusche selbst machen.'); } };
   const exit = () => { void remote.disconnect(); setShowExit(false); setShowPair(false); setShowFinish(false); setToolsOpen(false); setPresentation(false); setGame(null); };
-  const pair = async () => { if (!game) return; setToolsOpen(false); setShowPair(true); if (!remote.active) { const paused = updateKidsGame(game, 'pause', Date.now()); setGame(paused); await remote.connect(paused, false); } };
+  const enableVoice = async () => { await enableKidsSound(); setSound('on'); };
+  const pair = async () => { if (!game) return; void enableVoice().catch(()=>setSound('off')); setToolsOpen(false); setShowPair(true); if (!remote.active) { const paused = updateKidsGame(game, 'pause', Date.now()); setGame(paused); await remote.connect(paused, false); } };
   const round = game?.rounds[game.index];
   const revealed = game?.phase === 'revealed', finished = game?.phase === 'finished';
   const interlude = game && ['welcome','chapter','superbluff'].includes(game.phase);
@@ -79,9 +86,9 @@ export function KidsPage() {
   const seconds = game ? Math.ceil(game.remainingMs / 1000) : 30;
   const chapter = game ? Math.min(2, Math.floor(game.index / 3)) : 0;
   const status = !game ? '' : game.phase === 'reading' ? 'Erst zuhören. Dann geht’s los!' : game.phase === 'moving' ? '1, 2 oder 3? Ab in euer Feld!' : game.phase === 'paused' ? 'Kurze Pause. Bleibt, wo ihr seid!' : game.phase === 'locked' ? 'Stopp! Helfer prüfen die Felder.' : game.phase === 'returning' ? 'Alle zurück zu eurer Gruppe!' : game.phase === 'judging' ? 'Jetzt wird’s spannend …' : `Richtig ist Feld ${round!.correctIndex + 1}!`;
-  return <main class={`kids-page kids-show${game ? ' is-playing' : ''}${presentation && game ? ' is-projecting' : ''}${fullscreen ? ' is-fullscreen' : ''}`} ref={root} tabIndex={-1}>
+  return <KidsVoiceProvider game={game} enabled={sound==='on'} enable={enableVoice} act={act} busy={remote.busy} onError={setFullscreenError}><main class={`kids-page kids-show${game ? ' is-playing' : ''}${presentation && game ? ' is-projecting' : ''}${fullscreen ? ' is-fullscreen' : ''}`} ref={root} tabIndex={-1}>
     <header class={`kids-topbar${game ? ' kids-playing-bar' : ''}`}>
-      {game ? <><KidsLogo compact/><span class="kids-round-counter">{finished ? 'GESCHAFFT!' : game.index === 9 ? 'SUPERBLUFF' : `Kapitel ${chapter + 1}`} <b>· {finished ? 'Alle gemeinsam' : group?.name}</b></span><div class="kids-top-actions">{!finished && <button type="button" class="kids-tool kids-end-toggle" aria-label="Spiel mit Punktestand abschließen" onClick={()=>{setToolsOpen(false);setShowFinish(true);}}>⚑ <span>Abschluss</span></button>}<button class="kids-tool kids-mouse-toggle" type="button" aria-label={presentation ? 'Maussteuerung einblenden' : 'Maussteuerung ausblenden'} aria-pressed={!presentation} onClick={() => { setPresentation(!presentation); setToolsOpen(false); }}>↗ <span>Maus</span></button>{canFullscreen && <button type="button" class="kids-tool kids-fullscreen-toggle" onClick={toggleFullscreen} aria-label={fullscreen ? 'Vollbild ausschalten' : 'Vollbild einschalten'}>⛶ <span>{fullscreen ? 'Fenster' : 'Vollbild'}</span></button>}<button type="button" class="kids-tool kids-menu-toggle" aria-expanded={toolsOpen} aria-controls="kids-operator-tools" onClick={() => setToolsOpen(!toolsOpen)}>☰ <span>Bedienung</span></button></div></> : <><a href="/" class="kids-back" onClick={e => { e.preventDefault(); navigate('/'); }}>← Bible Bluff</a><span class="kids-top-title">GEMEINSAM GEGEN PROFESSOR BLUFF</span>{canFullscreen && <button type="button" class="kids-tool" onClick={toggleFullscreen}>⛶ Vollbild</button>}</>}
+      {game ? <><KidsLogo compact/><span class="kids-round-counter">{finished ? 'GESCHAFFT!' : game.index === 9 ? 'SUPERBLUFF' : `Kapitel ${chapter + 1}`} <b>· {finished ? 'Alle gemeinsam' : group?.name}</b></span><div class="kids-top-actions">{!finished && <button type="button" class="kids-tool kids-end-toggle" aria-label="Spiel mit Punktestand abschließen" onClick={()=>{setToolsOpen(false);setShowFinish(true);}}>⚑ <span>Abschluss</span></button>}<button class="kids-tool kids-mouse-toggle" type="button" aria-label={presentation ? 'Maussteuerung einblenden' : 'Maussteuerung ausblenden'} aria-pressed={!presentation} onClick={() => { setPresentation(!presentation); setToolsOpen(false); }}>↗ <span>Maus</span></button>{canFullscreen && <button type="button" class="kids-tool kids-fullscreen-toggle" onClick={toggleFullscreen} aria-label={fullscreen ? 'Vollbild ausschalten' : 'Vollbild einschalten'}>⛶ <span>{fullscreen ? 'Fenster' : 'Vollbild'}</span></button>}<button type="button" class="kids-tool kids-menu-toggle" aria-label="Bedienung" aria-expanded={toolsOpen} aria-controls="kids-operator-tools" onClick={() => setToolsOpen(!toolsOpen)}>☰ <span>Bedienung</span></button></div></> : <><a href="/" class="kids-back" onClick={e => { e.preventDefault(); navigate('/'); }}>← Bible Bluff</a><span class="kids-top-title">GEMEINSAM GEGEN PROFESSOR BLUFF</span>{canFullscreen && <button type="button" class="kids-tool" onClick={toggleFullscreen}>⛶ Vollbild</button>}</>}
     </header>
     {game && toolsOpen && <aside class="kids-operator-tools" id="kids-operator-tools" aria-label="Bedienung für die Spielleitung">
       <button type="button" class="kids-tool" onClick={() => { setPresentation(!presentation); setToolsOpen(false); }}>{presentation ? 'Maussteuerung einblenden' : 'Nur Spiel anzeigen'}</button>
@@ -107,7 +114,7 @@ export function KidsPage() {
       {finished ? <KidsFinish game={game}><Celebration variant={3}/></KidsFinish> : game.phase==='scene' ? <KidsScene key={`${game.index}-${game.cueSeq}`} game={game} act={act} sound={sound==='on'} toggleSound={()=>{void toggleSound();}} disabled={remote.busy} primaryRef={primary}/> : <>
       <ShowScoreboard game={game}/>
       {game.phase==='returning' || game.phase==='judging' ? <KidsRegroup game={game} act={act} disabled={remote.busy} primaryRef={primary}/> : revealed ? <KidsReveal key={`${game.index}-${game.results[game.index]}`} game={game} act={act} disabled={remote.busy} primaryRef={primary}>{kidsResultPoints(game.results[game.index])>0 && <Celebration variant={game.index}/>}</KidsReveal> : interlude ? <section class={`kids-show-interlude is-${game.phase}`}>
-        <div class="kids-show-host"><ProfessorBluff mood={professorMood(game)}/><blockquote>{professorSays(game)}</blockquote><span>Professor Bluff</span></div>
+        <div class="kids-show-host"><ProfessorBluff mood={professorMood(game)}/><blockquote>{professorSays(game)}</blockquote><span class="kids-professor-signature">Professor Bluff <KidsVoiceButton/></span></div>
         <div class="kids-show-story">
           <p class="kids-eyebrow">{game.phase === 'welcome' ? 'WILLKOMMEN, BIBLEBLUFF-DETEKTIVE!' : game.phase === 'chapter' ? `KAPITEL ${chapter + 1} VON 3` : 'ALLE TEAMS WERDEN GEBRAUCHT'}</p>
           <h1>{game.phase === 'welcome' ? 'Zusammen knacken wir jeden Bluff!' : game.phase === 'chapter' ? KIDS_CHAPTERS[chapter] : 'ALARM! Der Superbluff!'}</h1>
@@ -118,7 +125,7 @@ export function KidsPage() {
         <div class="kids-show-question"><h1 id="kids-question">{round.question.prompt}</h1></div>
         <div class="kids-status" role="status"><ProfessorBluff mood={professorMood(game)}/><div class={`kids-clock${game.phase === 'moving' && seconds <= 5 ? ' is-urgent' : ''}`} aria-label={`${seconds} Sekunden`}><svg viewBox="0 0 80 80" aria-hidden="true"><circle class="kids-clock-track" cx="40" cy="40" r="33"/><circle class="kids-clock-progress" cx="40" cy="40" r="33" style={{ strokeDasharray:'207.35', strokeDashoffset: `${207.35 * (1-game.remainingMs/30000)}` }}/></svg><b aria-hidden="true">{game.phase==='locked' ? '✋' : seconds}</b></div><div><strong>{status}</strong><span>{game.phase === 'locked' ? 'Noch nicht auflösen. Gleich geht’s zurück.' : `${group!.title} sind dran! Die anderen fiebern mit.`}</span></div></div>
         <ol class="kids-answers has-pictures" aria-label="Antworten und Spielfelder">{round.answers.map((answer,i)=><li key={`${game.index}-${i}`} class={`kids-answer kids-field-${i+1}`}><span class="kids-number">{i+1}</span><StoryPicture motif={kidsAnswerPicture(round.question,answer)}/><span class="kids-answer-text">{answer}</span></li>)}</ol>
-        <div class="kids-bottom"><div class="kids-discovery"><div><p>{professorSays(game)}</p></div></div><div class="kids-operator-actions">{game.phase==='reading' && <div class="kids-extra-controls">{round.question.scene && <button type="button" class="kids-tool" disabled={remote.busy} onClick={()=>act('scene')}>Szene abspielen</button>}</div>}<ShowControls game={game} act={act} disabled={remote.busy} primaryRef={primary}/></div></div>
+        <div class="kids-bottom"><div class="kids-discovery"><div><p>{professorSays(game)}</p></div><KidsVoiceButton/></div><div class="kids-operator-actions">{game.phase==='reading' && <div class="kids-extra-controls">{round.question.scene && <button type="button" class="kids-tool" disabled={remote.busy} onClick={()=>act('scene')}>Szene abspielen</button>}</div>}<ShowControls game={game} act={act} disabled={remote.busy} primaryRef={primary}/></div></div>
       </section>}
     </>}
     </>}
@@ -137,5 +144,5 @@ export function KidsPage() {
       if (e.key === 'Escape') { e.preventDefault(); setShowExit(false); }
       if (e.key === 'Tab') { e.preventDefault(); const buttons = e.currentTarget.querySelectorAll<HTMLButtonElement>('button'); const index = Array.from(buttons).indexOf(document.activeElement as HTMLButtonElement); buttons[(index + (e.shiftKey ? -1 : 1) + buttons.length) % buttons.length]?.focus(); }
     }}><div><h2 id="kids-exit-title">Zur Vorbereitung zurück?</h2><p>Der Endbildschirm wird geschlossen.</p><button type="button" class="kids-button kids-primary" autoFocus onClick={() => setShowExit(false)}>Abschluss weiter anzeigen</button><button type="button" class="kids-button" onClick={exit}>Zur Vorbereitung</button></div></div>}
-  </main>;
+  </main></KidsVoiceProvider>;
 }
