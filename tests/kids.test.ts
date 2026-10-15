@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { QUESTIONS } from '../src/server/questions';
 import { kidsRoundReaction } from '../src/client/lib/kids-reactions';
-import { KIDS_SHOW_QUESTIONS } from '../src/shared/kids-show-questions';
+import { KIDS_SHOW_QUESTIONS, kidsAnswerPicture } from '../src/shared/kids-show-questions';
 import { createKidsGame, kidsPrimaryAction, kidsScores, updateKidsGame, type KidsGame, type KidsResult } from '../src/shared/kids-game';
 
 const reading = () => updateKidsGame(updateKidsGame(createKidsGame(), 'next', 0), 'next', 0);
@@ -74,14 +74,26 @@ describe('Die große Bluff-Jagd', () => {
     behind.results[8]='correct';
     expect(kidsRoundReaction(behind)).toMatchObject({mood:'startled',points:10});
   });
-  it('gibt genau einen Familienjoker in Kapitel zwei und keine zusätzlichen Punkte', () => {
-    let g=reading(); expect(updateKidsGame(g,'joker',0)).toBe(g);
-    for(let i=0;i<3;i++) g=updateKidsGame(resolve(g,'correct'),'next',30000);
-    g=updateKidsGame(g,'next',30000); const before=kidsScores(g);
-    g=updateKidsGame(g,'joker',30000); expect(g.jokerFor).toBe(3); expect(kidsScores(g)).toEqual(before);
-    expect(updateKidsGame(g,'joker',30000)).toBe(g);
-    expect(updateKidsGame(g,'scene',30000).cueSeq).toBe(g.cueSeq+1);
+  it('behält eindeutige Bilder bei jeder gemischten Antwortreihenfolge', () => {
+    for (const value of [0, .25, .5, .75, .999]) for (const round of createKidsGame(()=>value).rounds) {
+      const q=round.question;
+      expect(new Set(q.pictures).size,q.sourceId).toBe(3);
+      for (const answer of round.answers) {
+        expect(kidsAnswerPicture(q,answer)).toBe(q.pictures[[q.answer,...q.distractors].indexOf(answer)]);
+      }
+    }
+    expect(kidsAnswerPicture(KIDS_SHOW_QUESTIONS[5],'Ein Rabe')).toBe('raven');
+    expect(kidsAnswerPicture(KIDS_SHOW_QUESTIONS[7],'5 Brote und 2 Fische')).toBe('five-breads-two-fish');
+    expect(kidsAnswerPicture(KIDS_SHOW_QUESTIONS[2],'Unter einem Kopfkissen')).toBe('coin-pillow');
+    expect(()=>kidsAnswerPicture(KIDS_SHOW_QUESTIONS[0],'unbekannt')).toThrow();
+  });
+  it('startet Szenen nur beim Vorlesen und wartet mit der Wertung auf den Rückweg', () => {
+    const g=reading();
+    expect(updateKidsGame(g,'scene',0).cueSeq).toBe(1);
+    const moving=updateKidsGame(g,'start',0);
+    expect(updateKidsGame(moving,'scene',0)).toBe(moving);
     expect(kidsPrimaryAction('judging')).toBeNull();
+    expect(kidsPrimaryAction('finished')).toBeNull();
     expect(kidsPrimaryAction('locked')).toBe('return');
   });
 });

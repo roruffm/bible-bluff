@@ -8,9 +8,9 @@ export function kidsResultPoints(result: KidsResult | null): number { return res
 export interface KidsRound { question: KidsShowQuestion; answers: string[]; correctIndex: number }
 export interface KidsGame {
   rounds: KidsRound[]; index: number; phase: KidsPhase; remainingMs: number; deadline: number | null;
-  results: (KidsResult | null)[]; jokerFor: number | null; cueSeq: number;
+  results: (KidsResult | null)[]; cueSeq: number;
 }
-export type KidsAction = 'start' | 'pause' | 'resume' | 'tick' | 'return' | 'ready' | 'correct' | 'participated' | 'none' | 'next' | 'joker' | 'scene';
+export type KidsAction = 'start' | 'pause' | 'resume' | 'tick' | 'return' | 'ready' | 'correct' | 'participated' | 'none' | 'next' | 'scene';
 
 function shuffle<T>(items: readonly T[], random: () => number): T[] {
   const result = [...items];
@@ -24,7 +24,7 @@ export function createKidsGame(random: () => number = Math.random): KidsGame {
     const answers = shuffle(question.distractors, random); answers.splice(correctIndex, 0, question.answer);
     return { question, answers, correctIndex };
   });
-  return { rounds, index: 0, phase: 'welcome', remainingMs: 30000, deadline: null, results: rounds.map(() => null), jokerFor: null, cueSeq: 0 };
+  return { rounds, index: 0, phase: 'welcome', remainingMs: 30000, deadline: null, results: rounds.map(() => null), cueSeq: 0 };
 }
 export function kidsScores(game: KidsGame) {
   const groups = { minis: 0, mittis: 0, maxis: 0 };
@@ -63,7 +63,6 @@ export function updateKidsGame(game: KidsGame, action: KidsAction, now: number):
     const results = [...game.results]; results[game.index] = action as KidsResult;
     return { ...game, results, phase: 'revealed' };
   }
-  if (action === 'joker' && game.jokerFor === null && game.index >= 3 && game.index <= 5 && phase === 'reading') return { ...game, jokerFor: game.index };
   if (action === 'scene' && phase === 'reading' && game.rounds[game.index].question.scene) return { ...game, cueSeq: game.cueSeq + 1 };
   return game;
 }

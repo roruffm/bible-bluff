@@ -527,3 +527,28 @@
 }
 .kids-reveal { isolation: isolate; }
 .kids-reveal > :not(.kids-celebration) { position: relative; z-index: 2; }
+/* Bilder sind bei jeder Altersgruppe ein fester Teil der Antwort. */
+.kids-show-stage .kids-answer > .kids-story-picture { width: min(85%,340px); }
+.kids-remote-answers li { display: grid; grid-template-columns: 24px 70px minmax(0,1fr); gap: 9px; }
+.kids-remote-answers .kids-story-picture { width: 70px; height: 58px; }
+.kids-remote-farewell { padding: 22px 18px; border-radius: 18px; border: 2px solid #b7d8c8; background: #e0f2e7; text-align: center; }
+.kids-remote-farewell h2 { font-size: 25px; color: #176845; margin-bottom: 12px; }
+.kids-remote-farewell p { font-size: 16px; line-height: 1.5; margin-top: 10px; }
+/* Der gemeinsame Schatz bleibt als Abschluss auf der Leinwand stehen. */
+.kids-show-interlude.is-finished { background: radial-gradient(ellipse at 76% 48%,#fff0ad80 0,transparent 60%); }
+.kids-show-interlude.is-finished .kids-show-story { gap: clamp(10px,1.6vh,22px); }
+.kids-show-interlude.is-finished .kids-treasure { width: min(430px,38vh); border-color: #aa8026; box-shadow: 0 6px 0 #aa8026,0 0 0 8px #fff8d9; }
+.kids-show-interlude.is-finished .kids-show-story h1 { font-size: clamp(28px,min(3.8vw,5.8vh),78px); line-height: 1.15; }
+.kids-show-interlude.is-finished .kids-treasure-message { font-size: clamp(25px,min(3.3vw,4.7vh),64px); }
+.kids-finale-seal { display: flex; gap: 14px; align-items: center; padding: 10px 20px; border-radius: 30px; color: #176845; background: #ddede0; border: 1px solid #b7d8c8; font-weight: 900; font-size: clamp(12px,1.3vw,23px); letter-spacing: .06em; }
+@media (min-width:760px) and (max-height:650px) {
+  .kids-show-interlude.is-finished .kids-show-story { gap: 7px; }
+  .kids-show-interlude.is-finished .kids-treasure { width: min(260px,33vh); }
+  .kids-show-interlude.is-finished .kids-treasure-message { font-size: 23px; }
+  .kids-finale-seal { padding: 7px 15px; font-size: 11px; }
+}
+@media (max-width:759px) {
+  .kids-show-stage .kids-answer > .kids-story-picture { width: 100px; }
+  .kids-show-interlude.is-finished .kids-treasure { width: min(100%,360px); }
+  .kids-finale-seal { font-size: 11px; gap: 8px; }
+}

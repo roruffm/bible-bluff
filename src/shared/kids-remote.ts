@@ -1,6 +1,6 @@
 import type { KidsGame, KidsAction } from './kids-game';
 
-export type KidsRemoteAction = Exclude<KidsAction, 'tick'> | 'restart';
+export type KidsRemoteAction = Exclude<KidsAction, 'tick'>;
 export interface KidsRemoteView {
   id: string;
   version: number;
@@ -20,7 +20,6 @@ export function packKidsGame(game: KidsGame, now: number) {
     phase: game.phase,
     remainingMs: game.phase === 'moving' ? Math.max(0, (game.deadline ?? now) - now) : game.remainingMs,
     results: game.results,
-    jokerFor: game.jokerFor,
     cueSeq: game.cueSeq,
   };
 }
