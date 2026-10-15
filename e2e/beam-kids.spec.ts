@@ -54,7 +54,7 @@ test('Kids: vollständige Show, Familienjoker, Superbluff und gemeinsamer Schatz
   await expect(page.getByRole('heading',{name:'Ihr habt den Bluff geknackt!'})).toBeVisible();
   await expect(page.getByTestId('team-score')).toHaveText('100'); await expect(page.getByTestId('prof-score')).toHaveText('73');
   await expect(page.getByText('Bei Jesus sind wir willkommen.',{exact:true})).toBeVisible();
-  await expect(page.locator('.kids-treasure-tiles .is-found')).toHaveCount(9);
+  await expect(page.locator('.kids-show-story .kids-treasure-tiles .is-found')).toHaveCount(9);
   await page.getByRole('button',{name:'Revanche!',exact:false}).click();
   await expect(page.getByTestId('team-score')).toHaveText('0');
   expect(requests).toEqual([]);
