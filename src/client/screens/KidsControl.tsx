@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'preact/hooks';
 import { kidsScores, updateKidsGame, type KidsGame } from '../../shared/kids-game';
 import { KIDS_CHAPTERS, KIDS_GROUPS } from '../../shared/kids-show-questions';
+import { kidsRoundReaction } from '../lib/kids-reactions';
 import { useKidsRemote } from '../lib/kids-remote';
 import { KidsLogo } from '../components/KidsLogo';
 import { ShowControls } from '../components/KidsShow';
@@ -28,6 +29,7 @@ export function KidsControlPage() {
       {['reading','moving','paused','locked','returning','judging','revealed'].includes(game.phase) && <ol class="kids-remote-answers">{round.answers.map((answer,i)=><li class={`kids-field-${i+1}${game.phase==='revealed' && i===round.correctIndex ? ' is-correct' : ''}`}><b>{i+1}</b><span>{answer}</span></li>)}</ol>}
       {game.jokerFor===game.index && <p class="kids-remote-direction">Familienjoker: {round.question.hint}</p>}
       {game.phase==='reading' && <div class="kids-remote-extras">{round.question.scene && <button class="kids-button" type="button" disabled={disabled} onClick={()=>remote.send('scene')}>Szene am Beamer abspielen</button>}{game.index>=3 && game.index<=5 && game.jokerFor===null && <button class="kids-button" type="button" disabled={disabled} onClick={()=>remote.send('joker')}>Familienjoker freischalten</button>}</div>}
+      {game.phase==='revealed' && <div class="kids-remote-direction"><b>Professor Bluff:</b><p>{kidsRoundReaction(game).quote}</p></div>}
       <div class="kids-remote-actions">{game.phase==='finished' ? <button type="button" class="kids-button kids-primary" disabled={disabled} onClick={()=>remote.send('restart')}>Revanche starten ↻</button> : <ShowControls game={game} act={action=>{void remote.send(action);}} disabled={disabled}/>}</div>
       <p class="kids-remote-note">Maus und Smartphone steuern denselben Stand. Nach einem Netzabbruch wird automatisch erneut verbunden. Klang wird am Beamer unter „Bedienung“ eingeschaltet.</p>
     </>}

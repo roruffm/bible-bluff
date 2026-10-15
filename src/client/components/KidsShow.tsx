@@ -1,11 +1,13 @@
+import { kidsRoundReaction } from '../lib/kids-reactions';
 import { CrownTreasureArt } from './KidsChildrenArt';
 import type { RefObject } from 'preact';
 import { kidsActionLabel, kidsPrimaryAction, kidsScores, type KidsAction, type KidsGame } from '../../shared/kids-game';
 import { KIDS_GROUPS, type StoryMotif } from '../../shared/kids-show-questions';
 
-export type ProfessorMood = 'confident' | 'nervous' | 'panic' | 'defeated' | 'victory';
+export type ProfessorMood = 'confident' | 'nervous' | 'panic' | 'defeated' | 'victory' | 'startled' | 'kind';
 export function professorMood(game: KidsGame): ProfessorMood {
   const s = kidsScores(game);
+  if (game.phase === 'revealed') return kidsRoundReaction(game).mood;
   if (game.phase === 'finished') return s.team > s.professor ? 'defeated' : 'victory';
   if (game.phase === 'superbluff') return 'panic';
   if (s.team >= s.professor && s.pieces > 3) return 'panic';
@@ -16,13 +18,13 @@ export function professorSays(game: KidsGame): string {
   if (game.phase === 'welcome') return 'Ha! Drei Detektivteams gegen MEIN Superhirn? Das wird ja heiter!';
   if (game.phase === 'superbluff') return 'ALARM! Mein Superbluff! Zehn Punkte für mich … aber ihr könnt sie auch holen!';
   if (game.phase === 'finished') return mood === 'defeated' ? 'Von MINIS, MITTIS und MAXIS besiegt?! Ich brauche eine neue Rätsel-Ausbildung!' : 'Ha! Diesmal gewonnen! Aber euer Teamgeist? Unbesiegbar. Revanche?';
-  if (game.phase === 'revealed') return mood === 'panic' ? 'Ihr seid schon so weit! Wo ist mein Notfall-Schnurrbart?!' : mood === 'nervous' ? 'Huch! Ihr seid ja richtige Spürnasen. Ich muss wohl nachlesen …' : 'Mein Plan läuft! Wobei … ihr habt ganz schön viel entdeckt!';
+  if (game.phase === 'revealed') return kidsRoundReaction(game).quote;
   if (game.index >= 6) return 'Nur noch ein Kapitel! Meine Knie zittern? Das ist mein Denk-Tanz!';
   if (game.index >= 3) return 'Das war nur die Aufwärmrunde. Jetzt wird geblufft!';
   return 'Ich bin Professor Bluff. Mein Spezialgebiet? Mich selbst überschätzen!';
 }
 export function ProfessorBluff({ mood = 'confident' }: { mood?: ProfessorMood }) {
-  return <svg class={`bluff-professor mood-${mood}`} viewBox="0 0 240 280" role="img" aria-label={`Professor Bluff${mood === 'panic' ? ' ist aufgeregt' : mood === 'defeated' ? ' staunt über das Kinderteam' : ''}`}>
+  return <svg class={`bluff-professor mood-${mood}`} viewBox="0 0 240 280" role="img" aria-label={`Professor Bluff${mood === 'startled' ? ' erschrickt über eure Punkte' : mood === 'kind' ? ' macht euch Mut' : mood === 'panic' ? ' ist aufgeregt' : mood === 'defeated' ? ' staunt über das Kinderteam' : ''}`}>
     <ellipse cx="120" cy="267" rx="78" ry="9" fill="#12324a20" />
     <g class="bluff-body"><path d="M67 180Q120 153 173 180l21 65-65 15-84-15z" fill="#6b57aa" stroke="#12324a" stroke-width="5"/>
     <path d="m99 172 21 45 20-45-20 8z" fill="#fff8e5"/><path d="m120 190-17-10v22l17-7 18 7v-22z" fill="#ffbd4b" stroke="#12324a" stroke-width="3"/>
@@ -35,12 +37,12 @@ export function ProfessorBluff({ mood = 'confident' }: { mood?: ProfessorMood })
 function BluffHead({ mood }: { mood: ProfessorMood }) {
   return <g class="bluff-head"><path d="M62 99 44 75l24 2-9-31 31 15 9-32 22 24 30-24 6 30 30-10-8 29 22 12-23 24z" fill="#fff0ad" stroke="#12324a" stroke-width="4" stroke-linejoin="round"/>
     <ellipse cx="120" cy="113" rx="61" ry="65" fill="#f6c89e" stroke="#12324a" stroke-width="5"/><circle cx="59" cy="119" r="11" fill="#efb98e" stroke="#12324a" stroke-width="4"/><circle cx="181" cy="119" r="11" fill="#efb98e" stroke="#12324a" stroke-width="4"/>
-    <path d="m76 79 26-7m36 0 25 7" stroke="#12324a" stroke-width="7" stroke-linecap="round"/>
+    <path class="bluff-brows" d={mood==='kind' ? 'M76 78q13-8 26-3m36 0q13-5 25 3' : 'm76 79 26-7m36 0 25 7'} stroke="#12324a" stroke-width="7" stroke-linecap="round"/>
     <g fill="#fff" fill-opacity=".72" stroke="#12324a" stroke-width="5"><circle cx="90" cy="104" r="25"/><circle cx="150" cy="104" r="25"/><path d="M115 102h10"/></g>
-    <g class="bluff-eyes" fill="#12324a"><ellipse cx="94" cy="105" rx="5" ry="8"/><ellipse cx="146" cy="105" rx="5" ry="8"/></g>
+    <g class="bluff-eyes" fill="#12324a">{mood==='kind' ? <path d="M86 106q8-10 16 0m36 0q8-10 16 0" fill="none" stroke="#12324a" stroke-width="4" stroke-linecap="round"/> : <><ellipse cx="94" cy="105" rx={mood==='startled' ? 4 : 5} ry={mood==='startled' ? 11 : 8}/><ellipse cx="146" cy="105" rx={mood==='startled' ? 4 : 5} ry={mood==='startled' ? 11 : 8}/></>}</g>
     <path d="m119 110-8 24 16 1" fill="#efb98e" stroke="#12324a" stroke-width="3" stroke-linecap="round"/>
     <path d="M120 140q-23-18-40 8 20 11 40-1 20 12 40 1-18-26-40-8" fill="#fff0ad" stroke="#12324a" stroke-width="3"/>
-    <path class="bluff-mouth" d="M105 157q15 15 30 0" fill="#fff" stroke="#12324a" stroke-width="3" stroke-linecap="round"/>
+    {mood==='startled' ? <ellipse class="bluff-mouth" cx="120" cy="159" rx="8" ry="11" fill="#fff" stroke="#12324a" stroke-width="3"/> : <path class="bluff-mouth" d="M105 157q15 15 30 0" fill="#fff" stroke="#12324a" stroke-width="3" stroke-linecap="round"/>}
     {mood === 'panic' && <path d="M191 74q19 26 3 30-18-3-3-30" fill="#6acbd1" stroke="#12324a" stroke-width="3"/>}</g>;
 }
 export function ProfessorHead({ mood = 'confident' }: { mood?: ProfessorMood }) {
