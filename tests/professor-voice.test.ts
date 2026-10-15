@@ -4,6 +4,17 @@ import { createKidsGame, kidsScores, updateKidsGame, type KidsGame } from '../sr
 import { professorVoiceKey } from '../src/shared/professor-voice';
 
 describe('Professor-Aufnahmen', () => {
+  it('ordnet allen neun regulären Fragen eigene Aufnahmen zu und lässt den Countdown ungestartet',()=>{
+    const base=createKidsGame();
+    for(let index=0;index<9;index++){
+      const game={...base,index,phase:'reading' as const}, next=updateKidsGame(game,'read-question',100);
+      expect(next).toMatchObject({phase:'reading',remainingMs:30000,deadline:null,voiceKind:'question',voiceCue:`reading:${index}`});
+      const key=professorVoiceKey(next,'question');expect(key).toBe(`question-${index}`);
+      expect(readFileSync(new URL(`../src/client/public/professor-bluff/${key}.mp3`,import.meta.url)).length).toBeGreaterThan(1500);
+      expect(kidsScores(next)).toEqual(kidsScores(game));
+    }
+    for(const phase of ['welcome','moving','revealed','finished'] as const) expect(updateKidsGame({...base,phase},'read-question',0).voiceSeq).toBeUndefined();
+  });
   it('startet nur durch einen manuellen Sprachbefehl und ändert keine Spielwertung', () => {
     const game=createKidsGame(), spoken=updateKidsGame(game,'speak',0);
     expect(game.voiceSeq ?? 0).toBe(0);

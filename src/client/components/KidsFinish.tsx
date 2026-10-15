@@ -1,3 +1,4 @@
+import { KidsGroupName } from './KidsGroupName';
 import { KidsVoiceButton } from './KidsVoice';
 import type { ComponentChildren } from 'preact';
 import { useLayoutEffect, useRef } from 'preact/hooks';
@@ -7,7 +8,7 @@ import { ProfessorBluff, professorSays } from './KidsShow';
 export function KidsFinish({ game, children }: { game:KidsGame; children?:ComponentChildren }) {
   const s=kidsScores(game);
   return <section class="kids-ending" aria-labelledby="kids-ending-title">
-    <header><p class="kids-eyebrow">EURE GEMEINSAME BLUFF-JAGD</p><h1 id="kids-ending-title">Gemeinsam seid ihr stark!</h1><p>Ein großer Applaus für Minis, Mittis und Maxis!</p></header>
+    <header><p class="kids-eyebrow">EURE GEMEINSAME BLUFF-JAGD</p><h1 id="kids-ending-title">Gemeinsam seid ihr stark!</h1><p>Ein großer Applaus für <KidsGroupName group="minis"/>, <KidsGroupName group="mittis"/> und <KidsGroupName group="maxis"/>!</p></header>
     <div class="kids-ending-host"><ProfessorBluff mood="kind"/><blockquote>{professorSays(game)}</blockquote><span class="kids-professor-signature">Professor Bluff <KidsVoiceButton/></span></div>
     <div class="kids-ending-results" aria-label="Endpunktestand">
       <div class="kids-ending-team"><span>BIBLEBLUFF-TEAM</span><strong data-testid="team-score">{s.team}</strong><b>gemeinsam gesammelte Punkte</b></div>

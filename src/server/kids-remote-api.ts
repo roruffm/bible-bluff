@@ -7,7 +7,7 @@ import type { KidsRemoteRecord, KidsRemoteStore } from './kids-remote-store';
 
 export const KIDS_REMOTE_TTL = 6 * 60 * 60 * 1000;
 const PHASES: KidsPhase[] = ['welcome', 'chapter', 'superbluff', 'reading', 'scene', 'moving', 'paused', 'locked', 'returning', 'judging', 'revealed', 'finished'];
-const ACTIONS: KidsRemoteAction[] = ['start', 'pause', 'resume', 'return', 'ready', 'correct', 'participated', 'none', 'next', 'scene', 'end-scene', 'finish', 'speak', 'stop-speech'];
+const ACTIONS: KidsRemoteAction[] = ['start', 'pause', 'resume', 'return', 'ready', 'correct', 'participated', 'none', 'next', 'scene', 'end-scene', 'finish', 'speak', 'stop-speech', 'read-question'];
 const response = (data: unknown, status = 200) => new Response(JSON.stringify(data), { status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', 'x-content-type-options': 'nosniff' } });
 const token = (bytes = 24) => Array.from(crypto.getRandomValues(new Uint8Array(bytes)), (b) => b.toString(16).padStart(2, '0')).join('');
 async function hash(value: string) { return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value))), (b) => b.toString(16).padStart(2, '0')).join(''); }
@@ -53,8 +53,8 @@ function unpack(value: unknown, now: number): KidsGame {
   })) return badRequest();
   if ((phase === 'welcome' && index !== 0) || (phase === 'chapter' && (index === 9 || index % 3 !== 0)) || (phase === 'superbluff' && index !== 9)) return badRequest();
   if (!Number.isSafeInteger(game.cueSeq) || Number(game.cueSeq) < 0 || Number(game.cueSeq) > 1000) return badRequest();
-  const voiceSeq = game.voiceSeq ?? 0, voicePlaying = game.voicePlaying ?? false, voiceCue = game.voiceCue ?? null;
-  if (!Number.isSafeInteger(voiceSeq) || Number(voiceSeq) < 0 || Number(voiceSeq) > 1000000 || typeof voicePlaying !== 'boolean') return badRequest();
+  const voiceSeq = game.voiceSeq ?? 0, voicePlaying = game.voicePlaying ?? false, voiceCue = game.voiceCue ?? null, voiceKind = game.voiceKind ?? 'quote';
+  if (!Number.isSafeInteger(voiceSeq) || Number(voiceSeq) < 0 || Number(voiceSeq) > 1000000 || typeof voicePlaying !== 'boolean' || !['quote','question'].includes(voiceKind as string)) return badRequest();
   if (voiceCue !== null && (typeof voiceCue !== 'string' || !/^[a-z]+:[0-9]$/.test(voiceCue) || !PHASES.includes(voiceCue.split(':')[0] as KidsPhase))) return badRequest();
   let sceneRemainingMs=0;
   if (phase === 'scene') {
@@ -64,7 +64,7 @@ function unpack(value: unknown, now: number): KidsGame {
   }
   if (game.remainingMs === 0 && (phase === 'moving' || phase === 'paused')) phase = 'locked';
   const remainingMs = ['welcome', 'chapter', 'superbluff', 'reading', 'scene'].includes(phase) ? 30000 : ['locked', 'returning', 'judging', 'revealed', 'finished'].includes(phase) ? 0 : game.remainingMs;
-  return { rounds, index, phase, remainingMs, deadline: phase === 'scene' ? now + sceneRemainingMs : phase === 'moving' ? now + remainingMs : null, results: game.results as (KidsResult | null)[], cueSeq: Number(game.cueSeq), voiceSeq: Number(voiceSeq), voicePlaying, voiceCue: voiceCue as string|null };
+  return { rounds, index, phase, remainingMs, deadline: phase === 'scene' ? now + sceneRemainingMs : phase === 'moving' ? now + remainingMs : null, results: game.results as (KidsResult | null)[], cueSeq: Number(game.cueSeq), voiceSeq: Number(voiceSeq), voicePlaying, voiceCue: voiceCue as string|null, voiceKind:voiceKind as 'quote'|'question' };
 }
 
 export function createKidsRemoteApi(store: KidsRemoteStore, now: () => number) {

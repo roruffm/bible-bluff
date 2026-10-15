@@ -5,23 +5,22 @@
 ## BibleBluff Kids – Die große Bluff-Jagd
 
 Über das Kids-Logo oben links auf der Startseite oder direkt unter `/kids` erreichbar.
-Die ca. 45-minütige Beamer-Show ersetzt das bisherige kurze Kids-Spiel. Minis (3–5),
-Mittis (6–8) und Maxis (9–11) spielen gemeinsam gegen den liebenswerten Professor Bluff.
+Die ca. 45-minütige Beamer-Show ersetzt das bisherige kurze Kids-Spiel. Glühwürmchen (3–5),
+Leuchtsterne (6–8) und Fackelträger (9–11) spielen gemeinsam gegen den liebenswerten Professor Bluff.
+Die Namen erscheinen immer mit ihrem festen Symbol: Glühwürmchen, Stern und Fackel.
 Pro Kapitel kommt jede Altersgruppe einmal dran: neun Aufgaben aus dem bestehenden
-Fragenpool und ein gemeinsamer Superbluff. Für Minis gibt es animierte Bilder und kurze,
+Fragenpool und ein gemeinsamer Superbluff. Für Glühwürmchen gibt es animierte Bilder und kurze,
 lokal erzeugte Klangbilder; Eltern und andere Gruppen machen Geräusche und Pantomime.
 
 - Drei nummerierte Felder im Raum, 30 Sekunden nach dem Vorlesen. Andere Gruppen bleiben
-  in ihren Bereichen. Eltern dürfen Minis begleiten. Keine Kinderkonten oder Einzelwertung.
+  in ihren Bereichen. Eltern dürfen Glühwürmchen begleiten. Keine Kinderkonten oder Einzelwertung.
 - Nach Stopp prüfen Helfer die Antwortfelder. **Zurück in die Gruppen → Alle sind zurück**
   zeigt Professor Bluff groß und animiert; erst danach wird die Wertung freigeschaltet. Nur das gemeinsame Resultat wird erfasst.
 - Kinderteam: Mehrheit richtig = 10 Punkte; sonst mindestens ein Kind richtig = 5; keiner richtig = 0. Maximal 30 je Altersgruppe.
-  Professor: immer +7 je Runde. Einmal in Kapitel 2 kann ein Familienjoker einen Hinweis
-  freischalten, ohne zusätzliche Punkte. Keine heimliche Anpassung der Wertung.
+  Professor: immer +7 je gewerteter Runde. Keine heimliche Anpassung der Wertung.
 - Superbluff: Professor +10, Kinder erhalten auch hier 10 / 5 / 0 nach derselben Regel. Endstand erst nach
-  dem Finale. Professor endet mit 73, Kinder mit Vielfachen von fünf: Gleichstand unmöglich.
-- Ein Schatzteil pro aufgelöster Runde: eine Krone, umringt von vielen Kindern. Am Ende öffnen alle gemeinsam die Botschaft über
-  Jesu Einladung an Kinder (Markus 10,14), unabhängig vom Ergebnis des Punkteduells.
+  dem Finale. Die Spielleitung kann auch jederzeit früher mit dem erreichten Punktestand abschließen.
+  Der Abschluss feiert alle Kinder mit Jesu Einladung (Markus 10,14).
 - Professor mit spielstandsabhängigen Kommentaren. Jede Auflösung hat eine eigene Showbühne:
   bei 5 oder 10 Punkten erschrickt er mit einem neuen Spruch, bei 0 Punkten macht er Mut.
   Die richtige Antwort und die Erklärung bleiben dabei sichtbar. Die Animation wartet auf
@@ -32,8 +31,13 @@ lokal erzeugte Klangbilder; Eltern und andere Gruppen machen Geräusche und Pant
   P: Pause/fortsetzen; H: Mausknöpfe. Während der Wertung: 1 = Mehrheit richtig,
   2 = mindestens ein Kind richtig, 0 = keiner richtig.
 - Smartphone der Spielleitung: **Bedienung → Smartphone verbinden**, QR-Code scannen.
-  Start, Pause, Rückweg, Mehrheitswertung, Familienjoker, Szene und Revanche steuern denselben
+  Start, Pause, Rückweg, Mehrheitswertung, Szene und Abschluss steuern denselben
   Stand wie die Maus. Regiehinweise bleiben auf der Fernbedienung. Klang am Beamer aktivieren.
+- **Frage vorlesen** liest auf manuellen Klick die sichtbare Frage mit Professor Bluffs Stimme.
+  Auch über **Frage am Beamer vorlesen** auf dem Smartphone steuerbar; die 30 Sekunden
+  starten weiterhin separat. Stoppen, Wiederholen und Abbruch beim Weitergehen sind möglich.
+  Die neun regulären Fragen haben eigene MP3-Aufnahmen. Für die noch fehlende Finalaufnahme
+  wird vorläufig eine deutsche Gerätestimme genutzt; fehlt diese, erscheint ein Hinweis zum Vorlesen.
 - Befristete Links mit getrennten Zugriffsschlüsseln, Hashes in D1 und versionierten
   Spielzügen gegen Doppelklicks. Wiederverbindung nach Neuladen und Netzabbruch.
   Ohne Smartphone-Verbindung läuft die Show lokal ohne Serverzugriff.

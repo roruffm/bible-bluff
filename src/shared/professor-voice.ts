@@ -1,7 +1,8 @@
 import { kidsResultPoints, kidsScores, type KidsGame } from './kids-game';
 
 /** Nur Aufnahmen, die zum aktuell sichtbaren Professor-Spruch passen. */
-export function professorVoiceKey(game: KidsGame): string | null {
+export function professorVoiceKey(game: KidsGame, kind:'quote'|'question'='quote'): string | null {
+  if (kind==='question') return game.phase==='reading' ? `question-${game.index}` : null;
   if (['scene','returning','judging'].includes(game.phase)) return null;
   if (game.phase === 'welcome') return 'welcome';
   if (game.phase === 'superbluff') return 'superbluff';

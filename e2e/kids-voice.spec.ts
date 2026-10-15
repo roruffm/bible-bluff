@@ -77,5 +77,32 @@ test('Professor: Smartphone startet und stoppt am Beamer, Neuladen spielt nichts
   await expect(page.getByRole('heading',{name:'Die erste Spur',exact:true})).toBeVisible();
   await page.waitForTimeout(200);
   expect((await counts(page)).starts).toBe(0);
+  await phone.getByRole('button',{name:'Erste Aufgabe im Kapitel',exact:true}).click();
+  await expect(page.locator('#kids-question')).toBeVisible();
+  const questionRequest=page.waitForRequest(request=>request.url().includes('/professor-bluff/question-0.mp3'));
+  await phone.getByRole('button',{name:'Frage am Beamer vorlesen',exact:false}).click();
+  await questionRequest;
+  await expect.poll(async()=>(await counts(page)).starts).toBe(1);
+  await expect(page.locator('.kids-clock')).toHaveAttribute('aria-label','30 Sekunden');
+  await phone.getByRole('button',{name:'Sprache stoppen',exact:false}).click();
+  await expect.poll(async()=>(await counts(page)).stops).toBe(1);
   await context.close();
+});
+
+test('Professor: Frage vorlesen bleibt manuell und stoppt beim Start des Antwort-Countdowns',async({page})=>{
+  await observeAudio(page);await page.goto('/kids');
+  await page.getByRole('button',{name:'Show vorbereiten',exact:false}).click();
+  await page.getByRole('button',{name:'Mission starten',exact:true}).click();
+  await page.getByRole('button',{name:'Erste Aufgabe im Kapitel',exact:true}).click();
+  expect((await counts(page)).starts).toBe(0);
+  await page.getByRole('button',{name:'Frage vorlesen',exact:false}).click();
+  await expect.poll(async()=>(await counts(page)).starts).toBe(1);
+  await expect(page.locator('.kids-clock')).toHaveAttribute('aria-label','30 Sekunden');
+  await page.getByRole('button',{name:'Vorlesen stoppen',exact:false}).click();
+  await expect.poll(async()=>(await counts(page)).stops).toBe(1);
+  await page.getByRole('button',{name:'Frage vorlesen',exact:false}).click();
+  await expect.poll(async()=>(await counts(page)).starts).toBe(2);
+  await page.getByRole('button',{name:'30 Sekunden starten',exact:true}).click();
+  await expect.poll(async()=>(await counts(page)).stops).toBe(2);
+  await expect(page.getByRole('button',{name:'Frage vorlesen',exact:false})).toHaveCount(0);
 });
