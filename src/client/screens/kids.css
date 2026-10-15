@@ -523,7 +523,7 @@
 .kids-ending-results > div { border: 3px solid #176845; border-radius: 26px; padding: 16px 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(145deg,#effff0,#ccebd8); box-shadow: 0 7px 0 #176845; text-align: center; min-width: 0; }
 .kids-ending-results > .kids-ending-professor { border-color: #7154a2; background: linear-gradient(145deg,#f6effd,#e5d9f0); box-shadow: 0 7px 0 #7154a2; }
 .kids-ending-results > div > span { font-size: clamp(11px,1.3vw,24px); font-weight: 900; letter-spacing: .025em; }
-.kids-ending-results strong { font-size: clamp(68px,min(12vw,19vh),250px); line-height: 1.05; font-weight: 900; color: #176845; font-variant-numeric: tabular-nums; padding: 4px 0; }
+.kids-ending-results strong { font-size: clamp(68px,min(12vw,19vh),250px); line-height: 1.25; font-weight: 900; color: #176845; font-variant-numeric: tabular-nums; padding: 4px 0; }
 .kids-ending-professor strong { color: #7154a2; }
 .kids-ending-results b { font-size: clamp(12px,1.3vw,23px); line-height: 1.3; }
 .kids-ending-count { grid-column: 1 / -1; font-size: clamp(14px,1.6vw,28px); text-align: center; font-weight: 800; padding: 10px 0 0; }
