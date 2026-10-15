@@ -22,6 +22,7 @@ import { Guide } from '../components/Guide';
 import { BluffPractice } from '../components/BluffPractice';
 import { EnterIcon, FriendsIcon } from '../components/Icons';
 import { LangSwitch } from '../components/LangSwitch';
+import { KidsLogo } from '../components/KidsLogo';
 import { ThemeFold } from '../components/ThemePicker';
 import { Avatar, Button, Logo, Segmented, Toggle } from '../components/ui';
 import { ApiError, api } from '../lib/api';
@@ -69,6 +70,7 @@ export function Home() {
   return (
     <main class="page home">
       <header class="hero has-lang">
+        <a class="home-kids-link" href="/kids" aria-label="BibleBluff Kids – Beamer-Spiel für Kinder" onClick={(e) => { e.preventDefault(); navigate('/kids'); }}><KidsLogo compact /></a>
         <LangSwitch />
         <Logo />
         <p class="tagline">{t('Bibelwissen hilft. Bluffen auch.')}</p>
