@@ -109,12 +109,12 @@ export function useKidsRemote(mode: 'display' | 'control', onGame: (game: KidsGa
       apply(created, state.current.epoch);
     } catch (err) { fail(err, epoch); } finally { state.current.pending = false; setBusy(false); }
   };
-  const send = async (action: KidsRemoteAction) => {
+  const send = async (action: KidsRemoteAction, voiceKey?: string) => {
     const { credentials: c, view: current, epoch } = state.current;
     if (!c || !current || state.current.pending || fatal) return;
     state.current.pending = true; setBusy(true);
     try {
-      const next = await request<KidsRemoteView>('POST', `/api/kids-remotes/${c.id}/action`, { action, version: current.version }, c.token);
+      const next = await request<KidsRemoteView>('POST', `/api/kids-remotes/${c.id}/action`, { action, version: current.version, ...(action === 'voice' ? { voiceKey } : {}) }, c.token);
       apply(next, epoch);
     } catch (err) {
       if (err instanceof RemoteError && err.status === 409) {
