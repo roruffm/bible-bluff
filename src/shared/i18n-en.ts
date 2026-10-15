@@ -4,6 +4,15 @@
 // Ein Test prüft, dass jeder verwendete Text hier steht und jeder Eintrag noch verwendet wird.
 
 export const EN: Record<string, string> = {
+  'Die Fernbedienungs-Anfrage ist ungültig.': 'The remote control request is invalid.',
+  'Bitte versuche es noch einmal.': 'Please try again.',
+  'Diese Fernbedienung gibt es nicht mehr.': 'This remote control is no longer available.',
+  'Bitte scanne den QR-Code der Spielleitung erneut.': 'Please scan the host’s QR code again.',
+  'Die Verbindung wurde beendet oder ist abgelaufen.': 'The connection was closed or has expired.',
+  'Dieser Fernbedienungs-Link passt nicht.': 'This remote control link is not valid.',
+  'Die Verbindung kann nur am Beamer beendet werden.': 'Only the projector can close this connection.',
+  'Der Spielstand hat sich geändert. Bitte noch einmal tippen.': 'The game has changed. Please tap again.',
+  'Dieser Schritt ist jetzt noch nicht möglich.': 'This step is not available yet.',
   'Weitere Einstellungen': 'More settings',
   'Einstellungen ändern': 'Change settings',
   'Spielregeln': 'Game rules',

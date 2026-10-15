@@ -38,6 +38,8 @@ import { getQuestion, hasQuestion } from './questions';
 import { buildRecap, isRecapId, randomRecapId } from './recap';
 import { GameError, type Ctx, type PlayerRec, type RoomState } from './state';
 import type { RoomRecord, RoomStore } from './store';
+import { createKidsRemoteApi } from './kids-remote-api';
+import { MemoryKidsRemoteStore, type KidsRemoteStore } from './kids-remote-store';
 import { isDuplicate, isTooCloseToTruth } from './text';
 import { versesFor } from '../shared/verses';
 import { buildView, publicRoom } from './view';
@@ -48,6 +50,7 @@ export interface ApiDeps {
   rng?: () => number;
   /** Schlüssel für die Freigabe-Seite /admin; ohne ihn ist die Freigabe abgeschaltet */
   adminKey?: string;
+  kidsRemoteStore?: KidsRemoteStore;
 }
 
 const MAX_BODY = 8 * 1024;
@@ -147,6 +150,7 @@ export function createApi(deps: ApiDeps) {
   const now = deps.now ?? (() => Date.now());
   const rng = deps.rng ?? cryptoRng;
   const { store } = deps;
+  const kidsRemote = createKidsRemoteApi(deps.kidsRemoteStore ?? new MemoryKidsRemoteStore(), now);
 
   const makeCtx = (presence: Record<string, number>, extraBluffs?: Record<string, string[]>): Ctx => ({
     now: now(),
@@ -506,6 +510,7 @@ export function createApi(deps: ApiDeps) {
     try {
       if (parts[0] !== 'api') throw new GameError('not_found', 'Nicht gefunden.', 404);
       const method = request.method.toUpperCase();
+      if (parts[1] === 'kids-remotes') return await kidsRemote(request, parts);
 
       if (parts.length === 2 && parts[1] === 'health' && method === 'GET') return json({ ok: true });
       if (parts.length === 2 && parts[1] === 'rooms' && method === 'POST') return await createRoomRoute(request);

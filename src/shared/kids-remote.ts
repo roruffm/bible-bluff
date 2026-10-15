@@ -1,0 +1,26 @@
+import type { KidsGame, KidsAction } from './kids-game';
+
+export type KidsRemoteAction = Exclude<KidsAction, 'tick'> | 'restart';
+export interface KidsRemoteView {
+  id: string;
+  version: number;
+  serverNow: number;
+  expiresAt: number;
+  easy: boolean;
+  game: KidsGame;
+}
+export interface KidsCredentials { id: string; token: string; remoteToken?: string }
+export interface KidsRemoteCreated extends KidsRemoteView { ownerToken: string; remoteToken: string }
+
+/** Nur IDs und Antwortreihenfolge; der Server holt Texte und richtige Antworten aus seinem Pool. */
+export function packKidsGame(game: KidsGame, now: number) {
+  return {
+    rounds: game.rounds.map((r) => ({ id: r.question.sourceId, answers: r.answers })),
+    index: game.index,
+    phase: game.phase,
+    remainingMs: game.phase === 'moving' ? Math.max(0, (game.deadline ?? now) - now) : game.remainingMs,
+    results: game.results,
+    jokerFor: game.jokerFor,
+    cueSeq: game.cueSeq,
+  };
+}

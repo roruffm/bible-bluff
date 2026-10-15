@@ -6,6 +6,7 @@ describe('Adressen', () => {
     expect(parseRoute('/')).toEqual({ name: 'home' });
     expect(parseRoute('/neu')).toEqual({ name: 'create' });
     expect(parseRoute('/kids')).toEqual({ name: 'kids' });
+    expect(parseRoute('/kids/steuerung')).toEqual({ name: 'kids-control' });
     expect(parseRoute('/jakob')).toEqual({ name: 'create', bot: true });
     expect(parseRoute('/joseph')).toEqual({ name: 'create', bot: true });
     expect(parseRoute('/r/lampe7')).toEqual({ name: 'room', code: 'LAMPE7' });

@@ -3,6 +3,7 @@
 
 import { createApi } from './server/api';
 import { D1Store, type D1Like } from './server/d1-store';
+import { D1KidsRemoteStore } from './server/kids-remote-store';
 import { HOME, homePreview, inviteCode, invitePreview, linkLang } from './server/preview';
 
 interface Env {
@@ -19,7 +20,7 @@ export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
     if (url.pathname.startsWith('/api/')) {
-      handleApi ??= createApi({ store: new D1Store(env.DB), adminKey: env.ADMIN_KEY || undefined });
+      handleApi ??= createApi({ store: new D1Store(env.DB), kidsRemoteStore: new D1KidsRemoteStore(env.DB), adminKey: env.ADMIN_KEY || undefined });
       return handleApi(request);
     }
     if (request.method === 'GET' || request.method === 'HEAD') {
