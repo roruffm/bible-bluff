@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 
-test.use({ isMobile: false, reducedMotion: 'reduce' });
+test.use({ isMobile: false });
+test.beforeEach(async ({ page }) => { await page.emulateMedia({ reducedMotion: 'reduce' }); });
 
 test('Kids: Inhalte bleiben bei schmalen und flachen Fenstern erreichbar', async ({ page }) => {
   const sizes = [{ width: 844, height: 390 }, { width: 1024, height: 500 }, { width: 768, height: 1024 }, { width: 390, height: 844 }];
