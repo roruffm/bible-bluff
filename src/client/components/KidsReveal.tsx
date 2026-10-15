@@ -21,7 +21,7 @@ export function KidsReveal({ game, act, disabled, primaryRef, children }: { game
       <blockquote class="kids-reaction-bubble"><span>PROFESSOR BLUFF</span><p class="kids-reaction-quote">{reaction.quote}</p></blockquote>
       <p class="kids-reaction-caption">{reaction.caption}</p>
     </aside>
-    <footer class="kids-reveal-footer"><p>{game.index===9 ? 'Alle Altersgruppen haben zusammengeholfen.' : 'Ein neues Schatzteil! Gemeinsam geht die Jagd weiter.'}</p><ShowControls game={game} act={act} disabled={disabled} primaryRef={primaryRef}/></footer>
+    <footer class="kids-reveal-footer"><p>{game.index===9 ? 'Alle Altersgruppen haben zusammengeholfen.' : 'Gemeinsam geht die Jagd weiter. Jeder Beitrag zählt!'}</p><ShowControls game={game} act={act} disabled={disabled} primaryRef={primaryRef}/></footer>
     {children}
   </section>;
 }

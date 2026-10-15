@@ -7,7 +7,7 @@ import type { KidsRemoteRecord, KidsRemoteStore } from './kids-remote-store';
 
 export const KIDS_REMOTE_TTL = 6 * 60 * 60 * 1000;
 const PHASES: KidsPhase[] = ['welcome', 'chapter', 'superbluff', 'reading', 'scene', 'moving', 'paused', 'locked', 'returning', 'judging', 'revealed', 'finished'];
-const ACTIONS: KidsRemoteAction[] = ['start', 'pause', 'resume', 'return', 'ready', 'correct', 'participated', 'none', 'next', 'scene', 'end-scene'];
+const ACTIONS: KidsRemoteAction[] = ['start', 'pause', 'resume', 'return', 'ready', 'correct', 'participated', 'none', 'next', 'scene', 'end-scene', 'finish'];
 const response = (data: unknown, status = 200) => new Response(JSON.stringify(data), { status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', 'x-content-type-options': 'nosniff' } });
 const token = (bytes = 24) => Array.from(crypto.getRandomValues(new Uint8Array(bytes)), (b) => b.toString(16).padStart(2, '0')).join('');
 async function hash(value: string) { return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value))), (b) => b.toString(16).padStart(2, '0')).join(''); }
@@ -45,8 +45,13 @@ function unpack(value: unknown, now: number): KidsGame {
   });
   let phase = game.phase as KidsPhase;
   const index = Number(game.index);
-  if (!Array.isArray(game.results) || game.results.length !== 10 || !game.results.every((r, i) => i < index || (i === index && ['revealed', 'finished'].includes(phase)) ? ['correct', 'participated', 'none'].includes(r) : r === null)) return badRequest();
-  if ((phase === 'welcome' && index !== 0) || (phase === 'chapter' && (index === 9 || index % 3 !== 0)) || (['superbluff', 'finished'].includes(phase) && index !== 9)) return badRequest();
+  if (!Array.isArray(game.results) || game.results.length !== 10 || !game.results.every((r,i)=>{
+    const scored=['correct','participated','none'].includes(r);
+    if (i < index) return scored;
+    if (i > index) return r === null;
+    return phase === 'finished' ? r === null || scored : phase === 'revealed' ? scored : r === null;
+  })) return badRequest();
+  if ((phase === 'welcome' && index !== 0) || (phase === 'chapter' && (index === 9 || index % 3 !== 0)) || (phase === 'superbluff' && index !== 9)) return badRequest();
   if (!Number.isSafeInteger(game.cueSeq) || Number(game.cueSeq) < 0 || Number(game.cueSeq) > 1000) return badRequest();
   let sceneRemainingMs=0;
   if (phase === 'scene') {

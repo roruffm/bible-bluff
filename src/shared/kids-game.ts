@@ -11,7 +11,7 @@ export interface KidsGame {
   rounds: KidsRound[]; index: number; phase: KidsPhase; remainingMs: number; deadline: number | null;
   results: (KidsResult | null)[]; cueSeq: number;
 }
-export type KidsAction = 'start' | 'pause' | 'resume' | 'tick' | 'return' | 'ready' | 'correct' | 'participated' | 'none' | 'next' | 'scene' | 'end-scene';
+export type KidsAction = 'start' | 'pause' | 'resume' | 'tick' | 'return' | 'ready' | 'correct' | 'participated' | 'none' | 'next' | 'scene' | 'end-scene' | 'finish';
 
 function shuffle<T>(items: readonly T[], random: () => number): T[] {
   const result = [...items];
@@ -29,25 +29,27 @@ export function createKidsGame(random: () => number = Math.random): KidsGame {
 }
 export function kidsScores(game: KidsGame) {
   const groups = { minis: 0, mittis: 0, maxis: 0 };
-  let professor = game.index === 9 ? 10 : 0; let bonus = 0; let pieces = 0;
+  let professor = 0; let bonus = 0; let playedRounds = 0;
   game.results.forEach((result, i) => {
     if (result === null) return;
-    if (i === 9) { bonus = kidsResultPoints(result); return; }
+    playedRounds++;
+    if (i === 9) { bonus = kidsResultPoints(result); professor += 10; return; }
     const group = game.rounds[i].question.group as Exclude<KidsGroup, 'all'>;
     groups[group] += kidsResultPoints(result);
-    professor += 7; pieces++;
+    professor += 7;
   });
-  return { groups, bonus, team: groups.minis + groups.mittis + groups.maxis + bonus, professor, pieces };
+  return { groups, bonus, team: groups.minis + groups.mittis + groups.maxis + bonus, professor, playedRounds };
 }
 /** Zeit und Punkte sind geräteunabhängig; doppelte oder unpassende Schritte ändern nichts. */
 export function updateKidsGame(game: KidsGame, action: KidsAction, now: number): KidsGame {
   const phase = game.phase;
+  if (action === 'finish' && phase !== 'finished') return { ...game, phase: 'finished', remainingMs: 0, deadline: null };
   if (phase === 'scene' && (action === 'end-scene' || (action === 'tick' && now >= (game.deadline ?? now)))) return { ...game, phase: 'reading', deadline: null };
   if (action === 'next') {
     if (phase === 'welcome') return { ...game, phase: 'chapter' };
     if (phase === 'chapter' || phase === 'superbluff') return { ...game, phase: 'reading' };
     if (phase === 'revealed') {
-      if (game.index === 9) return { ...game, phase: 'finished' };
+      if (game.index === 9) return updateKidsGame(game, 'finish', now);
       const index = game.index + 1;
       return { ...game, index, phase: index === 9 ? 'superbluff' : index % 3 === 0 ? 'chapter' : 'reading', remainingMs: 30000, deadline: null };
     }
@@ -80,6 +82,6 @@ export function kidsActionLabel(game: KidsGame): string {
   if (game.phase === 'paused') return 'Weiter geht’s';
   if (game.phase === 'locked') return 'Zurück in die Gruppen';
   if (game.phase === 'returning') return 'Alle sind zurück';
-  if (game.index === 9) return 'Schatz öffnen';
+  if (game.index === 9) return 'Zum Abschluss';
   return game.index === 8 ? 'Zum Superbluff' : (game.index + 1) % 3 === 0 ? 'Nächstes Kapitel' : 'Nächste Aufgabe';
 }

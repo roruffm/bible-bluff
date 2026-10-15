@@ -47,13 +47,13 @@ describe('Die große Bluff-Jagd', () => {
       g=updateKidsGame(g,'next',30000);
       if(i===2 || i===5) { expect(g.phase).toBe('chapter'); g=updateKidsGame(g,'next',30000); }
     }
-    expect(g.phase).toBe('superbluff'); expect(kidsScores(g).team).toBe(65); expect(kidsScores(g).professor).toBe(73);
-    expect(kidsScores(g).pieces).toBe(9); expect(kidsScores(g).groups).toEqual({minis:25,mittis:20,maxis:20});
-    g=updateKidsGame(g,'next',30000); expect(kidsScores(g).professor).toBe(73);
+    expect(g.phase).toBe('superbluff'); expect(kidsScores(g).team).toBe(65); expect(kidsScores(g).professor).toBe(63);
+    expect(kidsScores(g).playedRounds).toBe(9); expect(kidsScores(g).groups).toEqual({minis:25,mittis:20,maxis:20});
+    g=updateKidsGame(g,'next',30000); expect(kidsScores(g).professor).toBe(63);
     g=resolve(g,'correct'); expect(kidsScores(g).team).toBe(75);
     g=updateKidsGame(g,'next',30000); expect(g.phase).toBe('finished'); expect(kidsScores(g).professor).toBe(73);
   });
-  it('hat feste Punkte für alle Resultate und feiert den vollständigen Schatz auch bei einer Niederlage', () => {
+  it('hat feste Punkte für alle Resultate und einen gemeinsamen Abschluss', () => {
     for (const result of ['correct','participated','none'] as const) {
       let g=reading();
       for(let i=0;i<10;i++) {
@@ -62,7 +62,7 @@ describe('Die große Bluff-Jagd', () => {
         if(['chapter','superbluff'].includes(g.phase)) g=updateKidsGame(g,'next',30000);
       }
       expect(g.phase).toBe('finished'); const s=kidsScores(g);
-      expect(s.professor).toBe(73); expect(s.pieces).toBe(9);
+      expect(s.professor).toBe(73); expect(s.playedRounds).toBe(10);
       expect(s.team).toBe(result==='correct' ? 100 : result==='participated' ? 50 : 0);
       expect(Object.values(s.groups).every(n=>n<=30)).toBe(true);
     }
@@ -112,6 +112,38 @@ describe('Die große Bluff-Jagd', () => {
     expect(updateKidsGame(replay,'end-scene',12500)).toMatchObject({phase:'reading',remainingMs:30000,deadline:null});
     const noScene={...after,index:1};expect(updateKidsGame(noScene,'scene',12000)).toBe(noScene);
     expect(kidsSceneBeat(2999)).toBe(0);expect(kidsSceneBeat(3000)).toBe(1);expect(kidsSceneBeat(6500)).toBe(2);
+  });
+
+  it('kann in jeder Phase abschließen, zählt nur gewertete Aufgaben und friert den Stand ein', () => {
+    const candidates:KidsGame[]=[];
+    let g=createKidsGame();candidates.push(g);
+    g=updateKidsGame(g,'next',0);candidates.push(g);
+    g=updateKidsGame(g,'next',0);
+    for(let i=0;i<10;i++) {
+      candidates.push(g);
+      if(g.rounds[g.index].question.scene)candidates.push(updateKidsGame(g,'scene',0));
+      g=updateKidsGame(g,'start',0);candidates.push(g);
+      candidates.push(updateKidsGame(g,'pause',5000));
+      g=updateKidsGame(g,'tick',30000);candidates.push(g);
+      g=updateKidsGame(g,'return',30000);candidates.push(g);
+      g=updateKidsGame(g,'ready',30000);candidates.push(g);
+      g=updateKidsGame(g,i%2 ? 'participated' : 'correct',30000);candidates.push(g);
+      g=updateKidsGame(g,'next',30000);candidates.push(g);
+      if(['chapter','superbluff'].includes(g.phase))g=updateKidsGame(g,'next',30000);
+    }
+    expect(new Set(candidates.map(c=>c.phase)).size).toBe(12);
+    for(const before of candidates) {
+      const scores=kidsScores(before), finished=updateKidsGame(before,'finish',100000);
+      expect(finished).toMatchObject({phase:'finished',deadline:null,remainingMs:0,index:before.index});
+      expect(finished.results).toBe(before.results);expect(kidsScores(finished)).toEqual(scores);
+      for(const action of ['start','next','scene','end-scene','correct','participated','none','tick','finish'] as const)expect(updateKidsGame(finished,action,999999)).toBe(finished);
+    }
+  });
+  it('vergibt keine Punkte für einen ungespielten Superbluff', () => {
+    const g={...createKidsGame(),index:9,phase:'superbluff' as const,results:[...Array(9).fill('correct'),null]};
+    expect(kidsScores(updateKidsGame(g,'finish',0))).toMatchObject({team:90,professor:63,bonus:0,playedRounds:9});
+    const resolved={...g,phase:'revealed' as const,results:[...Array(9).fill('correct'),'none' as const]};
+    expect(kidsScores(updateKidsGame(resolved,'finish',0))).toMatchObject({team:90,professor:73,bonus:0,playedRounds:10});
   });
 
 });
