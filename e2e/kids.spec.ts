@@ -49,8 +49,12 @@ test('Kids: ganze Partie mit Finale und neuer Frageauswahl, ohne Raum oder Spiel
     await page.clock.runFor(30000);
     await page.getByRole('button', { name: 'Antwort aufdecken' }).click();
     await expect(page.locator('.kids-answer.is-correct')).toHaveCount(1);
-    const box = await page.locator('.kids-controls').boundingBox();
-    expect(box!.y + box!.height).toBeLessThanOrEqual(800);
+    for (const viewport of [{ width: 1280, height: 720 }, { width: 1024, height: 768 }, { width: 1920, height: 1080 }]) {
+      await page.setViewportSize(viewport);
+      const box = await page.locator('.kids-controls').boundingBox();
+      expect(box!.y + box!.height).toBeLessThanOrEqual(viewport.height);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    }
     await page.getByRole('button', { name: i === 5 ? 'Zum großen Finale' : 'Nächste Frage' }).click();
   }
   await expect(page.getByRole('heading', { name: 'Ihr wart spitze!' })).toBeVisible();
