@@ -1,3 +1,4 @@
+import { CrownTreasureArt } from './KidsChildrenArt';
 import type { RefObject } from 'preact';
 import { kidsActionLabel, kidsPrimaryAction, kidsScores, type KidsAction, type KidsGame } from '../../shared/kids-game';
 import { KIDS_GROUPS, type StoryMotif } from '../../shared/kids-show-questions';
@@ -28,16 +29,22 @@ export function ProfessorBluff({ mood = 'confident' }: { mood?: ProfessorMood })
     <path d="m72 193-34 27-16-15m147-10 30 24 20-20" fill="none" stroke="#12324a" stroke-width="18" stroke-linecap="round"/><path d="m72 193-34 27-16-15m147-10 30 24 20-20" fill="none" stroke="#8c79c2" stroke-width="11" stroke-linecap="round"/>
     <circle cx="20" cy="203" r="12" fill="#efb98e" stroke="#12324a" stroke-width="4"/><circle cx="220" cy="196" r="12" fill="#efb98e" stroke="#12324a" stroke-width="4"/>
     <path d="m86 249-7 15m70-15 8 15" stroke="#12324a" stroke-width="14" stroke-linecap="round"/></g>
-    <g class="bluff-head"><path d="M62 99 44 75l24 2-9-31 31 15 9-32 22 24 30-24 6 30 30-10-8 29 22 12-23 24z" fill="#fff0ad" stroke="#12324a" stroke-width="4" stroke-linejoin="round"/>
+    <BluffHead mood={mood}/>
+  </svg>;
+}
+function BluffHead({ mood }: { mood: ProfessorMood }) {
+  return <g class="bluff-head"><path d="M62 99 44 75l24 2-9-31 31 15 9-32 22 24 30-24 6 30 30-10-8 29 22 12-23 24z" fill="#fff0ad" stroke="#12324a" stroke-width="4" stroke-linejoin="round"/>
     <ellipse cx="120" cy="113" rx="61" ry="65" fill="#f6c89e" stroke="#12324a" stroke-width="5"/><circle cx="59" cy="119" r="11" fill="#efb98e" stroke="#12324a" stroke-width="4"/><circle cx="181" cy="119" r="11" fill="#efb98e" stroke="#12324a" stroke-width="4"/>
     <path d="m76 79 26-7m36 0 25 7" stroke="#12324a" stroke-width="7" stroke-linecap="round"/>
-    <g fill="#ffffffb8" stroke="#12324a" stroke-width="5"><circle cx="90" cy="104" r="25"/><circle cx="150" cy="104" r="25"/><path d="M115 102h10"/></g>
+    <g fill="#fff" fill-opacity=".72" stroke="#12324a" stroke-width="5"><circle cx="90" cy="104" r="25"/><circle cx="150" cy="104" r="25"/><path d="M115 102h10"/></g>
     <g class="bluff-eyes" fill="#12324a"><ellipse cx="94" cy="105" rx="5" ry="8"/><ellipse cx="146" cy="105" rx="5" ry="8"/></g>
     <path d="m119 110-8 24 16 1" fill="#efb98e" stroke="#12324a" stroke-width="3" stroke-linecap="round"/>
     <path d="M120 140q-23-18-40 8 20 11 40-1 20 12 40 1-18-26-40-8" fill="#fff0ad" stroke="#12324a" stroke-width="3"/>
     <path class="bluff-mouth" d="M105 157q15 15 30 0" fill="#fff" stroke="#12324a" stroke-width="3" stroke-linecap="round"/>
-    {mood === 'panic' && <path d="M191 74q19 26 3 30-18-3-3-30" fill="#6acbd1" stroke="#12324a" stroke-width="3"/>}</g>
-  </svg>;
+    {mood === 'panic' && <path d="M191 74q19 26 3 30-18-3-3-30" fill="#6acbd1" stroke="#12324a" stroke-width="3"/>}</g>;
+}
+export function ProfessorHead({ mood = 'confident' }: { mood?: ProfessorMood }) {
+  return <svg class={`bluff-professor-head mood-${mood}`} viewBox="35 22 175 166" role="img" aria-label="Professor Bluffs Kopf"><BluffHead mood={mood}/></svg>;
 }
 export function StoryPicture({ motif, animated = false }: { motif: StoryMotif; animated?: boolean }) {
   return <svg class={`kids-story-picture${animated ? ' is-animated' : ''}`} viewBox="0 0 220 140" aria-hidden="true">
@@ -57,8 +64,8 @@ export function StoryPicture({ motif, animated = false }: { motif: StoryMotif; a
   </svg>;
 }
 export function Treasure({ pieces, open = false }: { pieces: number; open?: boolean }) {
-  return <div class={`kids-treasure${open ? ' is-open' : ''}`} aria-label={`${pieces} von 9 Schatzteilen entdeckt`}>
-    <svg viewBox="0 0 300 180" aria-hidden="true"><rect width="300" height="180" fill="#d6eee5"/><circle cx="245" cy="32" r="39" fill="#ffdc74"/><path d="M-10 180Q50 35 150 110 235 50 310 160v30z" fill="#93ceb5"/><path d="M23 104q127-160 254 0" fill="none" stroke="#e7a3ad" stroke-width="17"/><path d="M23 118q127-160 254 0" fill="none" stroke="#ffd362" stroke-width="12"/><path d="M104 95h92v60h-92z" fill="#bb814f" stroke="#12324a" stroke-width="4"/><path d="M104 95q46-55 92 0z" fill="#e7b562" stroke="#12324a" stroke-width="4"/><path d="M147 88h9v68h-9z" fill="#ffd362"/><path d="M150 72C111 47 130 23 150 40c20-17 39 7 0 32" fill="#d55d78"/><circle cx="66" cy="133" r="13" fill="#f0ba8f"/><path d="m48 175 8-25h21l10 25" fill="#6e98cb"/><circle cx="235" cy="133" r="13" fill="#bf815c"/><path d="m215 175 10-25h21l10 25" fill="#b39aca"/></svg>
+  return <div class={`kids-treasure${open ? ' is-open' : ''}`} aria-label={`${pieces} von 9 Schatzteilen entdeckt: eine Krone mit vielen Kindern`}>
+    <CrownTreasureArt/>
     <div class="kids-treasure-tiles" aria-hidden="true">{Array.from({ length: 9 }, (_, i) => <span key={i} class={i < pieces ? 'is-found' : ''}>{i < pieces ? '' : '✦'}</span>)}</div>
   </div>;
 }
@@ -67,7 +74,7 @@ export function ShowScoreboard({ game }: { game: KidsGame }) {
   return <section class="kids-scoreboard" aria-label="Gemeinsame Punktejagd">
     <div class="kids-team-score"><span>BIBLEBLUFF-TEAM</span><strong data-testid="team-score">{suspense ? '?' : s.team}</strong><div>{(['minis','mittis','maxis'] as const).map(g=><span key={g}>{KIDS_GROUPS[g].name} <b>{s.groups[g]}</b><small>/30</small></span>)}</div></div>
     <div class="kids-race" aria-label={suspense ? 'Superbluff läuft. Endstand gleich!' : `Kinderteam ${s.team}, Professor Bluff ${s.professor}`}>
-      <div class="kids-race-lane"><span style={{ left: `${(suspense ? s.team - s.bonus : s.team) * .85}%` }}>♥</span></div><div class="kids-race-lane professor-lane"><span style={{ left: `${s.professor * .85}%` }}>B</span></div><div class="kids-race-chest"><Treasure pieces={s.pieces}/></div><small>{suspense ? 'Endstand nach dem Superbluff' : `${s.pieces} / 9 Schatzteile · Gemeinsam!`}</small>
+      <div class="kids-race-lane"><span style={{ left: `${(suspense ? s.team - s.bonus : s.team) * .85}%` }}>♥</span></div><div class="kids-race-lane professor-lane"><span style={{ left: `${s.professor * .85}%` }}><ProfessorHead mood={professorMood(game)}/></span></div><div class="kids-race-chest"><Treasure pieces={s.pieces}/></div><small>{suspense ? 'Endstand nach dem Superbluff' : `${s.pieces} / 9 Schatzteile · Gemeinsam!`}</small>
     </div>
     <div class="kids-prof-score"><span>PROFESSOR BLUFF</span><strong data-testid="prof-score">{suspense ? '?' : s.professor}</strong><small>{suspense ? '+10 Finalangriff' : '+7 pro Runde'}</small></div>
   </section>;
@@ -76,9 +83,9 @@ export function ShowControls({ game, act, disabled = false, primaryRef }: { game
   const action = kidsPrimaryAction(game.phase);
   return <div class={`kids-controls${game.phase === 'judging' ? ' is-judging' : ''}`}>
     {game.phase === 'judging' ? <div class="kids-score-actions" aria-label="Mehrheitsresultat eintragen">
-      <button class="kids-button kids-primary" type="button" disabled={disabled} onClick={() => act('correct')}>{game.index === 9 ? 'Gemeinsam gelöst · +10' : 'Mehrheit richtig · +10'}</button>
-      {game.index !== 9 && <button class="kids-button" type="button" disabled={disabled} onClick={() => act('participated')}>Mitgemacht · +5</button>}
-      <button class="kids-tool" type="button" disabled={disabled} onClick={() => act('none')}>{game.index === 9 ? 'Diesmal nicht gelöst · +0' : 'Keine Teilnahme · +0'}</button>
+      <button class="kids-button kids-primary" type="button" disabled={disabled} onClick={() => act('correct')}>Mehrheit richtig · +10</button>
+      <button class="kids-button" type="button" disabled={disabled} onClick={() => act('participated')}>Mindestens ein Kind richtig · +5</button>
+      <button class="kids-tool" type="button" disabled={disabled} onClick={() => act('none')}>Keiner richtig · +0</button>
     </div> : game.phase === 'moving' ? <button type="button" class="kids-button" disabled={disabled} onClick={() => act('pause')}>Ⅱ Pause</button> : action && <button ref={primaryRef} type="button" class="kids-button kids-primary" disabled={disabled} onClick={() => act(action)}>{kidsActionLabel(game)}</button>}
   </div>;
 }

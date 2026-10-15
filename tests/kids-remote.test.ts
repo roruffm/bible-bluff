@@ -6,7 +6,7 @@ import { MemoryStore } from '../src/server/store';
 import { D1KidsRemoteStore, MemoryKidsRemoteStore, type KidsRemoteStore } from '../src/server/kids-remote-store';
 import { KIDS_REMOTE_TTL } from '../src/server/kids-remote-api';
 import type { D1Like, D1PreparedLike } from '../src/server/d1-store';
-import { createKidsGame, updateKidsGame } from '../src/shared/kids-game';
+import { createKidsGame, kidsScores, updateKidsGame } from '../src/shared/kids-game';
 import { packKidsGame, type KidsRemoteCreated } from '../src/shared/kids-remote';
 import { Clock } from './helpers';
 
@@ -122,6 +122,20 @@ describe('Kids-Fernbedienung', () => {
     expect(next.body.game.phase).toBe('welcome'); expect(next.body.game.index).toBe(0);
     expect(next.body.game.rounds).toHaveLength(10);
     expect(next.body.game.results.every(r=>r===null)).toBe(true);
+  });
+  it('vergibt auch im Finale fünf Punkte für mindestens ein richtiges Kind und bewahrt sie beim Neuladen', async () => {
+    const t = setup();
+    const game = { ...reading(), index: 9, phase: 'judging' as const, remainingMs: 0, results: [...Array(9).fill('none'), null] };
+    const made = await t.create(game);
+    const path = `/api/kids-remotes/${made.id}`;
+    const result = await t.call('POST', `${path}/action`, { action: 'participated', version: 1 }, made.remoteToken);
+    expect(result.status).toBe(200);
+    expect(result.body.game.results[9]).toBe('participated');
+    expect(kidsScores(result.body.game).bonus).toBe(5);
+    expect(kidsScores(result.body.game).team).toBe(5);
+    const restored = await t.call('POST', '/api/kids-remotes', { easy: false, game: packKidsGame(result.body.game, t.clock.now) });
+    expect(restored.status).toBe(201);
+    expect(restored.body.game.results[9]).toBe('participated');
   });
 });
 

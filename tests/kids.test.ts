@@ -55,13 +55,13 @@ describe('Die große Bluff-Jagd', () => {
     for (const result of ['correct','participated','none'] as const) {
       let g=reading();
       for(let i=0;i<10;i++) {
-        g=resolve(g,i===9 && result==='participated' ? 'none':result);
+        g=resolve(g,result);
         g=updateKidsGame(g,'next',30000);
         if(['chapter','superbluff'].includes(g.phase)) g=updateKidsGame(g,'next',30000);
       }
       expect(g.phase).toBe('finished'); const s=kidsScores(g);
       expect(s.professor).toBe(73); expect(s.pieces).toBe(9);
-      expect(s.team).toBe(result==='correct' ? 100 : result==='participated' ? 45 : 0);
+      expect(s.team).toBe(result==='correct' ? 100 : result==='participated' ? 50 : 0);
       expect(Object.values(s.groups).every(n=>n<=30)).toBe(true);
     }
   });

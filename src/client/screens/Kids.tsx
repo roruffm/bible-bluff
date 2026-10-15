@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
+import { KidsRegroup } from '../components/KidsRegroup';
 import { KidsLogo } from '../components/KidsLogo';
 import { QRCode } from '../components/QR';
 import { ProfessorBluff, professorMood, professorSays, ShowControls, ShowScoreboard, StoryPicture, Treasure } from '../components/KidsShow';
 import { KIDS_CHAPTERS, KIDS_GROUPS } from '../../shared/kids-show-questions';
 import { kidsControlUrl, useKidsRemote } from '../lib/kids-remote';
 import { enableKidsSound, playKidsScene } from '../lib/kids-sound';
-import { createKidsGame, kidsPrimaryAction, kidsScores, updateKidsGame, type KidsAction, type KidsGame } from '../lib/kids';
+import { createKidsGame, kidsPrimaryAction, kidsResultPoints, kidsScores, updateKidsGame, type KidsAction, type KidsGame } from '../lib/kids';
 import { navigate } from '../lib/router';
 import './kids.css';
 
@@ -53,7 +54,7 @@ export function KidsPage() {
       if (['INPUT', 'SELECT', 'TEXTAREA'].includes(tag)) return;
       if (e.code === 'KeyH') { e.preventDefault(); setPresentation(v => !v); return; }
       if (e.code === 'Space' && ['BUTTON', 'A', 'SUMMARY'].includes(tag)) return;
-      const action = (e.code === 'Space' || e.code === 'ArrowRight') ? kidsPrimaryAction(game.phase) : e.code === 'KeyP' ? (game.phase === 'moving' ? 'pause' : game.phase === 'paused' ? 'resume' : null) : game.phase === 'judging' ? ({ Digit1: 'correct', Digit2: game.index === 9 ? null : 'participated', Digit0: 'none' } as const)[e.code as 'Digit1'|'Digit2'|'Digit0'] : null;
+      const action = (e.code === 'Space' || e.code === 'ArrowRight') ? kidsPrimaryAction(game.phase) : e.code === 'KeyP' ? (game.phase === 'moving' ? 'pause' : game.phase === 'paused' ? 'resume' : null) : game.phase === 'judging' ? ({ Digit1: 'correct', Digit2: 'participated', Digit0: 'none' } as const)[e.code as 'Digit1'|'Digit2'|'Digit0'] : null;
       if (action) { e.preventDefault(); act(action); }
     };
     window.addEventListener('keydown', key); return () => window.removeEventListener('keydown', key);
@@ -70,7 +71,7 @@ export function KidsPage() {
   const group = round ? KIDS_GROUPS[round.question.group] : null;
   const seconds = game ? Math.ceil(game.remainingMs / 1000) : 30;
   const chapter = game ? Math.min(2, Math.floor(game.index / 3)) : 0;
-  const status = !game ? '' : game.phase === 'reading' ? 'Erst zuhören. Dann geht’s los!' : game.phase === 'moving' ? '1, 2 oder 3? Ab in euer Feld!' : game.phase === 'paused' ? 'Kurze Pause. Bleibt, wo ihr seid!' : game.phase === 'locked' ? 'Stopp! Helfer merken sich die Mehrheit.' : game.phase === 'returning' ? 'Alle zurück zu eurer Gruppe!' : game.phase === 'judging' ? 'Jetzt wird’s spannend …' : `Richtig ist Feld ${round!.correctIndex + 1}!`;
+  const status = !game ? '' : game.phase === 'reading' ? 'Erst zuhören. Dann geht’s los!' : game.phase === 'moving' ? '1, 2 oder 3? Ab in euer Feld!' : game.phase === 'paused' ? 'Kurze Pause. Bleibt, wo ihr seid!' : game.phase === 'locked' ? 'Stopp! Helfer prüfen die Felder.' : game.phase === 'returning' ? 'Alle zurück zu eurer Gruppe!' : game.phase === 'judging' ? 'Jetzt wird’s spannend …' : `Richtig ist Feld ${round!.correctIndex + 1}!`;
   return <main class={`kids-page kids-show${game ? ' is-playing' : ''}${presentation && game ? ' is-projecting' : ''}`} ref={root} tabIndex={-1}>
     <header class={`kids-topbar${game ? ' kids-playing-bar' : ''}`}>
       {game ? <><KidsLogo compact/><span class="kids-round-counter">{game.index === 9 ? 'SUPERBLUFF' : `Kapitel ${chapter + 1}`} <b>· {group?.name}</b></span><div class="kids-top-actions"><button class="kids-tool kids-mouse-toggle" type="button" aria-label={presentation ? 'Maussteuerung einblenden' : 'Maussteuerung ausblenden'} aria-pressed={!presentation} onClick={() => { setPresentation(!presentation); setToolsOpen(false); }}>↗ <span>Maus</span></button><button type="button" class="kids-tool kids-menu-toggle" aria-expanded={toolsOpen} aria-controls="kids-operator-tools" onClick={() => setToolsOpen(!toolsOpen)}>☰ <span>Bedienung</span></button></div></> : <><a href="/" class="kids-back" onClick={e => { e.preventDefault(); navigate('/'); }}>← Bible Bluff</a><span class="kids-top-title">GEMEINSAM GEGEN PROFESSOR BLUFF</span>{canFullscreen && <button type="button" class="kids-tool" onClick={toggleFullscreen}>⛶ Vollbild</button>}</>}
@@ -91,13 +92,13 @@ export function KidsPage() {
       <div class="kids-setup-card"><p class="kids-eyebrow">FÜR DIE SPIELLEITUNG · CA. 45 MINUTEN</p><h2>Gemeinsam auf Punktejagd</h2><ol class="kids-rules">
         <li><b>Drei Felder vorbereiten</b><span>1, 2, 3 von links nach rechts markieren. Die aktive Altersgruppe wählt mit den Füßen. Andere bleiben bei ihrer Gruppe.</span></li>
         <li><b>9 Aufgaben + 1 Superbluff</b><span>Pro Kapitel spielen Minis, Mittis und Maxis. Erst vorlesen, dann 30 Sekunden starten. Eltern helfen bei Geräuschen und Pantomime.</span></li>
-        <li><b>Alle zurück, dann auflösen</b><span>Helfer merken sich die Mehrheit. Alle kehren zurück. Die Spielleitung trägt nur das gemeinsame Ergebnis ein.</span></li>
-      </ol><div class="kids-scoring-rule"><b>+5</b> fürs Mitmachen <b>+5</b> für die richtige Mehrheit<br/>Professor Bluff: +7 je Runde · Finale: Bluff +10 · Team bis +10</div>
+        <li><b>Alle zurück, dann auflösen</b><span>Helfer prüfen die Felder. Alle kehren zurück. Die Spielleitung trägt nur das gemeinsame Ergebnis ein.</span></li>
+      </ol><div class="kids-scoring-rule"><b>10</b> Mehrheit richtig · <b>5</b> mindestens ein Kind richtig<br/><b>0</b> keiner richtig<br/>Professor Bluff: +7 je Runde · Finale: Bluff +10 · Team bis +10</div>
       <button type="button" class="kids-button kids-primary" onClick={() => setGame(createKidsGame())}>Show vorbereiten <span>→</span></button><p class="kids-setup-note">Ein Beamer für alle · Kein Kinder-Smartphone<br/>Maus, Tastatur oder Smartphone der Spielleitung</p>
       <details class="kids-organizer"><summary>Helferplan & Ablauf</summary><p>Moderation, Beamer-Bedienung und Gruppenhelfer einplanen. Genug Platz für die aktive Gruppe und begleitende Eltern lassen. Elternkarten 1–3 und ein Kissen für die Final-Pantomime bereitlegen.</p><p>Begrüßung 5 Min. · 3 Kapitel je 9 Min. · Showeinlagen 6 Min. · Finale 7 Min. Alle Punkte sind fest geregelt. In Kapitel 2 gibt es einen gemeinsamen Familienjoker ohne zusätzliche Punkte.</p></details></div>
     </section> : <>
       <ShowScoreboard game={game}/>
-      {interlude ? <section class={`kids-show-interlude is-${game.phase}`}>
+      {game.phase==='returning' || game.phase==='judging' ? <KidsRegroup game={game} act={act} disabled={remote.busy} primaryRef={primary}/> : interlude ? <section class={`kids-show-interlude is-${game.phase}`}>
         {finished && <Celebration variant={3}/>}
         <div class="kids-show-host"><ProfessorBluff mood={professorMood(game)}/><blockquote>{professorSays(game)}</blockquote><span>Professor Bluff</span></div>
         <div class="kids-show-story">
@@ -108,9 +109,9 @@ export function KidsPage() {
         </div>
       </section> : round && <section class={`kids-stage kids-show-stage is-${game.phase}`} aria-labelledby="kids-question">
         <div class="kids-show-question">{round.question.scene && <div key={`${game.index}-${game.cueSeq}`} class="kids-scene"><StoryPicture motif={round.question.scene} animated/></div>}<h1 id="kids-question">{round.question.prompt}</h1></div>
-        <div class="kids-status" role="status"><ProfessorBluff mood={professorMood(game)}/><div class={`kids-clock${game.phase === 'moving' && seconds <= 5 ? ' is-urgent' : ''}`} aria-label={`${seconds} Sekunden`}><svg viewBox="0 0 80 80" aria-hidden="true"><circle class="kids-clock-track" cx="40" cy="40" r="33"/><circle class="kids-clock-progress" cx="40" cy="40" r="33" style={{ strokeDasharray:'207.35', strokeDashoffset: `${207.35 * (1-game.remainingMs/30000)}` }}/></svg><b aria-hidden="true">{revealed ? '✓' : ['locked','returning','judging'].includes(game.phase) ? '✋' : seconds}</b></div><div><strong>{status}</strong><span>{game.phase === 'locked' ? 'Noch nicht auflösen. Gleich geht’s zurück.' : game.phase === 'returning' ? 'Niemand bleibt allein in einem Feld.' : game.phase === 'judging' ? 'Ein Team. Ein gemeinsames Ergebnis.' : revealed ? (game.index === 9 ? 'Alle Altersgruppen haben zusammengeholfen!' : `Ein Schatzteil entdeckt! Professor Bluff bekommt +7.`) : `${group!.title} sind dran! Die anderen fiebern mit.`}</span></div></div>
+        <div class="kids-status" role="status"><ProfessorBluff mood={professorMood(game)}/><div class={`kids-clock${game.phase === 'moving' && seconds <= 5 ? ' is-urgent' : ''}`} aria-label={`${seconds} Sekunden`}><svg viewBox="0 0 80 80" aria-hidden="true"><circle class="kids-clock-track" cx="40" cy="40" r="33"/><circle class="kids-clock-progress" cx="40" cy="40" r="33" style={{ strokeDasharray:'207.35', strokeDashoffset: `${207.35 * (1-game.remainingMs/30000)}` }}/></svg><b aria-hidden="true">{revealed ? '✓' : ['locked','returning','judging'].includes(game.phase) ? '✋' : seconds}</b></div><div><strong>{status}</strong><span>{game.phase === 'locked' ? 'Noch nicht auflösen. Gleich geht’s zurück.' : revealed ? (game.index === 9 ? 'Alle Altersgruppen haben zusammengeholfen!' : `Ein Schatzteil entdeckt! Professor Bluff bekommt +7.`) : `${group!.title} sind dran! Die anderen fiebern mit.`}</span></div></div>
         <ol class={`kids-answers${round.question.group === 'minis' || game.index === 9 ? ' has-pictures' : ''}`} aria-label="Antworten und Spielfelder">{round.answers.map((answer,i)=><li key={`${game.index}-${i}`} class={`kids-answer kids-field-${i+1}${revealed ? i===round.correctIndex ? ' is-correct' : ' is-other' : ''}`}><span class="kids-number">{i+1}</span>{(round.question.group==='minis' || game.index===9) && <StoryPicture motif={round.question.pictures[answer===round.question.answer ? 0 : round.question.distractors.indexOf(answer)+1]}/>}<span class="kids-answer-text">{answer}</span>{revealed && i===round.correctIndex && <span class="kids-correct-mark">✓ Richtig!</span>}</li>)}</ol>
-        <div class="kids-bottom"><div class="kids-discovery">{revealed ? <div><p>{round.question.explanation}</p><small>{round.question.ref} · {game.index===9 ? game.results[9]==='correct' ? '+10 Finalbonus!' : 'Danke für euren Teamgeist!' : `Kinderteam +${game.results[game.index]==='correct' ? 10 : game.results[game.index]==='participated' ? 5 : 0}`}</small></div> : <div><p>{game.jokerFor===game.index ? `Familienjoker: ${round.question.hint}` : professorSays(game)}</p></div>}</div><div class="kids-operator-actions">{game.phase==='reading' && <div class="kids-extra-controls">{round.question.scene && <button type="button" class="kids-tool" disabled={remote.busy} onClick={()=>act('scene')}>Szene abspielen</button>}{game.index>=3 && game.index<=5 && game.jokerFor===null && <button type="button" class="kids-tool" disabled={remote.busy} onClick={()=>act('joker')}>Familienjoker</button>}</div>}<ShowControls game={game} act={act} disabled={remote.busy} primaryRef={primary}/></div></div>
+        <div class="kids-bottom"><div class="kids-discovery">{revealed ? <div><p>{round.question.explanation}</p><small>{round.question.ref} · {`Kinderteam +${kidsResultPoints(game.results[game.index])}${game.index===9 ? ' Finalbonus' : ''}`}</small></div> : <div><p>{game.jokerFor===game.index ? `Familienjoker: ${round.question.hint}` : professorSays(game)}</p></div>}</div><div class="kids-operator-actions">{game.phase==='reading' && <div class="kids-extra-controls">{round.question.scene && <button type="button" class="kids-tool" disabled={remote.busy} onClick={()=>act('scene')}>Szene abspielen</button>}{game.index>=3 && game.index<=5 && game.jokerFor===null && <button type="button" class="kids-tool" disabled={remote.busy} onClick={()=>act('joker')}>Familienjoker</button>}</div>}<ShowControls game={game} act={act} disabled={remote.busy} primaryRef={primary}/></div></div>
         {revealed && <Celebration variant={game.index}/>}
       </section>}
     </>}

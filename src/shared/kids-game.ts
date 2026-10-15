@@ -2,7 +2,9 @@ import { KIDS_SHOW_QUESTIONS, type KidsShowQuestion, type KidsGroup } from './ki
 
 export const KIDS_SECONDS = 30;
 export type KidsPhase = 'welcome' | 'chapter' | 'superbluff' | 'reading' | 'moving' | 'paused' | 'locked' | 'returning' | 'judging' | 'revealed' | 'finished';
+/** participated bleibt als gespeicherter Protokollwert erhalten: mindestens ein Kind richtig, ohne Mehrheit. */
 export type KidsResult = 'correct' | 'participated' | 'none';
+export function kidsResultPoints(result: KidsResult | null): number { return result === 'correct' ? 10 : result === 'participated' ? 5 : 0; }
 export interface KidsRound { question: KidsShowQuestion; answers: string[]; correctIndex: number }
 export interface KidsGame {
   rounds: KidsRound[]; index: number; phase: KidsPhase; remainingMs: number; deadline: number | null;
@@ -29,9 +31,9 @@ export function kidsScores(game: KidsGame) {
   let professor = game.index === 9 ? 10 : 0; let bonus = 0; let pieces = 0;
   game.results.forEach((result, i) => {
     if (result === null) return;
-    if (i === 9) { bonus = result === 'correct' ? 10 : 0; return; }
+    if (i === 9) { bonus = kidsResultPoints(result); return; }
     const group = game.rounds[i].question.group as Exclude<KidsGroup, 'all'>;
-    groups[group] += result === 'correct' ? 10 : result === 'participated' ? 5 : 0;
+    groups[group] += kidsResultPoints(result);
     professor += 7; pieces++;
   });
   return { groups, bonus, team: groups.minis + groups.mittis + groups.maxis + bonus, professor, pieces };
@@ -57,7 +59,7 @@ export function updateKidsGame(game: KidsGame, action: KidsAction, now: number):
   if (action === 'resume' && phase === 'paused') return { ...game, phase: 'moving', deadline: now + game.remainingMs };
   if (action === 'return' && phase === 'locked') return { ...game, phase: 'returning' };
   if (action === 'ready' && phase === 'returning') return { ...game, phase: 'judging' };
-  if (['correct', 'participated', 'none'].includes(action) && phase === 'judging' && game.results[game.index] === null && !(game.index === 9 && action === 'participated')) {
+  if (['correct', 'participated', 'none'].includes(action) && phase === 'judging' && game.results[game.index] === null) {
     const results = [...game.results]; results[game.index] = action as KidsResult;
     return { ...game, results, phase: 'revealed' };
   }
