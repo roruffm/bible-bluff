@@ -14,8 +14,8 @@ export function professorSays(game: KidsGame): string {
   const mood = professorMood(game);
   if (game.phase === 'welcome') return 'Ha! Drei Detektivteams gegen MEIN Superhirn? Das wird ja heiter!';
   if (game.phase === 'superbluff') return 'ALARM! Mein Superbluff! Zehn Punkte für mich … aber ihr könnt sie auch holen!';
-  if (game.phase === 'finished') return mood === 'defeated' ? 'Von MINIS, MITTIS und MAXIS besiegt?! Ich brauche eine neue Rätsel-Ausbildung!' : 'Ha! Knapp gewonnen! Aber euer Teamgeist? Unbesiegbar. Revanche?';
-  if (game.phase === 'revealed') return mood === 'panic' ? 'Ihr holt mich ein! Wo ist mein Notfall-Schnurrbart?!' : mood === 'nervous' ? 'Huch! Ihr seid ja richtige Spürnasen. Ich muss wohl nachlesen …' : 'Mein Plan läuft! Wobei … ihr habt ganz schön viel entdeckt!';
+  if (game.phase === 'finished') return mood === 'defeated' ? 'Von MINIS, MITTIS und MAXIS besiegt?! Ich brauche eine neue Rätsel-Ausbildung!' : 'Ha! Diesmal gewonnen! Aber euer Teamgeist? Unbesiegbar. Revanche?';
+  if (game.phase === 'revealed') return mood === 'panic' ? 'Ihr seid schon so weit! Wo ist mein Notfall-Schnurrbart?!' : mood === 'nervous' ? 'Huch! Ihr seid ja richtige Spürnasen. Ich muss wohl nachlesen …' : 'Mein Plan läuft! Wobei … ihr habt ganz schön viel entdeckt!';
   if (game.index >= 6) return 'Nur noch ein Kapitel! Meine Knie zittern? Das ist mein Denk-Tanz!';
   if (game.index >= 3) return 'Das war nur die Aufwärmrunde. Jetzt wird geblufft!';
   return 'Ich bin Professor Bluff. Mein Spezialgebiet? Mich selbst überschätzen!';
@@ -67,7 +67,7 @@ export function ShowScoreboard({ game }: { game: KidsGame }) {
   return <section class="kids-scoreboard" aria-label="Gemeinsame Punktejagd">
     <div class="kids-team-score"><span>BIBLEBLUFF-TEAM</span><strong data-testid="team-score">{suspense ? '?' : s.team}</strong><div>{(['minis','mittis','maxis'] as const).map(g=><span key={g}>{KIDS_GROUPS[g].name} <b>{s.groups[g]}</b><small>/30</small></span>)}</div></div>
     <div class="kids-race" aria-label={suspense ? 'Superbluff läuft. Endstand gleich!' : `Kinderteam ${s.team}, Professor Bluff ${s.professor}`}>
-      <div class="kids-race-lane"><span style={{ left: `${(suspense ? s.team - s.bonus : s.team) * .85}%` }}>♥</span></div><div class="kids-race-lane professor-lane"><span style={{ left: `${s.professor * .85}%` }}>B</span></div><span class="kids-race-chest" aria-hidden="true">✦</span><small>{suspense ? 'Endstand nach dem Superbluff' : `${s.pieces} / 9 Schatzteile · Gemeinsam!`}</small>
+      <div class="kids-race-lane"><span style={{ left: `${(suspense ? s.team - s.bonus : s.team) * .85}%` }}>♥</span></div><div class="kids-race-lane professor-lane"><span style={{ left: `${s.professor * .85}%` }}>B</span></div><div class="kids-race-chest"><Treasure pieces={s.pieces}/></div><small>{suspense ? 'Endstand nach dem Superbluff' : `${s.pieces} / 9 Schatzteile · Gemeinsam!`}</small>
     </div>
     <div class="kids-prof-score"><span>PROFESSOR BLUFF</span><strong data-testid="prof-score">{suspense ? '?' : s.professor}</strong><small>{suspense ? '+10 Finalangriff' : '+7 pro Runde'}</small></div>
   </section>;

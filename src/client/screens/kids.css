@@ -356,3 +356,15 @@
 }
 .kids-scene .is-animated .story-bob { animation-iteration-count: 2; }
 .kids-scene .is-animated .story-waves { animation-iteration-count: 3; }
+.kids-race { padding-right: 65px; }
+.kids-race-chest { top: 0; width: 56px; }
+.kids-race-chest .kids-treasure { width: 56px; border-width: 1px; border-radius: 4px; box-shadow: 0 2px 0 #12324a; }
+.kids-race-chest .kids-treasure-tiles span { font-size: 8px; border-width: .5px; }
+@media (min-width:760px) and (max-height:650px) {
+  .kids-show-interlude.is-finished .kids-show-story { gap: 6px; }
+  .kids-show-interlude.is-finished .kids-show-story .kids-eyebrow { font-size: 10px; }
+  .kids-show-interlude.is-finished .kids-treasure { width: 125px; }
+  .kids-show-interlude.is-finished .kids-show-story h1 { font-size: 25px; }
+  .kids-show-interlude.is-finished .kids-show-story > p { font-size: 16px; }
+  .kids-show-interlude.is-finished .kids-show-story > small { font-size: 11px; }
+}

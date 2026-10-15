@@ -76,6 +76,21 @@ describe('Kids-Fernbedienung', () => {
     const read = await t.call('GET', path, undefined, made.ownerToken);
     expect(read.body.version).toBe(2); expect(read.body.game.index).toBe(0);
   });
+  it('wertet konkurrierende Mehrheitsmeldungen einmal und bewahrt das Ergebnis beim Wiederverbinden', async () => {
+    const t = setup();
+    const made = await t.create({ ...reading(), phase: 'judging', remainingMs: 0 });
+    const path = `/api/kids-remotes/${made.id}`;
+    const responses = await Promise.all([
+      t.call('POST', `${path}/action`, { action: 'correct', version: 1 }, made.ownerToken),
+      t.call('POST', `${path}/action`, { action: 'participated', version: 1 }, made.remoteToken),
+    ]);
+    expect(responses.map(r=>r.status).sort()).toEqual([200,409]);
+    t.reboot();
+    const saved = (await t.call('GET', path, undefined, made.remoteToken)).body.game;
+    expect(saved.phase).toBe('revealed');
+    expect(['correct','participated']).toContain(saved.results[0]);
+    expect(saved.results.filter(r=>r!==null)).toHaveLength(1);
+  });
   it('lässt nur den Beamer die Verbindung trennen und beendet abgelaufene Sitzungen', async () => {
     const t = setup(); const made = await t.create(); const path = `/api/kids-remotes/${made.id}`;
     expect((await t.call('DELETE', path, undefined, made.remoteToken)).status).toBe(403);
@@ -91,6 +106,8 @@ describe('Kids-Fernbedienung', () => {
       (g: ReturnType<typeof packKidsGame>) => { g.rounds[0].answers = ['frei', 'erfunden', 'unsicher']; },
       (g: ReturnType<typeof packKidsGame>) => { g.rounds[1] = g.rounds[0]; },
       (g: ReturnType<typeof packKidsGame>) => { g.remainingMs = -1; },
+      (g: ReturnType<typeof packKidsGame>) => { g.results[0] = 'correct'; },
+      (g: ReturnType<typeof packKidsGame>) => { g.jokerFor = 3; },
     ]) {
       const game = packKidsGame(reading(), t.clock.now); change(game);
       expect((await t.call('POST', '/api/kids-remotes', { game, easy: true })).status).toBe(400);

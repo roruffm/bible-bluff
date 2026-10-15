@@ -88,7 +88,7 @@ test('Kids: Smartphone synchronisiert Maus, Wertung, Neuladen und Netzabbruch',a
   await page.getByRole('button',{name:'Ⅱ Pause',exact:true}).click();
   await expect(phone.locator('.kids-remote-phase strong')).toHaveText('Pause');
   await page.reload(); await expect(page.locator('#kids-question')).toHaveText(question);
-  await context.setOffline(true); await phone.getByRole('button',{name:'Weiter geht’s',exact:true}).click();
+  await context.setOffline(true);
   await expect(phone.getByRole('status')).toContainText('Verbindung unterbrochen');
   await context.setOffline(false); await expect(phone.getByText('Mit der Beamer-Partie verbunden',{exact:true})).toBeVisible({timeout:15000});
   await phone.getByRole('button',{name:'Weiter geht’s',exact:true}).click();

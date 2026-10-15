@@ -85,7 +85,7 @@ export function KidsPage() {
     </aside>}
     {fullscreenError && <p role="status" class="kids-connection-note">{fullscreenError}</p>}
     {remote.error && !showPair && <p class="kids-connection-note" role="status">{remote.error}</p>}
-    {remote.restoring && <div class="kids-exit"><div><h2>Show wiederherstellen …</h2><p>Die Fernbedienung wird wieder verbunden.</p><button type="button" class="kids-button" onClick={() => { void remote.disconnect(); }}>Zur Vorbereitung</button></div></div>}
+    {remote.active && !remote.view && <div class="kids-exit"><div><h2>Show wiederherstellen …</h2><p>{remote.error || 'Die Fernbedienung wird wieder verbunden.'}</p><button type="button" class="kids-button" onClick={() => { void remote.disconnect(); }}>Zur Vorbereitung</button></div></div>}
     {!game ? <section class="kids-setup">
       <div class="kids-intro"><KidsLogo/><p class="kids-eyebrow">DAS GEMEINSAME BIBELABENTEUER</p><h1>Die große<br/><em>Bluff-Jagd!</em></h1><p>Drei Detektivteams. Ein frecher Professor.<br/>Und ein Schatz, den nur ihr entdecken könnt.</p><ProfessorBluff/><div class="kids-show-teams">{(['minis','mittis','maxis'] as const).map(g=><span><b>{KIDS_GROUPS[g].name}</b><small>{KIDS_GROUPS[g].ages}</small></span>)}</div></div>
       <div class="kids-setup-card"><p class="kids-eyebrow">FÜR DIE SPIELLEITUNG · CA. 45 MINUTEN</p><h2>Gemeinsam auf Punktejagd</h2><ol class="kids-rules">
