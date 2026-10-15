@@ -113,6 +113,36 @@ describe('Kids-Fernbedienung', () => {
     }
     expect((await t.call('POST', '/api/kids-remotes', { long: 'x'.repeat(9000) })).status).toBe(413);
   });
+  it('synchronisiert die Szene, stellt sie zeitgenau wieder her und startet danach keine Antwortzeit', async () => {
+    const t=setup(), made=await t.create(), path=`/api/kids-remotes/${made.id}`;
+    const scene=await t.call('POST',path+'/action',{action:'scene',version:1},made.remoteToken);
+    expect(scene.body.game).toMatchObject({phase:'scene',cueSeq:1,remainingMs:30000,deadline:t.clock.now+10000});
+    expect((await t.call('POST',path+'/action',{action:'start',version:2},made.ownerToken)).status).toBe(409);
+    t.clock.advance(4200);t.reboot();
+    const saved=await t.call('GET',path,undefined,made.ownerToken);
+    expect(saved.body.game.deadline).toBe(scene.body.game.deadline);
+    const restored=await t.create(saved.body.game);
+    expect(restored.game.deadline).toBe(scene.body.game.deadline);
+    expect(restored.game.rounds.map(r=>r.answers)).toEqual(made.game.rounds.map(r=>r.answers));
+    t.clock.advance(5800);
+    const after=await t.call('GET',path,undefined,made.remoteToken);
+    expect(after.body.game).toMatchObject({phase:'reading',remainingMs:30000,deadline:null});
+    const replay=await t.call('POST',path+'/action',{action:'scene',version:2},made.remoteToken);
+    expect(replay.body.game.cueSeq).toBe(2);
+    const skipped=await t.call('POST',path+'/action',{action:'end-scene',version:3},made.remoteToken);
+    expect(skipped.body.game).toMatchObject({phase:'reading',remainingMs:30000,deadline:null});
+  });
+  it('weist Szenen ohne passende Frage oder mit ungültiger Restzeit zurück', async () => {
+    const t=setup();
+    for(const value of [undefined,-1,10001,NaN]) {
+      const game=packKidsGame(updateKidsGame(reading(),'scene',t.clock.now),t.clock.now);
+      game.sceneRemainingMs=value;
+      expect((await t.call('POST','/api/kids-remotes',{easy:false,game})).status).toBe(400);
+    }
+    const game=packKidsGame(updateKidsGame(reading(),'scene',t.clock.now),t.clock.now);
+    game.index=1;game.results[0]='correct';
+    expect((await t.call('POST','/api/kids-remotes',{easy:false,game})).status).toBe(400);
+  });
   it('beendet die Show ohne Revanche und akzeptiert keine Familienjoker', async () => {
     const t = setup();
     const game = { ...reading(), phase: 'finished' as const, index: 9, remainingMs: 0, results: Array(10).fill('correct') };

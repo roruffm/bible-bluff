@@ -1,7 +1,8 @@
 import { KIDS_SHOW_QUESTIONS, type KidsShowQuestion, type KidsGroup } from './kids-show-questions';
+import { KIDS_SCENE_MS } from './kids-scenes';
 
 export const KIDS_SECONDS = 30;
-export type KidsPhase = 'welcome' | 'chapter' | 'superbluff' | 'reading' | 'moving' | 'paused' | 'locked' | 'returning' | 'judging' | 'revealed' | 'finished';
+export type KidsPhase = 'welcome' | 'chapter' | 'superbluff' | 'reading' | 'scene' | 'moving' | 'paused' | 'locked' | 'returning' | 'judging' | 'revealed' | 'finished';
 /** participated bleibt als gespeicherter Protokollwert erhalten: mindestens ein Kind richtig, ohne Mehrheit. */
 export type KidsResult = 'correct' | 'participated' | 'none';
 export function kidsResultPoints(result: KidsResult | null): number { return result === 'correct' ? 10 : result === 'participated' ? 5 : 0; }
@@ -10,7 +11,7 @@ export interface KidsGame {
   rounds: KidsRound[]; index: number; phase: KidsPhase; remainingMs: number; deadline: number | null;
   results: (KidsResult | null)[]; cueSeq: number;
 }
-export type KidsAction = 'start' | 'pause' | 'resume' | 'tick' | 'return' | 'ready' | 'correct' | 'participated' | 'none' | 'next' | 'scene';
+export type KidsAction = 'start' | 'pause' | 'resume' | 'tick' | 'return' | 'ready' | 'correct' | 'participated' | 'none' | 'next' | 'scene' | 'end-scene';
 
 function shuffle<T>(items: readonly T[], random: () => number): T[] {
   const result = [...items];
@@ -41,6 +42,7 @@ export function kidsScores(game: KidsGame) {
 /** Zeit und Punkte sind geräteunabhängig; doppelte oder unpassende Schritte ändern nichts. */
 export function updateKidsGame(game: KidsGame, action: KidsAction, now: number): KidsGame {
   const phase = game.phase;
+  if (phase === 'scene' && (action === 'end-scene' || (action === 'tick' && now >= (game.deadline ?? now)))) return { ...game, phase: 'reading', deadline: null };
   if (action === 'next') {
     if (phase === 'welcome') return { ...game, phase: 'chapter' };
     if (phase === 'chapter' || phase === 'superbluff') return { ...game, phase: 'reading' };
@@ -63,17 +65,18 @@ export function updateKidsGame(game: KidsGame, action: KidsAction, now: number):
     const results = [...game.results]; results[game.index] = action as KidsResult;
     return { ...game, results, phase: 'revealed' };
   }
-  if (action === 'scene' && phase === 'reading' && game.rounds[game.index].question.scene) return { ...game, cueSeq: game.cueSeq + 1 };
+  if (action === 'scene' && phase === 'reading' && game.rounds[game.index].question.scene) return { ...game, phase: 'scene', deadline: now + KIDS_SCENE_MS, cueSeq: game.cueSeq + 1 };
   return game;
 }
 export function kidsPrimaryAction(phase: KidsPhase): Exclude<KidsAction, 'tick'> | null {
-  return ({ welcome: 'next', chapter: 'next', superbluff: 'next', reading: 'start', paused: 'resume', locked: 'return', returning: 'ready', revealed: 'next' } as Partial<Record<KidsPhase, Exclude<KidsAction, 'tick'>>>)[phase] ?? null;
+  return ({ welcome: 'next', chapter: 'next', superbluff: 'next', reading: 'start', scene: 'end-scene', paused: 'resume', locked: 'return', returning: 'ready', revealed: 'next' } as Partial<Record<KidsPhase, Exclude<KidsAction, 'tick'>>>)[phase] ?? null;
 }
 export function kidsActionLabel(game: KidsGame): string {
   if (game.phase === 'welcome') return 'Mission starten';
   if (game.phase === 'chapter') return 'Erste Aufgabe im Kapitel';
   if (game.phase === 'superbluff') return 'Gemeinsam ins Finale';
   if (game.phase === 'reading') return '30 Sekunden starten';
+  if (game.phase === 'scene') return 'Zur Frage';
   if (game.phase === 'paused') return 'Weiter geht’s';
   if (game.phase === 'locked') return 'Zurück in die Gruppen';
   if (game.phase === 'returning') return 'Alle sind zurück';

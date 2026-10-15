@@ -1,11 +1,12 @@
 import { KIDS_QUESTIONS, type KidsQuestion } from './kids-questions';
+import type { KidsSceneMotif } from './kids-scenes';
 
 export type KidsGroup = 'minis' | 'mittis' | 'maxis' | 'all';
 export type StoryMotif = 'ark' | 'manger' | 'lion' | 'fish' | 'leaf' | 'bread' | 'coin' | 'donkey' | 'twins' | 'boat' | 'tree' | 'crown' | 'one-day' | 'three-days' | 'forty-days' | 'coin-bread' | 'coin-pillow' | 'raven' | 'camel' | 'five-breads-two-fish' | 'three-breads-milk' | 'seven-figs-cheese' | 'runner' | 'small';
 export interface KidsShowQuestion extends KidsQuestion {
   group: KidsGroup;
   pictures: readonly [StoryMotif, StoryMotif, StoryMotif];
-  scene?: StoryMotif;
+  scene?: KidsSceneMotif;
   direction: string;
 }
 export const KIDS_GROUPS = {

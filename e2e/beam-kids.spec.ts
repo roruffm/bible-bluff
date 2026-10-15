@@ -103,6 +103,14 @@ test('Kids: Smartphone synchronisiert Maus, Wertung, Neuladen und Netzabbruch',a
   await expect(phone.getByRole('heading',{name:question})).toBeVisible();
   await expect(phone.locator('.kids-remote-answers .kids-story-picture')).toHaveCount(3);
   await expect(phone.getByRole('button',{name:/Familienjoker|Revanche/})).toHaveCount(0);
+  await phone.getByRole('button',{name:'Szene am Beamer abspielen',exact:true}).click();
+  await expect(page.locator('.kids-cinema')).toHaveAttribute('data-scene','ark');
+  await expect(phone.locator('.kids-remote-phase strong')).toHaveText('Szene läuft');
+  await expect(phone.getByRole('button',{name:'30 Sekunden starten',exact:true})).toHaveCount(0);
+  await page.reload();
+  await expect(page.locator('.kids-cinema')).toBeVisible();
+  await phone.getByRole('button',{name:'Zur Frage',exact:true}).click();
+  await expect(page.locator('#kids-question')).toHaveText(question);
   await phone.getByRole('button',{name:'30 Sekunden starten',exact:true}).click();
   await expect(page.getByText('1, 2 oder 3? Ab in euer Feld!',{exact:true})).toBeVisible();
   await page.getByRole('button',{name:'Ⅱ Pause',exact:true}).click();
@@ -186,5 +194,58 @@ test('Kids: Vollbild und Professor-Reaktion bei null, fünf und zehn Punkten',as
     expect(await page.locator('.kids-reaction-art .bluff-body').evaluate(el=>getComputedStyle(el).animationName)).toBe('none');
     await page.emulateMedia({reducedMotion:'no-preference'});
     await page.getByRole('button',{name:points===10?'Nächstes Kapitel':'Nächste Aufgabe',exact:true}).click();
+  }
+});
+
+
+test('Kids: vier große Szenen mit Handlung, Klang, Wiederholung und separatem Antwort-Countdown',async({page})=>{
+  await page.addInitScript(()=>{
+    const state=window as unknown as {sceneAudioStarts:number};state.sceneAudioStarts=0;
+    const original=AudioContext.prototype.createOscillator;
+    AudioContext.prototype.createOscillator=function(){state.sceneAudioStarts++;return original.call(this);};
+  });
+  await page.emulateMedia({reducedMotion:'no-preference'});
+  await page.goto('/kids');await begin(page);await page.clock.install();
+  const scenes=new Map([[0,'ark'],[3,'manger'],[6,'lion'],[9,'boat']]);
+  for(let i=0;i<10;i++) {
+    const scene=scenes.get(i);
+    if(scene) {
+      const answers=await page.locator('.kids-answer-text').allTextContents();
+      await page.getByRole('button',{name:'Szene abspielen',exact:true}).click();
+      await expect(page.locator('.kids-cinema')).toHaveAttribute('data-scene',scene);
+      await expect(page.locator('.kids-cinema-art')).toHaveClass(/beat-0/);
+      await expect(page.locator('.kids-answers')).toHaveCount(0);
+      await expect(page.getByRole('button',{name:'30 Sekunden starten',exact:true})).toHaveCount(0);
+      for(const viewport of [{width:800,height:600},{width:1024,height:768},{width:1280,height:720},{width:1920,height:1080},{width:2560,height:1440}]) {
+        await page.setViewportSize(viewport);
+        const issues=await page.locator('.kids-cinema').evaluate(el=>{
+          const problems:string[]=[];
+          for(const child of el.querySelectorAll('header,.kids-cinema-screen,.kids-cinema-caption,footer')){const box=child.getBoundingClientRect();if(box.left<0||box.right>innerWidth||box.bottom>innerHeight)problems.push(child.className);}
+          return problems;
+        });expect(issues).toEqual([]);
+        const art=await page.locator('.kids-cinema-screen').boundingBox();expect(art!.height).toBeGreaterThan(viewport.height*.4);
+      }
+      await page.clock.runFor(3200);await expect(page.locator('.kids-cinema-art')).toHaveClass(/beat-1/);
+      await page.clock.runFor(3500);await expect(page.locator('.kids-cinema-art')).toHaveClass(/beat-2/);
+      if(i===0) {
+        expect(await page.evaluate(()=>(window as unknown as {sceneAudioStarts:number}).sceneAudioStarts)).toBeGreaterThan(0);
+        await page.locator('.kids-cinema').getByRole('button',{name:'Klang ausschalten',exact:true}).click();
+      }
+      await page.clock.runFor(3400);await expect(page.locator('.kids-cinema')).toHaveCount(0);
+      await expect(page.locator('.kids-clock')).toHaveAttribute('aria-label','30 Sekunden');
+      expect(await page.locator('.kids-answer-text').allTextContents()).toEqual(answers);
+      await page.getByRole('button',{name:'Szene abspielen',exact:true}).click();
+      await expect(page.locator('.kids-cinema-art')).toHaveClass(/beat-0/);
+      await expect(page.locator('.kids-cinema').getByRole('button',{name:'Klang einschalten',exact:true})).toBeVisible();
+      await page.emulateMedia({reducedMotion:'reduce'});
+      const animation=await page.locator('.kids-cinema-art .scene-hammer-arm,.kids-cinema-art .scene-cradle,.kids-cinema-art .scene-lion-head,.kids-cinema-art .scene-boat-rock').first().evaluate(el=>getComputedStyle(el).animationName);
+      expect(animation).toBe('none');
+      await page.getByRole('button',{name:'Zur Frage',exact:false}).click();
+      await page.emulateMedia({reducedMotion:'no-preference'});
+      await expect(page.locator('.kids-clock')).toHaveAttribute('aria-label','30 Sekunden');
+    }
+    await resolve(page);
+    await page.getByRole('button',{name:i===9?'Schatz öffnen':i===8?'Zum Superbluff':i===2||i===5?'Nächstes Kapitel':'Nächste Aufgabe',exact:true}).click();
+    if(i===2||i===5||i===8)await page.getByRole('button',{name:i===8?'Gemeinsam ins Finale':'Erste Aufgabe im Kapitel',exact:true}).click();
   }
 });

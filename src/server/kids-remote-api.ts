@@ -1,12 +1,13 @@
 import { updateKidsGame, type KidsGame, type KidsPhase, type KidsResult } from '../shared/kids-game';
+import { KIDS_SCENE_MS } from '../shared/kids-scenes';
 import { KIDS_SHOW_QUESTIONS } from '../shared/kids-show-questions';
 import { packKidsGame, type KidsRemoteAction, type KidsRemoteView } from '../shared/kids-remote';
 import { GameError } from './state';
 import type { KidsRemoteRecord, KidsRemoteStore } from './kids-remote-store';
 
 export const KIDS_REMOTE_TTL = 6 * 60 * 60 * 1000;
-const PHASES: KidsPhase[] = ['welcome', 'chapter', 'superbluff', 'reading', 'moving', 'paused', 'locked', 'returning', 'judging', 'revealed', 'finished'];
-const ACTIONS: KidsRemoteAction[] = ['start', 'pause', 'resume', 'return', 'ready', 'correct', 'participated', 'none', 'next', 'scene'];
+const PHASES: KidsPhase[] = ['welcome', 'chapter', 'superbluff', 'reading', 'scene', 'moving', 'paused', 'locked', 'returning', 'judging', 'revealed', 'finished'];
+const ACTIONS: KidsRemoteAction[] = ['start', 'pause', 'resume', 'return', 'ready', 'correct', 'participated', 'none', 'next', 'scene', 'end-scene'];
 const response = (data: unknown, status = 200) => new Response(JSON.stringify(data), { status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', 'x-content-type-options': 'nosniff' } });
 const token = (bytes = 24) => Array.from(crypto.getRandomValues(new Uint8Array(bytes)), (b) => b.toString(16).padStart(2, '0')).join('');
 async function hash(value: string) { return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value))), (b) => b.toString(16).padStart(2, '0')).join(''); }
@@ -47,9 +48,15 @@ function unpack(value: unknown, now: number): KidsGame {
   if (!Array.isArray(game.results) || game.results.length !== 10 || !game.results.every((r, i) => i < index || (i === index && ['revealed', 'finished'].includes(phase)) ? ['correct', 'participated', 'none'].includes(r) : r === null)) return badRequest();
   if ((phase === 'welcome' && index !== 0) || (phase === 'chapter' && (index === 9 || index % 3 !== 0)) || (['superbluff', 'finished'].includes(phase) && index !== 9)) return badRequest();
   if (!Number.isSafeInteger(game.cueSeq) || Number(game.cueSeq) < 0 || Number(game.cueSeq) > 1000) return badRequest();
+  let sceneRemainingMs=0;
+  if (phase === 'scene') {
+    if (!rounds[index].question.scene || typeof game.sceneRemainingMs !== 'number' || !Number.isFinite(game.sceneRemainingMs) || game.sceneRemainingMs < 0 || game.sceneRemainingMs > KIDS_SCENE_MS) return badRequest();
+    sceneRemainingMs=game.sceneRemainingMs;
+    if (sceneRemainingMs === 0) phase='reading';
+  }
   if (game.remainingMs === 0 && (phase === 'moving' || phase === 'paused')) phase = 'locked';
-  const remainingMs = ['welcome', 'chapter', 'superbluff', 'reading'].includes(phase) ? 30000 : ['locked', 'returning', 'judging', 'revealed', 'finished'].includes(phase) ? 0 : game.remainingMs;
-  return { rounds, index, phase, remainingMs, deadline: phase === 'moving' ? now + remainingMs : null, results: game.results as (KidsResult | null)[], cueSeq: Number(game.cueSeq) };
+  const remainingMs = ['welcome', 'chapter', 'superbluff', 'reading', 'scene'].includes(phase) ? 30000 : ['locked', 'returning', 'judging', 'revealed', 'finished'].includes(phase) ? 0 : game.remainingMs;
+  return { rounds, index, phase, remainingMs, deadline: phase === 'scene' ? now + sceneRemainingMs : phase === 'moving' ? now + remainingMs : null, results: game.results as (KidsResult | null)[], cueSeq: Number(game.cueSeq) };
 }
 
 export function createKidsRemoteApi(store: KidsRemoteStore, now: () => number) {

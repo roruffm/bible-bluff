@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { KIDS_SCENE_MS, kidsSceneBeat } from '../src/shared/kids-scenes';
 import { QUESTIONS } from '../src/server/questions';
 import { kidsRoundReaction } from '../src/client/lib/kids-reactions';
 import { KIDS_SHOW_QUESTIONS, kidsAnswerPicture } from '../src/shared/kids-show-questions';
@@ -89,11 +90,28 @@ describe('Die große Bluff-Jagd', () => {
   });
   it('startet Szenen nur beim Vorlesen und wartet mit der Wertung auf den Rückweg', () => {
     const g=reading();
-    expect(updateKidsGame(g,'scene',0).cueSeq).toBe(1);
+    expect(updateKidsGame(g,'scene',0)).toMatchObject({phase:'scene',cueSeq:1,deadline:10000});
     const moving=updateKidsGame(g,'start',0);
     expect(updateKidsGame(moving,'scene',0)).toBe(moving);
     expect(kidsPrimaryAction('judging')).toBeNull();
     expect(kidsPrimaryAction('finished')).toBeNull();
     expect(kidsPrimaryAction('locked')).toBe('return');
   });
+  it('zeigt eine Szene zehn Sekunden ohne Antwort-Countdown und lässt sie abbrechen oder wiederholen', () => {
+    const before=reading(), scene=updateKidsGame(before,'scene',1000);
+    expect(scene.remainingMs).toBe(30000);expect(scene.deadline).toBe(1000+KIDS_SCENE_MS);
+    expect(updateKidsGame(scene,'start',2000)).toBe(scene);
+    expect(updateKidsGame(scene,'scene',2000)).toBe(scene);
+    expect(updateKidsGame(scene,'tick',10999)).toBe(scene);
+    const after=updateKidsGame(scene,'tick',11000);
+    expect(after).toMatchObject({phase:'reading',deadline:null,remainingMs:30000});
+    expect(after.rounds).toBe(before.rounds);expect(kidsScores(after)).toEqual(kidsScores(before));
+    expect(updateKidsGame(after,'start',12000).deadline).toBe(42000);
+    const replay=updateKidsGame(after,'scene',12000);
+    expect(replay).toMatchObject({phase:'scene',cueSeq:2,deadline:22000});
+    expect(updateKidsGame(replay,'end-scene',12500)).toMatchObject({phase:'reading',remainingMs:30000,deadline:null});
+    const noScene={...after,index:1};expect(updateKidsGame(noScene,'scene',12000)).toBe(noScene);
+    expect(kidsSceneBeat(2999)).toBe(0);expect(kidsSceneBeat(3000)).toBe(1);expect(kidsSceneBeat(6500)).toBe(2);
+  });
+
 });
