@@ -1,4 +1,5 @@
 import type { ComponentChildren } from 'preact';
+import { useLayoutEffect, useRef } from 'preact/hooks';
 import { kidsScores, type KidsGame } from '../../shared/kids-game';
 import { ProfessorBluff, professorSays } from './KidsShow';
 
@@ -19,6 +20,8 @@ export function KidsFinish({ game, children }: { game:KidsGame; children?:Compon
 
 export function KidsFinishDialog({ game, onCancel, onFinish, disabled, error }: { game:KidsGame; onCancel:()=>void; onFinish:()=>void; disabled:boolean; error?:string }) {
   const s=kidsScores(game);
+  const cancel=useRef<HTMLButtonElement>(null);
+  useLayoutEffect(()=>{cancel.current?.focus({preventScroll:true});},[]);
   return <div class="kids-exit kids-finish-dialog" role="dialog" aria-modal="true" aria-labelledby="kids-finish-title" onKeyDown={e=>{
     if(e.key==='Escape'){e.preventDefault();onCancel();}
     if(e.key==='Tab'){
@@ -26,5 +29,5 @@ export function KidsFinishDialog({ game, onCancel, onFinish, disabled, error }: 
       const index=buttons.indexOf(document.activeElement as HTMLButtonElement);
       e.preventDefault();buttons[(index+(e.shiftKey?-1:1)+buttons.length)%buttons.length]?.focus();
     }
-  }}><div><h2 id="kids-finish-title">Spiel jetzt abschließen?</h2><p>Der gemeinsame Endbildschirm zeigt die Punkte aller bereits gewerteten Aufgaben.</p><div class="kids-finish-preview"><span>Kinderteam <b>{s.team}</b></span><span>Professor Bluff <b>{s.professor}</b></span></div><p>Eine noch nicht gewertete Aufgabe bleibt ohne Wertung.</p>{error && <p role="alert">{error}</p>}<button type="button" class="kids-button" autoFocus onClick={onCancel}>Weiterspielen</button><button type="button" class="kids-button kids-primary" disabled={disabled} onClick={onFinish}>Jetzt mit Punktestand abschließen</button></div></div>;
+  }}><div><h2 id="kids-finish-title">Spiel jetzt abschließen?</h2><p>Der gemeinsame Endbildschirm zeigt die Punkte aller bereits gewerteten Aufgaben.</p><div class="kids-finish-preview"><span>Kinderteam <b>{s.team}</b></span><span>Professor Bluff <b>{s.professor}</b></span></div><p>Eine noch nicht gewertete Aufgabe bleibt ohne Wertung.</p>{error && <p role="alert">{error}</p>}<button type="button" class="kids-button" ref={cancel} onClick={onCancel}>Weiterspielen</button><button type="button" class="kids-button kids-primary" disabled={disabled} onClick={onFinish}>Jetzt mit Punktestand abschließen</button></div></div>;
 }
