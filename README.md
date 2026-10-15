@@ -13,20 +13,20 @@ lokal erzeugte Klangbilder; Eltern und andere Gruppen machen Geräusche und Pant
 
 - Drei nummerierte Felder im Raum, 30 Sekunden nach dem Vorlesen. Andere Gruppen bleiben
   in ihren Bereichen. Eltern dürfen Minis begleiten. Keine Kinderkonten oder Einzelwertung.
-- Nach Stopp merken sich Helfer die Mehrheit. **Zurück in die Gruppen → Alle sind zurück**
-  schaltet erst danach die Wertung frei. Nur das gemeinsame Resultat wird erfasst.
-- Kinderteam: +5 Mitmachen und +5 für die richtige Mehrheit; maximal 30 je Altersgruppe.
+- Nach Stopp prüfen Helfer die Antwortfelder. **Zurück in die Gruppen → Alle sind zurück**
+  zeigt Professor Bluff groß und animiert; erst danach wird die Wertung freigeschaltet. Nur das gemeinsame Resultat wird erfasst.
+- Kinderteam: Mehrheit richtig = 10 Punkte; sonst mindestens ein Kind richtig = 5; keiner richtig = 0. Maximal 30 je Altersgruppe.
   Professor: immer +7 je Runde. Einmal in Kapitel 2 kann ein Familienjoker einen Hinweis
   freischalten, ohne zusätzliche Punkte. Keine heimliche Anpassung der Wertung.
-- Superbluff: Professor +10, Kinder bei gemeinsam gelöster Aufgabe +10. Endstand erst nach
+- Superbluff: Professor +10, Kinder erhalten auch hier 10 / 5 / 0 nach derselben Regel. Endstand erst nach
   dem Finale. Professor endet mit 73, Kinder mit Vielfachen von fünf: Gleichstand unmöglich.
-- Ein Schatzteil pro aufgelöster Runde. Am Ende öffnen alle gemeinsam die Botschaft über
+- Ein Schatzteil pro aufgelöster Runde: eine Krone, umringt von vielen Kindern. Am Ende öffnen alle gemeinsam die Botschaft über
   Jesu Einladung an Kinder (Markus 10,14), unabhängig vom Ergebnis des Punkteduells.
 - Professor mit spielstandsabhängigen Kommentaren und Animationen; Jubel nach jeder
   Auflösung. Die Einstellung für reduzierte Bewegung wird berücksichtigt.
 - Mausbedienung über **Maus** ein-/ausblenden. Leertaste oder Pfeil rechts: weiter;
   P: Pause/fortsetzen; H: Mausknöpfe. Während der Wertung: 1 = Mehrheit richtig,
-  2 = Mitgemacht, 0 = keine Teilnahme (im Finale 0 = nicht gelöst).
+  2 = mindestens ein Kind richtig, 0 = keiner richtig.
 - Smartphone der Spielleitung: **Bedienung → Smartphone verbinden**, QR-Code scannen.
   Start, Pause, Rückweg, Mehrheitswertung, Familienjoker, Szene und Revanche steuern denselben
   Stand wie die Maus. Regiehinweise bleiben auf der Fernbedienung. Klang am Beamer aktivieren.

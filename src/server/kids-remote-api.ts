@@ -44,7 +44,7 @@ function unpack(value: unknown, now: number): KidsGame {
   });
   let phase = game.phase as KidsPhase;
   const index = Number(game.index);
-  if (!Array.isArray(game.results) || game.results.length !== 10 || !game.results.every((r, i) => i < index || (i === index && ['revealed', 'finished'].includes(phase)) ? ['correct', 'participated', 'none'].includes(r) && !(i === 9 && r === 'participated') : r === null)) return badRequest();
+  if (!Array.isArray(game.results) || game.results.length !== 10 || !game.results.every((r, i) => i < index || (i === index && ['revealed', 'finished'].includes(phase)) ? ['correct', 'participated', 'none'].includes(r) : r === null)) return badRequest();
   if ((phase === 'welcome' && index !== 0) || (phase === 'chapter' && (index === 9 || index % 3 !== 0)) || (['superbluff', 'finished'].includes(phase) && index !== 9)) return badRequest();
   if (!(game.jokerFor === null || (Number.isInteger(game.jokerFor) && Number(game.jokerFor) >= 3 && Number(game.jokerFor) <= 5 && Number(game.jokerFor) <= index)) || !Number.isSafeInteger(game.cueSeq) || Number(game.cueSeq) < 0 || Number(game.cueSeq) > 1000) return badRequest();
   if (game.remainingMs === 0 && (phase === 'moving' || phase === 'paused')) phase = 'locked';
