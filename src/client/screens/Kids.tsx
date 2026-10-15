@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
+import { KidsScene } from '../components/KidsScene';
+import { KIDS_SCENE_MS } from '../../shared/kids-scenes';
 import { KidsReveal } from '../components/KidsReveal';
 import { KidsRegroup } from '../components/KidsRegroup';
 import { KidsLogo } from '../components/KidsLogo';
@@ -19,10 +21,11 @@ export function KidsPage() {
   const [showExit, setShowExit] = useState(false), [showPair, setShowPair] = useState(false);
   const [fullscreen, setFullscreen] = useState(false), [fullscreenError, setFullscreenError] = useState('');
   const [presentation, setPresentation] = useState(false), [toolsOpen, setToolsOpen] = useState(false);
-  const [sound, setSound] = useState(false);
-  const root = useRef<HTMLElement>(null), primary = useRef<HTMLButtonElement>(null), lastCue = useRef<number | null>(null);
+  const [sound, setSound] = useState<'unarmed'|'on'|'off'>('unarmed');
+  const root = useRef<HTMLElement>(null), primary = useRef<HTMLButtonElement>(null);
   const remote = useKidsRemote('display', setGame);
   const act = (action: KidsAction) => {
+    if (action === 'scene' && sound === 'unarmed') void enableKidsSound().then(()=>setSound('on')).catch(()=>setSound('off'));
     if (action !== 'tick' && remote.active) { void remote.send(action); return; }
     setGame((g) => g ? updateKidsGame(g, action, Date.now()) : g);
   };
@@ -32,16 +35,19 @@ export function KidsPage() {
   useEffect(() => { const old = document.title; document.title = 'BibleBluff Kids · Die große Bluff-Jagd'; return () => { document.title = old; }; }, []);
   useEffect(() => { const sync = () => setFullscreen(!!document.fullscreenElement); document.addEventListener('fullscreenchange', sync); return () => document.removeEventListener('fullscreenchange', sync); }, []);
   useEffect(() => {
-    if (game?.phase !== 'moving') return;
+    if (game?.phase !== 'moving' && game?.phase !== 'scene') return;
     const tick = () => act('tick'); const timer = window.setInterval(tick, 100);
     document.addEventListener('visibilitychange', tick);
     return () => { clearInterval(timer); document.removeEventListener('visibilitychange', tick); };
   }, [game?.phase]);
   useEffect(() => {
-    if (!game) { lastCue.current = null; return; }
-    if (lastCue.current !== null && game.cueSeq > lastCue.current && sound) { const scene = game.rounds[game.index].question.scene; if (scene) playKidsScene(scene); }
-    lastCue.current = game.cueSeq;
-  }, [game?.cueSeq, sound]);
+    if (game?.phase !== 'scene' || sound !== 'on') return;
+    const scene=game.rounds[game.index].question.scene;
+    if (!scene) return;
+    let cancelled=false, stop=()=>{};
+    void enableKidsSound().then(()=>{ if(!cancelled) stop=playKidsScene(scene,KIDS_SCENE_MS-Math.max(0,(game.deadline??Date.now())-Date.now())); }).catch(()=>{ if(!cancelled) setSound('off'); });
+    return ()=>{ cancelled=true; stop(); };
+  }, [game?.phase, game?.cueSeq, sound]);
   useEffect(() => {
     if (!game || showExit || showPair || toolsOpen) return;
     if (presentation || game.phase === 'judging' || game.phase === 'moving') root.current?.focus({ preventScroll: true });
@@ -61,7 +67,7 @@ export function KidsPage() {
     window.addEventListener('keydown', key); return () => window.removeEventListener('keydown', key);
   }, []);
   const toggleFullscreen = async () => { try { setFullscreenError(''); if (document.fullscreenElement) await document.exitFullscreen(); else await root.current?.requestFullscreen(); } catch { setFullscreenError('Nutze das Vollbild deines Browsers.'); } };
-  const toggleSound = async () => { if (sound) { setSound(false); return; } try { await enableKidsSound(); setSound(true); } catch { setFullscreenError('Klang hier nicht verfügbar. Die Gruppen können die Geräusche selbst machen.'); } };
+  const toggleSound = async () => { if (sound === 'on') { setSound('off'); return; } try { await enableKidsSound(); setSound('on'); } catch { setFullscreenError('Klang hier nicht verfügbar. Die Gruppen können die Geräusche selbst machen.'); } };
   const exit = () => { void remote.disconnect(); setShowExit(false); setShowPair(false); setToolsOpen(false); setPresentation(false); setGame(null); };
   const pair = async () => { if (!game) return; setToolsOpen(false); setShowPair(true); if (!remote.active) { const paused = updateKidsGame(game, 'pause', Date.now()); setGame(paused); await remote.connect(paused, false); } };
   const round = game?.rounds[game.index];
@@ -79,7 +85,7 @@ export function KidsPage() {
     {game && toolsOpen && <aside class="kids-operator-tools" id="kids-operator-tools" aria-label="Bedienung für die Spielleitung">
       <button type="button" class="kids-tool" onClick={() => { setPresentation(!presentation); setToolsOpen(false); }}>{presentation ? 'Maussteuerung einblenden' : 'Nur Spiel anzeigen'}</button>
       <button type="button" class="kids-tool" disabled={remote.busy} onClick={pair}>{remote.active ? 'Smartphone-Steuerung anzeigen' : 'Smartphone verbinden'}</button>
-      <button type="button" class="kids-tool" onClick={toggleSound}>{sound ? 'Klang ausschalten' : 'Klang einschalten'}</button>
+      <button type="button" class="kids-tool" onClick={toggleSound}>{sound === 'on' ? 'Klang ausschalten' : 'Klang einschalten'}</button>
       {canFullscreen && <button type="button" class="kids-tool" onClick={toggleFullscreen}>{fullscreen ? 'Vollbild aus' : 'Vollbild einschalten'}</button>}
       <button type="button" class="kids-tool" onClick={() => { act('pause'); setToolsOpen(false); setShowExit(true); }}>Spiel beenden</button>
       <p>→ / Leertaste: weiter · P: Pause<br/>H: Mausknöpfe · Wertung: 1 / 2 / 0</p><button type="button" class="kids-tool" onClick={() => setToolsOpen(false)}>Menü schließen</button>
@@ -97,6 +103,7 @@ export function KidsPage() {
       <button type="button" class="kids-button kids-primary" onClick={() => setGame(createKidsGame())}>Show vorbereiten <span>→</span></button><p class="kids-setup-note">Ein Beamer für alle · Kein Kinder-Smartphone<br/>Maus, Tastatur oder Smartphone der Spielleitung</p>
       <details class="kids-organizer"><summary>Helferplan & Ablauf</summary><p>Moderation, Beamer-Bedienung und Gruppenhelfer einplanen. Genug Platz für die aktive Gruppe und begleitende Eltern lassen. Elternkarten 1–3 und ein Kissen für die Final-Pantomime bereitlegen.</p><p>Begrüßung 5 Min. · 3 Kapitel je 9 Min. · Showeinlagen 6 Min. · Finale 7 Min. Alle Punkte sind fest geregelt.</p></details></div>
     </section> : <>
+      {game.phase==='scene' ? <KidsScene key={`${game.index}-${game.cueSeq}`} game={game} act={act} sound={sound==='on'} toggleSound={()=>{void toggleSound();}} disabled={remote.busy} primaryRef={primary}/> : <>
       <ShowScoreboard game={game}/>
       {game.phase==='returning' || game.phase==='judging' ? <KidsRegroup game={game} act={act} disabled={remote.busy} primaryRef={primary}/> : revealed ? <KidsReveal key={`${game.index}-${game.results[game.index]}`} game={game} act={act} disabled={remote.busy} primaryRef={primary}>{kidsResultPoints(game.results[game.index])>0 && <Celebration variant={game.index}/>}</KidsReveal> : interlude ? <section class={`kids-show-interlude is-${game.phase}`}>
         {finished && <Celebration variant={3}/>}
@@ -108,17 +115,19 @@ export function KidsPage() {
           {!finished && <ShowControls game={game} act={act} disabled={remote.busy} primaryRef={primary}/>}
         </div>
       </section> : round && <section class={`kids-stage kids-show-stage is-${game.phase}`} aria-labelledby="kids-question">
-        <div class="kids-show-question">{round.question.scene && <div key={`${game.index}-${game.cueSeq}`} class="kids-scene"><StoryPicture motif={round.question.scene} animated/></div>}<h1 id="kids-question">{round.question.prompt}</h1></div>
+        <div class="kids-show-question"><h1 id="kids-question">{round.question.prompt}</h1></div>
         <div class="kids-status" role="status"><ProfessorBluff mood={professorMood(game)}/><div class={`kids-clock${game.phase === 'moving' && seconds <= 5 ? ' is-urgent' : ''}`} aria-label={`${seconds} Sekunden`}><svg viewBox="0 0 80 80" aria-hidden="true"><circle class="kids-clock-track" cx="40" cy="40" r="33"/><circle class="kids-clock-progress" cx="40" cy="40" r="33" style={{ strokeDasharray:'207.35', strokeDashoffset: `${207.35 * (1-game.remainingMs/30000)}` }}/></svg><b aria-hidden="true">{game.phase==='locked' ? '✋' : seconds}</b></div><div><strong>{status}</strong><span>{game.phase === 'locked' ? 'Noch nicht auflösen. Gleich geht’s zurück.' : `${group!.title} sind dran! Die anderen fiebern mit.`}</span></div></div>
         <ol class="kids-answers has-pictures" aria-label="Antworten und Spielfelder">{round.answers.map((answer,i)=><li key={`${game.index}-${i}`} class={`kids-answer kids-field-${i+1}`}><span class="kids-number">{i+1}</span><StoryPicture motif={kidsAnswerPicture(round.question,answer)}/><span class="kids-answer-text">{answer}</span></li>)}</ol>
         <div class="kids-bottom"><div class="kids-discovery"><div><p>{professorSays(game)}</p></div></div><div class="kids-operator-actions">{game.phase==='reading' && <div class="kids-extra-controls">{round.question.scene && <button type="button" class="kids-tool" disabled={remote.busy} onClick={()=>act('scene')}>Szene abspielen</button>}</div>}<ShowControls game={game} act={act} disabled={remote.busy} primaryRef={primary}/></div></div>
       </section>}
     </>}
+    </>}
     {showPair && <div class="kids-exit kids-pair" role="dialog" aria-modal="true" aria-labelledby="kids-pair-title" onKeyDown={(e) => {
       if (e.key === 'Escape') { e.preventDefault(); setShowPair(false); }
       if (e.key === 'Tab') { const elements = Array.from(e.currentTarget.querySelectorAll<HTMLElement>('button:not(:disabled), a')); const index = elements.indexOf(document.activeElement as HTMLElement); e.preventDefault(); elements[(index + (e.shiftKey ? -1 : 1) + elements.length) % elements.length]?.focus(); }
     }}><div><h2 id="kids-pair-title">Smartphone verbinden</h2><p>Nur für die Spielleitung: QR-Code mit dem Smartphone scannen und dieselbe Partie steuern.</p>
-      {remote.credentials?.remoteToken ? <><QRCode value={kidsControlUrl(remote.credentials)} label="QR-Code zur Smartphone-Fernbedienung" /><a class="kids-button kids-remote-link" href={kidsControlUrl(remote.credentials)} target="_blank" rel="noopener noreferrer">Fernbedienung öffnen ↗</a><p class="kids-pair-note">Start · Pause · Mehrheitswertung · Weiter<br />Die Kinder brauchen kein Smartphone.</p></> : <p role="status">{remote.error || 'QR-Code wird vorbereitet …'}</p>}
+      {remote.credentials?.remoteToken ? <><QRCode value={kidsControlUrl(remote.credentials)} label="QR-Code zur Smartphone-Fernbedienung" /><a class="kids-button kids-remote-link" href={kidsControlUrl(remote.credentials)} target="_blank" rel="noopener noreferrer">Fernbedienung öffnen ↗</a><p class="kids-pair-note">Start · Szene · Pause · Mehrheitswertung · Weiter<br />Die Kinder brauchen kein Smartphone.</p></> : <p role="status">{remote.error || 'QR-Code wird vorbereitet …'}</p>}
+      <button type="button" class="kids-tool" disabled={sound==='on'} onClick={()=>{void toggleSound();}}>{sound==='on' ? 'Klänge am Beamer sind aktiviert' : 'Klänge für Smartphone-Steuerung aktivieren'}</button>
       {remote.error && !remote.active && <button type="button" class="kids-button" disabled={remote.busy} onClick={pair}>Erneut versuchen</button>}
       <button type="button" class="kids-button kids-primary" autoFocus onClick={() => setShowPair(false)}>Zur Partie</button>
       {remote.active && <button type="button" class="kids-tool" onClick={() => { void remote.disconnect(); setShowPair(false); }}>Smartphone-Verbindung trennen</button>}

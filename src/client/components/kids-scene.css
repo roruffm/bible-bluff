@@ -1,0 +1,60 @@
+.kids-cinema { height: calc(100dvh - 68px); display: grid; grid-template-rows: auto minmax(0,1fr) auto 7px auto; gap: clamp(8px,1.4vh,22px); padding: 16px 5vw 18px; background: radial-gradient(ellipse at 50% 40%,#fff7da,transparent 70%); }
+.kids-cinema > header { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 2px 20px; }
+.kids-cinema .kids-eyebrow { grid-column: 1; margin: 0; color: #14795f; font-size: clamp(11px,1.1vw,22px); }
+.kids-cinema h1 { margin: 0; font-size: clamp(27px,min(3.6vw,5vh),76px); line-height: 1.2; font-weight: 900; }
+.kids-cinema-listen { grid-column: 2; grid-row: 1 / 3; font-size: clamp(30px,4vw,70px); color: #14795f; }
+.kids-cinema-screen { min-height: 0; position: relative; border: 3px solid #12324a; border-radius: 25px; box-shadow: 0 7px 0 #12324a; background: #dcece5; overflow: hidden; }
+.kids-cinema-art { width: 100%; height: 100%; display: block; }
+.kids-cinema-steps { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; padding: 7px 12px; background: #fffdf1df; border-radius: 30px; }
+.kids-cinema-steps i { width: 10px; height: 10px; border-radius: 50%; background: #a7bab8; }
+.kids-cinema-steps .is-seen { background: #14795f; }
+.kids-cinema-caption { font-size: clamp(23px,min(3vw,4vh),60px); line-height: 1.3; font-weight: 850; text-align: center; text-wrap: balance; margin: 0; padding: 3px 0; }
+.kids-cinema-progress { height: 7px; background: #cedfd7; border-radius: 10px; overflow: hidden; }
+.kids-cinema-progress span { display: block; height: 100%; background: #14795f; border-radius: inherit; transition: width .1s linear; }
+.kids-cinema footer { display: flex; justify-content: space-between; align-items: center; gap: 15px; }
+.kids-cinema footer > p { font-size: clamp(14px,1.5vw,26px); font-weight: 750; }
+.kids-cinema-controls { display: flex; gap: 12px; align-items: center; }
+.kids-cinema-controls .kids-button { font-size: clamp(15px,1.5vw,26px); padding: 10px 18px; }
+.is-projecting .kids-cinema-controls { display: none; }
+.is-projecting .kids-cinema footer { justify-content: center; }
+/* Jede Bewegung startet auch nach Neuladen an derselben Stelle der Szene. */
+.kids-cinema-art .scene-raindrop { animation: cinema-rain .85s linear infinite; animation-delay: var(--drop-delay); }
+.kids-cinema-art .scene-wave-lines { animation: cinema-wave 1.6s ease-in-out infinite alternate; }
+.scene-ark .scene-hammer-arm { transform-origin: 65px 100px; animation: cinema-hammer .6s ease-in-out infinite; }
+.scene-ark .scene-animal-board { animation: cinema-board 10s linear both; animation-delay: var(--scene-offset); }
+.scene-ark .scene-ark-ship { animation: cinema-ark 10s ease-in-out both; animation-delay: var(--scene-offset); transform-origin: 570px 390px; }
+.scene-ark .scene-onboard,.scene-ark .scene-ark-weather,.scene-ark .scene-animal-board { opacity: 0; }
+.scene-ark.beat-1 .scene-animal-board,.scene-ark.beat-2 .scene-onboard,.scene-ark.beat-2 .scene-ark-weather { opacity: 1; }
+.scene-ark.beat-1 .scene-builder,.scene-ark.beat-2 .scene-builder,.scene-ark.beat-2 .scene-gangplank { opacity: 0; }
+.scene-ark.beat-2 .scene-sun { opacity: .2; }
+.scene-manger .scene-guiding-star { animation: cinema-star 2s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
+.scene-manger .scene-parents { opacity: .35; transition: opacity .8s ease; }
+.scene-manger.beat-1 .scene-parents,.scene-manger.beat-2 .scene-parents { opacity: 1; }
+.scene-manger .scene-cradle { animation: cinema-cradle 2.6s ease-in-out infinite; transform-origin: 100px 110px; }
+.scene-manger .scene-sleep-marks { opacity: 0; }
+.scene-manger.beat-2 .scene-sleep-marks { opacity: 1; animation: cinema-sleep 2s ease-in-out infinite; }
+.scene-lion .scene-angel,.scene-lion .scene-peace-hearts { opacity: 0; transition: opacity .7s ease; }
+.scene-lion.beat-1 .scene-angel,.scene-lion.beat-2 .scene-angel,.scene-lion.beat-2 .scene-peace-hearts { opacity: 1; }
+.scene-lion .scene-lion-head { animation: cinema-lion 2s ease-in-out infinite; transform-origin: 88px 120px; }
+.scene-lion.beat-2 .scene-lion-rest { transform: translateY(15px) scaleY(.88); transform-origin: 88px 150px; transition: transform .8s ease; }
+.scene-lion.beat-2 .scene-lion-head { animation: none; transform: rotate(5deg); }
+.scene-boat .scene-boat-rock { animation: cinema-boat 10s ease-in-out both; animation-delay: var(--scene-offset); transform-origin: 530px 405px; }
+.scene-boat .scene-standing,.scene-boat .scene-calm-birds,.scene-boat .scene-sun { opacity: 0; }
+.scene-boat.beat-2 .scene-standing,.scene-boat.beat-2 .scene-calm-birds,.scene-boat.beat-2 .scene-sun { opacity: 1; }
+.scene-boat.beat-2 .scene-sleeper,.scene-boat.beat-2 .scene-rain { opacity: 0; }
+.scene-boat.beat-2 .scene-clouds { opacity: .3; transition: opacity 1s ease; }
+.scene-boat.beat-2 .scene-water { transform: scaleY(.7); transform-origin: 500px 500px; transition: transform 1s ease; }
+.scene-boat.beat-2 .scene-wave-lines { animation: none; }
+.scene-boat.beat-1 .scene-sleeper { filter: drop-shadow(0 0 7px #ffdf77); }
+@keyframes cinema-rain { to { transform: translate(-20px,45px); } }
+@keyframes cinema-wave { to { transform: translateX(30px); } }
+@keyframes cinema-hammer { 50% { transform: rotate(-24deg); } }
+@keyframes cinema-board { 0%,30% { transform: translate(0,0); } 65%,100% { transform: translate(340px,-94px); } }
+@keyframes cinema-ark { 0%,65%,100% { transform: rotate(0); } 75%,90% { transform: rotate(2deg) translateY(-5px); } 82%,96% { transform: rotate(-2deg); } }
+@keyframes cinema-star { 50% { transform: scale(1.1); opacity: .7; } }
+@keyframes cinema-cradle { 25% { transform: rotate(-3deg); } 75% { transform: rotate(3deg); } }
+@keyframes cinema-sleep { 50% { transform: translateY(-8px); opacity: .6; } }
+@keyframes cinema-lion { 50% { transform: rotate(-5deg); } }
+@keyframes cinema-boat { 0%,30%,60% { transform: rotate(-5deg) translateY(-8px); } 15%,45% { transform: rotate(5deg) translateY(6px); } 70%,100% { transform: rotate(0) translateY(0); } }
+@media (max-width:759px) { .kids-cinema { height: calc(100dvh - 68px); min-height: 480px; padding: 16px 18px; gap: 12px; } .kids-cinema h1 { font-size: 26px; } .kids-cinema-caption { font-size: 21px; } .kids-cinema footer { flex-direction: column; } .kids-cinema footer > p { font-size: 14px; } .kids-cinema-controls .kids-tool { font-size: 12px; } }
+@media (prefers-reduced-motion:reduce) { .kids-cinema *, .kids-cinema *::before,.kids-cinema *::after { animation: none !important; transition: none !important; } .scene-ark.beat-1 .scene-animal-board { transform: translate(200px,-55px); } }
