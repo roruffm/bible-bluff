@@ -59,7 +59,8 @@
 .kids-shortcuts { grid-column: 1 / -1; color: #526b77; font-size: 12px; text-align: center; margin-top: 5px; }
 /* Eine Kopfzeile, vier feste Bereiche: Frage, Phase, Felder, Auflösung/Bedienung. */
 .kids-page.is-playing { height: 100dvh; min-height: 0; overflow: hidden; background-image: none; }
-.kids-playing-bar { height: 68px; padding-block: 6px; background: #fffdf8; }
+.kids-playing-bar { height: 68px; padding-block: 6px; background: #fffdf8; display: grid; grid-template-columns: auto minmax(0,1fr) auto; gap: clamp(8px,1.4vw,18px); }
+.kids-playing-bar .kids-round-counter { min-width: 0; justify-self: center; text-align: center; line-height: 1.25; }
 .kids-playing-bar .kids-logo { width: 86px; }
 .kids-round-counter { font-size: clamp(16px, 1.7vw, 32px); font-weight: 800; font-variant-numeric: tabular-nums; }
 .kids-round-counter b { font-size: 1.25em; }
@@ -538,6 +539,25 @@
 .kids-finish-preview > span + span { background: #eee7f7; }
 .kids-finish-preview b { display: block; font-size: 36px; }
 .kids-remote-finish { margin-top: 22px; width: 100%; background: #fff0cf; }
+.kids-professor-signature,.kids-reaction-bubble > .kids-professor-signature { display: flex; justify-content: center; align-items: center; gap: 9px; }
+.kids-voice-play { flex: 0 0 auto; display: inline-grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 1px solid #7154a2; border-radius: 50%; background: #f5effc; color: #594083; font-size: 13px; line-height: 1; cursor: pointer; }
+.kids-voice-play:hover { background: #e5d8f6; }
+.is-projecting .kids-voice-play { display: none; }
+.kids-remote-voice > div { display: grid; gap: 10px; margin-top: 15px; }
+.kids-remote-voice .kids-button { white-space: normal; font-size: 16px; padding: 12px; }
+/* Die Bedienung darf die Kapitelanzeige auch auf Tablets nicht verdrängen. */
+@media (max-width:1000px) {
+  .kids-top-actions { gap: 6px; }
+  .kids-top-actions .kids-tool { padding: 7px 9px; }
+  .kids-top-actions .kids-tool > span { display: none; }
+}
+/* Unterhalb üblicher Beamerhöhen bleiben alle Inhalte durch Scrollen erreichbar. */
+@media (min-width:760px) and (max-height:599px) {
+  .kids-page.is-playing { height: auto; min-height: 100dvh; overflow-x: clip; overflow-y: visible; }
+  .kids-page.is-playing:fullscreen { height: 100dvh; overflow-y: auto; }
+  .kids-show-stage,.kids-show-interlude,.kids-regroup,.kids-reveal { min-height: 520px; }
+  .kids-ending,.kids-cinema { min-height: 600px; }
+}
 @media (min-width:760px) and (max-height:650px) {
   .kids-finale-seal { padding: 7px 15px; font-size: 11px; }
 }
@@ -554,4 +574,10 @@
   .kids-ending-results strong { font-size: 76px; }
   .kids-finish-dialog { padding: 16px; }
   .kids-finish-dialog > div { padding: 22px; gap: 15px; }
+}
+@media (max-width:520px) and (orientation:portrait) {
+  .kids-show-stage .has-pictures .kids-answer { grid-template-columns: 48px 80px minmax(0,1fr); padding-inline: 10px; }
+  .kids-show-stage .has-pictures .kids-number { min-width: 0; width: 48px; font-size: 34px; }
+  .kids-show-stage .has-pictures .kids-story-picture { width: 80px; }
+  .kids-show-stage .has-pictures .kids-answer-text { min-width: 0; overflow-wrap: anywhere; font-size: 21px; }
 }

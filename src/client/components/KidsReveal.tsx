@@ -1,3 +1,4 @@
+import { KidsVoiceButton } from './KidsVoice';
 import type { ComponentChildren, RefObject } from 'preact';
 import type { KidsAction, KidsGame } from '../../shared/kids-game';
 import { KIDS_GROUPS } from '../../shared/kids-show-questions';
@@ -18,7 +19,7 @@ export function KidsReveal({ game, act, disabled, primaryRef, children }: { game
     </div>
     <aside class="kids-reaction" aria-label="Professor Bluffs Reaktion">
       <div class="kids-reaction-art"><div class="kids-reaction-halo" aria-hidden="true"/><ProfessorBluff mood={reaction.mood}/><div class="kids-reaction-symbols" aria-hidden="true">{[0,1,2].map(i=><span key={i} style={{'--i':i}}>{reaction.points>0 ? ['!','✦','!'][i] : '♥'}</span>)}</div></div>
-      <blockquote class="kids-reaction-bubble"><span>PROFESSOR BLUFF</span><p class="kids-reaction-quote">{reaction.quote}</p></blockquote>
+      <blockquote class="kids-reaction-bubble"><span class="kids-professor-signature">PROFESSOR BLUFF <KidsVoiceButton/></span><p class="kids-reaction-quote">{reaction.quote}</p></blockquote>
       <p class="kids-reaction-caption">{reaction.caption}</p>
     </aside>
     <footer class="kids-reveal-footer"><p>{game.index===9 ? 'Alle Altersgruppen haben zusammengeholfen.' : 'Gemeinsam geht die Jagd weiter. Jeder Beitrag zählt!'}</p><ShowControls game={game} act={act} disabled={disabled} primaryRef={primaryRef}/></footer>

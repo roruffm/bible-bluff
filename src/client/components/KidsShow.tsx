@@ -15,7 +15,7 @@ export function professorMood(game: KidsGame): ProfessorMood {
 }
 export function professorSays(game: KidsGame): string {
   if (game.phase === 'welcome') return 'Ha! Drei Detektivteams gegen MEIN Superhirn? Das wird ja heiter!';
-  if (game.phase === 'superbluff') return 'ALARM! Mein Superbluff! Im Finale geht es für uns beide um zehn Punkte!';
+  if (game.phase === 'superbluff') return 'ALARM! Mein Superbluff! Zehn Punkte für mich … aber ihr könnt sie auch holen!';
   if (game.phase === 'finished') return kidsScores(game).team > kidsScores(game).professor ? 'Ihr habt meinen Bluff geknackt! Hut ab, ihr großartigen Detektive. Es war wunderbar mit euch!' : 'Meine Punkte kann ich zählen. Euer Zusammenhalt ist unbezahlbar! Danke, ihr großartigen Detektive!';
   if (game.phase === 'revealed') return kidsRoundReaction(game).quote;
   if (game.index >= 6) return 'Nur noch ein Kapitel! Meine Knie zittern? Das ist mein Denk-Tanz!';

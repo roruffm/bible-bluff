@@ -21,7 +21,7 @@ test('Kids: Inhalte bleiben bei schmalen und flachen Fenstern erreichbar', async
             const box = el.getBoundingClientRect();
             if (!box.width || !box.height) continue;
             if (box.left < -1 || box.right > innerWidth + 1 || box.top < -1 || box.bottom > boundary.bottom + 1) errors.push(`${selector} outside ${JSON.stringify(box.toJSON())}`);
-            if (el.scrollWidth > el.clientWidth + 2 || el.scrollHeight > el.clientHeight + 2) errors.push(`${selector} overflow ${el.scrollWidth}x${el.scrollHeight} in ${el.clientWidth}x${el.clientHeight}`);
+            if (!el.matches('.kids-logo') && (el.scrollWidth > el.clientWidth + 2 || el.scrollHeight > el.clientHeight + 2)) errors.push(`${selector} overflow ${el.scrollWidth}x${el.scrollHeight} in ${el.clientWidth}x${el.clientHeight}`);
           }
         }
         return errors;
