@@ -14,6 +14,8 @@ export function KidsVoiceProvider({ game, enabled, enable, act, busy, onError, c
   const [preparing,setPreparing] = useState(false);
   const previous = useRef<number|null>(null);
   const playback = useRef<AbortController|null>(null);
+  const currentCue = useRef<string|null>(null);
+  currentCue.current=game ? `${game.phase}:${game.index}` : null;
   const stop = () => { const old=playback.current; playback.current=null; old?.abort(); setPlaying(false); };
   const key = game ? professorVoiceKey(game) : null;
   useEffect(() => {
@@ -23,7 +25,7 @@ export function KidsVoiceProvider({ game, enabled, enable, act, busy, onError, c
     const requested=previous.current !== null && sequence !== previous.current;
     previous.current=sequence;
     // Ein Seitenaufruf, Phasenwechsel oder erneutes Verbinden löst keine Sprache aus.
-    if (!requested || !game.voicePlaying || !key) return;
+    if (!requested || !game.voicePlaying || !key || game.voiceCue!==`${game.phase}:${game.index}`) return;
     if (!enabled) { onError('Professor-Ton am Beamer unter „Bedienung → Klang einschalten“ aktivieren. Danach den Spruch erneut starten.'); return; }
     const controller=new AbortController(); playback.current=controller; setPlaying(true);
     void playProfessorVoice(key,controller.signal,()=>{if(playback.current===controller){playback.current=null;setPlaying(false);}}).catch(error=>{
@@ -32,9 +34,9 @@ export function KidsVoiceProvider({ game, enabled, enable, act, busy, onError, c
     });
     return () => { if(playback.current===controller) playback.current=null; controller.abort(); };
   },[game?.voiceSeq,game?.phase,game?.index,enabled]);
-  useEffect(()=>()=>{playback.current?.abort();},[]);
+  useEffect(()=>()=>{currentCue.current=null;playback.current?.abort();},[]);
   return <VoiceContext.Provider value={{available:!!key,playing,busy:busy||preparing,
-    play:()=>{setPreparing(true);void enable().then(()=>act('speak')).catch(error=>onError(error instanceof Error ? error.message : 'Professor-Ton nicht verfügbar.')).finally(()=>setPreparing(false));},
+    play:()=>{const cue=currentCue.current;onError('');setPreparing(true);void enable().then(()=>{if(cue!==null && currentCue.current===cue)act('speak');}).catch(error=>onError(error instanceof Error ? error.message : 'Professor-Ton nicht verfügbar.')).finally(()=>setPreparing(false));},
     stop:()=>{stop();act('stop-speech');},
   }}>{children}</VoiceContext.Provider>;
 }

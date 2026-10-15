@@ -33,7 +33,7 @@ describe('Kids-Fernbedienung', () => {
   it('überträgt manuelles Abspielen und Stoppen ohne den Countdown oder Punkte zu ändern', async () => {
     const t=setup(), made=await t.create(), path=`/api/kids-remotes/${made.id}`;
     const play=await t.call('POST',path+'/action',{action:'speak',version:1},made.remoteToken);
-    expect(play.status).toBe(200);expect(play.body.game).toMatchObject({phase:'reading',remainingMs:30000,voiceSeq:1,voicePlaying:true});
+    expect(play.status).toBe(200);expect(play.body.game).toMatchObject({phase:'reading',remainingMs:30000,voiceSeq:1,voicePlaying:true,voiceCue:'reading:0'});
     expect(kidsScores(play.body.game)).toEqual(kidsScores(made.game));
     const read=await t.call('GET',path,undefined,made.ownerToken);expect(read.body.game.voiceSeq).toBe(1);
     const stop=await t.call('POST',path+'/action',{action:'stop-speech',version:2},made.remoteToken);

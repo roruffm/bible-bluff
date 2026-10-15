@@ -24,6 +24,7 @@ export function packKidsGame(game: KidsGame, now: number) {
     cueSeq: game.cueSeq,
     voiceSeq: game.voiceSeq ?? 0,
     voicePlaying: game.voicePlaying ?? false,
+    voiceCue: game.voiceCue ?? null,
     sceneRemainingMs: game.phase === 'scene' ? Math.min(KIDS_SCENE_MS, Math.max(0, (game.deadline ?? now) - now)) : undefined,
   };
 }

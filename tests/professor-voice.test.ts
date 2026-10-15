@@ -8,9 +8,11 @@ describe('Professor-Aufnahmen', () => {
     const game=createKidsGame(), spoken=updateKidsGame(game,'speak',0);
     expect(game.voiceSeq ?? 0).toBe(0);
     expect(spoken.voicePlaying).toBe(true);expect(spoken.voiceSeq).toBe(1);
+    expect(spoken.voiceCue).toBe('welcome:0');
     expect(kidsScores(spoken)).toEqual(kidsScores(game));expect(spoken.phase).toBe(game.phase);
     const stopped=updateKidsGame(spoken,'stop-speech',0);
     expect(stopped.voicePlaying).toBe(false);expect(stopped.voiceSeq).toBe(2);
+    expect(stopped.voiceCue).toBeNull();
     expect(stopped.results).toBe(game.results);expect(stopped.deadline).toBe(game.deadline);
   });
   it('verweist für alle sichtbaren Sprüche auf vorhandene MP3s und überspringt alte Schatztexte', () => {

@@ -64,5 +64,18 @@ test('Professor: Smartphone startet und stoppt am Beamer, Neuladen spielt nichts
   await expect.poll(async()=>(await counts(page)).starts).toBe(2);
   await page.reload();await expect(page.getByRole('button',{name:'Mission starten',exact:true})).toBeVisible();
   expect((await counts(page)).starts).toBe(0);expect(phoneAudio).toEqual([]);
+  await page.getByRole('button',{name:'Bedienung',exact:false}).click();
+  await page.getByRole('button',{name:'Klang einschalten',exact:true}).click();
+  await page.getByRole('button',{name:'Menü schließen',exact:true}).click();
+  let release!:()=>void, waiting!:()=>void;
+  const blocked=new Promise<void>(resolve=>{release=resolve;}), poll=new Promise<void>(resolve=>{waiting=resolve;});
+  await page.route('**/api/kids-remotes/*',async route=>{if(route.request().method()==='GET'){waiting();await blocked;}await route.continue();});
+  await poll;
+  await phone.getByRole('button',{name:'Spruch am Beamer abspielen',exact:false}).click();
+  await phone.getByRole('button',{name:'Mission starten',exact:true}).click();
+  release();
+  await expect(page.getByRole('heading',{name:'Die erste Spur',exact:true})).toBeVisible();
+  await page.waitForTimeout(200);
+  expect((await counts(page)).starts).toBe(0);
   await context.close();
 });

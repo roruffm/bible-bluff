@@ -9,7 +9,7 @@ export function kidsResultPoints(result: KidsResult | null): number { return res
 export interface KidsRound { question: KidsShowQuestion; answers: string[]; correctIndex: number }
 export interface KidsGame {
   rounds: KidsRound[]; index: number; phase: KidsPhase; remainingMs: number; deadline: number | null;
-  results: (KidsResult | null)[]; cueSeq: number; voiceSeq?: number; voicePlaying?: boolean;
+  results: (KidsResult | null)[]; cueSeq: number; voiceSeq?: number; voicePlaying?: boolean; voiceCue?: string|null;
 }
 export type KidsAction = 'start' | 'pause' | 'resume' | 'tick' | 'return' | 'ready' | 'correct' | 'participated' | 'none' | 'next' | 'scene' | 'end-scene' | 'finish' | 'speak' | 'stop-speech';
 
@@ -43,8 +43,8 @@ export function kidsScores(game: KidsGame) {
 /** Zeit und Punkte sind geräteunabhängig; doppelte oder unpassende Schritte ändern nichts. */
 export function updateKidsGame(game: KidsGame, action: KidsAction, now: number): KidsGame {
   const phase = game.phase;
-  if (action === 'speak' && !['scene','returning','judging'].includes(phase)) return { ...game, voiceSeq: (game.voiceSeq ?? 0) + 1, voicePlaying: true };
-  if (action === 'stop-speech') return { ...game, voiceSeq: (game.voiceSeq ?? 0) + 1, voicePlaying: false };
+  if (action === 'speak' && !['scene','returning','judging'].includes(phase)) return { ...game, voiceSeq: (game.voiceSeq ?? 0) + 1, voicePlaying: true, voiceCue: `${phase}:${game.index}` };
+  if (action === 'stop-speech') return { ...game, voiceSeq: (game.voiceSeq ?? 0) + 1, voicePlaying: false, voiceCue: null };
   if (action === 'finish' && phase !== 'finished') return { ...game, phase: 'finished', remainingMs: 0, deadline: null };
   if (phase === 'scene' && (action === 'end-scene' || (action === 'tick' && now >= (game.deadline ?? now)))) return { ...game, phase: 'reading', deadline: null };
   if (action === 'next') {
