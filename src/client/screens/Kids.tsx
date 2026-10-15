@@ -21,6 +21,8 @@ export function KidsPage() {
   const [showExit, setShowExit] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
   const [fullscreenError, setFullscreenError] = useState('');
+  const [presentation, setPresentation] = useState(false);
+  const [toolsOpen, setToolsOpen] = useState(false);
   const root = useRef<HTMLElement>(null);
   const primary = useRef<HTMLButtonElement>(null);
   const current = useRef({ game, showExit });
@@ -47,14 +49,18 @@ export function KidsPage() {
     return () => { clearInterval(timer); document.removeEventListener('visibilitychange', tick); };
   }, [game?.phase]);
   useEffect(() => {
-    if (game && game.phase !== 'moving' && !showExit) primary.current?.focus({ preventScroll: true });
-  }, [game?.phase, game?.index, showExit]);
+    if (!game || showExit || toolsOpen) return;
+    if (presentation && game.phase !== 'finished') root.current?.focus({ preventScroll: true });
+    else if (game.phase !== 'moving') primary.current?.focus({ preventScroll: true });
+  }, [game?.phase, game?.index, showExit, presentation, toolsOpen]);
   useEffect(() => {
     const key = (e: KeyboardEvent) => {
       const { game, showExit } = current.current;
       if (!game || showExit || e.repeat || e.altKey || e.ctrlKey || e.metaKey) return;
       const tag = (e.target as HTMLElement)?.tagName;
       if (['INPUT', 'SELECT', 'TEXTAREA'].includes(tag)) return;
+      if (e.code === 'KeyH') { e.preventDefault(); setPresentation((v) => !v); setToolsOpen(false); return; }
+      if (e.code === 'Escape') { setToolsOpen(false); return; }
       // Leertaste aktiviert fokussierte Knöpfe nativ; → und P bleiben überall bedienbar.
       if (e.code === 'Space' && ['BUTTON', 'A', 'SUMMARY'].includes(tag)) return;
       const action = (e.code === 'Space' || e.code === 'ArrowRight') ? kidsPrimaryAction(game.phase) : e.code === 'KeyP' ? (game.phase === 'moving' ? 'pause' : game.phase === 'paused' ? 'resume' : null) : null;
@@ -71,19 +77,26 @@ export function KidsPage() {
       else await root.current?.requestFullscreen();
     } catch { setFullscreenError('Vollbild ist hier nicht verfügbar. Nutze das Vollbild deines Browsers.'); }
   };
-  const exit = () => { setShowExit(false); setGame(null); };
+  const exit = () => { setShowExit(false); setToolsOpen(false); setPresentation(false); setGame(null); };
   const round = game?.rounds[game.index];
   const revealed = game?.phase === 'revealed';
   const finished = game?.phase === 'finished';
   const poolSize = KIDS_QUESTIONS.filter((q) => !easy || q.level === 1).length;
   const seconds = game ? Math.ceil(game.remainingMs / 1000) : 30;
+  const active = !!game && !finished;
+  const actionLabel = !game ? '' : game.phase === 'reading' ? '30 Sekunden starten' : game.phase === 'paused' ? 'Weiter geht’s' : game.phase === 'locked' ? 'Antwort aufdecken' : game.index + 1 === game.rounds.length ? 'Zum großen Finale' : 'Nächste Frage';
 
-  return <main class="kids-page" ref={root}>
-    <header class="kids-topbar">
-      <a href="/" class="kids-back" onClick={(e) => { e.preventDefault(); if (game && !finished) { act('pause'); setShowExit(true); } else navigate('/'); }} aria-label="Zurück zu Bible Bluff">← <span>Bible Bluff</span></a>
-      <span class="kids-top-title">BEWEGEN. RATEN. STAUNEN.</span>
-      {canFullscreen && <button type="button" class="kids-tool" onClick={toggleFullscreen}>{fullscreen ? '↙ Vollbild aus' : '⛶ Vollbild'}</button>}
+  return <main class={`kids-page${active ? ' is-playing' : ''}${presentation && active ? ' is-projecting' : ''}`} ref={root} tabIndex={-1}>
+    <header class={`kids-topbar${active ? ' kids-playing-bar' : ''}`}>
+      {active ? <><KidsLogo compact /><span class="kids-round-counter">Frage <b>{game.index + 1}</b><span> von {game.rounds.length}</span></span><button type="button" class="kids-tool kids-menu-toggle" aria-expanded={toolsOpen} aria-controls="kids-operator-tools" onClick={() => setToolsOpen(!toolsOpen)}>☰ <span>Bedienung</span></button></> : <><a href="/" class="kids-back" onClick={(e) => { e.preventDefault(); navigate('/'); }} aria-label="Zurück zu Bible Bluff">← <span>Bible Bluff</span></a><span class="kids-top-title">BEWEGEN. RATEN. STAUNEN.</span>{canFullscreen && <button type="button" class="kids-tool" onClick={toggleFullscreen}>{fullscreen ? '↙ Vollbild aus' : '⛶ Vollbild'}</button>}</>}
     </header>
+    {active && toolsOpen && <aside class="kids-operator-tools" id="kids-operator-tools" aria-label="Bedienung für die Spielleitung">
+      <button type="button" class="kids-tool" onClick={() => { setPresentation(!presentation); setToolsOpen(false); }}>{presentation ? 'Bedienknöpfe einblenden' : 'Nur Spiel anzeigen'}</button>
+      {canFullscreen && <button type="button" class="kids-tool" onClick={toggleFullscreen}>{fullscreen ? 'Vollbild aus' : 'Vollbild einschalten'}</button>}
+      <button type="button" class="kids-tool" onClick={() => { act('pause'); setToolsOpen(false); setShowExit(true); }}>Spiel beenden</button>
+      <p>Leertaste / →: weiter<br />P: Pause · H: Bedienknöpfe an/aus</p>
+      <button type="button" class="kids-tool" onClick={() => setToolsOpen(false)}>Menü schließen</button>
+    </aside>}
     {fullscreenError && <p role="status" class="kids-screen-note">{fullscreenError}</p>}
 
     {!game ? <section class="kids-setup" aria-labelledby="kids-title">
@@ -108,7 +121,7 @@ export function KidsPage() {
         <button type="button" class="kids-button kids-primary" onClick={() => setGame(createKidsGame(count, easy))}>Los geht’s! <span>→</span></button>
         <p class="kids-setup-note">{poolSize} ausgewählte Fragen · Ein Bildschirm für alle<br />Bedienung durch die Spielleitung am Computer</p>
       </div>
-      <p class="kids-shortcuts">Spielleitung: Leertaste / → = weiter · P = Pause<br />Fragen in Ruhe vorlesen. Erst danach die Zeit starten.</p>
+      <p class="kids-shortcuts">Spielleitung: Leertaste / → = weiter · P = Pause · H = Bedienknöpfe an/aus<br />Fragen in Ruhe vorlesen. Erst danach die Zeit starten.</p>
     </section> : finished ? <section class="kids-finish" aria-labelledby="kids-finish-title">
       <Celebration variant={game.rounds.length} />
       <KidsLogo />
@@ -117,23 +130,21 @@ export function KidsPage() {
       <p>So viel bewegt. So viel entdeckt.<br />Schön, dass ihr alle dabei wart!</p>
       <div class="kids-finish-actions"><button ref={primary} type="button" class="kids-button kids-primary" onClick={() => setGame(createKidsGame(count, easy))}>Noch eine Runde! ↻</button><button type="button" class="kids-button" onClick={exit}>Zur Auswahl</button></div>
     </section> : round && <section class={`kids-stage is-${game.phase}`} aria-labelledby="kids-question">
-      <div class="kids-game-meta"><KidsLogo compact /><span>FRAGE <b>{game.index + 1}</b> / {game.rounds.length}</span><button type="button" class="kids-tool" onClick={() => { act('pause'); setShowExit(true); }}>Spiel beenden</button></div>
       <h1 id="kids-question" key={game.index}>{round.question.prompt}</h1>
       <div class="kids-status" role="status" aria-live="polite">
         <div class={`kids-clock${game.phase === 'moving' && seconds <= 5 ? ' is-urgent' : ''}`} aria-label={`${seconds} Sekunden`}>
           <svg viewBox="0 0 80 80" aria-hidden="true"><circle class="kids-clock-track" cx="40" cy="40" r="33"/><circle class="kids-clock-progress" cx="40" cy="40" r="33" style={{ strokeDasharray: '207.35', strokeDashoffset: `${207.35 * (1 - game.remainingMs / 30000)}` }} /></svg>
-          <b aria-hidden="true">{revealed ? '✓' : seconds}</b>
+          <b aria-hidden="true">{revealed ? '✓' : game.phase === 'locked' ? '✋' : seconds}</b>
         </div>
-        <div><strong>{game.phase === 'reading' ? 'Erst zuhören. Dann geht’s los!' : game.phase === 'moving' ? '1, 2 oder 3? Ab in euer Feld!' : game.phase === 'paused' ? 'Kurze Pause. Bleibt, wo ihr seid!' : game.phase === 'locked' ? 'Stopp! Jetzt stehen bleiben!' : `Richtig ist Feld ${round.correctIndex + 1}!`}</strong><span>{game.phase === 'reading' ? 'Die Spielleitung liest die Frage und alle Antworten vor.' : game.phase === 'moving' ? 'Ihr dürft noch wechseln, bis die Zeit vorbei ist.' : game.phase === 'paused' ? 'Die Zeit wartet auf euch.' : game.phase === 'locked' ? 'Seid ihr bereit für die Auflösung?' : CHEERS[game.index % CHEERS.length]}</span></div>
+        <div><strong>{game.phase === 'reading' ? 'Erst zuhören. Dann geht’s los!' : game.phase === 'moving' ? '1, 2 oder 3? Ab in euer Feld!' : game.phase === 'paused' ? 'Kurze Pause. Bleibt, wo ihr seid!' : game.phase === 'locked' ? 'Stopp! Jetzt stehen bleiben!' : `Richtig ist Feld ${round.correctIndex + 1}!`}</strong><span>{game.phase === 'reading' ? 'Welche Antwort stimmt?' : game.phase === 'moving' ? 'Wechseln erlaubt – bis zum Stopp!' : game.phase === 'paused' ? 'Die Zeit wartet auf euch.' : game.phase === 'locked' ? 'Bleibt in eurem Feld!' : CHEERS[game.index % CHEERS.length]}</span></div>
       </div>
       <ol class="kids-answers" aria-label="Antworten und Spielfelder">{round.answers.map((answer, i) => <li key={`${game.index}-${i}`} class={`kids-answer kids-field-${i + 1}${revealed ? i === round.correctIndex ? ' is-correct' : ' is-other' : ''}`}>
         <span class="kids-field-label">FELD</span><b class="kids-number">{i + 1}</b><span class="kids-answer-text">{answer}</span>
         {revealed && i === round.correctIndex && <span class="kids-correct-mark" aria-label="Richtige Antwort">✓ RICHTIG!</span>}
       </li>)}</ol>
-      <div class="kids-discovery" aria-live="polite">{revealed ? <><span class="kids-discovery-star" aria-hidden="true">✦</span><div><p>{round.question.explanation}</p><small>{round.question.ref}</small></div></> : <p>{game.phase === 'reading' ? 'Welche Antwort stimmt? Überlegt schon mal!' : game.phase === 'locked' ? 'Alle bleiben in ihrem Feld. Gleich wisst ihr mehr!' : 'Feld 1, 2 oder 3 – nur eine Antwort ist richtig.'}</p>}</div>
-      <footer class="kids-controls">
-        <span class="kids-control-hint">Spielleitung <span>Leertaste / → weiter · P Pause</span></span>
-        {game.phase === 'moving' ? <button type="button" class="kids-button" onClick={() => act('pause')}>Ⅱ Pause</button> : <button ref={primary} type="button" class="kids-button kids-primary" onClick={() => { const action = kidsPrimaryAction(game.phase); if (action) act(action); }}>{game.phase === 'reading' ? '30 Sekunden starten →' : game.phase === 'paused' ? 'Weiter geht’s →' : game.phase === 'locked' ? 'Antwort aufdecken ✦' : game.index + 1 === game.rounds.length ? 'Zum großen Finale →' : 'Nächste Frage →'}</button>}
+      <footer class="kids-bottom">
+        <div class="kids-discovery" aria-live="polite">{revealed ? <><span class="kids-discovery-star" aria-hidden="true">✦</span><div><p>{round.question.explanation}</p><small>{round.question.ref}</small></div></> : <p class="kids-control-hint">{game.phase === 'reading' ? 'In Ruhe vorlesen. Danach die Zeit starten.' : game.phase === 'locked' ? 'Bereit? Jetzt darf aufgedeckt werden.' : 'Leertaste / → weiter · P Pause · H Bedienknöpfe'}</p>}</div>
+        <div class="kids-controls">{game.phase === 'moving' ? <button type="button" class="kids-button" onClick={() => act('pause')}>Ⅱ Pause</button> : <button ref={primary} type="button" class="kids-button kids-primary" aria-label={actionLabel} onClick={() => { const action = kidsPrimaryAction(game.phase); if (action) act(action); }}>{game.phase === 'reading' ? '30 s starten ▶' : game.phase === 'paused' ? 'Weiter ▶' : game.phase === 'locked' ? 'Aufdecken ✦' : game.index + 1 === game.rounds.length ? 'Finale →' : 'Nächste Frage →'}</button>}</div>
       </footer>
       {revealed && <Celebration key={game.index} variant={game.index} />}
     </section>}
