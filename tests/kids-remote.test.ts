@@ -30,6 +30,15 @@ function setup(store: KidsRemoteStore = new MemoryKidsRemoteStore()) {
 }
 
 describe('Kids-Fernbedienung', () => {
+  it('überträgt Frage vorlesen als eigenen manuellen Sprachbefehl, ohne den Timer zu starten',async()=>{
+    const t=setup(),made=await t.create(),path=`/api/kids-remotes/${made.id}`;
+    const read=await t.call('POST',path+'/action',{action:'read-question',version:1},made.remoteToken);
+    expect(read.status).toBe(200);expect(read.body.game).toMatchObject({voiceKind:'question',voiceCue:'reading:0',voiceSeq:1,remainingMs:30000,deadline:null,phase:'reading'});
+    const quote=await t.call('POST',path+'/action',{action:'speak',version:2},made.ownerToken);
+    expect(quote.body.game.voiceKind).toBe('quote');
+    await t.call('POST',path+'/action',{action:'start',version:3},made.ownerToken);
+    expect((await t.call('POST',path+'/action',{action:'read-question',version:4},made.remoteToken)).status).toBe(409);
+  });
   it('überträgt manuelles Abspielen und Stoppen ohne den Countdown oder Punkte zu ändern', async () => {
     const t=setup(), made=await t.create(), path=`/api/kids-remotes/${made.id}`;
     const play=await t.call('POST',path+'/action',{action:'speak',version:1},made.remoteToken);

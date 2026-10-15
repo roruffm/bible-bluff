@@ -9,7 +9,7 @@ export async function enableKidsSound() {
 const professorBuffers = new Map<string, Promise<AudioBuffer>>();
 /** Ein Abbruch verhindert auch, dass eine noch ladende Aufnahme später losspielt. */
 export async function playProfessorVoice(key: string, signal: AbortSignal, onEnded: () => void) {
-  if (!/^(welcome|intro|chapter[23]|superbluff|win|lose|startled-[0-9]|comfort-[0-9])$/.test(key) || !context || context.state !== 'running') throw new Error('Professor-Ton bitte am Beamer aktivieren.');
+  if (!/^(welcome|intro|chapter[23]|superbluff|win|lose|startled-[0-9]|comfort-[0-9]|question-[0-9])$/.test(key) || !context || context.state !== 'running') throw new Error('Professor-Ton bitte am Beamer aktivieren.');
   const ctx = context;
   let buffer = professorBuffers.get(key);
   if (!buffer) {

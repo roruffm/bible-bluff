@@ -1,7 +1,7 @@
+import { KidsGroupName } from './KidsGroupName';
 import { KidsVoiceButton } from './KidsVoice';
 import type { ComponentChildren, RefObject } from 'preact';
 import type { KidsAction, KidsGame } from '../../shared/kids-game';
-import { KIDS_GROUPS } from '../../shared/kids-show-questions';
 import { kidsRoundReaction } from '../lib/kids-reactions';
 import { ProfessorBluff, ShowControls, StoryPicture } from './KidsShow';
 
@@ -9,7 +9,7 @@ export function KidsReveal({ game, act, disabled, primaryRef, children }: { game
   const round=game.rounds[game.index], reaction=kidsRoundReaction(game);
   return <section class={`kids-reveal is-revealed reaction-${reaction.mood}`} aria-labelledby="kids-reveal-title" data-points={reaction.points}>
     <div class="kids-reveal-result">
-      <header><p class="kids-eyebrow">AUFGELÖST · {KIDS_GROUPS[round.question.group].name}</p><h1 id="kids-reveal-title">Feld {round.correctIndex+1} ist richtig!</h1></header>
+      <header><p class="kids-eyebrow">AUFGELÖST · <KidsGroupName group={round.question.group}/></p><h1 id="kids-reveal-title">Feld {round.correctIndex+1} ist richtig!</h1></header>
       <div class={`kids-answer kids-reveal-answer kids-field-${round.correctIndex+1} is-correct has-picture`}>
         <span class="kids-number">{round.correctIndex+1}</span>
         <StoryPicture motif={round.question.pictures[0]}/>

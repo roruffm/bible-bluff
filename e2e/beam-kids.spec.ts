@@ -48,7 +48,7 @@ test('Kids: Startseitenlogo, 30 Sekunden, Pause, Rückweg und gemeinsame Wertung
   await expect(page.getByTestId('prof-score')).toHaveText('7');
   await expect(page.locator('.kids-celebration')).toBeVisible();
   await page.keyboard.press('ArrowRight');
-  await expect(page.locator('.kids-round-counter')).toContainText('Mittis');
+  await expect(page.locator('.kids-round-counter')).toContainText('Leuchtsterne');
   await expect(page.locator('.kids-clock')).toHaveAttribute('aria-label','30 Sekunden');
 });
 test('Kids: vollständige Show mit Bildern, ohne Joker und mit jederzeit möglichem Abschluss',async({page})=>{
@@ -128,7 +128,7 @@ test('Kids: Smartphone synchronisiert Maus, Wertung, Neuladen und Netzabbruch',a
   await phone.getByRole('button',{name:'Mehrheit richtig · +10',exact:true}).click();
   await expect(page.getByTestId('team-score')).toHaveText('10');
   await phone.getByRole('button',{name:'Nächste Aufgabe',exact:true}).click();
-  await expect(page.locator('.kids-round-counter')).toContainText('Mittis');
+  await expect(page.locator('.kids-round-counter')).toContainText('Leuchtsterne');
   await page.getByRole('button',{name:'Bedienung',exact:false}).click();
   await page.getByRole('button',{name:'Smartphone-Steuerung anzeigen',exact:true}).click();
   await page.getByRole('button',{name:'Smartphone-Verbindung trennen',exact:true}).click();

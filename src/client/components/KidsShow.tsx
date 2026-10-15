@@ -1,8 +1,9 @@
+import { KidsGroupName } from './KidsGroupName';
 import { kidsRoundReaction } from '../lib/kids-reactions';
 import { AnswerMotifArt } from './KidsAnswerArt';
 import type { RefObject } from 'preact';
 import { kidsActionLabel, kidsPrimaryAction, kidsScores, type KidsAction, type KidsGame } from '../../shared/kids-game';
-import { KIDS_GROUPS, type StoryMotif } from '../../shared/kids-show-questions';
+import { type StoryMotif } from '../../shared/kids-show-questions';
 
 export type ProfessorMood = 'confident' | 'nervous' | 'panic' | 'defeated' | 'victory' | 'startled' | 'kind';
 export function professorMood(game: KidsGame): ProfessorMood {
@@ -68,7 +69,7 @@ export function StoryPicture({ motif, animated = false }: { motif: StoryMotif; a
 export function ShowScoreboard({ game }: { game: KidsGame }) {
   const s = kidsScores(game);
   return <section class="kids-scoreboard" aria-label="Gemeinsame Punktejagd">
-    <div class="kids-team-score"><span>BIBLEBLUFF-TEAM</span><strong data-testid="team-score">{s.team}</strong><div>{(['minis','mittis','maxis'] as const).map(g=><span key={g}>{KIDS_GROUPS[g].name} <b>{s.groups[g]}</b><small>/30</small></span>)}</div></div>
+    <div class="kids-team-score"><span>BIBLEBLUFF-TEAM</span><strong data-testid="team-score">{s.team}</strong><div>{(['minis','mittis','maxis'] as const).map(g=><span key={g}><KidsGroupName group={g}/> <b>{s.groups[g]}</b><small>/30</small></span>)}</div></div>
     <div class="kids-race" aria-label={`Kinderteam ${s.team}, Professor Bluff ${s.professor}`}>
       <div class="kids-race-lane"><span style={{ left: `${s.team * .85}%` }}>♥</span></div><div class="kids-race-lane professor-lane"><span style={{ left: `${s.professor * .85}%` }}><ProfessorHead mood={professorMood(game)}/></span></div><small>{s.playedRounds} {s.playedRounds === 1 ? 'Aufgabe gewertet' : 'Aufgaben gewertet'} · Gemeinsam!</small>
     </div>

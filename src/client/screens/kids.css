@@ -545,6 +545,22 @@
 .is-projecting .kids-voice-play { display: none; }
 .kids-remote-voice > div { display: grid; gap: 10px; margin-top: 15px; }
 .kids-remote-voice .kids-button { white-space: normal; font-size: 16px; padding: 12px; }
+.kids-group-name { display: inline-flex; align-items: center; gap: .22em; vertical-align: middle; max-width: 100%; }
+.kids-group-name > span { min-width: 0; }
+.kids-group-symbol { width: 1.35em; height: 1.35em; flex: 0 0 1.35em; overflow: visible; }
+.kids-show-teams { flex-wrap: wrap; }
+.kids-show-teams > span { padding-inline: 10px; }
+.kids-show-teams .kids-group-name { font-size: 15px; }
+.kids-team-badges b { font-size: clamp(14px,min(1.6vw,2.4vh),28px); }
+.kids-team-badges .kids-group-name { justify-content: center; }
+.kids-team-score > div > span { display: inline-flex; align-items: center; gap: 3px; }
+.kids-team-score > div { font-size: clamp(9px,1.05vw,18px); }
+.kids-question-voice { font-size: 12px; padding: 5px 9px; }
+@media (max-width:759px) {
+  .kids-playing-bar .kids-logo { width: 62px; }
+  .kids-show .kids-round-counter { font-size: 10px; padding-inline: 5px; }
+  .kids-show .kids-round-counter b { font-size: 1.05em; }
+}
 /* Die Bedienung darf die Kapitelanzeige auch auf Tablets nicht verdrängen. */
 @media (max-width:1000px) {
   .kids-top-actions { gap: 6px; }
