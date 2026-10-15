@@ -143,6 +143,38 @@ describe('Kids-Fernbedienung', () => {
     game.index=1;game.results[0]='correct';
     expect((await t.call('POST','/api/kids-remotes',{easy:false,game})).status).toBe(400);
   });
+  for(const scoredCurrent of [false,true]) it(`schließt vorzeitig ab und stellt den Endstand wieder her, aktuelle Aufgabe gewertet: ${scoredCurrent}`, async () => {
+    const t=setup();
+    const results=['correct','participated',scoredCurrent ? 'none' : null,...Array(7).fill(null)];
+    const game={...reading(),index:2,phase:scoredCurrent ? 'revealed' as const : 'moving' as const,results,deadline:scoredCurrent ? null : t.clock.now+30000};
+    const made=await t.create(game), path=`/api/kids-remotes/${made.id}`;
+    const ended=await t.call('POST',path+'/action',{action:'finish',version:1},made.remoteToken);
+    expect(ended.status).toBe(200);expect(ended.body.game).toMatchObject({index:2,phase:'finished',deadline:null,remainingMs:0,results});
+    expect(kidsScores(ended.body.game)).toMatchObject({team:15,professor:scoredCurrent ? 21 : 14,playedRounds:scoredCurrent ? 3 : 2});
+    t.clock.advance(100000);t.reboot();
+    const saved=await t.call('GET',path,undefined,made.ownerToken);
+    expect(saved.body.game).toEqual(ended.body.game);
+    for(const action of ['next','start','correct','finish'])expect((await t.call('POST',path+'/action',{action,version:2},made.ownerToken)).status).toBe(409);
+    const restored=await t.create(saved.body.game);expect(restored.game).toEqual(saved.body.game);
+  });
+  it('beendet beim gleichzeitigen Abschluss beider Geräte genau einmal', async () => {
+    const t=setup(), made=await t.create();
+    const responses=await Promise.all([made.ownerToken,made.remoteToken].map(token=>t.call('POST',`/api/kids-remotes/${made.id}/action`,{action:'finish',version:1},token)));
+    expect(responses.map(r=>r.status).sort()).toEqual([200,409]);
+    const saved=await t.call('GET',`/api/kids-remotes/${made.id}`,undefined,made.ownerToken);
+    expect(saved.body.version).toBe(2);expect(saved.body.game.phase).toBe('finished');expect(kidsScores(saved.body.game).playedRounds).toBe(0);
+  });
+  it('akzeptiert keine Lücken oder vorzeitig erfundenen Resultate im Endstand', async () => {
+    const t=setup();
+    for(const results of [
+      ['correct',null,null,...Array(7).fill(null)],
+      ['correct','participated','unbekannt',...Array(7).fill(null)],
+      ['correct','participated',null,'correct',...Array(6).fill(null)],
+    ]) {
+      const game=packKidsGame({...reading(),index:2,phase:'finished',results},t.clock.now);
+      expect((await t.call('POST','/api/kids-remotes',{easy:false,game})).status).toBe(400);
+    }
+  });
   it('beendet die Show ohne Revanche und akzeptiert keine Familienjoker', async () => {
     const t = setup();
     const game = { ...reading(), phase: 'finished' as const, index: 9, remainingMs: 0, results: Array(10).fill('correct') };
@@ -191,6 +223,10 @@ describe('Kids-Fernbedienung in D1 / SQLite', () => {
     const started = await t.call('POST', `/api/kids-remotes/${made.id}/action`, { action: 'start', version: 1 }, made.remoteToken);
     expect(started.status).toBe(200); expect(started.body.game.phase).toBe('moving');
     expect(await store.update(made.id, 1, made.game, true)).toBe(false);
+    const ended=await t.call('POST',`/api/kids-remotes/${made.id}/action`,{action:'finish',version:2},made.remoteToken);
+    expect(ended.body.game).toMatchObject({phase:'finished',index:0,deadline:null,remainingMs:0});
+    t.reboot(new D1KidsRemoteStore(binding));
+    expect((await t.call('GET',`/api/kids-remotes/${made.id}`,undefined,made.ownerToken)).body.game.phase).toBe('finished');
     t.clock.advance(KIDS_REMOTE_TTL); await store.cleanup(t.clock.now);
     expect(await store.load(made.id)).toBeNull(); db.close();
   });

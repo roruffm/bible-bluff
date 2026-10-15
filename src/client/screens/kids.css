@@ -147,11 +147,6 @@
 .kids-party-2 > i { animation-name: kids-bubbles; top: auto; bottom: -40px; }
 .kids-party-3 > i { animation-name: kids-confetti; font-size: 40px; }
 .kids-happy { position: absolute; width: clamp(80px, 8vw, 150px); left: 2%; bottom: 120px; animation: kids-happy 2.6s ease both; }
-.kids-finish { min-height: calc(100dvh - 65px); padding: 45px 25px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; position: relative; }
-.kids-finish > :not(.kids-celebration) { position: relative; z-index: 2; }
-.kids-finish h1 { font-size: clamp(45px, 7vw, 100px); letter-spacing: -.04em; margin: 15px 0 20px; }
-.kids-finish > p:not(.kids-eyebrow) { font-size: clamp(20px, 2vw, 32px); }
-.kids-finish-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; margin-top: 35px; }
 .kids-exit { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; background: #12324aab; padding: 25px; }
 .kids-exit > div { max-width: 440px; border: 3px solid #12324a; border-radius: 25px; background: #fffdf8; padding: 30px; display: grid; gap: 20px; }
 @keyframes kids-answer-pop { 0% { transform: scale(.96); } 45% { transform: scale(1.025); } 100% { transform: scale(1); } }
@@ -229,12 +224,11 @@
 .kids-team-score > div { display: flex; flex-wrap: wrap; gap: 4px 13px; font-size: clamp(11px,1.15vw,20px); }
 .kids-team-score small { font-size: .8em; opacity: .7; }
 .kids-prof-score > small { font-size: clamp(11px,1vw,18px); }
-.kids-race { padding-right: 29px; position: relative; min-width: 0; }
+.kids-race { padding-right: 0; position: relative; min-width: 0; }
 .kids-race-lane { height: 18px; border-radius: 20px; background: #d8ede5; position: relative; margin: 0 10px 8px 0; }
 .kids-race-lane span { position: absolute; top: -4px; width: 25px; height: 25px; border-radius: 50%; background: #17785f; color: #fff; font-size: 16px; font-weight: 900; display: grid; place-items: center; transition: left 1s ease; }
 .professor-lane { background: #e7dff0; }
 .professor-lane span { background: #7154a2; }
-.kids-race-chest { position: absolute; right: 0; top: 2px; color: #9c7013; font-size: 40px; }
 .kids-race small { display: block; font-size: 12px; font-weight: 750; text-align: center; white-space: nowrap; }
 .kids-show-stage { height: calc(100dvh - 160px); grid-template-rows: minmax(0,1fr) minmax(0,.9fr) minmax(0,2.8fr) minmax(0,1.15fr); padding: 10px 3vw 14px; gap: 10px; }
 .kids-show-question { display: flex; align-items: center; justify-content: center; gap: 20px; }
@@ -280,18 +274,10 @@
 .kids-team-badges > div { padding: 12px 6px; background: #fffdf8; border: 2px solid #b4ceca; border-radius: 16px; }
 .kids-team-badges b { display: block; font-size: clamp(17px,2vw,30px); margin-bottom: 5px; }
 .kids-team-badges span { font-size: clamp(11px,1.15vw,20px); }
-.kids-treasure { width: min(240px,33vh); aspect-ratio: 5/3; position: relative; border: 3px solid #12324a; border-radius: 15px; overflow: hidden; box-shadow: 0 5px 0 #12324a; }
-.kids-treasure svg { width: 100%; height: 100%; display: block; }
-.kids-treasure-tiles { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(3,1fr); grid-template-rows: repeat(3,1fr); }
-.kids-treasure-tiles span { display: grid; place-items: center; background: #716095; color: #ffe6a1; border: 1px solid #3f365b; font-size: 24px; transition: opacity .8s ease; }
-.kids-treasure-tiles .is-found { opacity: 0; }
 .kids-final-bonuses { display: flex; gap: 20px; width: 100%; }
 .kids-final-bonuses > span { flex: 1; border: 2px solid #12324a; border-radius: 15px; background: #e8e0f2; padding: 15px; font-size: clamp(14px,1.6vw,28px); }
 .kids-final-bonuses > span+span { background: #cdeedc; }
 .kids-final-bonuses b { display: block; font-size: clamp(40px,7vw,110px); }
-.kids-final-result { display: flex; gap: 20px; font-size: clamp(17px,1.6vw,30px); }
-.kids-final-result b { color: #116a55; }
-.kids-show-story .kids-treasure-message { font-weight: 900; color: #116a55; }
 .kids-show-story > small { font-size: clamp(12px,1.1vw,20px); }
 .kids-remote-score { display: flex; gap: 8px; justify-content: space-between; margin-bottom: 16px; font-size: 14px; }
 .kids-remote-score b { font-size: 22px; margin-left: 4px; }
@@ -319,10 +305,6 @@
   .kids-show-stage .kids-discovery div p { font-size: 15px; }
   .kids-show-stage .kids-status > .bluff-professor { display: none; }
   .kids-show-story { gap: 10px; }
-  .kids-show-interlude.is-finished .kids-treasure { width: 150px; }
-  .kids-show-interlude.is-finished .kids-show-story h1 { font-size: 27px; }
-  .kids-show-interlude.is-finished .kids-show-story > p { font-size: 17px; }
-  .kids-show-interlude.is-finished .kids-finish-actions .kids-button { padding: 8px 12px; }
 }
 @media (max-width:759px) {
   .kids-scoreboard { height: auto; min-height: 100px; grid-template-columns: 1fr 1fr; gap: 12px 20px; padding: 12px 18px; }
@@ -356,18 +338,8 @@
 }
 .kids-scene .is-animated .story-bob { animation-iteration-count: 2; }
 .kids-scene .is-animated .story-waves { animation-iteration-count: 3; }
-.kids-race { padding-right: 65px; }
-.kids-race-chest { top: 0; width: 56px; }
-.kids-race-chest .kids-treasure { width: 56px; border-width: 1px; border-radius: 4px; box-shadow: 0 2px 0 #12324a; }
-.kids-race-chest .kids-treasure-tiles span { font-size: 8px; border-width: .5px; }
-@media (min-width:760px) and (max-height:650px) {
-  .kids-show-interlude.is-finished .kids-show-story { gap: 6px; }
-  .kids-show-interlude.is-finished .kids-show-story .kids-eyebrow { font-size: 10px; }
-  .kids-show-interlude.is-finished .kids-treasure { width: 125px; }
-  .kids-show-interlude.is-finished .kids-show-story h1 { font-size: 25px; }
-  .kids-show-interlude.is-finished .kids-show-story > p { font-size: 16px; }
-  .kids-show-interlude.is-finished .kids-show-story > small { font-size: 11px; }
-}
+.kids-race { padding-right: 0; }
+
 /* Wiedererkennbarer Professor-Kopf auf der Punktejagd. */
 .bluff-professor-head { display: block; width: 100%; height: 100%; overflow: visible; }
 .bluff-professor-head .bluff-head { animation: none; transform: none; }
@@ -506,7 +478,6 @@
   .kids-reveal-footer { min-height: 36px; }
   .kids-reveal-footer .kids-button { padding: 8px 13px; }
 }
-@media (min-width:760px) and (min-height:760px) { .kids-show-interlude.is-finished .kids-treasure { width: min(330px,30vh); } }
 @media (max-width:759px) {
   .kids-fullscreen-toggle > span { display: none; }
   .kids-show .kids-round-counter { font-size: 11px; padding: 5px 8px; }
@@ -534,21 +505,53 @@
 .kids-remote-farewell { padding: 22px 18px; border-radius: 18px; border: 2px solid #b7d8c8; background: #e0f2e7; text-align: center; }
 .kids-remote-farewell h2 { font-size: 25px; color: #176845; margin-bottom: 12px; }
 .kids-remote-farewell p { font-size: 16px; line-height: 1.5; margin-top: 10px; }
-/* Der gemeinsame Schatz bleibt als Abschluss auf der Leinwand stehen. */
-.kids-show-interlude.is-finished { background: radial-gradient(ellipse at 76% 48%,#fff0ad80 0,transparent 60%); }
-.kids-show-interlude.is-finished .kids-show-story { gap: clamp(10px,1.6vh,22px); }
-.kids-show-interlude.is-finished .kids-treasure { width: min(430px,38vh); border-color: #aa8026; box-shadow: 0 6px 0 #aa8026,0 0 0 8px #fff8d9; }
-.kids-show-interlude.is-finished .kids-show-story h1 { font-size: clamp(28px,min(3.8vw,5.8vh),78px); line-height: 1.15; }
-.kids-show-interlude.is-finished .kids-treasure-message { font-size: clamp(25px,min(3.3vw,4.7vh),64px); }
+/* Der gemeinsame Abschluss bleibt auf der Leinwand stehen. */
 .kids-finale-seal { display: flex; gap: 14px; align-items: center; padding: 10px 20px; border-radius: 30px; color: #176845; background: #ddede0; border: 1px solid #b7d8c8; font-weight: 900; font-size: clamp(12px,1.3vw,23px); letter-spacing: .06em; }
+.kids-end-toggle { background: #fff0cf; }
+.kids-ending { height: calc(100dvh - 68px); padding: 16px 4vw 18px; display: grid; grid-template-columns: minmax(0,.85fr) minmax(0,1.15fr); grid-template-rows: auto minmax(0,1fr) auto; gap: 14px 3vw; position: relative; isolation: isolate; background: radial-gradient(ellipse at 75% 45%,#fff2be9c,transparent 65%); }
+.kids-ending > :not(.kids-celebration) { position: relative; z-index: 2; min-width: 0; }
+.kids-ending > header { grid-column: 1 / -1; text-align: center; }
+.kids-ending .kids-eyebrow { margin: 0 0 5px; font-size: clamp(11px,1.2vw,22px); color: #176845; }
+.kids-ending h1 { font-size: clamp(30px,min(4.4vw,6vh),90px); line-height: 1.2; margin: 0; font-weight: 900; text-wrap: balance; }
+.kids-ending > header > p:last-child { font-size: clamp(16px,min(2vw,3vh),36px); line-height: 1.3; margin: 8px 0 0; }
+.kids-ending-host { display: grid; grid-template-rows: minmax(0,1fr) auto auto; justify-items: center; align-items: center; min-height: 0; gap: 10px; }
+.kids-ending-host > .bluff-professor { width: auto; height: 100%; max-width: min(100%,340px); }
+.kids-ending-host blockquote { margin: 0 0 4px; padding: 12px 15px; border: 2px solid #12324a; border-radius: 20px; box-shadow: 0 4px 0 #12324a; background: #fffdf8; font-size: clamp(18px,min(2vw,2.8vh),34px); line-height: 1.3; font-weight: 750; text-align: center; text-wrap: balance; }
+.kids-ending-host > span { font-size: clamp(11px,1.1vw,20px); font-weight: 850; color: #7154a2; }
+.kids-ending-host .bluff-head { animation: bluff-kind-nod 2.8s ease-in-out 2; }
+.kids-ending-results { display: grid; grid-template-columns: minmax(0,1.2fr) minmax(0,1fr); grid-template-rows: minmax(0,1fr) auto; gap: 14px; min-height: 0; align-content: center; }
+.kids-ending-results > div { border: 3px solid #176845; border-radius: 26px; padding: 16px 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(145deg,#effff0,#ccebd8); box-shadow: 0 7px 0 #176845; text-align: center; min-width: 0; }
+.kids-ending-results > .kids-ending-professor { border-color: #7154a2; background: linear-gradient(145deg,#f6effd,#e5d9f0); box-shadow: 0 7px 0 #7154a2; }
+.kids-ending-results > div > span { font-size: clamp(11px,1.3vw,24px); font-weight: 900; letter-spacing: .025em; }
+.kids-ending-results strong { font-size: clamp(68px,min(12vw,19vh),250px); line-height: 1.05; font-weight: 900; color: #176845; font-variant-numeric: tabular-nums; padding: 4px 0; }
+.kids-ending-professor strong { color: #7154a2; }
+.kids-ending-results b { font-size: clamp(12px,1.3vw,23px); line-height: 1.3; }
+.kids-ending-count { grid-column: 1 / -1; font-size: clamp(14px,1.6vw,28px); text-align: center; font-weight: 800; padding: 10px 0 0; }
+.kids-ending > footer { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
+.kids-ending > footer > p { margin: 0; font-size: clamp(23px,min(3.2vw,4.2vh),58px); font-weight: 900; color: #176845; line-height: 1.25; }
+.kids-ending > footer > small { font-size: clamp(11px,1.2vw,22px); }
+.kids-ending .kids-finale-seal { margin-top: 5px; }
+.kids-finish-dialog > div { width: min(480px,100%); max-width: 480px; max-height: calc(100dvh - 40px); overflow-y: auto; }
+.kids-finish-dialog p { font-size: 16px; line-height: 1.5; }
+.kids-finish-preview { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.kids-finish-preview > span { border-radius: 12px; padding: 12px 7px; font-size: 14px; background: #e0f2e7; text-align: center; }
+.kids-finish-preview > span + span { background: #eee7f7; }
+.kids-finish-preview b { display: block; font-size: 36px; }
+.kids-remote-finish { margin-top: 22px; width: 100%; background: #fff0cf; }
 @media (min-width:760px) and (max-height:650px) {
-  .kids-show-interlude.is-finished .kids-show-story { gap: 7px; }
-  .kids-show-interlude.is-finished .kids-treasure { width: min(260px,33vh); }
-  .kids-show-interlude.is-finished .kids-treasure-message { font-size: 23px; }
   .kids-finale-seal { padding: 7px 15px; font-size: 11px; }
 }
 @media (max-width:759px) {
   .kids-show-stage .kids-answer > .kids-story-picture { width: 100px; }
-  .kids-show-interlude.is-finished .kids-treasure { width: min(100%,360px); }
   .kids-finale-seal { font-size: 11px; gap: 8px; }
+  .kids-end-toggle > span { display: none; }
+  .kids-ending { height: auto; min-height: calc(100dvh - 68px); grid-template-columns: minmax(0,1fr); grid-template-rows: auto; gap: 24px; padding: 25px 18px; }
+  .kids-ending > header,.kids-ending > footer { grid-column: 1; }
+  .kids-ending h1 { font-size: 32px; }
+  .kids-ending-host > .bluff-professor { height: 180px; }
+  .kids-ending-host blockquote { font-size: 20px; }
+  .kids-ending-results { min-height: 230px; }
+  .kids-ending-results strong { font-size: 76px; }
+  .kids-finish-dialog { padding: 16px; }
+  .kids-finish-dialog > div { padding: 22px; gap: 15px; }
 }

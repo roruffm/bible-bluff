@@ -1,6 +1,5 @@
 import { kidsRoundReaction } from '../lib/kids-reactions';
 import { AnswerMotifArt } from './KidsAnswerArt';
-import { CrownTreasureArt } from './KidsChildrenArt';
 import type { RefObject } from 'preact';
 import { kidsActionLabel, kidsPrimaryAction, kidsScores, type KidsAction, type KidsGame } from '../../shared/kids-game';
 import { KIDS_GROUPS, type StoryMotif } from '../../shared/kids-show-questions';
@@ -11,12 +10,12 @@ export function professorMood(game: KidsGame): ProfessorMood {
   if (game.phase === 'revealed') return kidsRoundReaction(game).mood;
   if (game.phase === 'finished') return 'kind';
   if (game.phase === 'superbluff') return 'panic';
-  if (s.team >= s.professor && s.pieces > 3) return 'panic';
-  return s.team >= s.professor && s.pieces > 0 ? 'nervous' : 'confident';
+  if (s.team >= s.professor && s.playedRounds > 3) return 'panic';
+  return s.team >= s.professor && s.playedRounds > 0 ? 'nervous' : 'confident';
 }
 export function professorSays(game: KidsGame): string {
   if (game.phase === 'welcome') return 'Ha! Drei Detektivteams gegen MEIN Superhirn? Das wird ja heiter!';
-  if (game.phase === 'superbluff') return 'ALARM! Mein Superbluff! Zehn Punkte für mich … aber ihr könnt sie auch holen!';
+  if (game.phase === 'superbluff') return 'ALARM! Mein Superbluff! Im Finale geht es für uns beide um zehn Punkte!';
   if (game.phase === 'finished') return kidsScores(game).team > kidsScores(game).professor ? 'Ihr habt meinen Bluff geknackt! Hut ab, ihr großartigen Detektive. Es war wunderbar mit euch!' : 'Meine Punkte kann ich zählen. Euer Zusammenhalt ist unbezahlbar! Danke, ihr großartigen Detektive!';
   if (game.phase === 'revealed') return kidsRoundReaction(game).quote;
   if (game.index >= 6) return 'Nur noch ein Kapitel! Meine Knie zittern? Das ist mein Denk-Tanz!';
@@ -66,20 +65,14 @@ export function StoryPicture({ motif, animated = false }: { motif: StoryMotif; a
     </g>
   </svg>;
 }
-export function Treasure({ pieces, open = false }: { pieces: number; open?: boolean }) {
-  return <div class={`kids-treasure${open ? ' is-open' : ''}`} aria-label={`${pieces} von 9 Schatzteilen entdeckt: eine Krone mit vielen Kindern`}>
-    <CrownTreasureArt/>
-    <div class="kids-treasure-tiles" aria-hidden="true">{Array.from({ length: 9 }, (_, i) => <span key={i} class={i < pieces ? 'is-found' : ''}>{i < pieces ? '' : '✦'}</span>)}</div>
-  </div>;
-}
 export function ShowScoreboard({ game }: { game: KidsGame }) {
-  const s = kidsScores(game); const suspense = game.index === 9 && game.phase !== 'finished';
+  const s = kidsScores(game);
   return <section class="kids-scoreboard" aria-label="Gemeinsame Punktejagd">
-    <div class="kids-team-score"><span>BIBLEBLUFF-TEAM</span><strong data-testid="team-score">{suspense ? '?' : s.team}</strong><div>{(['minis','mittis','maxis'] as const).map(g=><span key={g}>{KIDS_GROUPS[g].name} <b>{s.groups[g]}</b><small>/30</small></span>)}</div></div>
-    <div class="kids-race" aria-label={suspense ? 'Superbluff läuft. Endstand gleich!' : `Kinderteam ${s.team}, Professor Bluff ${s.professor}`}>
-      <div class="kids-race-lane"><span style={{ left: `${(suspense ? s.team - s.bonus : s.team) * .85}%` }}>♥</span></div><div class="kids-race-lane professor-lane"><span style={{ left: `${s.professor * .85}%` }}><ProfessorHead mood={professorMood(game)}/></span></div><div class="kids-race-chest"><Treasure pieces={s.pieces}/></div><small>{suspense ? 'Endstand nach dem Superbluff' : `${s.pieces} / 9 Schatzteile · Gemeinsam!`}</small>
+    <div class="kids-team-score"><span>BIBLEBLUFF-TEAM</span><strong data-testid="team-score">{s.team}</strong><div>{(['minis','mittis','maxis'] as const).map(g=><span key={g}>{KIDS_GROUPS[g].name} <b>{s.groups[g]}</b><small>/30</small></span>)}</div></div>
+    <div class="kids-race" aria-label={`Kinderteam ${s.team}, Professor Bluff ${s.professor}`}>
+      <div class="kids-race-lane"><span style={{ left: `${s.team * .85}%` }}>♥</span></div><div class="kids-race-lane professor-lane"><span style={{ left: `${s.professor * .85}%` }}><ProfessorHead mood={professorMood(game)}/></span></div><small>{s.playedRounds} {s.playedRounds === 1 ? 'Aufgabe gewertet' : 'Aufgaben gewertet'} · Gemeinsam!</small>
     </div>
-    <div class="kids-prof-score"><span>PROFESSOR BLUFF</span><strong data-testid="prof-score">{suspense ? '?' : s.professor}</strong><small>{suspense ? '+10 Finalangriff' : '+7 pro Runde'}</small></div>
+    <div class="kids-prof-score"><span>PROFESSOR BLUFF</span><strong data-testid="prof-score">{s.professor}</strong><small>+7 je Aufgabe · Finale +10</small></div>
   </section>;
 }
 export function ShowControls({ game, act, disabled = false, primaryRef }: { game: KidsGame; act: (action: Exclude<KidsAction, 'tick'>) => void; disabled?: boolean; primaryRef?: RefObject<HTMLButtonElement> }) {

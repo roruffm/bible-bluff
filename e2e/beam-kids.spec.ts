@@ -51,7 +51,7 @@ test('Kids: Startseitenlogo, 30 Sekunden, Pause, Rückweg und gemeinsame Wertung
   await expect(page.locator('.kids-round-counter')).toContainText('Mittis');
   await expect(page.locator('.kids-clock')).toHaveAttribute('aria-label','30 Sekunden');
 });
-test('Kids: vollständige Show mit Bildern, ohne Joker und mit gemeinsamem Abschluss',async({page})=>{
+test('Kids: vollständige Show mit Bildern, ohne Joker und mit jederzeit möglichem Abschluss',async({page})=>{
   const requests:string[]=[]; page.on('request',r=>{if(r.url().includes('/api/'))requests.push(r.url());});
   await page.goto('/kids'); await begin(page); await page.clock.install();
   for(let i=0;i<10;i++) {
@@ -61,18 +61,19 @@ test('Kids: vollständige Show mit Bildern, ohne Joker und mit gemeinsamem Absch
     expect(new Set(motifs).size).toBe(3);
     await resolve(page,'Mehrheit richtig · +10');
     await expect(page.locator('.kids-answer.is-correct')).toHaveCount(1);
-    await page.getByRole('button',{name:i===9?'Schatz öffnen':i===8?'Zum Superbluff':i===2||i===5?'Nächstes Kapitel':'Nächste Aufgabe',exact:true}).click();
+    await page.getByRole('button',{name:i===9?'Zum Abschluss':i===8?'Zum Superbluff':i===2||i===5?'Nächstes Kapitel':'Nächste Aufgabe',exact:true}).click();
     if(i===2||i===5) await page.getByRole('button',{name:'Erste Aufgabe im Kapitel',exact:true}).click();
-    if(i===8) { await expect(page.getByTestId('team-score')).toHaveText('?'); await expect(page.getByText('ALARM! Der Superbluff!',{exact:true})).toBeVisible(); await page.getByRole('button',{name:'Gemeinsam ins Finale',exact:true}).click(); }
+    if(i===8) { await expect(page.getByTestId('team-score')).toHaveText('90'); await expect(page.getByText('ALARM! Der Superbluff!',{exact:true})).toBeVisible(); await page.getByRole('button',{name:'Gemeinsam ins Finale',exact:true}).click(); }
   }
   await expect(page.getByRole('heading',{name:'Gemeinsam seid ihr stark!'})).toBeVisible();
-  await expect(page.locator('.kids-show-story').getByRole('img',{name:'Eine goldene Krone, umringt von zwölf fröhlichen Kindern'})).toBeVisible();
+  await expect(page.locator('.kids-treasure')).toHaveCount(0);
+  await expect(page.locator('.kids-ending')).toBeVisible();
   await expect(page.getByTestId('team-score')).toHaveText('100'); await expect(page.getByTestId('prof-score')).toHaveText('73');
   await expect(page.getByText('Bei Jesus sind wir willkommen.',{exact:true})).toBeVisible();
-  await expect(page.locator('.kids-show-story .kids-treasure-tiles .is-found')).toHaveCount(9);
+  await expect(page.locator('.kids-ending-count')).toContainText('10 Aufgaben');
   await expect(page.getByRole('button',{name:/Revanche|Vorbereitung/})).toHaveCount(0);
   await expect(page.locator('.kids-finale-seal')).toHaveText('♥ ALLE GEHÖREN DAZU ♥');
-  await expect(page.locator('.kids-show-host .bluff-professor')).toHaveClass(/mood-kind/);
+  await expect(page.locator('.kids-ending-host .bluff-professor')).toHaveClass(/mood-kind/);
   await page.keyboard.press('ArrowRight');
   await expect(page.getByTestId('team-score')).toHaveText('100');
   expect(requests).toEqual([]);
@@ -141,11 +142,11 @@ test('Kids: alle Showfragen passen bei 800×600, 4:3, 720p, Full HD und 1440p',a
   async function check() {
     const issues=await page.evaluate(()=>{
       const problems:string[]=[];
-      for(const selector of ['#kids-question','.kids-answer-text','.is-revealed .kids-discovery p','#kids-regroup-title','.kids-regroup-instruction','#kids-reveal-title','.kids-reaction-quote','.kids-reaction-caption','.kids-farewell']) document.querySelectorAll<HTMLElement>(selector).forEach(el=>{
+      for(const selector of ['#kids-question','.kids-answer-text','.is-revealed .kids-discovery p','#kids-regroup-title','.kids-regroup-instruction','#kids-reveal-title','.kids-reaction-quote','.kids-reaction-caption','.kids-farewell','#kids-ending-title','.kids-ending-host blockquote','.kids-ending-count','.kids-ending-results strong','.kids-ending footer > p']) document.querySelectorAll<HTMLElement>(selector).forEach(el=>{
         const range=document.createRange();range.selectNodeContents(el);const text=range.getBoundingClientRect(),box=(selector.includes('discovery')?el.closest('.kids-discovery')!:el).getBoundingClientRect();
         if(text.left<box.left-1||text.right>box.right+1||text.top<box.top-1||text.bottom>box.bottom+1) problems.push(`${innerWidth}×${innerHeight} ${selector}: ${el.textContent}; Text ${JSON.stringify({left:text.left,right:text.right,top:text.top,bottom:text.bottom})}; Box ${JSON.stringify({left:box.left,right:box.right,top:box.top,bottom:box.bottom})}`);
       });
-      for(const el of document.querySelectorAll('.kids-answer > .kids-story-picture,.kids-reveal-answer > .kids-story-picture,.kids-status,.kids-answers,.kids-bottom,.kids-show-story,.kids-show-host,.kids-regroup-content,.kids-regroup-operator,.kids-reveal-result,.kids-reaction,.kids-reveal-footer')) {const box=el.getBoundingClientRect();if(el.matches('.kids-story-picture') && box.height<45)problems.push(`Bild zu klein: ${el.getAttribute('data-motif')}`);if(box.bottom>innerHeight+1||box.left<0||box.right>innerWidth+1)problems.push(`Außerhalb: ${el.className}`);}
+      for(const el of document.querySelectorAll('.kids-answer > .kids-story-picture,.kids-reveal-answer > .kids-story-picture,.kids-status,.kids-answers,.kids-bottom,.kids-show-story,.kids-show-host,.kids-regroup-content,.kids-regroup-operator,.kids-reveal-result,.kids-reaction,.kids-reveal-footer,.kids-ending > header,.kids-ending-host,.kids-ending-results,.kids-ending > footer')) {const box=el.getBoundingClientRect();if(el.matches('.kids-story-picture') && box.height<45)problems.push(`Bild zu klein: ${el.getAttribute('data-motif')}`);if(box.bottom>innerHeight+1||box.left<0||box.right>innerWidth+1)problems.push(`Außerhalb: ${el.className}`);}
       if(document.documentElement.scrollWidth>innerWidth)problems.push('Breite');return problems;
     });expect(issues).toEqual([]);
   }
@@ -155,7 +156,7 @@ test('Kids: alle Showfragen passen bei 800×600, 4:3, 720p, Full HD und 1440p',a
     for(const viewport of viewports){await page.setViewportSize(viewport);await check();}
     await resolve(page,'Mindestens ein Kind richtig · +5',async()=>{for(const viewport of viewports){await page.setViewportSize(viewport);await check();const professor=await page.locator('.kids-regroup-professor .bluff-professor').boundingBox();expect(professor!.width).toBeGreaterThan(160);}});
     for(const viewport of viewports){await page.setViewportSize(viewport);await check();const field=Number(await page.locator('.kids-reveal .kids-number').innerText());expect(await page.locator('.kids-reveal .kids-answer-text').innerText()).toBe(answers[field-1]);await expect(page.locator('.kids-reveal .kids-story-picture')).toHaveAttribute('data-motif',motifs[field-1]!);}
-    await page.getByRole('button',{name:i===9?'Schatz öffnen':i===8?'Zum Superbluff':i===2||i===5?'Nächstes Kapitel':'Nächste Aufgabe',exact:true}).click();
+    await page.getByRole('button',{name:i===9?'Zum Abschluss':i===8?'Zum Superbluff':i===2||i===5?'Nächstes Kapitel':'Nächste Aufgabe',exact:true}).click();
     if(i===2||i===5||i===8) {
       for(const viewport of viewports){await page.setViewportSize(viewport);await check();}
       await page.getByRole('button',{name:i===8?'Gemeinsam ins Finale':'Erste Aufgabe im Kapitel',exact:true}).click();
@@ -245,7 +246,61 @@ test('Kids: vier große Szenen mit Handlung, Klang, Wiederholung und separatem A
       await expect(page.locator('.kids-clock')).toHaveAttribute('aria-label','30 Sekunden');
     }
     await resolve(page);
-    await page.getByRole('button',{name:i===9?'Schatz öffnen':i===8?'Zum Superbluff':i===2||i===5?'Nächstes Kapitel':'Nächste Aufgabe',exact:true}).click();
+    await page.getByRole('button',{name:i===9?'Zum Abschluss':i===8?'Zum Superbluff':i===2||i===5?'Nächstes Kapitel':'Nächste Aufgabe',exact:true}).click();
     if(i===2||i===5||i===8)await page.getByRole('button',{name:i===8?'Gemeinsam ins Finale':'Erste Aufgabe im Kapitel',exact:true}).click();
   }
+});
+
+
+test('Kids: vorzeitiger Abschluss behält nur gewertete Punkte, stoppt die Zeit und entfernt das Schatzbild',async({page})=>{
+  await page.goto('/kids');await begin(page);await page.clock.install();
+  await resolve(page);await page.getByRole('button',{name:'Nächste Aufgabe',exact:true}).click();
+  await resolve(page,'Mindestens ein Kind richtig · +5');await page.getByRole('button',{name:'Nächste Aufgabe',exact:true}).click();
+  await page.getByRole('button',{name:'30 Sekunden starten',exact:true}).click();await page.clock.runFor(5000);
+  await page.getByRole('button',{name:'Spiel mit Punktestand abschließen',exact:true}).click();
+  await expect(page.getByRole('dialog',{name:'Spiel jetzt abschließen?'})).toBeVisible();
+  await page.keyboard.press('Escape');await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(page.locator('.kids-clock')).toHaveAttribute('aria-label','25 Sekunden');
+  await page.getByRole('button',{name:'Spiel mit Punktestand abschließen',exact:true}).click();
+  await page.getByRole('button',{name:'Jetzt mit Punktestand abschließen',exact:true}).click();
+  await expect(page.getByRole('heading',{name:'Gemeinsam seid ihr stark!'})).toBeVisible();
+  await expect(page.getByTestId('team-score')).toHaveText('15');await expect(page.getByTestId('prof-score')).toHaveText('14');
+  await expect(page.locator('.kids-ending-count')).toHaveText('2 Aufgaben gemeinsam gespielt');
+  await expect(page.locator('.kids-clock,.kids-treasure,.kids-treasure-tiles')).toHaveCount(0);
+  await page.clock.runFor(120000);await page.keyboard.press('ArrowRight');
+  await expect(page.getByTestId('team-score')).toHaveText('15');await expect(page.getByTestId('prof-score')).toHaveText('14');
+  await expect(page.getByText('Bei Jesus sind wir willkommen.',{exact:true})).toBeVisible();
+});
+
+test('Kids: Abschluss vor der ersten Aufgabe und während einer Szene',async({page})=>{
+  for(const phase of ['welcome','scene']) {
+    await page.goto('/kids');await page.getByRole('button',{name:'Show vorbereiten',exact:false}).click();
+    if(phase==='scene') {
+      await page.getByRole('button',{name:'Mission starten',exact:true}).click();await page.getByRole('button',{name:'Erste Aufgabe im Kapitel',exact:true}).click();
+      await page.getByRole('button',{name:'Szene abspielen',exact:true}).click();await expect(page.locator('.kids-cinema')).toBeVisible();
+    }
+    await page.getByRole('button',{name:'Spiel mit Punktestand abschließen',exact:true}).click();
+    await page.getByRole('button',{name:'Jetzt mit Punktestand abschließen',exact:true}).click();
+    await expect(page.locator('.kids-ending')).toBeVisible();await expect(page.getByTestId('team-score')).toHaveText('0');await expect(page.getByTestId('prof-score')).toHaveText('0');
+    await expect(page.locator('.kids-cinema')).toHaveCount(0);await expect(page.getByRole('button',{name:/Revanche/})).toHaveCount(0);
+  }
+});
+
+test('Kids: Smartphone beendet die Show mit Endstand, der nach Neuladen erhalten bleibt',async({page,browser})=>{
+  await page.goto('/kids');await begin(page);await page.clock.install();
+  await resolve(page);await page.getByRole('button',{name:'Nächste Aufgabe',exact:true}).click();
+  await page.getByRole('button',{name:'Bedienung',exact:false}).click();await page.getByRole('button',{name:'Smartphone verbinden',exact:true}).click();
+  const url=await page.getByRole('link',{name:'Fernbedienung öffnen',exact:false}).getAttribute('href');await page.getByRole('button',{name:'Zur Partie',exact:true}).click();
+  const context=await browser.newContext({viewport:{width:390,height:844},locale:'de-DE'}),phone=await context.newPage();
+  await phone.goto(url!);await expect(phone.getByText('Mit der Beamer-Partie verbunden',{exact:true})).toBeVisible();
+  await phone.getByRole('button',{name:'Spiel abschließen',exact:true}).click();await phone.getByRole('button',{name:'Weiterspielen',exact:true}).click();
+  await expect(phone.getByRole('button',{name:'30 Sekunden starten',exact:true})).toBeVisible();
+  await phone.getByRole('button',{name:'Spiel abschließen',exact:true}).click();await phone.getByRole('button',{name:'Jetzt mit Punktestand abschließen',exact:true}).click();
+  await expect(phone.getByRole('heading',{name:'Gemeinsam seid ihr stark!'})).toBeVisible();
+  await page.clock.runFor(2000);await expect(page.locator('.kids-ending')).toBeVisible();
+  await expect(page.getByTestId('team-score')).toHaveText('10');await expect(page.getByTestId('prof-score')).toHaveText('7');
+  await page.reload();await expect(page.locator('.kids-ending')).toBeVisible();await expect(page.getByTestId('team-score')).toHaveText('10');
+  await phone.reload();await expect(phone.getByRole('heading',{name:'Gemeinsam seid ihr stark!'})).toBeVisible();
+  await expect(phone.getByRole('button',{name:/30 Sekunden starten|Spiel abschließen|Revanche/})).toHaveCount(0);
+  await expect(phone.locator('.kids-remote-question')).toHaveCount(0);await context.close();
 });

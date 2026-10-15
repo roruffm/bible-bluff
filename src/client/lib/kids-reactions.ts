@@ -17,12 +17,12 @@ const COMFORT = [
   'Nicht jede Spur ist sofort klar. Wir entdecken einfach weiter!',
   'Auch große Detektive rätseln mal daneben. Ihr bleibt ein tolles Team!',
   'Einmal tief durchatmen. Ihr gehört alle dazu – und weiter geht’s!',
-  'Heute etwas Neues entdeckt? Das ist auch ein kleiner Schatz!',
+  'Heute etwas Neues entdeckt? Darauf könnt ihr stolz sein!',
   'Meine Rätsel haben Ecken und Kanten. Euer Zusammenhalt ist stärker!',
   'Kopf hoch, Spürnasen! Zusammen findet ihr die nächste Spur.',
   'Ihr habt zusammen überlegt. Bleibt neugierig und haltet zusammen!',
   'Ein schweres Rätsel ändert nichts: Jeder von euch ist wichtig!',
-  'Euer Teamgeist bleibt! Den gemeinsamen Schatz öffnen wir trotzdem.',
+  'Euer Teamgeist bleibt! Ein großer Applaus für euch alle!',
 ];
 /** Die aktuelle Runde entscheidet über die Reaktion, unabhängig vom Gesamtstand. */
 export function kidsRoundReaction(game: KidsGame) {
