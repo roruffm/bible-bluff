@@ -21,6 +21,10 @@ lokal erzeugte Klangbilder; Eltern und andere Gruppen machen Geräusche und Pant
 - Superbluff: Professor +10, Kinder erhalten auch hier 10 / 5 / 0 nach derselben Regel. Endstand erst nach
   dem Finale. Die Spielleitung kann auch jederzeit früher mit dem erreichten Punktestand abschließen.
   Der Abschluss feiert alle Kinder mit Jesu Einladung (Markus 10,14).
+- **Direkt ins Finale** springt jederzeit sofort zum Superbluff: am Beamer oben über „Finale“
+  oder im Bedienmenü, auf dem Smartphone direkt unter dem Punktestand. Gewertete Aufgaben
+  bleiben erhalten; übersprungene Aufgaben zählen für beide Seiten nicht. Laufender Ton,
+  Szenen und Countdown stoppen, die Finalrunde startet danach wie gewohnt manuell.
 - **Professor Bluff blufft in jeder Aufgabe:** Er behauptet selbstbewusst eine falsche Antwort.
   Seine Behauptung steht unten am Beamer, ein kleiner Professor-Kopf mit „?“ markiert sein Feld.
   Die Kinder entlarven ihn. Für die Behauptung gibt es keine Aufnahme; die Spielleitung liest sie

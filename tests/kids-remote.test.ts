@@ -30,6 +30,36 @@ function setup(store: KidsRemoteStore = new MemoryKidsRemoteStore()) {
 }
 
 describe('Kids-Fernbedienung', () => {
+  it('springt mit erhaltenen Punkten ins Finale, stellt übersprungene Aufgaben wieder her und wertet das Finale genau einmal', async () => {
+    const t=setup(), base=reading();
+    const game={...base,index:2,results:['correct','participated',...Array(8).fill(null)]};
+    const made=await t.create(game),path=`/api/kids-remotes/${made.id}`;
+    const jump=await t.call('POST',path+'/action',{action:'jump-final',version:1},made.remoteToken);
+    expect(jump.status).toBe(200);
+    expect(jump.body.game).toMatchObject({index:9,phase:'superbluff',deadline:null,voicePlaying:false});
+    expect(kidsScores(jump.body.game)).toMatchObject({team:15,professor:14,playedRounds:2});
+    expect(jump.body.game.results.slice(2)).toEqual(Array(8).fill(null));
+    t.reboot();
+    const saved=await t.call('GET',path,undefined,made.ownerToken);
+    expect(saved.body.game).toEqual(jump.body.game);
+    expect((await t.create(saved.body.game)).game.results).toEqual(jump.body.game.results);
+    expect((await t.call('POST',path+'/action',{action:'jump-final',version:1},made.remoteToken)).status).toBe(409);
+    let version=2;
+    for(const action of ['next','start','return','ready','correct','next']) {
+      if(action==='return') t.clock.advance(30000);
+      const r=await t.call('POST',path+'/action',{action,version:version++},made.remoteToken);
+      expect(r.status,action).toBe(200);
+    }
+    const end=await t.call('GET',path,undefined,made.ownerToken);
+    expect(end.body.game.phase).toBe('finished');
+    expect(kidsScores(end.body.game)).toMatchObject({team:25,professor:24,playedRounds:3});
+    expect((await t.call('POST',path+'/action',{action:'jump-final',version},made.ownerToken)).status).toBe(409);
+  });
+  it('akzeptiert vor dem Finale nur einen gewerteten Anfang mit anschließendem ungespielten Rest', async () => {
+    const t=setup(),base=reading();
+    const game=packKidsGame({...base,index:9,phase:'superbluff',results:['correct',null,'correct',...Array(7).fill(null)]},t.clock.now);
+    expect((await t.call('POST','/api/kids-remotes',{easy:false,game})).status).toBe(400);
+  });
   it('korrigiert per Smartphone die letzte Wertung auch während der nächsten Runde und nach Neustart', async () => {
     const t=setup(), base=reading();
     const game={...base,index:1,phase:'reading' as const,results:base.results.map((_,i)=>i===0 ? 'none' as const : null)};

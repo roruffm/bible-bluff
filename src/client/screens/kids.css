@@ -545,6 +545,9 @@
 .kids-finish-preview > span + span { background: #eee7f7; }
 .kids-finish-preview b { display: block; font-size: 36px; }
 .kids-remote-finish { margin-top: 22px; width: 100%; background: #fff0cf; }
+.kids-final-jump { width: 100%; margin-bottom: 18px; background: #ffe3a0; white-space: normal; font-size: 17px; }
+.kids-final-toggle { background: #ffe3a0; }
+@media (max-width:759px) { .kids-top-actions .kids-final-toggle { display: none; } }
 .kids-professor-signature,.kids-reaction-bubble > .kids-professor-signature { display: flex; justify-content: center; align-items: center; gap: 9px; }
 .kids-voice-play { flex: 0 0 auto; display: inline-grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 1px solid #7154a2; border-radius: 50%; background: #f5effc; color: #594083; font-size: 13px; line-height: 1; cursor: pointer; }
 .kids-voice-play:hover { background: #e5d8f6; }

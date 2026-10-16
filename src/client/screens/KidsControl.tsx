@@ -1,7 +1,7 @@
 import { KidsGroupName, KidsGroupText } from '../components/KidsGroupName';
 import { professorVoiceKey } from '../../shared/professor-voice';
 import { useEffect, useState } from 'preact/hooks';
-import { kidsLastScoredIndex, kidsResultPoints, kidsScores, updateKidsGame, type KidsGame } from '../../shared/kids-game';
+import { kidsCanJumpToFinal, kidsLastScoredIndex, kidsResultPoints, kidsScores, updateKidsGame, type KidsGame } from '../../shared/kids-game';
 import { KIDS_CHAPTERS, kidsAnswerPicture } from '../../shared/kids-show-questions';
 import { useKidsRemote } from '../lib/kids-remote';
 import { KidsFinishDialog } from '../components/KidsFinish';
@@ -20,7 +20,7 @@ export function KidsControlPage() {
     const timer = window.setInterval(() => setGame(g => g ? updateKidsGame(g, 'tick', Date.now()) : g), 100);
     return () => clearInterval(timer);
   }, [game?.phase]);
-  useEffect(()=>{if(game?.phase==='finished') setShowFinish(false);},[game?.phase]);
+  useEffect(()=>{if(game?.phase==='finished' || game?.phase==='superbluff') setShowFinish(false);},[game?.phase]);
   const round = game?.rounds[game.index], scores = game ? kidsScores(game) : null;
   const disabled = remote.busy || !!remote.error;
   const lastScored = game ? kidsLastScoredIndex(game) : -1;
@@ -29,6 +29,7 @@ export function KidsControlPage() {
     <header><KidsLogo compact/><h1>Show-Steuerung</h1><p class={`kids-remote-status${remote.error ? ' is-offline' : ''}`} role="status">{remote.error || (remote.view ? 'Mit der Beamer-Partie verbunden' : remote.active ? 'Verbindung wird aufgebaut …' : 'Scanne den QR-Code am Beamer.')}</p></header>
     {game && round && !remote.fatal && <>
       <div class="kids-remote-score">Kinderteam <b>{scores!.team}</b><span>Professor Bluff <b>{scores!.professor}</b></span></div>
+      {kidsCanJumpToFinal(game) && <button type="button" class="kids-button kids-final-jump" disabled={disabled} onClick={()=>{void remote.send('jump-final');}}>🏁 Direkt ins Finale</button>}
       <KidsSoundboard game={game} disabled={disabled} send={remote.send}/>
       {game.phase!=='finished' && <div class="kids-remote-question"><span>{game.index===9 ? 'SUPERBLUFF · Alle gemeinsam' : <><KidsGroupName group={round.question.group}/> · Kapitel {Math.floor(game.index/3)+1}: {KIDS_CHAPTERS[Math.min(2,Math.floor(game.index/3))]}</>}</span><h2>{round.question.prompt}</h2></div>}
       <div class={`kids-remote-phase is-${game.phase}`}><strong>{phaseLabel}</strong><span>{game.phase==='finished' ? 'Der Endpunktestand bleibt am Beamer sichtbar.' : game.phase==='scene' ? 'Die zehnsekündige Szene läuft groß am Beamer. Danach bleibt Zeit zum Vorlesen. Der Antwort-Countdown startet erst mit deinem nächsten Schritt.' : game.phase==='locked' ? 'Helfer prüfen: Mehrheit richtig, mindestens ein Kind richtig oder keiner richtig. Noch nicht auflösen.' : game.phase==='returning' ? 'Warte, bis alle Kinder wieder in ihrer Gruppe sind.' : game.phase==='judging' ? 'Nur das gemeinsame Resultat eintragen. Damit wird aufgelöst.' : game.phase==='moving' ? 'Die aktive Gruppe wählt ihr Feld. Die anderen machen ihre Mitmach-Geste vom Beamer: funkeln, trommeln oder Daumen drücken.' : 'Du bestimmst, wann es weitergeht.'}</span></div>
