@@ -2,8 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { KIDS_SCENE_MS, kidsSceneBeat } from '../src/shared/kids-scenes';
 import { QUESTIONS } from '../src/server/questions';
 import { kidsRoundReaction } from '../src/client/lib/kids-reactions';
-import { KIDS_SHOW_QUESTIONS, kidsAnswerPicture } from '../src/shared/kids-show-questions';
-import { createKidsGame, kidsPrimaryAction, kidsScores, updateKidsGame, type KidsGame, type KidsResult } from '../src/shared/kids-game';
+import { KIDS_CHEERS, KIDS_SHOW_QUESTIONS, kidsAnswerPicture } from '../src/shared/kids-show-questions';
+import { createKidsGame, kidsGroupResults, kidsOvertook, kidsPrimaryAction, kidsScores, updateKidsGame, type KidsGame, type KidsResult } from '../src/shared/kids-game';
+import { professorVoiceKey } from '../src/shared/professor-voice';
 
 const reading = () => updateKidsGame(updateKidsGame(createKidsGame(), 'next', 0), 'next', 0);
 function resolve(g: KidsGame, result: KidsResult) {
@@ -138,6 +139,35 @@ describe('Die große Bluff-Jagd', () => {
       expect(finished.results).toBe(before.results);expect(kidsScores(finished)).toEqual(scores);
       for(const action of ['start','next','scene','end-scene','correct','participated','none','tick','finish'] as const)expect(updateKidsGame(finished,action,999999)).toBe(finished);
     }
+  });
+  it('lässt Professor Bluff in jeder Aufgabe auf eine falsche Antwort tippen', () => {
+    for (const q of KIDS_SHOW_QUESTIONS) {
+      expect(q.distractors, q.sourceId).toContain(q.bluff.answer);
+      expect(q.bluff.claim.length, q.sourceId).toBeGreaterThan(20);
+    }
+    for (const round of createKidsGame().rounds) expect(round.answers.indexOf(round.question.bluff.answer)).not.toBe(round.correctIndex);
+    let g=reading();
+    for (const state of [g,updateKidsGame(g,'start',0),updateKidsGame(updateKidsGame(g,'start',0),'pause',1000),updateKidsGame(updateKidsGame(g,'start',0),'tick',30000)]) {
+      // Für die Behauptung gibt es keine Aufnahme. Die Spielleitung liest sie selbst vor.
+      expect(professorVoiceKey(state)).toBeNull();
+    }
+    g=resolve(g,'correct');expect(professorVoiceKey(g)).toBe('startled-0');
+  });
+  it('hält die Wertung während des Trommelwirbels zurück und erkennt das Überholen', () => {
+    let g=resolve(reading(),'correct');
+    expect(kidsScores(g,0)).toMatchObject({team:0,professor:0,playedRounds:0});
+    expect(kidsScores(g)).toMatchObject({team:10,professor:7});
+    expect(kidsOvertook(g)).toBe(true);
+    expect(kidsGroupResults(g,'minis')).toEqual(['correct',null,null]);
+    expect(kidsGroupResults(g,'minis',0)).toEqual([null,null,null]);
+    g=updateKidsGame(g,'next',30000);
+    expect(kidsOvertook(g)).toBe(false);
+    g=resolve(g,'none');expect(kidsOvertook(g)).toBe(false);
+    g=updateKidsGame(updateKidsGame(g,'next',30000),'next',30000);
+    g=resolve(g,'participated');expect(kidsScores(g)).toMatchObject({team:15,professor:21});expect(kidsOvertook(g)).toBe(false);
+    const behind={...createKidsGame(),phase:'revealed' as const,index:2,results:['none','none','correct',...Array(7).fill(null)] as KidsGame['results']};
+    expect(kidsOvertook(behind)).toBe(false);
+    expect(Object.keys(KIDS_CHEERS)).toEqual(['minis','mittis','maxis']);
   });
   it('vergibt keine Punkte für einen ungespielten Superbluff', () => {
     const g={...createKidsGame(),index:9,phase:'superbluff' as const,results:[...Array(9).fill('correct'),null]};

@@ -178,7 +178,16 @@ test('Kids: Vollbild und Professor-Reaktion bei null, fünf und zehn Punkten',as
   await page.clock.install();
   let previous='';
   for(const [label,points,mood] of [['Keiner richtig · +0',0,'kind'],['Mindestens ein Kind richtig · +5',5,'startled'],['Mehrheit richtig · +10',10,'startled']] as const) {
+    const teamBefore=await page.getByTestId('team-score').innerText();
     await resolve(page,label);
+    // Trommelwirbel: zwei Bluff-Stempel, Wertung und Konfetti erst danach.
+    await expect(page.locator('.kids-suspense')).toBeVisible();
+    await expect(page.locator('.kids-suspense .kids-bluff-stamp')).toHaveCount(2);
+    await expect(page.getByTestId('team-score')).toHaveText(teamBefore);
+    await expect(page.locator('.kids-celebration')).toHaveCount(0);
+    await page.clock.runFor(3700);
+    await expect(page.locator('.kids-suspense')).toHaveCount(0);
+    await expect(page.getByTestId('team-score')).toHaveText(String(Number(teamBefore)+points));
     await expect(page.locator('.kids-reveal')).toHaveAttribute('data-points',String(points));
     await expect(page.locator('.kids-reaction-art > .bluff-professor')).toHaveClass(new RegExp(`mood-${mood}`));
     const quote=await page.locator('.kids-reaction-quote').innerText(); expect(quote).not.toBe(previous); previous=quote;
