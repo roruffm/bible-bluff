@@ -1,6 +1,7 @@
 import { KidsGroupName } from './KidsGroupName';
 import { kidsRoundReaction } from '../lib/kids-reactions';
 import { AnswerMotifArt } from './KidsAnswerArt';
+import type { ProfessorMotion } from '../lib/professor-motion';
 import type { RefObject } from 'preact';
 import { kidsActionLabel, kidsPrimaryAction, kidsScores, type KidsAction, type KidsGame } from '../../shared/kids-game';
 import { type StoryMotif } from '../../shared/kids-show-questions';
@@ -23,25 +24,28 @@ export function professorSays(game: KidsGame): string {
   if (game.index >= 3) return 'Das war nur die Aufwärmrunde. Jetzt wird geblufft!';
   return 'Ich bin Professor Bluff. Mein Spezialgebiet? Mich selbst überschätzen!';
 }
-export function ProfessorBluff({ mood = 'confident' }: { mood?: ProfessorMood }) {
-  return <svg class={`bluff-professor mood-${mood}`} viewBox="0 0 240 280" role="img" aria-label={`Professor Bluff${mood === 'startled' ? ' erschrickt über eure Punkte' : mood === 'kind' ? ' macht euch Mut' : mood === 'panic' ? ' ist aufgeregt' : mood === 'defeated' ? ' staunt über das Kinderteam' : ''}`}>
-    <ellipse cx="120" cy="267" rx="78" ry="9" fill="#12324a20" />
-    <g class="bluff-body"><path d="M67 180Q120 153 173 180l21 65-65 15-84-15z" fill="#6b57aa" stroke="#12324a" stroke-width="5"/>
+export function ProfessorBluff({ mood = 'confident', motion }: { mood?: ProfessorMood; motion?: ProfessorMotion }) {
+  return <svg class={`bluff-professor mood-${mood}${motion ? ` professor-showcase motion-${motion}` : ''}`} data-motion={motion} viewBox={motion ? '-28 -38 296 326' : '0 0 240 280'} role="img" aria-label={`Professor Bluff${mood === 'startled' ? ' erschrickt über eure Punkte' : mood === 'kind' ? ' macht euch Mut' : mood === 'panic' ? ' ist aufgeregt' : mood === 'defeated' ? ' staunt über das Kinderteam' : ''}`}>
+    <svg class="bluff-canvas" x="0" y="0" width="240" height="280" viewBox="0 0 240 280" overflow="visible">
+    <ellipse class="bluff-shadow" cx="120" cy="267" rx="78" ry="9" fill="#12324a20" />
+    <g class="bluff-performer"><g class="bluff-body"><path d="M67 180Q120 153 173 180l21 65-65 15-84-15z" fill="#6b57aa" stroke="#12324a" stroke-width="5"/>
     <path d="m99 172 21 45 20-45-20 8z" fill="#fff8e5"/><path d="m120 190-17-10v22l17-7 18 7v-22z" fill="#ffbd4b" stroke="#12324a" stroke-width="3"/>
-    <path d="m72 193-34 27-16-15m147-10 30 24 20-20" fill="none" stroke="#12324a" stroke-width="18" stroke-linecap="round"/><path d="m72 193-34 27-16-15m147-10 30 24 20-20" fill="none" stroke="#8c79c2" stroke-width="11" stroke-linecap="round"/>
-    <circle cx="20" cy="203" r="12" fill="#efb98e" stroke="#12324a" stroke-width="4"/><circle cx="220" cy="196" r="12" fill="#efb98e" stroke="#12324a" stroke-width="4"/>
-    <path d="m86 249-7 15m70-15 8 15" stroke="#12324a" stroke-width="14" stroke-linecap="round"/></g>
+    <g class="bluff-arm bluff-arm-left"><path d="m72 193-34 27-16-15" fill="none" stroke="#12324a" stroke-width="18" stroke-linecap="round"/><path d="m72 193-34 27-16-15" fill="none" stroke="#8c79c2" stroke-width="11" stroke-linecap="round"/><circle cx="20" cy="203" r="12" fill="#efb98e" stroke="#12324a" stroke-width="4"/></g>
+    <g class="bluff-arm bluff-arm-right"><path d="m169 195 30 24 20-20" fill="none" stroke="#12324a" stroke-width="18" stroke-linecap="round"/><path d="m169 195 30 24 20-20" fill="none" stroke="#8c79c2" stroke-width="11" stroke-linecap="round"/><circle cx="220" cy="196" r="12" fill="#efb98e" stroke="#12324a" stroke-width="4"/></g>
+    <path class="bluff-legs" d="m86 249-7 15m70-15 8 15" stroke="#12324a" stroke-width="14" stroke-linecap="round"/></g>
     <BluffHead mood={mood}/>
+    </g>
+    </svg>
   </svg>;
 }
 function BluffHead({ mood }: { mood: ProfessorMood }) {
   return <g class="bluff-head"><path d="M62 99 44 75l24 2-9-31 31 15 9-32 22 24 30-24 6 30 30-10-8 29 22 12-23 24z" fill="#fff0ad" stroke="#12324a" stroke-width="4" stroke-linejoin="round"/>
     <ellipse cx="120" cy="113" rx="61" ry="65" fill="#f6c89e" stroke="#12324a" stroke-width="5"/><circle cx="59" cy="119" r="11" fill="#efb98e" stroke="#12324a" stroke-width="4"/><circle cx="181" cy="119" r="11" fill="#efb98e" stroke="#12324a" stroke-width="4"/>
     <path class="bluff-brows" d={mood==='kind' ? 'M76 78q13-8 26-3m36 0q13-5 25 3' : 'm76 79 26-7m36 0 25 7'} stroke="#12324a" stroke-width="7" stroke-linecap="round"/>
-    <g fill="#fff" fill-opacity=".72" stroke="#12324a" stroke-width="5"><circle cx="90" cy="104" r="25"/><circle cx="150" cy="104" r="25"/><path d="M115 102h10"/></g>
+    <g class="bluff-glasses" fill="#fff" fill-opacity=".72" stroke="#12324a" stroke-width="5"><circle cx="90" cy="104" r="25"/><circle cx="150" cy="104" r="25"/><path d="M115 102h10"/></g>
     <g class="bluff-eyes" fill="#12324a">{mood==='kind' ? <path d="M86 106q8-10 16 0m36 0q8-10 16 0" fill="none" stroke="#12324a" stroke-width="4" stroke-linecap="round"/> : <><ellipse cx="94" cy="105" rx={mood==='startled' ? 4 : 5} ry={mood==='startled' ? 11 : 8}/><ellipse cx="146" cy="105" rx={mood==='startled' ? 4 : 5} ry={mood==='startled' ? 11 : 8}/></>}</g>
     <path d="m119 110-8 24 16 1" fill="#efb98e" stroke="#12324a" stroke-width="3" stroke-linecap="round"/>
-    <path d="M120 140q-23-18-40 8 20 11 40-1 20 12 40 1-18-26-40-8" fill="#fff0ad" stroke="#12324a" stroke-width="3"/>
+    <path class="bluff-moustache" d="M120 140q-23-18-40 8 20 11 40-1 20 12 40 1-18-26-40-8" fill="#fff0ad" stroke="#12324a" stroke-width="3"/>
     {mood==='startled' ? <ellipse class="bluff-mouth" cx="120" cy="159" rx="8" ry="11" fill="#fff" stroke="#12324a" stroke-width="3"/> : <path class="bluff-mouth" d="M105 157q15 15 30 0" fill="#fff" stroke="#12324a" stroke-width="3" stroke-linecap="round"/>}
     {mood === 'panic' && <path d="M191 74q19 26 3 30-18-3-3-30" fill="#6acbd1" stroke="#12324a" stroke-width="3"/>}</g>;
 }

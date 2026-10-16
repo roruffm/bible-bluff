@@ -9,6 +9,7 @@ import { KidsRegroup } from '../components/KidsRegroup';
 import { KidsLogo } from '../components/KidsLogo';
 import { QRCode } from '../components/QR';
 import { ProfessorBluff, professorMood, professorSays, ShowControls, ShowScoreboard, StoryPicture } from '../components/KidsShow';
+import { professorMotion } from '../lib/professor-motion';
 import { KIDS_CHAPTERS, KIDS_GROUPS, kidsAnswerPicture } from '../../shared/kids-show-questions';
 import { kidsControlUrl, useKidsRemote } from '../lib/kids-remote';
 import { enableKidsSound, playKidsScene } from '../lib/kids-sound';
@@ -114,7 +115,7 @@ export function KidsPage() {
       {finished ? <KidsFinish game={game}><Celebration variant={3}/></KidsFinish> : game.phase==='scene' ? <KidsScene key={`${game.index}-${game.cueSeq}`} game={game} act={act} sound={sound==='on'} toggleSound={()=>{void toggleSound();}} disabled={remote.busy} primaryRef={primary}/> : <>
       <ShowScoreboard game={game}/>
       {game.phase==='returning' || game.phase==='judging' ? <KidsRegroup game={game} act={act} disabled={remote.busy} primaryRef={primary}/> : revealed ? <KidsReveal key={`${game.index}-${game.results[game.index]}`} game={game} act={act} disabled={remote.busy} primaryRef={primary}>{kidsResultPoints(game.results[game.index])>0 && <Celebration variant={game.index}/>}</KidsReveal> : interlude ? <section class={`kids-show-interlude is-${game.phase}`}>
-        <div class="kids-show-host"><ProfessorBluff mood={professorMood(game)}/><blockquote>{professorSays(game)}</blockquote><span class="kids-professor-signature">Professor Bluff <KidsVoiceButton/></span></div>
+        <div class="kids-show-host"><ProfessorBluff key={`${game.phase}:${game.index}`} mood={professorMood(game)} motion={professorMotion(game)}/><blockquote>{professorSays(game)}</blockquote><span class="kids-professor-signature">Professor Bluff <KidsVoiceButton/></span></div>
         <div class="kids-show-story">
           <p class="kids-eyebrow">{game.phase === 'welcome' ? 'WILLKOMMEN, BIBLEBLUFF-DETEKTIVE!' : game.phase === 'chapter' ? `KAPITEL ${chapter + 1} VON 3` : 'ALLE TEAMS WERDEN GEBRAUCHT'}</p>
           <h1>{game.phase === 'welcome' ? 'Zusammen knacken wir jeden Bluff!' : game.phase === 'chapter' ? KIDS_CHAPTERS[chapter] : 'ALARM! Der Superbluff!'}</h1>

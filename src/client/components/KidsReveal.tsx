@@ -3,6 +3,7 @@ import { KidsVoiceButton } from './KidsVoice';
 import type { ComponentChildren, RefObject } from 'preact';
 import type { KidsAction, KidsGame } from '../../shared/kids-game';
 import { kidsRoundReaction } from '../lib/kids-reactions';
+import { professorMotion } from '../lib/professor-motion';
 import { ProfessorBluff, ShowControls, StoryPicture } from './KidsShow';
 
 export function KidsReveal({ game, act, disabled, primaryRef, children }: { game: KidsGame; act: (action: Exclude<KidsAction,'tick'>)=>void; disabled:boolean; primaryRef:RefObject<HTMLButtonElement>; children?:ComponentChildren }) {
@@ -18,7 +19,7 @@ export function KidsReveal({ game, act, disabled, primaryRef, children }: { game
       <div class="kids-discovery"><div><p>{round.question.explanation}</p><small>{round.question.ref}</small></div></div>
     </div>
     <aside class="kids-reaction" aria-label="Professor Bluffs Reaktion">
-      <div class="kids-reaction-art"><div class="kids-reaction-halo" aria-hidden="true"/><ProfessorBluff mood={reaction.mood}/><div class="kids-reaction-symbols" aria-hidden="true">{[0,1,2].map(i=><span key={i} style={{'--i':i}}>{reaction.points>0 ? ['!','✦','!'][i] : '♥'}</span>)}</div></div>
+      <div class="kids-reaction-art"><div class="kids-reaction-halo" aria-hidden="true"/><ProfessorBluff mood={reaction.mood} motion={professorMotion(game)}/><div class="kids-reaction-symbols" aria-hidden="true">{[0,1,2].map(i=><span key={i} style={{'--i':i}}>{reaction.points>0 ? ['!','✦','!'][i] : '♥'}</span>)}</div></div>
       <blockquote class="kids-reaction-bubble"><span class="kids-professor-signature">PROFESSOR BLUFF <KidsVoiceButton labelled/></span><p class="kids-reaction-quote">{reaction.quote}</p></blockquote>
       <p class="kids-reaction-caption">{reaction.caption}</p>
     </aside>

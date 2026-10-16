@@ -368,8 +368,6 @@
 .kids-regroup-professor { text-align: center; min-width: 0; }
 .kids-regroup-professor > .bluff-professor { width: min(31vw,44vh); max-width: 370px; }
 .kids-regroup-professor > span { display: block; color: #7154a2; font-weight: 900; font-size: clamp(14px,1.5vw,28px); }
-.kids-regroup.is-returning .bluff-body { animation: bluff-guide 2s ease-in-out infinite; }
-.kids-regroup.is-judging .bluff-head { animation: bluff-nod 1.4s ease-in-out 2; }
 .kids-regroup-content { display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; min-width: 0; }
 .kids-regroup-content > .kids-eyebrow { margin: 0; font-size: clamp(10px,1.2vw,22px); }
 .kids-regroup h1 { font-size: clamp(32px,min(4.4vw,6.2vh),90px); line-height: 1.08; font-weight: 900; text-wrap: balance; margin: 0; }
@@ -389,8 +387,6 @@
 @keyframes kids-walk-home { 0% { opacity: 0; transform: translateX(0); } 12% { opacity: 1; } 35% { transform: translate(80px,-5px); } 58% { transform: translate(150px,0); } 85% { opacity: 1; transform: translate(235px,-4px); } 100% { opacity: 0; transform: translate(235px,0); } }
 @keyframes kids-guide-arrow { 50% { transform: translateX(9px); } }
 @keyframes kids-together { 0% { opacity: 0; transform: scale(.8); } 75% { transform: scale(1.05); } 100% { opacity: 1; transform: scale(1); } }
-@keyframes bluff-guide { 50% { transform: rotate(-3deg); } }
-@keyframes bluff-nod { 50% { transform: translateY(6px) rotate(2deg); } }
 @media (min-width:760px) and (max-height:650px) {
   .kids-regroup { height: calc(100dvh - 148px); padding-block: 12px; }
   .kids-regroup-content { gap: 8px; }
@@ -468,16 +464,8 @@
 .kids-reveal-footer .kids-controls { padding-bottom: 5px; }
 .kids-reveal-footer .kids-button { font-size: clamp(15px,1.4vw,26px); padding: 10px 17px; }
 .is-projecting .kids-reveal-footer { justify-content: center; }
-.kids-reaction-art > .mood-startled { transform-origin: 50% 100%; animation: bluff-startle 1.25s cubic-bezier(.2,.7,.25,1) both; }
-.kids-reaction-art .mood-startled .bluff-head { animation: bluff-startled-head 1.25s ease-out both; }
 .mood-startled .bluff-brows { transform: translateY(-7px); }
-.kids-reaction-art .mood-kind .bluff-body { animation: bluff-comfort 2.8s ease-in-out 2; }
-.kids-reaction-art .mood-kind .bluff-head { animation: bluff-kind-nod 2.8s ease-in-out 2; }
 .kids-remote-direction > b { color: #7154a2; }
-@keyframes bluff-startle { 0% { transform: translateY(0) rotate(0); } 22% { transform: translateY(-16px) rotate(-7deg) scale(1.05); } 40% { transform: translateY(-6px) rotate(6deg); } 58% { transform: rotate(-4deg); } 76% { transform: rotate(3deg); } 100% { transform: translateY(0) rotate(0); } }
-@keyframes bluff-startled-head { 22% { transform: translateY(-8px) rotate(7deg); } 45% { transform: rotate(-6deg); } 100% { transform: translateY(0) rotate(0); } }
-@keyframes bluff-comfort { 25%,75% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
-@keyframes bluff-kind-nod { 25%,75% { transform: translateY(5px) rotate(-2deg); } 50% { transform: translateY(0) rotate(2deg); } }
 @keyframes kids-surprise-mark { 0% { opacity: 0; transform: scale(.3) translateY(15px); } 30% { opacity: 1; transform: scale(1.2); } 100% { opacity: 1; transform: scale(1); } }
 @keyframes kids-comfort-heart { 0%,100% { transform: translateY(6px) scale(.85); opacity: .65; } 50% { transform: translateY(-10px) scale(1.1); opacity: 1; } }
 @media (min-width:760px) and (max-height:650px) {
@@ -538,7 +526,6 @@
 .kids-ending-host > .bluff-professor { width: auto; height: 100%; max-width: min(100%,340px); }
 .kids-ending-host blockquote { margin: 0 0 4px; padding: 12px 15px; border: 2px solid #12324a; border-radius: 20px; box-shadow: 0 4px 0 #12324a; background: #fffdf8; font-size: clamp(18px,min(2vw,2.8vh),34px); line-height: 1.3; font-weight: 750; text-align: center; text-wrap: balance; }
 .kids-ending-host > span { font-size: clamp(11px,1.1vw,20px); font-weight: 850; color: #7154a2; }
-.kids-ending-host .bluff-head { animation: bluff-kind-nod 2.8s ease-in-out 2; }
 .kids-ending-results { display: grid; grid-template-columns: minmax(0,1.2fr) minmax(0,1fr); grid-template-rows: minmax(0,1fr) auto; gap: 14px; min-height: 0; align-content: center; }
 .kids-ending-results > div { border: 3px solid #176845; border-radius: 26px; padding: 16px 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(145deg,#effff0,#ccebd8); box-shadow: 0 7px 0 #176845; text-align: center; min-width: 0; }
 .kids-ending-results > .kids-ending-professor { border-color: #7154a2; background: linear-gradient(145deg,#f6effd,#e5d9f0); box-shadow: 0 7px 0 #7154a2; }
@@ -621,3 +608,72 @@
   .kids-show-stage .has-pictures .kids-story-picture { width: 80px; }
   .kids-show-stage .has-pictures .kids-answer-text { min-width: 0; overflow-wrap: anywhere; font-size: 21px; }
 }
+
+/* Die Figur bewegt sich innerhalb ihres SVGs; Text und Bedienelemente behalten ihren Platz. */
+.kids-page .professor-showcase { overflow: hidden; animation: none; transform: none; }
+.kids-page .professor-showcase .bluff-body,.kids-page .professor-showcase .bluff-head { animation: none; }
+.professor-showcase .bluff-performer { transform-box: view-box; transform-origin: 120px 245px; animation-duration: 2.4s; animation-timing-function: cubic-bezier(.22,.7,.25,1); animation-fill-mode: both; }
+.professor-showcase .bluff-arm-left { transform-origin: 72px 193px; }
+.professor-showcase .bluff-arm-right { transform-origin: 169px 195px; }
+.professor-showcase .bluff-legs { transform-origin: 120px 249px; }
+.professor-showcase .bluff-shadow { transform-origin: 120px 267px; }
+.professor-showcase .bluff-glasses { transform-origin: 120px 104px; }
+.professor-showcase .bluff-moustache { transform-origin: 120px 146px; }
+.professor-showcase .bluff-eyes { transform-origin: 120px 105px; animation: professor-blink 5s ease-in-out 2; }
+.professor-showcase.motion-greet .bluff-performer { animation-name: professor-entrance; }
+.professor-showcase.motion-greet .bluff-arm-right { animation: professor-wave 2.8s ease-in-out 2 both; }
+.professor-showcase.motion-startle .bluff-performer { animation-name: professor-big-startle; }
+.professor-showcase.motion-startle .bluff-arm-left { animation: professor-hands-up 2.4s ease-out both; }
+.professor-showcase.motion-startle .bluff-arm-right { animation: professor-hands-up-right 2.4s ease-out both; }
+.professor-showcase.motion-startle .bluff-head { animation: professor-head-pop 2.4s ease-out both; }
+.professor-showcase.motion-startle .bluff-glasses { animation: professor-glasses-jump 2.4s ease-out both; }
+.professor-showcase.motion-startle .bluff-shadow { animation: professor-jump-shadow 2.4s ease-out both; }
+.professor-showcase.motion-startle .bluff-moustache { animation: professor-moustache 2.4s ease-out both; }
+.professor-showcase.motion-spin .bluff-performer { animation: professor-twirl 2.1s cubic-bezier(.3,.05,.2,1) both; }
+.professor-showcase.motion-spin .bluff-arm-left { animation: professor-open-arms 2.1s ease-in-out both; }
+.professor-showcase.motion-spin .bluff-arm-right { animation: professor-wave 2.1s ease-in-out both; }
+.professor-showcase.motion-stumble .bluff-performer { animation-name: professor-stumble; }
+.professor-showcase.motion-stumble .bluff-arm-left { animation: professor-balance-left 2.4s ease-in-out both; }
+.professor-showcase.motion-stumble .bluff-arm-right { animation: professor-balance-right 2.4s ease-in-out both; }
+.professor-showcase.motion-stumble .bluff-legs { animation: professor-feet 2.4s ease-in-out both; }
+.professor-showcase.motion-double-take .bluff-performer { animation-name: professor-double-take; }
+.professor-showcase.motion-double-take .bluff-head { animation: professor-look 2.4s ease-in-out both; }
+.professor-showcase.motion-double-take .bluff-glasses { animation: professor-glasses-jump 2.4s ease-in-out both; }
+.professor-showcase.motion-encourage .bluff-arm-left { animation: professor-open-arms 3s ease-in-out 2 both; }
+.professor-showcase.motion-encourage .bluff-arm-right { animation: professor-open-right 3s ease-in-out 2 both; }
+.professor-showcase.motion-encourage .bluff-head { animation: professor-kind-nod 3s ease-in-out 2 both; }
+.professor-showcase.motion-guide .bluff-arm-right { animation: professor-beckon 2.6s ease-in-out 2 both; }
+.professor-showcase.motion-guide .bluff-head { animation: professor-kind-nod 2.6s ease-in-out 2 both; }
+.professor-showcase.motion-think .bluff-arm-right { animation: professor-think-hand 3.4s ease-in-out 2 both; }
+.professor-showcase.motion-think .bluff-head { animation: professor-look 3.4s ease-in-out 2 both; }
+.professor-showcase.motion-nervous .bluff-performer { animation: professor-nervous-shuffle 2.8s ease-in-out 2 both; }
+.professor-showcase.motion-nervous .bluff-arm-left { animation: professor-balance-left 2.8s ease-in-out 2 both; }
+.professor-showcase.motion-nervous .bluff-arm-right { animation: professor-balance-right 2.8s ease-in-out 2 both; }
+.professor-showcase.motion-bow .bluff-performer { animation: professor-bow 3.2s ease-in-out both; }
+.professor-showcase.motion-bow .bluff-head { animation: professor-kind-nod 3.2s ease-in-out both; }
+.professor-showcase.motion-bow .bluff-arm-right { animation: professor-goodbye 3.2s ease-in-out both; }
+@keyframes professor-entrance { 0% { transform: translateY(12px) scale(.92); } 35% { transform: translateY(-8px) rotate(-4deg) scale(1.03); } 65% { transform: rotate(3deg); } 100% { transform: none; } }
+@keyframes professor-wave { 0%,100% { transform: rotate(0); } 20%,55%,82% { transform: rotate(-85deg); } 38%,70% { transform: rotate(-48deg); } }
+@keyframes professor-big-startle { 0%,100% { transform: none; } 12% { transform: translateY(7px) scale(1.04,.93); } 28% { transform: translateY(-34px) rotate(-7deg) scale(.97,1.07); } 43% { transform: translateY(-24px) rotate(7deg); } 60% { transform: translateY(5px) scale(1.05,.94); } 76% { transform: translateY(-7px) rotate(-3deg); } }
+@keyframes professor-hands-up { 0%,100% { transform: rotate(0); } 22%,48% { transform: rotate(112deg); } 65% { transform: rotate(65deg); } 82% { transform: rotate(88deg); } }
+@keyframes professor-hands-up-right { 0%,100% { transform: rotate(0); } 22%,48% { transform: rotate(-112deg); } 65% { transform: rotate(-65deg); } 82% { transform: rotate(-88deg); } }
+@keyframes professor-head-pop { 0%,100% { transform: none; } 28% { transform: translateY(-8px) rotate(7deg); } 46% { transform: rotate(-6deg); } 64% { transform: translateY(5px); } }
+@keyframes professor-glasses-jump { 0%,100% { transform: none; } 27% { transform: translateY(-11px) rotate(-5deg); } 44% { transform: translateY(-4px) rotate(5deg); } 62% { transform: translateY(3px); } 78% { transform: translateY(-2px); } }
+@keyframes professor-jump-shadow { 0%,100% { transform: none; opacity: 1; } 28%,43% { transform: scaleX(.7); opacity: .5; } 60% { transform: scaleX(1.08); } }
+@keyframes professor-moustache { 0%,100% { transform: none; } 25%,45%,65% { transform: rotate(-7deg); } 35%,55%,75% { transform: rotate(7deg); } }
+@keyframes professor-twirl { 0% { transform: perspective(600px) rotateY(0) rotateZ(0); } 18% { transform: perspective(600px) translateY(-5px) rotateY(-25deg) rotateZ(-7deg); } 50% { transform: perspective(600px) translateY(-16px) rotateY(190deg) rotateZ(4deg); } 78% { transform: perspective(600px) translateY(-5px) rotateY(345deg) rotateZ(-3deg); } 100% { transform: perspective(600px) rotateY(360deg) rotateZ(0); } }
+@keyframes professor-stumble { 0%,100% { transform: none; } 20% { transform: translateX(18px) rotate(10deg); } 38% { transform: translateX(-15px) rotate(-8deg); } 56% { transform: translateX(10px) rotate(5deg); } 76% { transform: translateX(-5px) rotate(-3deg); } }
+@keyframes professor-balance-left { 0%,100% { transform: none; } 22%,60% { transform: rotate(65deg); } 42%,78% { transform: rotate(-18deg); } }
+@keyframes professor-balance-right { 0%,100% { transform: none; } 22%,60% { transform: rotate(-70deg); } 42%,78% { transform: rotate(20deg); } }
+@keyframes professor-feet { 0%,100% { transform: none; } 20%,56% { transform: rotate(-8deg); } 38%,76% { transform: rotate(8deg); } }
+@keyframes professor-double-take { 0%,100% { transform: none; } 18% { transform: translateX(-12px) rotate(-4deg); } 40% { transform: translateX(12px) rotate(4deg); } 62% { transform: translateX(-5px); } }
+@keyframes professor-look { 0%,100% { transform: none; } 20% { transform: rotate(-12deg); } 45% { transform: translateY(-3px) rotate(12deg); } 70% { transform: rotate(-5deg); } }
+@keyframes professor-open-arms { 0%,100% { transform: none; } 35%,65% { transform: rotate(23deg); } }
+@keyframes professor-open-right { 0%,100% { transform: none; } 35%,65% { transform: rotate(-23deg); } }
+@keyframes professor-kind-nod { 0%,100% { transform: none; } 28%,65% { transform: translateY(7px) rotate(4deg); } 45% { transform: translateY(-2px) rotate(-3deg); } }
+@keyframes professor-beckon { 0%,100% { transform: none; } 20%,65% { transform: rotate(-45deg); } 42%,82% { transform: rotate(-80deg); } }
+@keyframes professor-think-hand { 0%,100% { transform: none; } 25%,70% { transform: rotate(-105deg); } 40%,60% { transform: rotate(-85deg); } }
+@keyframes professor-nervous-shuffle { 0%,100% { transform: none; } 15%,50% { transform: translateX(-9px) rotate(-4deg); } 32%,68% { transform: translateX(9px) rotate(4deg); } 83% { transform: translateY(-5px); } }
+@keyframes professor-bow { 0%,100% { transform: perspective(600px) rotateX(0); } 25%,45% { transform: perspective(600px) translateY(5px) rotateX(32deg); } 68% { transform: perspective(600px) rotateX(-5deg); } }
+@keyframes professor-goodbye { 0%,48%,100% { transform: none; } 63%,85% { transform: rotate(-85deg); } 74% { transform: rotate(-48deg); } }
+@keyframes professor-blink { 0%,62%,66%,100% { transform: scaleY(1); } 64% { transform: scaleY(.12); } }

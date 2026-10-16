@@ -25,6 +25,12 @@ lokal erzeugte Klangbilder; Eltern und andere Gruppen machen Geräusche und Pant
   bei 5 oder 10 Punkten erschrickt er mit einem neuen Spruch, bei 0 Punkten macht er Mut.
   Die richtige Antwort und die Erklärung bleiben dabei sichtbar. Die Animation wartet auf
   die Spielleitung; reduzierte Bewegung wird berücksichtigt.
+- Große Professor-Szenen haben eigene Choreografien: Begrüßungswinken, Schrecksprung mit
+  hochgerissenen Armen und hüpfender Brille, schwungvolle Drehung, Stolpern, ungläubiges
+  Hin-und-her-Schauen, ermutigende Gesten, Heranwinken, Nachdenken, nervöses Trippeln und
+  eine Verbeugung mit Abschiedswinken. Die positiven Auflösungen wechseln ihre Bewegungen;
+  bei null Punkten bleibt der Professor ermutigend. Die Animationen laufen begrenzt und
+  bleiben innerhalb der Figurfläche; „Bewegung reduzieren“ schaltet sie vollständig ab.
 - Vollbild direkt über **Vollbild** in der Kopfzeile. Größere Figuren, farbige Punktekarten
   und eine klare Aufteilung für Frage, Auflösung und Professor auf der Leinwand.
 - Mausbedienung über **Maus** ein-/ausblenden. Leertaste oder Pfeil rechts: weiter;

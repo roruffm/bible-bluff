@@ -185,11 +185,11 @@ test('Kids: Vollbild und Professor-Reaktion bei null, fünf und zehn Punkten',as
     if(points===0) {
       await expect(page.getByRole('img',{name:'Professor Bluff macht euch Mut',exact:true})).toBeVisible();
       await expect(page.locator('.kids-celebration')).toHaveCount(0);
-      expect(await page.locator('.kids-reaction-art .bluff-body').evaluate(el=>getComputedStyle(el).animationName)).toBe('bluff-comfort');
+      expect(await page.locator('.kids-reaction-art .bluff-arm-left').evaluate(el=>getComputedStyle(el).animationName)).not.toBe('none');
     } else {
       await expect(page.getByRole('img',{name:'Professor Bluff erschrickt über eure Punkte',exact:true})).toBeVisible();
       await expect(page.locator('.kids-reaction-caption')).toHaveText(`+${points} für euer Team!`);
-      expect(await page.locator('.kids-reaction-art > .bluff-professor').evaluate(el=>getComputedStyle(el).animationName)).toBe('bluff-startle');
+      expect(await page.locator('.kids-reaction-art .bluff-performer').evaluate(el=>getComputedStyle(el).animationName)).not.toBe('none');
     }
     await page.emulateMedia({reducedMotion:'reduce'});
     expect(await page.locator('.kids-reaction-art .bluff-body').evaluate(el=>getComputedStyle(el).animationName)).toBe('none');
