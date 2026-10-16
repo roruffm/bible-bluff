@@ -9,7 +9,7 @@ export function KidsResume({ saved, onResume, onDiscard, resumeRef }: { saved: K
   const { game } = saved, s = kidsScores(game);
   const time = new Date(saved.savedAt).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
   const where = game.phase === 'finished' ? 'Endbildschirm' : game.phase === 'welcome' ? 'Begrüßung' : game.index === 9 ? 'Superbluff'
-    : <>Kapitel {Math.floor(game.index / 3) + 1} · <KidsGroupName group={game.rounds[game.index].question.group}/></>;
+    : <>{game.short ? 'Kurzshow' : `Kapitel ${Math.floor(game.index / 3) + 1}`} · <KidsGroupName group={game.rounds[game.index].question.group}/></>;
   return <section class="kids-resume" aria-labelledby="kids-resume-title">
     <p class="kids-eyebrow">GESICHERTER SPIELSTAND · {time} UHR</p>
     <h3 id="kids-resume-title">Show fortsetzen?</h3>

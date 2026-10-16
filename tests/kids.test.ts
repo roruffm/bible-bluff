@@ -94,9 +94,9 @@ describe('Die große Bluff-Jagd', () => {
     expect(updateKidsGame(g,'scene',0)).toMatchObject({phase:'scene',cueSeq:1,deadline:10000});
     const moving=updateKidsGame(g,'start',0);
     expect(updateKidsGame(moving,'scene',0)).toBe(moving);
-    expect(kidsPrimaryAction('judging')).toBeNull();
-    expect(kidsPrimaryAction('finished')).toBeNull();
-    expect(kidsPrimaryAction('locked')).toBe('return');
+    expect(kidsPrimaryAction({phase:'judging'})).toBeNull();
+    expect(kidsPrimaryAction({phase:'finished'})).toBeNull();
+    expect(kidsPrimaryAction({phase:'locked'})).toBe('return');
   });
   it('zeigt eine Szene zehn Sekunden ohne Antwort-Countdown und lässt sie abbrechen oder wiederholen', () => {
     const before=reading(), scene=updateKidsGame(before,'scene',1000);

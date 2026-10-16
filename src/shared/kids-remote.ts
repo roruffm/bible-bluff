@@ -1,4 +1,4 @@
-import type { KidsGame, KidsAction, KidsPhase, KidsResult } from './kids-game';
+import { kidsAnswerMs, type KidsGame, type KidsAction, type KidsPhase, type KidsResult } from './kids-game';
 import { KIDS_SCENE_MS } from './kids-scenes';
 import { KIDS_SHOW_QUESTIONS } from './kids-show-questions';
 import { professorInterjection } from './professor-interjections';
@@ -30,6 +30,9 @@ export function packKidsGame(game: KidsGame, now: number) {
     voiceKind: game.voiceKind ?? 'quote',
     voiceClip: game.voiceClip ?? null,
     sceneRemainingMs: game.phase === 'scene' ? Math.min(KIDS_SCENE_MS, Math.max(0, (game.deadline ?? now) - now)) : undefined,
+    short: game.short ? true : undefined,
+    // Relativ statt als Uhrzeit: Beamer, Smartphone und Server dürfen verschieden gestellte Uhren haben.
+    startedAgoMs: typeof game.startedAt === 'number' ? Math.max(0, now - game.startedAt) : undefined,
   };
 }
 
@@ -44,7 +47,15 @@ export function unpackKidsGame(value: unknown, now: number): KidsGame | null {
 function unpack(value: unknown, now: number): KidsGame {
   if (!value || typeof value !== 'object') return invalid();
   const game = value as Record<string, unknown>;
-  if (!Array.isArray(game.rounds) || game.rounds.length !== 10 || !Number.isInteger(game.index) || Number(game.index) < 0 || Number(game.index) >= game.rounds.length || !PHASES.includes(game.phase as KidsPhase) || typeof game.remainingMs !== 'number' || !Number.isFinite(game.remainingMs) || game.remainingMs < 0 || game.remainingMs > 30000) return invalid();
+  if (game.short !== undefined && game.short !== true) return invalid();
+  const short = game.short === true, answerMs = kidsAnswerMs({ short });
+  if (!Array.isArray(game.rounds) || game.rounds.length !== 10 || !Number.isInteger(game.index) || Number(game.index) < 0 || Number(game.index) >= game.rounds.length || !PHASES.includes(game.phase as KidsPhase) || typeof game.remainingMs !== 'number' || !Number.isFinite(game.remainingMs) || game.remainingMs < 0 || game.remainingMs > answerMs) return invalid();
+  // Die Kurzshow spielt nur das erste Kapitel und das Finale.
+  if (short && Number(game.index) > 2 && Number(game.index) < 9) return invalid();
+  const startedAgo = game.startedAgoMs;
+  if (startedAgo !== undefined && (typeof startedAgo !== 'number' || !Number.isFinite(startedAgo) || startedAgo < 0)) return invalid();
+  // Ein Start vor über einem Tag gehört zu keiner laufenden Show mehr; der Zeitplan beginnt dann neu.
+  const recentStart = typeof startedAgo === 'number' && startedAgo <= 24 * 60 * 60 * 1000;
   const used = new Set<string>();
   const rounds = game.rounds.map((raw: unknown, index: number) => {
     if (!raw || typeof raw !== 'object') return invalid();
@@ -79,6 +90,7 @@ function unpack(value: unknown, now: number): KidsGame {
     if (sceneRemainingMs === 0) phase='reading';
   }
   if (game.remainingMs === 0 && (phase === 'moving' || phase === 'paused')) phase = 'locked';
-  const remainingMs = ['welcome', 'chapter', 'superbluff', 'reading', 'scene'].includes(phase) ? 30000 : ['locked', 'returning', 'judging', 'revealed', 'finished'].includes(phase) ? 0 : game.remainingMs;
-  return { rounds, index, phase, remainingMs, deadline: phase === 'scene' ? now + sceneRemainingMs : phase === 'moving' ? now + remainingMs : null, results: game.results as (KidsResult | null)[], cueSeq: Number(game.cueSeq), voiceSeq: Number(voiceSeq), voicePlaying, voiceCue: voiceCue as string|null, voiceKind:voiceKind as KidsGame['voiceKind'], voiceClip: voiceClip as KidsGame['voiceClip'] };
+  const remainingMs = ['welcome', 'chapter', 'superbluff', 'reading', 'scene'].includes(phase) ? answerMs : ['locked', 'returning', 'judging', 'revealed', 'finished'].includes(phase) ? 0 : game.remainingMs;
+  return { rounds, index, phase, remainingMs, deadline: phase === 'scene' ? now + sceneRemainingMs : phase === 'moving' ? now + remainingMs : null, results: game.results as (KidsResult | null)[], cueSeq: Number(game.cueSeq), voiceSeq: Number(voiceSeq), voicePlaying, voiceCue: voiceCue as string|null, voiceKind:voiceKind as KidsGame['voiceKind'], voiceClip: voiceClip as KidsGame['voiceClip'],
+    ...(short ? { short } : {}), ...(recentStart ? { startedAt: now - (startedAgo as number) } : {}) };
 }

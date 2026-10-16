@@ -21,6 +21,14 @@ lokal erzeugte Klangbilder; Eltern und andere Gruppen machen Geräusche und Pant
 - Superbluff: Professor +10, Kinder erhalten auch hier 10 / 5 / 0 nach derselben Regel. Endstand erst nach
   dem Finale. Die Spielleitung kann auch jederzeit früher mit dem erreichten Punktestand abschließen.
   Der Abschluss feiert alle Kinder mit Jesu Einladung (Markus 10,14).
+- **Kurzshow · 15 Minuten** hat in der Vorbereitung einen eigenen Startknopf: Begrüßung, ein Kapitel
+  (je eine Aufgabe für Glühwürmchen, Leuchtsterne und Fackelträger), Superbluff und Abschluss. 20 statt
+  30 Sekunden. Die Kinder bleiben sitzen und zeigen 1, 2 oder 3 Finger; nach dem Stopp wird sofort gewertet,
+  ohne die Bildschirme „Zurück in die Gruppen“ und „Alle sind zurück“. Punkte und Professor wie in der
+  vollen Show (Kinder bis 40, Professor 31). „Bedienung“ und das Smartphone zeigen einen Zeitplan ab
+  „Mission starten“ (Aufgaben bis 2:30, 5:00, 7:30, Superbluff bis 11:30, Abschluss bis 13:30; plus
+  1:30 Begrüßung) und melden, ob ihr im Plan liegt. Fernbedienung, Sicherung und „Show fortsetzen“
+  funktionieren auch hier.
 - **Direkt ins Finale** springt jederzeit sofort zum Superbluff: am Beamer oben über „Finale“
   oder im Bedienmenü, auf dem Smartphone direkt unter dem Punktestand. Gewertete Aufgaben
   bleiben erhalten; übersprungene Aufgaben zählen für beide Seiten nicht. Laufender Ton,

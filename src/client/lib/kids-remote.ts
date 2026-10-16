@@ -29,7 +29,11 @@ async function request<T>(method: string, path: string, data?: unknown, token?: 
     const json = await response.json();
     if (!response.ok) throw new RemoteError(json.error?.message ?? 'Das hat nicht geklappt.', response.status);
     // Derselbe Zeitpunkt auf beiden Geräten, auch wenn deren Uhren verschieden gestellt sind.
-    if (json.game && typeof json.serverNow === 'number' && json.game.deadline !== null) json.game.deadline += (sent + Date.now()) / 2 - json.serverNow;
+    if (json.game && typeof json.serverNow === 'number') {
+      const shift = (sent + Date.now()) / 2 - json.serverNow;
+      if (json.game.deadline !== null) json.game.deadline += shift;
+      if (typeof json.game.startedAt === 'number') json.game.startedAt += shift;
+    }
     return json as T;
   } catch (err) {
     if (err instanceof RemoteError) throw err;
