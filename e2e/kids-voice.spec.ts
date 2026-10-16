@@ -64,7 +64,7 @@ test('Professor: Smartphone startet und stoppt am Beamer, Neuladen spielt nichts
   expect((await counts(page)).starts).toBe(0);
   await phone.getByRole('button',{name:'Spruch am Beamer abspielen',exact:false}).click();
   await expect.poll(async()=>(await counts(page)).starts).toBe(1);
-  await phone.getByRole('button',{name:'Sprache stoppen',exact:false}).click();
+  await phone.getByRole('button',{name:'Professor-Audio stoppen',exact:false}).click();
   await expect.poll(async()=>(await counts(page)).stops).toBe(1);
   await phone.getByRole('button',{name:'Spruch am Beamer abspielen',exact:false}).click();
   await expect.poll(async()=>(await counts(page)).starts).toBe(2);
@@ -90,7 +90,7 @@ test('Professor: Smartphone startet und stoppt am Beamer, Neuladen spielt nichts
   await questionRequest;
   await expect.poll(async()=>(await counts(page)).starts).toBe(1);
   await expect(page.locator('.kids-clock')).toHaveAttribute('aria-label','30 Sekunden');
-  await phone.getByRole('button',{name:'Sprache stoppen',exact:false}).click();
+  await phone.getByRole('button',{name:'Professor-Audio stoppen',exact:false}).click();
   await expect.poll(async()=>(await counts(page)).stops).toBe(1);
   await context.close();
 });
