@@ -74,6 +74,18 @@ lokal erzeugte Klangbilder; Eltern und andere Gruppen machen Geräusche und Pant
 - Befristete Links mit getrennten Zugriffsschlüsseln, Hashes in D1 und versionierten
   Spielzügen gegen Doppelklicks. Wiederverbindung nach Neuladen und Netzabbruch.
   Ohne Smartphone-Verbindung läuft die Show lokal ohne Serverzugriff.
+- **Neuladen kostet nichts:** Der Beamer-Rechner sichert jeden Spielstand (`localStorage`, bis zu 6 Stunden).
+  Nach versehentlichem Neuladen oder einem Absturz bietet die Vorbereitung **Show fortsetzen?** mit Kapitel,
+  Gruppe und Punkten an. Der Knopf hat den Fokus, die Leertaste genügt. Ein laufender Countdown ist danach
+  angehalten, eine Szene beendet, der Professor schweigt. **Verwerfen** oder **Zur Vorbereitung** am Ende löschen den Stand.
+- **Netzausfall:** **Show vorbereiten** lädt alle Professor-Aufnahmen vorab in den Speicher. Fällt das Internet
+  aus, spricht der Professor weiter. Über https legt die Show zusätzlich eine Offline-Kopie an (Service Worker
+  `kids-sw.js`, nur für `/kids`, immer zuerst das Netz). Dann lädt die Seite auch ganz ohne Internet neu.
+  Bricht die Verbindung zur Smartphone-Fernbedienung ab, geht es mit **Ohne Smartphone weiterspielen** per Maus
+  und Tastatur weiter.
+- **Technik-Check** in der Vorbereitung: spielt einen Testsatz über die Lautsprecher und zeigt Ton, geladene
+  Aufnahmen, Offline-Kopie, Internet für die Fernbedienung und Vollbild. Aufnahmen und Offline-Kopie stehen
+  auch im Bedienmenü.
 - Moderation, Beamer-Bedienung, Gruppenhelfer und genügend Platz inklusive begleitender
   Eltern einplanen. Helferplan und Ablauf stehen in der Vorbereitung.
 

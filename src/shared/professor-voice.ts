@@ -1,4 +1,17 @@
 import { kidsResultPoints, kidsScores, type KidsGame } from './kids-game';
+import { PROFESSOR_INTERJECTIONS } from './professor-interjections';
+
+// Diese zwei alten Aufnahmen erwähnen einen Schatz, den es im Spiel nicht mehr gibt.
+const comfortClip = (index: number) => `comfort-${index === 4 ? 7 : index === 9 ? 2 : index}`;
+const series = (name: string, count: number) => Array.from({ length: count }, (_, i) => `${name}-${i}`);
+
+/** Alle Aufnahmen, die am Beamer erklingen können. „Show vorbereiten“ lädt sie vollständig vorab.
+ * Die Finalfrage hat noch keine Aufnahme; sie liest vorläufig die Gerätestimme. */
+export const PROFESSOR_VOICE_KEYS: readonly string[] = [...new Set([
+  'welcome', 'intro', 'chapter2', 'chapter3', 'superbluff', 'win', 'lose',
+  ...series('startled', 10), ...Array.from({ length: 10 }, (_, i) => comfortClip(i)), ...series('question', 9),
+  ...PROFESSOR_INTERJECTIONS.map(clip => `interjection-${clip.id}`),
+])];
 
 /** Nur Aufnahmen, die zum aktuell sichtbaren Professor-Spruch passen. */
 export function professorVoiceKey(game: KidsGame, kind:'quote'|'question'='quote'): string | null {
@@ -10,8 +23,7 @@ export function professorVoiceKey(game: KidsGame, kind:'quote'|'question'='quote
   if (game.phase === 'finished') return kidsScores(game).team > kidsScores(game).professor ? 'win' : 'lose';
   if (game.phase === 'revealed') {
     if (kidsResultPoints(game.results[game.index]) > 0) return `startled-${game.index}`;
-    // Diese zwei alten Aufnahmen erwähnen einen Schatz, den es im Spiel nicht mehr gibt.
-    return `comfort-${game.index === 4 ? 7 : game.index === 9 ? 2 : game.index}`;
+    return comfortClip(game.index);
   }
   return game.index >= 6 ? 'chapter3' : game.index >= 3 ? 'chapter2' : 'intro';
 }

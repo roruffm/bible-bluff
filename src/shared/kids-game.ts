@@ -111,6 +111,11 @@ export function updateKidsGame(game: KidsGame, action: KidsAction, now: number):
   if (action === 'scene' && phase === 'reading' && game.rounds[game.index].question.scene) return { ...game, phase: 'scene', deadline: now + KIDS_SCENE_MS, cueSeq: game.cueSeq + 1 };
   return game;
 }
+/** Nach dem Neuladen wartet die Show auf die Spielleitung: Der Countdown steht, eine Szene ist vorbei, der Professor schweigt. */
+export function kidsResumeGame(game: KidsGame, now: number): KidsGame {
+  const waiting = game.phase === 'moving' ? updateKidsGame(game, 'pause', now) : game.phase === 'scene' ? { ...game, phase: 'reading' as const, deadline: null } : game;
+  return { ...waiting, voicePlaying: false, voiceCue: null };
+}
 export function kidsPrimaryAction(phase: KidsPhase): Exclude<KidsAction, 'tick'> | null {
   return ({ welcome: 'next', chapter: 'next', superbluff: 'next', reading: 'start', scene: 'end-scene', paused: 'resume', locked: 'return', returning: 'ready', revealed: 'next' } as Partial<Record<KidsPhase, Exclude<KidsAction, 'tick'>>>)[phase] ?? null;
 }

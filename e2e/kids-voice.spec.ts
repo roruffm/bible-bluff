@@ -1,31 +1,16 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test } from '@playwright/test';
+import { professorAudio as counts, trackProfessorAudio as observeAudio } from './professor-audio';
 
 test.use({ viewport:{width:1280,height:800}, isMobile:false });
-async function observeAudio(page:Page) {
-  await page.addInitScript(()=>{
-    const counters={starts:0,stops:0};
-    Object.assign(window,{professorAudio:counters});
-    const create=AudioContext.prototype.createBufferSource;
-    AudioContext.prototype.createBufferSource=function(){
-      const source=create.call(this), start=source.start.bind(source), stop=source.stop.bind(source);
-      // Nur Sprachaufnahmen zählen, nicht die kurzen erzeugten Showklänge (Ticken, Trommelwirbel).
-      const voice=()=>(source.buffer?.duration ?? 0)>.9;
-      source.start=(...args)=>{if(voice())counters.starts++;return start(...args);};
-      source.stop=(...args)=>{if(voice())counters.stops++;return stop(...args);};
-      return source;
-    };
-  });
-}
-async function counts(page:Page) { return page.evaluate(()=> (window as unknown as {professorAudio:{starts:number;stops:number}}).professorAudio); }
-
 test('Professor: manuell abspielen, stoppen, wiederholen und beim Weitergehen abbrechen',async({page})=>{
   await observeAudio(page);
-  const recordings:string[]=[];page.on('request',request=>{if(request.url().includes('/professor-bluff/'))recordings.push(request.url());});
   await page.goto('/kids');await page.getByRole('button',{name:'Show vorbereiten',exact:false}).click();
-  expect(recordings).toEqual([]);expect((await counts(page)).starts).toBe(0);
+  // Alle Aufnahmen werden vorab geladen, aber nichts erklingt von selbst.
+  await expect(page.getByRole('button',{name:'Mission starten',exact:true})).toBeVisible();
+  expect((await counts(page)).starts).toBe(0);
   await page.getByRole('button',{name:'Professor-Spruch abspielen',exact:true}).click();
   await expect.poll(async()=>(await counts(page)).starts).toBe(1);
-  expect(recordings[0]).toContain('/professor-bluff/welcome.mp3');
+  expect((await counts(page)).played).toEqual(['welcome']);
   await page.getByRole('button',{name:'Professor-Spruch stoppen',exact:true}).click();
   await expect.poll(async()=>(await counts(page)).stops).toBe(1);
   await page.getByRole('button',{name:'Professor-Spruch abspielen',exact:true}).click();
@@ -35,7 +20,7 @@ test('Professor: manuell abspielen, stoppen, wiederholen und beim Weitergehen ab
   expect((await counts(page)).starts).toBe(2);
   await page.getByRole('button',{name:'Professor-Spruch abspielen',exact:true}).click();
   await expect.poll(async()=>(await counts(page)).starts).toBe(3);
-  expect(recordings.at(-1)).toContain('/professor-bluff/intro.mp3');
+  expect((await counts(page)).played.at(-1)).toBe('intro');
   await page.getByRole('button',{name:'Erste Aufgabe im Kapitel',exact:true}).click();
   await expect.poll(async()=>(await counts(page)).stops).toBe(3);
   // Während der Aufgabe steht Professor Bluffs Behauptung am Beamer. Die Spielleitung liest sie selbst vor.
@@ -48,7 +33,7 @@ test('Professor: manuell abspielen, stoppen, wiederholen und beim Weitergehen ab
   await expect(page.getByTestId('team-score')).toHaveText('0');
   await page.getByRole('button',{name:'Professor-Spruch abspielen',exact:true}).click();
   await expect.poll(async()=>(await counts(page)).starts).toBe(4);
-  expect(recordings.at(-1)).toContain('/professor-bluff/lose.mp3');
+  expect((await counts(page)).played.at(-1)).toBe('lose');
 });
 
 test('Professor: Smartphone startet und stoppt am Beamer, Neuladen spielt nichts automatisch',async({page,browser})=>{
@@ -85,10 +70,9 @@ test('Professor: Smartphone startet und stoppt am Beamer, Neuladen spielt nichts
   expect((await counts(page)).starts).toBe(0);
   await phone.getByRole('button',{name:'Erste Aufgabe im Kapitel',exact:true}).click();
   await expect(page.locator('#kids-question')).toBeVisible();
-  const questionRequest=page.waitForRequest(request=>request.url().includes('/professor-bluff/question-0.mp3'));
   await phone.getByRole('button',{name:'Frage am Beamer vorlesen',exact:false}).click();
-  await questionRequest;
   await expect.poll(async()=>(await counts(page)).starts).toBe(1);
+  expect((await counts(page)).played).toEqual(['question-0']);
   await expect(page.locator('.kids-clock')).toHaveAttribute('aria-label','30 Sekunden');
   await phone.getByRole('button',{name:'Sprache stoppen',exact:false}).click();
   await expect.poll(async()=>(await counts(page)).stops).toBe(1);

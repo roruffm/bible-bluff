@@ -12,7 +12,10 @@ import { ProfessorBluff, professorMood, professorSays, ShowControls, ShowScorebo
 import { professorMotion } from '../lib/professor-motion';
 import { KIDS_CHAPTERS, KIDS_GROUPS, kidsAnswerPicture } from '../../shared/kids-show-questions';
 import { kidsControlUrl, useKidsRemote } from '../lib/kids-remote';
-import { enableKidsSound, KIDS_SUSPENSE_MS, playKidsCue, playKidsScene, type KidsCue } from '../lib/kids-sound';
+import { enableKidsSound, KIDS_SUSPENSE_MS, playKidsCue, playKidsScene, playProfessorVoice, type KidsCue } from '../lib/kids-sound';
+import { clearKidsShow, loadKidsShow, saveKidsShow } from '../lib/kids-saved';
+import { checkKidsInternet, prepareKidsShow } from '../lib/kids-ready';
+import { KidsResume, KidsTechCheck, KidsTechStatus } from '../components/KidsPrepare';
 import { BluffClaim, BluffPin, KidsCheers, KidsCountdown } from '../components/KidsBluff';
 import { createKidsGame, kidsCanJumpToFinal, kidsOvertook, kidsPrimaryAction, kidsResultPoints, updateKidsGame, type KidsAction, type KidsGame } from '../lib/kids';
 import { navigate } from '../lib/router';
@@ -28,11 +31,20 @@ export function KidsPage() {
   const [presentation, setPresentation] = useState(false), [toolsOpen, setToolsOpen] = useState(false);
   const [sound, setSound] = useState<'unarmed'|'on'|'off'>('unarmed');
   const [suspense, setSuspense] = useState<number|null>(null);
+  const [saved, setSaved] = useState(() => loadKidsShow());
+  const [checked, setChecked] = useState(false), [testing, setTesting] = useState(false);
+  const resumeButton = useRef<HTMLButtonElement>(null), soundTest = useRef<AbortController|null>(null);
   const soundOn = useRef(false), lastPhase = useRef<string|null>(null);
   soundOn.current = sound === 'on';
   const cue = (name: KidsCue) => soundOn.current ? playKidsCue(name) : () => {};
   const root = useRef<HTMLElement>(null), primary = useRef<HTMLButtonElement>(null);
   const remote = useKidsRemote('display', setGame);
+  // Jeder Stand wird auf diesem Gerät gesichert, auch der vom Fernbedienungs-Server: Neuladen oder Absturz kosten nichts.
+  // Sofort nach dem Rendern, damit auch ein Neuladen direkt nach einem Klick den letzten Schritt behält.
+  useLayoutEffect(() => { if (game) saveKidsShow(game); }, [game]);
+  useEffect(() => { if (game) prepareKidsShow(); }, [!!game]);
+  useLayoutEffect(() => { if (saved && !game && !remote.active) resumeButton.current?.focus(); }, [!!saved, !!game, remote.active]);
+  useEffect(() => () => soundTest.current?.abort(), []);
   const act = (action: KidsAction) => {
     if ((action === 'scene' || action === 'start') && sound === 'unarmed') void enableKidsSound().then(()=>setSound('on')).catch(()=>setSound('off'));
     if (action !== 'tick' && remote.active) { void remote.send(action); return; }
@@ -100,8 +112,21 @@ export function KidsPage() {
   useEffect(()=>{ if(game?.phase==='superbluff') { setShowFinish(false); setShowExit(false); setShowPair(false); setToolsOpen(false); } },[game?.phase]);
   const toggleFullscreen = async () => { try { setFullscreenError(''); if (document.fullscreenElement) await document.exitFullscreen(); else await root.current?.requestFullscreen(); } catch { setFullscreenError('Nutze das Vollbild deines Browsers.'); } };
   const toggleSound = async () => { if (sound === 'on') { setSound('off'); return; } try { await enableKidsSound(); setSound('on'); } catch { setFullscreenError('Klang hier nicht verfügbar. Die Gruppen können die Geräusche selbst machen.'); } };
-  const exit = () => { void remote.disconnect(); setShowExit(false); setShowPair(false); setShowFinish(false); setToolsOpen(false); setPresentation(false); setGame(null); };
+  const exit = () => { void remote.disconnect(); clearKidsShow(); setSaved(null); setShowExit(false); setShowPair(false); setShowFinish(false); setToolsOpen(false); setPresentation(false); setGame(null); };
   const enableVoice = async () => { await enableKidsSound(); setSound('on'); };
+  const startShow = () => { setSaved(null); setGame(createKidsGame()); };
+  // Der Klick aufs Fortsetzen darf den Ton gleich wieder einschalten; Browser verlangen dafür eine Geste.
+  const resume = () => { if (!saved) return; setSaved(null); setGame(saved.game); void enableVoice().catch(() => setSound('off')); };
+  const discard = () => { clearKidsShow(); setSaved(null); };
+  /** Lädt alles vorab, prüft das Internet und spielt einen Testsatz über die Beamer-Lautsprecher. */
+  const checkTech = async () => {
+    setChecked(true); setTesting(true); setFullscreenError('');
+    prepareKidsShow(); void checkKidsInternet();
+    try { await enableVoice(); } catch { setSound('off'); setTesting(false); return; }
+    soundTest.current?.abort(); const controller = new AbortController(); soundTest.current = controller;
+    try { await playProfessorVoice('interjection-listen', controller.signal, () => {}); } catch (error) { setFullscreenError(error instanceof Error ? error.message : 'Der Testsatz konnte nicht abgespielt werden.'); }
+    setTesting(false);
+  };
   const pair = async () => { if (!game) return; void enableVoice().catch(()=>setSound('off')); setToolsOpen(false); setShowPair(true); if (!remote.active) { const paused = updateKidsGame(game, 'pause', Date.now()); setGame(paused); await remote.connect(paused, false); } };
   const round = game?.rounds[game.index];
   const revealed = game?.phase === 'revealed', finished = game?.phase === 'finished';
@@ -121,19 +146,21 @@ export function KidsPage() {
       <button type="button" class="kids-tool" onClick={toggleSound}>{sound === 'on' ? 'Klang ausschalten' : 'Klang einschalten'}</button>
       {canFullscreen && <button type="button" class="kids-tool" onClick={toggleFullscreen}>{fullscreen ? 'Vollbild aus' : 'Vollbild einschalten'}</button>}
       <button type="button" class="kids-tool" onClick={() => { setToolsOpen(false); if(finished) setShowExit(true); else setShowFinish(true); }}>{finished ? 'Zur Vorbereitung' : 'Spiel abschließen'}</button>
+      <KidsTechStatus/>
       <p>→ / Leertaste: weiter · P: Pause<br/>H: Mausknöpfe · Wertung: 1 / 2 / 0</p><button type="button" class="kids-tool" onClick={() => setToolsOpen(false)}>Menü schließen</button>
     </aside>}
     {fullscreenError && <p role="status" class="kids-connection-note">{fullscreenError}</p>}
-    {remote.error && !showPair && <p class="kids-connection-note" role="status">{remote.error}</p>}
+    {remote.error && !showPair && <p class="kids-connection-note" role="status">{remote.error}{remote.lost && game && <button type="button" class="kids-tool" onClick={() => { void remote.disconnect(); }}>Ohne Smartphone weiterspielen</button>}</p>}
     {remote.active && !remote.view && <div class="kids-exit"><div><h2>Show wiederherstellen …</h2><p>{remote.error || 'Die Fernbedienung wird wieder verbunden.'}</p><button type="button" class="kids-button" onClick={() => { void remote.disconnect(); }}>Zur Vorbereitung</button></div></div>}
     {!game ? <section class="kids-setup">
       <div class="kids-intro"><KidsLogo/><p class="kids-eyebrow">DAS GEMEINSAME BIBELABENTEUER</p><h1>Die große<br/><em>Bluff-Jagd!</em></h1><p>Drei Detektivteams. Ein frecher Professor.<br/>Gemeinsam knackt ihr seine Bibelrätsel.</p><ProfessorBluff/><div class="kids-show-teams">{(['minis','mittis','maxis'] as const).map(g=><span><b><KidsGroupName group={g}/></b><small>{KIDS_GROUPS[g].ages}</small></span>)}</div></div>
-      <div class="kids-setup-card"><p class="kids-eyebrow">FÜR DIE SPIELLEITUNG · CA. 45 MINUTEN</p><h2>Gemeinsam auf Punktejagd</h2><ol class="kids-rules">
+      <div class="kids-setup-card">{saved && !remote.active && <KidsResume saved={saved} onResume={resume} onDiscard={discard} resumeRef={resumeButton}/>}<p class="kids-eyebrow">FÜR DIE SPIELLEITUNG · CA. 45 MINUTEN</p><h2>Gemeinsam auf Punktejagd</h2><ol class="kids-rules">
         <li><b>Drei Felder vorbereiten</b><span>1, 2, 3 von links nach rechts markieren. Die aktive Altersgruppe wählt mit den Füßen. Andere bleiben bei ihrer Gruppe.</span></li>
         <li><b>Bis zu 9 Aufgaben + 1 Superbluff</b><span>Pro Kapitel spielen alle drei Gruppen. Erst vorlesen, dann 30 Sekunden starten. Eltern helfen bei Geräuschen und Pantomime. Ihr könnt die Show jederzeit mit Punktestand abschließen.</span></li>
         <li><b>Alle zurück, dann auflösen</b><span>Helfer prüfen die Felder. Alle kehren zurück. Die Spielleitung trägt nur das gemeinsame Ergebnis ein.</span></li>
       </ol><div class="kids-scoring-rule"><b>10</b> Mehrheit richtig · <b>5</b> mindestens ein Kind richtig<br/><b>0</b> keiner richtig<br/>Professor Bluff: +7 je Runde · Finale: Bluff +10 · Team bis +10</div>
-      <button type="button" class="kids-button kids-primary" onClick={() => setGame(createKidsGame())}>Show vorbereiten <span>→</span></button><p class="kids-setup-note">Ein Beamer für alle · Kein Kinder-Smartphone<br/>Maus, Tastatur oder Smartphone der Spielleitung</p>
+      <button type="button" class={`kids-button${saved && !remote.active ? '' : ' kids-primary'}`} onClick={startShow}>{saved && !remote.active ? 'Neue Show vorbereiten' : 'Show vorbereiten'} <span>→</span></button><p class="kids-setup-note">Ein Beamer für alle · Kein Kinder-Smartphone<br/>Maus, Tastatur oder Smartphone der Spielleitung</p>
+      <KidsTechCheck checked={checked} testing={testing} sound={sound} onCheck={() => { void checkTech(); }} fullscreen={canFullscreen ? fullscreen : null} onFullscreen={() => { void toggleFullscreen(); }}/>
       <details class="kids-organizer"><summary>Helferplan & Ablauf</summary><p>Moderation, Beamer-Bedienung und Gruppenhelfer einplanen. Genug Platz für die aktive Gruppe und begleitende Eltern lassen. Elternkarten 1–3 und ein Kissen für die Final-Pantomime bereitlegen.</p><p>Begrüßung 5 Min. · 3 Kapitel je 9 Min. · Showeinlagen 6 Min. · Finale 7 Min. Alle Punkte sind fest geregelt. Gewertet werden nur abgeschlossene Aufgaben. Über „Abschluss“ könnt ihr jederzeit den Endbildschirm zeigen.</p></details></div>
     </section> : <>
       {finished ? <KidsFinish game={game}><Celebration variant={3}/></KidsFinish> : game.phase==='scene' ? <KidsScene key={`${game.index}-${game.cueSeq}`} game={game} act={act} sound={sound==='on'} toggleSound={()=>{void toggleSound();}} disabled={remote.busy} primaryRef={primary}/> : <>

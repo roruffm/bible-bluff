@@ -54,7 +54,7 @@
 .kids-options small { display: block; font-size: 11px; font-weight: 500; }
 .kids-button { border: 2px solid #12324a; padding: 13px 24px; background: #fff; border-radius: 13px; font-weight: 800; font-size: clamp(15px, 1.4vw, 21px); box-shadow: 0 5px 0 #12324a; cursor: pointer; line-height: 1.25; }
 .kids-primary { background: #ffd362; }
-.kids-setup-card > .kids-primary { width: 100%; display: flex; justify-content: space-between; font-size: 21px; }
+.kids-setup-card > .kids-button { width: 100%; display: flex; justify-content: space-between; font-size: 21px; }
 .kids-setup-note { font-size: 12px; line-height: 1.6; color: #526b77; text-align: center; margin-top: 17px; }
 .kids-shortcuts { grid-column: 1 / -1; color: #526b77; font-size: 12px; text-align: center; margin-top: 5px; }
 /* Eine Kopfzeile, vier feste Bereiche: Frage, Phase, Felder, Auflösung/Bedienung. */
@@ -680,3 +680,30 @@
 @keyframes professor-bow { 0%,100% { transform: perspective(600px) rotateX(0); } 25%,45% { transform: perspective(600px) translateY(5px) rotateX(32deg); } 68% { transform: perspective(600px) rotateX(-5deg); } }
 @keyframes professor-goodbye { 0%,48%,100% { transform: none; } 63%,85% { transform: rotate(-85deg); } 74% { transform: rotate(-48deg); } }
 @keyframes professor-blink { 0%,62%,66%,100% { transform: scaleY(1); } 64% { transform: scaleY(.12); } }
+
+/* Vorbereitung: gesicherten Spielstand fortsetzen und Technik-Check vor dem Einlass. */
+.kids-resume { margin-bottom: 22px; padding: 16px 18px; border: 2px solid #147d73; border-radius: 18px; background: #e1f4ec; display: grid; gap: 8px; }
+.kids-setup-card .kids-resume .kids-eyebrow { margin: 0; font-size: 10px; color: #0f676b; }
+.kids-resume h3 { font-size: 21px; }
+.kids-resume p { font-size: 15px; line-height: 1.4; }
+.kids-resume .kids-resume-note { font-size: 13px; color: #40596a; }
+.kids-resume-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 4px; }
+.kids-resume-actions .kids-button { font-size: 18px; padding: 11px 22px; }
+.kids-check { margin-top: 18px; padding-top: 16px; border-top: 1px solid #d1dedd; }
+.kids-check-head { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+.kids-check h3 { font-size: 15px; }
+.kids-check-head p { font-size: 12px; line-height: 1.45; color: #526b77; margin-top: 2px; }
+.kids-check-list { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 8px; }
+.kids-check-row { display: grid; grid-template-columns: 24px 96px minmax(0, 1fr); align-items: start; gap: 8px; font-size: 13px; line-height: 1.4; }
+.kids-check-row > b { font-weight: 800; }
+.kids-check-mark { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; font-size: 13px; font-weight: 900; background: #e7eeef; }
+.kids-check-row.is-ok .kids-check-mark { background: #14795e; color: #fff; }
+.kids-check-row.is-warn .kids-check-mark { background: #ffd362; color: #12324a; }
+.kids-check-action { border: 0; padding: 0; background: none; font: inherit; font-weight: 800; color: #0f676b; text-decoration: underline; cursor: pointer; }
+.kids-tech-status { font-weight: 700; }
+.kids-connection-note .kids-tool { margin-left: 10px; padding: 4px 10px; font-size: 13px; }
+@media (max-width: 520px) {
+  .kids-check-head { flex-direction: column; align-items: stretch; }
+  .kids-check-row { grid-template-columns: 24px minmax(0, 1fr); row-gap: 2px; }
+  .kids-check-row > span:last-child { grid-column: 2; }
+}

@@ -1,5 +1,5 @@
 import { KIDS_SCENE_MS, type KidsSceneMotif } from '../../shared/kids-scenes';
-import { professorInterjection } from '../../shared/professor-interjections';
+import { PROFESSOR_VOICE_KEYS } from '../../shared/professor-voice';
 let context: AudioContext | null = null;
 export async function enableKidsSound() {
   context ??= new AudioContext();
@@ -7,20 +7,40 @@ export async function enableKidsSound() {
   if (context.state !== 'running') throw new Error('Klang nicht verfügbar');
 }
 
+const professorRecordings = new Map<string, Promise<ArrayBuffer>>();
 const professorBuffers = new Map<string, Promise<AudioBuffer>>();
+/** Lädt eine Aufnahme einmal und hält sie bis zum ersten Abspielen bereit. Fehlschläge dürfen erneut laden. */
+function professorRecording(key: string): Promise<ArrayBuffer> {
+  let bytes = professorRecordings.get(key);
+  if (!bytes) {
+    bytes = fetch(`/professor-bluff/${key}.mp3`).then(response => {
+      if (!response.ok) throw new Error('Diese Professor-Aufnahme konnte nicht geladen werden.');
+      return response.arrayBuffer();
+    });
+    professorRecordings.set(key, bytes);
+    const loading = bytes;
+    void loading.catch(() => { if (professorRecordings.get(key) === loading) professorRecordings.delete(key); });
+  }
+  return bytes;
+}
+/** Holt alle Aufnahmen vorab in den Speicher, damit ein Netzausfall während der Show den Professor nicht verstummen lässt. */
+export async function preloadProfessorVoices(onLoaded: (loaded: number, total: number) => void): Promise<number> {
+  let loaded = 0;
+  await Promise.all(PROFESSOR_VOICE_KEYS.map(key => (professorBuffers.has(key) ? Promise.resolve() : professorRecording(key))
+    .then(() => onLoaded(++loaded, PROFESSOR_VOICE_KEYS.length), () => {})));
+  return loaded;
+}
 /** Ein Abbruch verhindert auch, dass eine noch ladende Aufnahme später losspielt. */
 export async function playProfessorVoice(key: string, signal: AbortSignal, onEnded: () => void) {
-  const interjection = key.startsWith('interjection-') && professorInterjection(key.slice('interjection-'.length));
-  if ((!/^(welcome|intro|chapter[23]|superbluff|win|lose|startled-[0-9]|comfort-[0-9]|question-[0-9])$/.test(key) && !interjection) || !context || context.state !== 'running') throw new Error('Professor-Ton bitte am Beamer aktivieren.');
+  if (!PROFESSOR_VOICE_KEYS.includes(key) || !context || context.state !== 'running') throw new Error('Professor-Ton bitte am Beamer aktivieren.');
   const ctx = context;
   let buffer = professorBuffers.get(key);
   if (!buffer) {
-    buffer = fetch(`/professor-bluff/${key}.mp3`).then(response => {
-      if (!response.ok) throw new Error('Diese Professor-Aufnahme konnte nicht geladen werden.');
-      return response.arrayBuffer();
-    }).then(bytes => ctx.decodeAudioData(bytes));
+    // Das Dekodieren übernimmt die geladenen Bytes; danach bleibt nur der abspielbare Klang im Speicher.
+    buffer = professorRecording(key).then(bytes => { professorRecordings.delete(key); return ctx.decodeAudioData(bytes); });
     professorBuffers.set(key, buffer);
-    void buffer.catch(() => { if (professorBuffers.get(key) === buffer) professorBuffers.delete(key); });
+    const decoding = buffer;
+    void decoding.catch(() => { if (professorBuffers.get(key) === decoding) professorBuffers.delete(key); });
   }
   const decoded = await buffer;
   if (signal.aborted) return;

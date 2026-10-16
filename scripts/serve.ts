@@ -27,6 +27,7 @@ const TYPES: Record<string, string> = {
   '.webmanifest': 'application/manifest+json',
   '.woff2': 'font/woff2',
   '.woff': 'font/woff',
+  '.mp3': 'audio/mpeg',
   '.txt': 'text/plain; charset=utf-8',
 };
 

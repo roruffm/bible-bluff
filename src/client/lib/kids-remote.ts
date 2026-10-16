@@ -47,6 +47,7 @@ export function useKidsRemote(mode: 'display' | 'control', onGame: (game: KidsGa
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [fatal, setFatal] = useState(false);
+  const [lost, setLost] = useState(false);
   const state = useRef({ credentials, view, epoch: 0, pending: false, onGame });
   state.current.onGame = onGame;
   const save = (c: KidsCredentials | null) => {
@@ -56,11 +57,12 @@ export function useKidsRemote(mode: 'display' | 'control', onGame: (game: KidsGa
   };
   const apply = (next: KidsRemoteView, epoch: number) => {
     if (state.current.epoch !== epoch || (state.current.view && next.id === state.current.view.id && next.version < state.current.view.version)) return;
-    state.current.view = next; setView(next); setError(''); setFatal(false); state.current.onGame(next.game);
+    state.current.view = next; setView(next); setError(''); setFatal(false); setLost(false); state.current.onGame(next.game);
   };
   const fail = (err: unknown, epoch: number) => {
     if (state.current.epoch !== epoch) return;
     setError(err instanceof Error ? err.message : 'Keine Verbindung.');
+    setLost(err instanceof RemoteError && err.status === 0);
     if (err instanceof RemoteError && [401, 403, 404, 410].includes(err.status)) {
       setFatal(true);
       if (mode === 'display') { save(null); state.current.view = null; setView(null); }
@@ -124,8 +126,9 @@ export function useKidsRemote(mode: 'display' | 'control', onGame: (game: KidsGa
   };
   const disconnect = async () => {
     const c = state.current.credentials;
-    save(null); state.current.view = null; setView(null); setError(''); setFatal(false);
+    save(null); state.current.view = null; setView(null); setError(''); setFatal(false); setLost(false);
     if (c && mode === 'display') try { await request('DELETE', `/api/kids-remotes/${c.id}`, undefined, c.token); } catch { /* der Link läuft auch ohne erneute Verbindung ab */ }
   };
-  return { active: !!credentials, credentials, view, error, busy, fatal, restoring: !!credentials && !view && !error, connect, send, disconnect };
+  // lost: Der Server ist gerade nicht erreichbar (kein Fehler des Spielzugs).
+  return { active: !!credentials, credentials, view, error, busy, fatal, lost, restoring: !!credentials && !view && !error, connect, send, disconnect };
 }
