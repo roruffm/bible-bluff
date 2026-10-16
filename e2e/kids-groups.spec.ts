@@ -11,6 +11,25 @@ test('Kids: neue Gruppennamen tragen bei jedem Auftreten ihr festes Symbol',asyn
   await expect(page.locator('.kids-team-badges .kids-group-symbol')).toHaveCount(3);
   await expect(page.locator('.kids-team-badges .kids-group-ages')).toHaveText(['3–5 Jahre','6–8 Jahre','9–11 Jahre']);
   await expect(page.locator('.kids-show-interlude')).not.toContainText(/Die Spürnasen|Die Rätselknacker|Die Bluffjäger/);
+  for(const viewport of [{width:800,height:600},{width:1024,height:768},{width:1280,height:720},{width:1920,height:1080},{width:2560,height:1440}]) {
+    await page.setViewportSize(viewport);
+    const problems=await page.locator('.kids-show-interlude').evaluate(el=>{
+      const issues:string[]=[];
+      for(const child of el.querySelectorAll('.kids-show-story,.kids-show-host,.kids-team-badges > div')) {
+        const box=child.getBoundingClientRect();
+        if(box.left<0 || box.right>innerWidth+1 || box.top<0 || box.bottom>innerHeight+1)issues.push(`Außerhalb: ${child.className}`);
+      }
+      for(const name of el.querySelectorAll('.kids-group-name > span')) {
+        const box=name.getBoundingClientRect(),range=document.createRange();range.selectNodeContents(name);
+        const text=range.getBoundingClientRect();
+        if(text.left<box.left-1 || text.right>box.right+1)issues.push(`Name abgeschnitten: ${name.textContent}`);
+        if(parseFloat(getComputedStyle(name).fontSize)<22)issues.push(`Name zu klein: ${name.textContent}`);
+      }
+      return issues;
+    });
+    expect(problems).toEqual([]);
+  }
+  await page.setViewportSize({width:1280,height:800});
   await expect(page.locator('.kids-team-score .kids-group-symbol')).toHaveCount(3);
   await expect(page.locator('.kids-round-counter [data-group="minis"]')).toHaveText('Glühwürmchen');
   await page.getByRole('button',{name:'Spiel mit Punktestand abschließen',exact:true}).click();
