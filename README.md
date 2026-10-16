@@ -63,9 +63,15 @@ lokal erzeugte Klangbilder; Eltern und andere Gruppen machen Geräusche und Pant
 - **Letzte Wertung ändern** auf dem Smartphone korrigiert die zuletzt abgeschlossene Aufgabe
   auf 10 / 5 / 0 Punkte, auch nach dem Weitergehen oder am Endbildschirm. Aktuelle Frage,
   Countdown und Professor-Punkte bleiben bestehen; es wird keine Runde erneut gezählt.
-- **Zwischendurch-Sprüche** bietet zwölf manuell abspielbare Professor-Ansagen in den Bereichen
-  Mitmachen, Ablauf, Spannung und Mut machen. Alle Aufnahmen verwenden die bisherige Snorre-Stimme,
+- **Zwischendurch-Sprüche** bietet 23 manuell abspielbare Professor-Ansagen in den Bereichen
+  Mitmachen, Ablauf, Spannung, Mut machen, Gruppenaufrufe und Spielsignale. Alle Aufnahmen verwenden die bisherige Snorre-Stimme,
   erklingen am Beamer und lassen sich stoppen oder durch einen anderen Spruch ersetzen.
+- **Passende Phasenansagen** stehen direkt beim aktuellen Spielschritt: der Aufruf der aktiven
+  Altersgruppe vor der Frage, Start/Fortsetzen während der Antwortwahl, Pause, Stopp,
+  „Alle sind zurück“ vor der Auflösung und der Gedanke „Bei Jesus sind wir willkommen“ am Abschluss.
+  **Countdown für letzte 5 Sekunden vormerken** lässt Professor Bluff synchron zum laufenden Timer
+  fünf bis eins zählen. Pause, ein anderes Audio und Phasenwechsel heben die Vormerkung auf.
+  Es gibt keine automatische Sprachausgabe beim Aufrufen, Neuladen oder Wechseln der Spielphase.
 - **Frage vorlesen** liest auf manuellen Klick die sichtbare Frage mit Professor Bluffs Stimme.
   Auch über **Frage am Beamer vorlesen** auf dem Smartphone steuerbar; die 30 Sekunden
   starten weiterhin separat. Stoppen, Wiederholen und Abbruch beim Weitergehen sind möglich.

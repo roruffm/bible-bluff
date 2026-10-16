@@ -9,7 +9,7 @@ export async function enableKidsSound() {
 
 const professorBuffers = new Map<string, Promise<AudioBuffer>>();
 /** Ein Abbruch verhindert auch, dass eine noch ladende Aufnahme später losspielt. */
-export async function playProfessorVoice(key: string, signal: AbortSignal, onEnded: () => void) {
+export async function playProfessorVoice(key: string, signal: AbortSignal, onEnded: () => void, countdownDeadline?: number) {
   const interjection = key.startsWith('interjection-') && professorInterjection(key.slice('interjection-'.length));
   if ((!/^(welcome|intro|chapter[23]|superbluff|win|lose|startled-[0-9]|comfort-[0-9]|question-[0-9])$/.test(key) && !interjection) || !context || context.state !== 'running') throw new Error('Professor-Ton bitte am Beamer aktivieren.');
   const ctx = context;
@@ -25,13 +25,17 @@ export async function playProfessorVoice(key: string, signal: AbortSignal, onEnd
   const decoded = await buffer;
   if (signal.aborted) return;
   if (ctx.state !== 'running') throw new Error('Professor-Ton bitte am Beamer aktivieren.');
+  // Erst nach dem Laden berechnen: ein langsamer Download darf den Countdown nicht versetzen.
+  const untilEnd = countdownDeadline === undefined ? null : (countdownDeadline - Date.now()) / 1000;
+  if (untilEnd !== null && untilEnd <= 0) { onEnded(); return; }
   const source = ctx.createBufferSource();
   source.buffer = decoded;
   source.connect(ctx.destination);
   const stop = () => { try { source.stop(); } catch { /* Bereits beendet. */ } };
   signal.addEventListener('abort', stop, { once: true });
   source.onended = () => { signal.removeEventListener('abort', stop); source.disconnect(); onEnded(); };
-  source.start();
+  if (untilEnd === null) source.start();
+  else source.start(ctx.currentTime + Math.max(0, untilEnd - 5), Math.max(0, 5 - untilEnd));
 }
 type Tone=(frequency:number,at:number,duration:number,type?:OscillatorType,volume?:number,to?:number)=>void;
 type Noise=(at:number,duration:number,frequency:number,volume:number,filter?:BiquadFilterType)=>void;
