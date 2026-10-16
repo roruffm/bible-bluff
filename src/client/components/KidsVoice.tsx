@@ -46,10 +46,10 @@ export function KidsVoiceProvider({ game, enabled, enable, act, busy, onError, c
 }
 
 /** Kompakter Knopf am jeweils sichtbaren Professor-Spruch. */
-export function KidsVoiceButton() {
+export function KidsVoiceButton({ labelled = false }: { labelled?: boolean } = {}) {
   const voice=useContext(VoiceContext);
   if (!voice?.available) return null;
-  return <button type="button" class="kids-voice-play" disabled={voice.busy} aria-label={voice.playing==='quote' ? 'Professor-Spruch stoppen' : 'Professor-Spruch abspielen'} title={voice.playing==='quote' ? 'Spruch stoppen' : 'Diesen Spruch abspielen'} onClick={voice.playing==='quote' ? voice.stop : voice.play}><span aria-hidden="true">{voice.playing==='quote' ? '■' : '▶'}</span></button>;
+  return <button type="button" class={`kids-voice-play${labelled ? ' has-label' : ''}`} disabled={voice.busy} aria-label={voice.playing==='quote' ? 'Professor-Spruch stoppen' : 'Professor-Spruch abspielen'} title={voice.playing==='quote' ? 'Spruch stoppen' : 'Diesen Spruch abspielen'} onClick={voice.playing==='quote' ? voice.stop : voice.play}><span aria-hidden="true">{voice.playing==='quote' ? '■' : '▶'}</span>{labelled && <span>{voice.playing==='quote' ? 'Spruch stoppen' : 'Spruch abspielen'}</span>}</button>;
 }
 
 export function KidsQuestionVoiceButton() {

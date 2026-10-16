@@ -499,8 +499,9 @@
   .kids-reveal .kids-reveal-answer { min-height: 190px; display: flex; flex-direction: column; }
   .kids-reveal .kids-reveal-answer.has-picture { min-height: 240px; display: grid; }
   .kids-reveal-answer > .kids-story-picture { height: 140px; }
-  .kids-reaction-art { height: 260px; }
-  .kids-reaction { gap: 16px; }
+  .kids-reaction-art { height: 260px; flex: 0 0 260px; }
+  .kids-reaction-art > .bluff-professor { height: 240px; }
+  .kids-reaction { display: flex; flex-direction: column; align-items: stretch; gap: 16px; }
   .kids-reaction-quote { font-size: 23px; }
   .kids-reaction-caption { font-size: 27px; }
   .kids-reveal-footer { grid-column: 1; flex-direction: column; text-align: center; }
@@ -550,7 +551,13 @@
 .kids-professor-signature,.kids-reaction-bubble > .kids-professor-signature { display: flex; justify-content: center; align-items: center; gap: 9px; }
 .kids-voice-play { flex: 0 0 auto; display: inline-grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 1px solid #7154a2; border-radius: 50%; background: #f5effc; color: #594083; font-size: 13px; line-height: 1; cursor: pointer; }
 .kids-voice-play:hover { background: #e5d8f6; }
+.kids-voice-play.has-label { display: inline-flex; justify-content: center; gap: 7px; width: auto; min-height: 44px; padding: 8px 12px; border-radius: 12px; font-size: 14px; letter-spacing: normal; }
+.kids-reaction-bubble > .kids-professor-signature { flex-wrap: wrap; }
 .is-projecting .kids-voice-play { display: none; }
+/* Auf dem Smartphone bleibt der Spruch auch ohne eingeblendete Maussteuerung bedienbar. */
+@media (max-width:759px), (pointer:coarse) and (max-width:1000px) {
+  .is-projecting .kids-reveal .kids-voice-play { display: inline-flex; }
+}
 .kids-remote-voice > div { display: grid; gap: 10px; margin-top: 15px; }
 .kids-remote-voice .kids-button { white-space: normal; font-size: 16px; padding: 12px; }
 .kids-group-name { display: inline-flex; align-items: center; gap: .22em; vertical-align: middle; max-width: 100%; }
