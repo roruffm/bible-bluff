@@ -2,8 +2,17 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { createKidsGame, kidsScores, updateKidsGame, type KidsGame } from '../src/shared/kids-game';
 import { professorVoiceKey } from '../src/shared/professor-voice';
+import { PROFESSOR_INTERJECTIONS } from '../src/shared/professor-interjections';
 
 describe('Professor-Aufnahmen', () => {
+  it('liefert zu jedem freien Zwischendurch-Spruch eine echte MP3-Aufnahme', () => {
+    expect(new Set(PROFESSOR_INTERJECTIONS.map(clip => clip.id)).size).toBe(PROFESSOR_INTERJECTIONS.length);
+    for (const clip of PROFESSOR_INTERJECTIONS) {
+      const bytes=readFileSync(new URL(`../src/client/public/professor-bluff/interjection-${clip.id}.mp3`,import.meta.url));
+      expect(bytes.length).toBeGreaterThan(1500);
+      expect(bytes.subarray(0,3).toString()==='ID3' || bytes[0]===255).toBe(true);
+    }
+  });
   it('ordnet allen neun regulären Fragen eigene Aufnahmen zu und lässt den Countdown ungestartet',()=>{
     const base=createKidsGame();
     for(let index=0;index<9;index++){

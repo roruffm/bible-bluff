@@ -33,6 +33,12 @@ lokal erzeugte Klangbilder; Eltern und andere Gruppen machen Geräusche und Pant
 - Smartphone der Spielleitung: **Bedienung → Smartphone verbinden**, QR-Code scannen.
   Start, Pause, Rückweg, Mehrheitswertung, Szene und Abschluss steuern denselben
   Stand wie die Maus. Regiehinweise bleiben auf der Fernbedienung. Klang am Beamer aktivieren.
+- **Letzte Wertung ändern** auf dem Smartphone korrigiert die zuletzt abgeschlossene Aufgabe
+  auf 10 / 5 / 0 Punkte, auch nach dem Weitergehen oder am Endbildschirm. Aktuelle Frage,
+  Countdown und Professor-Punkte bleiben bestehen; es wird keine Runde erneut gezählt.
+- **Zwischendurch-Sprüche** bietet zwölf manuell abspielbare Professor-Ansagen in den Bereichen
+  Mitmachen, Ablauf, Spannung und Mut machen. Alle Aufnahmen verwenden die bisherige Snorre-Stimme,
+  erklingen am Beamer und lassen sich stoppen oder durch einen anderen Spruch ersetzen.
 - **Frage vorlesen** liest auf manuellen Klick die sichtbare Frage mit Professor Bluffs Stimme.
   Auch über **Frage am Beamer vorlesen** auf dem Smartphone steuerbar; die 30 Sekunden
   starten weiterhin separat. Stoppen, Wiederholen und Abbruch beim Weitergehen sind möglich.

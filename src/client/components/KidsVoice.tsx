@@ -2,6 +2,7 @@ import { createContext, type ComponentChildren } from 'preact';
 import { useContext, useEffect, useRef, useState } from 'preact/hooks';
 import type { KidsAction, KidsGame } from '../../shared/kids-game';
 import { professorVoiceKey } from '../../shared/professor-voice';
+import { professorInterjection } from '../../shared/professor-interjections';
 import { playProfessorVoice } from '../lib/kids-sound';
 import { playDeviceQuestion } from '../lib/kids-device-speech';
 
@@ -11,14 +12,15 @@ export function KidsVoiceProvider({ game, enabled, enable, act, busy, onError, c
   game:KidsGame|null; enabled:boolean; enable:()=>Promise<void>; act:(action:KidsAction)=>void;
   busy:boolean; onError:(message:string)=>void; children:ComponentChildren;
 }) {
-  const [playing,setPlaying] = useState<'quote'|'question'|null>(null);
+  const [playing,setPlaying] = useState<'quote'|'question'|'interjection'|null>(null);
   const [preparing,setPreparing] = useState(false);
   const previous = useRef<number|null>(null);
   const playback = useRef<AbortController|null>(null);
   const currentCue = useRef<string|null>(null);
   currentCue.current=game ? `${game.phase}:${game.index}` : null;
   const stop = () => { const old=playback.current; playback.current=null; old?.abort(); setPlaying(null); };
-  const key = game ? professorVoiceKey(game,game.voiceKind ?? 'quote') : null;
+  const clip = professorInterjection(game?.voiceClip);
+  const key = game?.voiceKind === 'interjection' ? clip ? `interjection-${clip.id}` : null : game ? professorVoiceKey(game,game.voiceKind ?? 'quote') : null;
   useEffect(() => {
     stop();
     if (!game) { previous.current=null; return; }
@@ -36,10 +38,10 @@ export function KidsVoiceProvider({ game, enabled, enable, act, busy, onError, c
       playback.current=null;setPlaying(null);onError(error instanceof Error ? error.message : 'Die Professor-Aufnahme konnte nicht abgespielt werden.');
     });
     return () => { if(playback.current===controller) playback.current=null; controller.abort(); };
-  },[game?.voiceSeq,game?.phase,game?.index,game?.voiceKind,enabled]);
+  },[game?.voiceSeq,game?.phase,game?.index,game?.voiceKind,game?.voiceClip,enabled]);
   useEffect(()=>()=>{currentCue.current=null;playback.current?.abort();},[]);
   const request=(action:'speak'|'read-question')=>{const cue=currentCue.current;onError('');setPreparing(true);void enable().then(()=>{if(cue!==null && currentCue.current===cue)act(action);}).catch(error=>onError(error instanceof Error ? error.message : 'Professor-Ton nicht verfügbar.')).finally(()=>setPreparing(false));};
-  return <VoiceContext.Provider value={{available:!!game && !!professorVoiceKey(game),questionAvailable:game?.phase==='reading',questionDevice:game?.index===9,playing,busy:busy||preparing,
+  return <VoiceContext.Provider value={{available:!!game && !!professorVoiceKey(game),questionAvailable:game?.phase==='reading',questionDevice:game?.index===9,playing:playing==='interjection' ? null : playing,busy:busy||preparing,
     play:()=>request('speak'),read:()=>request('read-question'),
     stop:()=>{stop();act('stop-speech');},
   }}>{children}</VoiceContext.Provider>;
