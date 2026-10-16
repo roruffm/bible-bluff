@@ -102,6 +102,10 @@ test('Smartphone: Gruppenaufruf, vorgemerkter Countdown, Pause und Jesus-Abschlu
   const stopsBeforePause=(await observed()).stops;
   await phone.getByRole('button',{name:'Pause',exact:false}).click();
   await expect.poll(async()=>(await observed()).stops).toBe(stopsBeforePause+1);
+  await phone.getByRole('button',{name:'Weiter geht’s',exact:true}).click();
+  await expect(phone.getByRole('button',{name:'Countdown für letzte 5 Sekunden vormerken',exact:true})).toBeVisible();
+  await expect(phone.getByRole('status').filter({hasText:'Countdown vorgemerkt'})).toHaveCount(0);
+  await phone.getByRole('button',{name:'Pause',exact:false}).click();
   await phone.getByRole('button',{name:'Pause · bleibt stehen am Beamer abspielen',exact:true}).click();
   await expect.poll(async()=>(await observed()).starts.length).toBe(3);
   expect(recordings.at(-1)).toContain('/professor-bluff/interjection-signal-pause.mp3');

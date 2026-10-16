@@ -51,7 +51,7 @@ export function KidsPhaseAudio({ game, disabled, send }: SoundboardProps) {
       </div>}
       {context.clips.map(id => <InterjectionButton key={id} clip={professorInterjection(id)!} game={game} disabled={disabled} send={send}/>)}
     </div>
-    {game.phase === 'moving' && game.voicePlaying && game.voiceKind === 'interjection' && game.voiceClip === 'signal-countdown' && <p role="status">{game.remainingMs > 5000 ? 'Countdown vorgemerkt · Professor zählt in den letzten 5 Sekunden.' : 'Professor zählt jetzt mit.'}</p>}
+    {game.phase === 'moving' && game.voicePlaying && game.voiceKind === 'interjection' && game.voiceClip === 'signal-countdown' && game.voiceCue === `moving:${game.index}` && <p role="status">{game.remainingMs > 5000 ? 'Countdown vorgemerkt · Professor zählt in den letzten 5 Sekunden.' : 'Professor zählt jetzt mit.'}</p>}
     <button type="button" class="kids-button" disabled={disabled} onClick={() => { void send('stop-speech'); }}>■ Professor-Audio stoppen</button>
     <small>Ein neues Audio ersetzt die laufende Sprache. Beim Wechsel der Spielphase stoppt die Aufnahme.</small>
   </section>;
