@@ -71,6 +71,72 @@ export const PROFESSOR_INTERJECTIONS = [
     "label": "Applaus für alle",
     "category": "Mut machen",
     "text": "Einen großen Applaus für alle! Ihr habt toll mitgemacht!"
+  },
+  {
+    "id": "regroup-ready",
+    "label": "Alle sind zurück · gleich auflösen",
+    "category": "Ablauf",
+    "text": "Alle sind zurück! Bleibt bei eurer Gruppe. Gleich kommt die Auflösung!"
+  },
+  {
+    "id": "call-minis",
+    "label": "Glühwürmchen aufrufen",
+    "category": "Gruppenaufrufe",
+    "text": "Glühwürmchen, jetzt seid ihr dran! Die anderen Teams feuern euch an!"
+  },
+  {
+    "id": "call-mittis",
+    "label": "Leuchtsterne aufrufen",
+    "category": "Gruppenaufrufe",
+    "text": "Leuchtsterne, jetzt seid ihr dran! Die anderen Teams feuern euch an!"
+  },
+  {
+    "id": "call-maxis",
+    "label": "Fackelträger aufrufen",
+    "category": "Gruppenaufrufe",
+    "text": "Fackelträger, jetzt seid ihr dran! Die anderen Teams feuern euch an!"
+  },
+  {
+    "id": "call-all",
+    "label": "Alle Teams zum Finale aufrufen",
+    "category": "Gruppenaufrufe",
+    "text": "Jetzt sind alle Teams gemeinsam dran! Zusammen knackt ihr meinen Superbluff!"
+  },
+  {
+    "id": "signal-start",
+    "label": "Jetzt geht es los",
+    "category": "Spielsignale",
+    "text": "Jetzt geht es los! Geht ruhig zu eurem Feld."
+  },
+  {
+    "id": "signal-pause",
+    "label": "Pause · bleibt stehen",
+    "category": "Spielsignale",
+    "text": "Kurze Pause! Bleibt bitte, wo ihr seid."
+  },
+  {
+    "id": "signal-resume",
+    "label": "Weiter geht es",
+    "category": "Spielsignale",
+    "text": "Weiter geht es! Ihr könnt weiter euer Feld wählen."
+  },
+  {
+    "id": "signal-stop",
+    "label": "Stopp · Helfer prüfen",
+    "category": "Spielsignale",
+    "text": "Stopp! Bleibt auf eurem Feld. Unsere Helfer schauen nach."
+  },
+  {
+    "id": "signal-countdown",
+    "label": "Countdown · fünf bis eins",
+    "category": "Spielsignale",
+    "text": "Fünf! Vier! Drei! Zwei! Eins!"
+  },
+  {
+    "id": "closing-jesus",
+    "label": "Bei Jesus sind wir willkommen",
+    "category": "Mut machen",
+    "text": "Bei Jesus sind wir willkommen. Jesus lädt die Kinder zu sich ein. Jeder von euch gehört dazu!"
   }
 ] as const;
 

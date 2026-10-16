@@ -38,6 +38,17 @@ describe('Kids-Wertung korrigieren', () => {
   });
 });
 describe('Freie Professor-Ansagen', () => {
+  it('hebt einen vorgemerkten Countdown bei Pause auf und meldet ihn nach Fortsetzen nicht mehr als aktiv', () => {
+    let game=createKidsGame();
+    game={...game,phase:'reading'};
+    game=updateKidsGame(game,'start',1000);
+    game=updateKidsGame(game,'interjection:signal-countdown',2000);
+    expect(game.voicePlaying).toBe(true);
+    game=updateKidsGame(game,'pause',5000);
+    expect(game).toMatchObject({phase:'paused',remainingMs:26000,deadline:null,voicePlaying:false,voiceCue:null});
+    game=updateKidsGame(game,'resume',10000);
+    expect(game).toMatchObject({phase:'moving',deadline:36000,voicePlaying:false,voiceCue:null});
+  });
   it('startet jeden Spruch in jeder Phase nur manuell und erhält Spielstand und Zeit', () => {
     const base = createKidsGame();
     for (const phase of ['welcome','chapter','reading','scene','moving','paused','locked','returning','judging','revealed','superbluff','finished'] as const) {

@@ -99,7 +99,7 @@ export function updateKidsGame(game: KidsGame, action: KidsAction, now: number):
   if ((action === 'tick' || action === 'pause') && phase === 'moving') {
     const remainingMs = Math.max(0, (game.deadline ?? now) - now);
     if (remainingMs === 0) return { ...game, phase: 'locked', remainingMs: 0, deadline: null };
-    return { ...game, remainingMs, ...(action === 'pause' ? { phase: 'paused' as const, deadline: null } : {}) };
+    return { ...game, remainingMs, ...(action === 'pause' ? { phase: 'paused' as const, deadline: null, voicePlaying: false, voiceCue: null } : {}) };
   }
   if (action === 'resume' && phase === 'paused') return { ...game, phase: 'moving', deadline: now + game.remainingMs };
   if (action === 'return' && phase === 'locked') return { ...game, phase: 'returning' };

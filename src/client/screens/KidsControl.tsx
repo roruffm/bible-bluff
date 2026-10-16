@@ -1,12 +1,11 @@
 import { KidsGroupName, KidsGroupText } from '../components/KidsGroupName';
-import { professorVoiceKey } from '../../shared/professor-voice';
 import { useEffect, useState } from 'preact/hooks';
 import { kidsCanJumpToFinal, kidsLastScoredIndex, kidsResultPoints, kidsScores, updateKidsGame, type KidsGame } from '../../shared/kids-game';
 import { KIDS_CHAPTERS, kidsAnswerPicture } from '../../shared/kids-show-questions';
 import { useKidsRemote } from '../lib/kids-remote';
 import { KidsFinishDialog } from '../components/KidsFinish';
 import { KidsLogo } from '../components/KidsLogo';
-import { KidsSoundboard } from '../components/KidsSoundboard';
+import { KidsPhaseAudio, KidsSoundboard } from '../components/KidsSoundboard';
 import { kidsClaimPhase, professorSays, ShowControls, StoryPicture } from '../components/KidsShow';
 import './kids.css';
 
@@ -30,14 +29,13 @@ export function KidsControlPage() {
     {game && round && !remote.fatal && <>
       <div class="kids-remote-score">Kinderteam <b>{scores!.team}</b><span>Professor Bluff <b>{scores!.professor}</b></span></div>
       {kidsCanJumpToFinal(game) && <button type="button" class="kids-button kids-final-jump" disabled={disabled} onClick={()=>{void remote.send('jump-final');}}>🏁 Direkt ins Finale</button>}
-      <KidsSoundboard game={game} disabled={disabled} send={remote.send}/>
       {game.phase!=='finished' && <div class="kids-remote-question"><span>{game.index===9 ? 'SUPERBLUFF · Alle gemeinsam' : <><KidsGroupName group={round.question.group}/> · Kapitel {Math.floor(game.index/3)+1}: {KIDS_CHAPTERS[Math.min(2,Math.floor(game.index/3))]}</>}</span><h2>{round.question.prompt}</h2></div>}
       <div class={`kids-remote-phase is-${game.phase}`}><strong>{phaseLabel}</strong><span>{game.phase==='finished' ? 'Der Endpunktestand bleibt am Beamer sichtbar.' : game.phase==='scene' ? 'Die zehnsekündige Szene läuft groß am Beamer. Danach bleibt Zeit zum Vorlesen. Der Antwort-Countdown startet erst mit deinem nächsten Schritt.' : game.phase==='locked' ? 'Helfer prüfen: Mehrheit richtig, mindestens ein Kind richtig oder keiner richtig. Noch nicht auflösen.' : game.phase==='returning' ? 'Warte, bis alle Kinder wieder in ihrer Gruppe sind.' : game.phase==='judging' ? 'Nur das gemeinsame Resultat eintragen. Damit wird aufgelöst.' : game.phase==='moving' ? 'Die aktive Gruppe wählt ihr Feld. Die anderen machen ihre Mitmach-Geste vom Beamer: funkeln, trommeln oder Daumen drücken.' : 'Du bestimmst, wann es weitergeht.'}</span></div>
       {game.phase!=='finished' && <details class="kids-remote-direction" open={game.phase==='reading' || game.phase==='superbluff'}><summary>Regiehinweis · nur Spielleitung</summary><p><KidsGroupText text={round.question.direction}/></p>{game.phase==='welcome' && <p>Alle drei Teams begrüßen. Regel ansagen: Mehrheit richtig = 10, sonst mindestens ein Kind richtig = 5, keiner richtig = 0. Professor +7. Niemand scheidet aus.</p>}{game.phase==='chapter' && <p>Andere Gruppen bleiben in ihren Bereichen. Jetzt kommt zuerst die Aufgabe der jüngsten Gruppe.</p>}</details>}
       {['reading','moving','paused','locked','returning','judging','revealed'].includes(game.phase) && <ol class="kids-remote-answers">{round.answers.map((answer,i)=><li class={`kids-field-${i+1}${game.phase==='revealed' && i===round.correctIndex ? ' is-correct' : ''}`}><b>{i+1}</b><StoryPicture motif={kidsAnswerPicture(round.question,answer)}/><span>{answer}{answer===round.question.bluff.answer && <small class="kids-remote-bluff"> · Professor-Tipp (Bluff)</small>}</span></li>)}</ol>}
-      {game.phase==='reading' && <div class="kids-remote-extras"><button class="kids-button" type="button" disabled={disabled} onClick={()=>remote.send('read-question')}>▶ Frage am Beamer vorlesen</button>{game.index===9 && <small>Finalfrage vorläufig mit deutscher Gerätestimme.</small>}{round.question.scene && <button class="kids-button" type="button" disabled={disabled} onClick={()=>remote.send('scene')}>Szene am Beamer abspielen</button>}</div>}
-      {kidsClaimPhase(game.phase) && <section class="kids-remote-direction kids-remote-voice" aria-label="Professor Bluffs Behauptung"><b>Professor Bluff behauptet · bitte mit Professor-Stimme vorlesen:</b><p>{professorSays(game)}</p><div><button type="button" class="kids-tool" disabled={disabled} onClick={()=>{void remote.send('stop-speech');}}>■ Sprache stoppen</button></div></section>}
-      {professorVoiceKey(game) && <section class="kids-remote-direction kids-remote-voice" aria-label="Professor-Sprache am Beamer"><b>Professor Bluff:</b><p>{professorSays(game)}</p><div><button type="button" class="kids-button" disabled={disabled} onClick={()=>{void remote.send('speak');}}>▶ Spruch am Beamer abspielen</button><button type="button" class="kids-tool" disabled={disabled} onClick={()=>{void remote.send('stop-speech');}}>■ Sprache stoppen</button></div></section>}
+      {game.phase==='reading' && round.question.scene && <div class="kids-remote-extras"><button class="kids-button" type="button" disabled={disabled} onClick={()=>remote.send('scene')}>Szene am Beamer abspielen</button></div>}
+      {kidsClaimPhase(game.phase) && <section class="kids-remote-direction kids-remote-voice" aria-label="Professor Bluffs Behauptung"><b>Professor Bluff behauptet · bitte mit Professor-Stimme vorlesen:</b><p>{professorSays(game)}</p></section>}
+      <KidsPhaseAudio game={game} disabled={disabled} send={remote.send}/>
       <div class="kids-remote-actions">{game.phase==='finished' ? <div class="kids-remote-farewell"><h2>Gemeinsam seid ihr stark!</h2><p>{professorSays(game)}</p><p>{scores!.playedRounds} {scores!.playedRounds===1 ? 'Aufgabe gewertet' : 'Aufgaben gewertet'}. Lasst den Abschluss am Beamer stehen und feiert alle Kinder.</p></div> : <ShowControls game={game} act={action=>{void remote.send(action);}} disabled={disabled}/>}</div>
       {lastScored >= 0 && <details class="kids-remote-direction kids-score-correction">
         <summary>Letzte Wertung ändern</summary>
@@ -50,6 +48,7 @@ export function KidsControlPage() {
         ] as const).map(([result, label]) => <button key={result} type="button" class="kids-button" aria-pressed={game.results[lastScored] === result} disabled={disabled || game.results[lastScored] === result} onClick={() => { void remote.send(`${result}-last`); }}>{label}</button>)}</div>
         <small>Ändert nur diese Wertung. Die laufende Frage und der Timer bleiben bestehen.</small>
       </details>}
+      <KidsSoundboard game={game} disabled={disabled} send={remote.send}/>
       {game.phase!=='finished' && <button type="button" class="kids-button kids-remote-finish" disabled={disabled} onClick={()=>setShowFinish(true)}>Spiel abschließen</button>}
       {showFinish && game.phase!=='finished' && <KidsFinishDialog game={game} onCancel={()=>setShowFinish(false)} onFinish={()=>{void remote.send('finish');}} disabled={disabled} error={remote.error}/>}
       <p class="kids-remote-note">Maus und Smartphone steuern denselben Stand. Nach einem Netzabbruch wird automatisch erneut verbunden. Sprache und Szenen erklingen am Beamer. Nach einem Neuladen dort einmal „Bedienung → Klang einschalten“ wählen. Sprüche starten nur per Knopfdruck.</p>
