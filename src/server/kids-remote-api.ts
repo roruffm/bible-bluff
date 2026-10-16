@@ -8,7 +8,7 @@ import type { KidsRemoteRecord, KidsRemoteStore } from './kids-remote-store';
 
 export const KIDS_REMOTE_TTL = 6 * 60 * 60 * 1000;
 const PHASES: KidsPhase[] = ['welcome', 'chapter', 'superbluff', 'reading', 'scene', 'moving', 'paused', 'locked', 'returning', 'judging', 'revealed', 'finished'];
-const ACTIONS: KidsRemoteAction[] = ['start', 'pause', 'resume', 'return', 'ready', 'correct', 'participated', 'none', 'next', 'scene', 'end-scene', 'finish', 'speak', 'stop-speech', 'read-question', 'correct-last', 'participated-last', 'none-last', ...PROFESSOR_INTERJECTIONS.map(clip => `interjection:${clip.id}` as const)];
+const ACTIONS: KidsRemoteAction[] = ['start', 'pause', 'resume', 'return', 'ready', 'correct', 'participated', 'none', 'next', 'scene', 'end-scene', 'finish', 'jump-final', 'speak', 'stop-speech', 'read-question', 'correct-last', 'participated-last', 'none-last', ...PROFESSOR_INTERJECTIONS.map(clip => `interjection:${clip.id}` as const)];
 const response = (data: unknown, status = 200) => new Response(JSON.stringify(data), { status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', 'x-content-type-options': 'nosniff' } });
 const token = (bytes = 24) => Array.from(crypto.getRandomValues(new Uint8Array(bytes)), (b) => b.toString(16).padStart(2, '0')).join('');
 async function hash(value: string) { return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value))), (b) => b.toString(16).padStart(2, '0')).join(''); }
@@ -46,9 +46,12 @@ function unpack(value: unknown, now: number): KidsGame {
   });
   let phase = game.phase as KidsPhase;
   const index = Number(game.index);
-  if (!Array.isArray(game.results) || game.results.length !== 10 || !game.results.every((r,i)=>{
+  if (!Array.isArray(game.results) || game.results.length !== 10) return badRequest();
+  // Nur vor dem Finale darf auf einen gewerteten Anfang eine ungespielte Folge kommen.
+  const skippedFrom = index === 9 ? game.results.slice(0, 9).indexOf(null) : -1;
+  if (!game.results.every((r,i)=>{
     const scored=['correct','participated','none'].includes(r);
-    if (i < index) return scored;
+    if (i < index) return skippedFrom >= 0 && i >= skippedFrom ? r === null : scored;
     if (i > index) return r === null;
     return phase === 'finished' ? r === null || scored : phase === 'revealed' ? scored : r === null;
   })) return badRequest();

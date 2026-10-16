@@ -12,7 +12,12 @@ export interface KidsGame {
   rounds: KidsRound[]; index: number; phase: KidsPhase; remainingMs: number; deadline: number | null;
   results: (KidsResult | null)[]; cueSeq: number; voiceSeq?: number; voicePlaying?: boolean; voiceCue?: string|null; voiceKind?: 'quote'|'question'|'interjection'; voiceClip?: ProfessorInterjectionId|null;
 }
-export type KidsAction = 'start' | 'pause' | 'resume' | 'tick' | 'return' | 'ready' | 'correct' | 'participated' | 'none' | 'next' | 'scene' | 'end-scene' | 'finish' | 'speak' | 'stop-speech' | 'read-question' | 'correct-last' | 'participated-last' | 'none-last' | `interjection:${ProfessorInterjectionId}`;
+export type KidsAction = 'start' | 'pause' | 'resume' | 'tick' | 'return' | 'ready' | 'correct' | 'participated' | 'none' | 'next' | 'scene' | 'end-scene' | 'finish' | 'jump-final' | 'speak' | 'stop-speech' | 'read-question' | 'correct-last' | 'participated-last' | 'none-last' | `interjection:${ProfessorInterjectionId}`;
+
+export function kidsCanJumpToFinal(game: KidsGame): boolean {
+  const final = game.rounds.length - 1;
+  return game.results[final] === null && (game.index < final || game.phase === 'finished');
+}
 
 export function kidsLastScoredIndex(game: KidsGame): number {
   for (let i = game.results.length - 1; i >= 0; i--) if (game.results[i] !== null) return i;
@@ -49,6 +54,11 @@ export function kidsScores(game: KidsGame) {
 /** Zeit und Punkte sind geräteunabhängig; doppelte oder unpassende Schritte ändern nichts. */
 export function updateKidsGame(game: KidsGame, action: KidsAction, now: number): KidsGame {
   const phase = game.phase;
+  if (action === 'jump-final') {
+    if (!kidsCanJumpToFinal(game)) return game;
+    return { ...game, index: game.rounds.length - 1, phase: 'superbluff', remainingMs: 30000, deadline: null,
+      voiceSeq: (game.voiceSeq ?? 0) + 1, voicePlaying: false, voiceCue: null };
+  }
   if (action === 'correct-last' || action === 'participated-last' || action === 'none-last') {
     const index = kidsLastScoredIndex(game), result = action.slice(0, -5) as KidsResult;
     if (index < 0 || game.results[index] === result) return game;

@@ -1,0 +1,77 @@
+import { expect, test } from '@playwright/test';
+import { createKidsGame } from '../src/shared/kids-game';
+import { packKidsGame } from '../src/shared/kids-remote';
+
+test.use({viewport:{width:1280,height:800},isMobile:false});
+test('Kids: Maus springt sofort aus dem Countdown ins Finale und zählt keine übersprungenen Aufgaben', async ({page}) => {
+  await page.emulateMedia({reducedMotion:'reduce'});
+  await page.clock.install();
+  await page.goto('/kids');
+  await page.getByRole('button',{name:'Show vorbereiten',exact:false}).click();
+  await page.getByRole('button',{name:'Mission starten',exact:true}).click();
+  await page.getByRole('button',{name:'Erste Aufgabe im Kapitel',exact:true}).click();
+  await page.getByRole('button',{name:'30 Sekunden starten',exact:true}).click();
+  await page.clock.fastForward(5000);
+  await page.getByRole('button',{name:'Direkt ins Finale',exact:true}).click();
+  await expect(page.getByRole('heading',{name:'ALARM! Der Superbluff!',exact:true})).toBeVisible();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(page.getByTestId('team-score')).toHaveText('0');
+  await expect(page.getByTestId('prof-score')).toHaveText('0');
+  await page.clock.fastForward(60000);
+  await expect(page.getByRole('heading',{name:'ALARM! Der Superbluff!',exact:true})).toBeVisible();
+  await page.getByRole('button',{name:'Gemeinsam ins Finale',exact:true}).click();
+  await expect(page.locator('.kids-clock')).toHaveAttribute('aria-label','30 Sekunden');
+  await page.getByRole('button',{name:'30 Sekunden starten',exact:true}).click();
+  await page.clock.fastForward(30000);
+  await page.getByRole('button',{name:'Zurück in die Gruppen',exact:true}).click();
+  await page.getByRole('button',{name:'Alle sind zurück',exact:true}).click();
+  await page.getByRole('button',{name:'Mehrheit richtig · +10',exact:true}).click();
+  await page.getByRole('button',{name:'Zum Abschluss',exact:true}).click();
+  await expect(page.getByTestId('team-score')).toHaveText('10');
+  await expect(page.getByTestId('prof-score')).toHaveText('10');
+  await expect(page.locator('.kids-ending-count')).toHaveText('1 Aufgabe gemeinsam gespielt');
+});
+
+test('Kids: Smartphone beendet Sprache und offene Dialoge beim Finalsprung; beide Geräte behalten Punkte nach Neuladen', async ({page,browser,request}) => {
+  const game=createKidsGame();
+  game.index=2;game.phase='paused';game.remainingMs=20000;
+  game.results=['correct','participated',...Array(8).fill(null)];
+  const response=await request.post('/api/kids-remotes',{data:{easy:false,game:packKidsGame(game,Date.now())}});
+  expect(response.status()).toBe(201);const remote=await response.json();
+  await page.addInitScript(({id,token})=>{
+    sessionStorage.setItem('bb:kids:display',JSON.stringify({id,token}));
+    const audio={starts:0,stops:0};Object.assign(window,{finalJumpAudio:audio});
+    const create=AudioContext.prototype.createBufferSource;
+    AudioContext.prototype.createBufferSource=function(){
+      const source=create.call(this),start=source.start.bind(source),stop=source.stop.bind(source);
+      source.start=(...args)=>{audio.starts++;return start(...args);};
+      source.stop=(...args)=>{audio.stops++;return stop(...args);};return source;
+    };
+  },{id:remote.id,token:remote.ownerToken});
+  await page.goto('/kids');
+  await page.getByRole('button',{name:'Bedienung',exact:true}).click();
+  await page.getByRole('button',{name:'Klang einschalten',exact:true}).click();
+  await page.getByRole('button',{name:'Menü schließen',exact:true}).click();
+  const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,locale:'de-DE'}),phone=await context.newPage();
+  await phone.goto(`/kids/steuerung#id=${remote.id}&key=${remote.remoteToken}`);
+  await phone.getByText('♪ Zwischendurch-Sprüche',{exact:true}).click();
+  await phone.getByRole('button',{name:'Mit Bewegung und Geräuschen helfen am Beamer abspielen',exact:true}).click();
+  const counts=()=>page.evaluate(()=>(window as unknown as {finalJumpAudio:{starts:number;stops:number}}).finalJumpAudio);
+  await expect.poll(async()=>(await counts()).starts).toBe(1);
+  await page.getByRole('button',{name:'Spiel mit Punktestand abschließen',exact:true}).click();
+  await expect(page.getByRole('dialog')).toBeVisible();
+  await phone.getByRole('button',{name:'Direkt ins Finale',exact:false}).click();
+  await expect(page.getByRole('heading',{name:'ALARM! Der Superbluff!',exact:true})).toBeVisible();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect.poll(async()=>(await counts()).stops).toBe(1);
+  await expect(page.getByTestId('team-score')).toHaveText('15');
+  await expect(page.getByTestId('prof-score')).toHaveText('14');
+  await page.reload();await phone.reload();
+  await expect(page.getByRole('heading',{name:'ALARM! Der Superbluff!',exact:true})).toBeVisible();
+  await expect(page.getByTestId('team-score')).toHaveText('15');
+  await expect(phone.getByRole('button',{name:'Gemeinsam ins Finale',exact:true})).toBeVisible();
+  await expect(phone.getByRole('button',{name:'Direkt ins Finale',exact:false})).toHaveCount(0);
+  expect((await counts()).starts).toBe(0);
+  expect(await phone.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await context.close();
+});
