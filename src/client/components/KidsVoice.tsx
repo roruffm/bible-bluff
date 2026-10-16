@@ -32,7 +32,8 @@ export function KidsVoiceProvider({ game, enabled, enable, act, busy, onError, c
     if (!enabled) { onError('Professor-Ton am Beamer unter „Bedienung → Klang einschalten“ aktivieren. Danach den Spruch erneut starten.'); return; }
     const controller=new AbortController(); playback.current=controller; setPlaying(game.voiceKind ?? 'quote');
     const ended=()=>{if(playback.current===controller){playback.current=null;setPlaying(null);}};
-    const playbackPromise=game.voiceKind==='question' && game.index===9 ? playDeviceQuestion(game.rounds[game.index].question.prompt,controller.signal,ended) : playProfessorVoice(key,controller.signal,ended);
+    const countdownDeadline=game.voiceKind==='interjection' && game.voiceClip==='signal-countdown' && game.phase==='moving' ? game.deadline ?? undefined : undefined;
+    const playbackPromise=game.voiceKind==='question' && game.index===9 ? playDeviceQuestion(game.rounds[game.index].question.prompt,controller.signal,ended) : playProfessorVoice(key,controller.signal,ended,countdownDeadline);
     void playbackPromise.catch(error=>{
       if (playback.current!==controller) return;
       playback.current=null;setPlaying(null);onError(error instanceof Error ? error.message : 'Die Professor-Aufnahme konnte nicht abgespielt werden.');
