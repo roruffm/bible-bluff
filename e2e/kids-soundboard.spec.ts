@@ -56,3 +56,61 @@ test('Smartphone: Wertung nach Weitergehen korrigieren, freie Ansagen und Ende s
   await expect(phone.getByRole('heading',{name:'Gemeinsam seid ihr stark!',exact:true})).toBeVisible();
   await phoneContext.close();
 });
+
+test('Smartphone: Gruppenaufruf, vorgemerkter Countdown, Pause und Jesus-Abschluss erklingen am Beamer', async ({ page, browser, request }) => {
+  const game=createKidsGame();
+  game.phase='reading'; game.index=1; game.results[0]='correct';
+  const response=await request.post('/api/kids-remotes',{data:{easy:false,game:packKidsGame(game,Date.now())}});
+  expect(response.status()).toBe(201);
+  const remote=await response.json();
+  await page.addInitScript(({id,token})=>{
+    sessionStorage.setItem('bb:kids:display',JSON.stringify({id,token}));
+    const observed={starts:[] as {delay:number;offset:number}[],stops:0};
+    Object.assign(window,{phaseVoiceAudio:observed});
+    const create=AudioContext.prototype.createBufferSource;
+    AudioContext.prototype.createBufferSource=function(){
+      const context=this,source=create.call(this),start=source.start.bind(source),stop=source.stop.bind(source);
+      source.start=(...args)=>{
+        if((source.buffer?.duration??0)>.9)observed.starts.push({delay:(args[0]??context.currentTime)-context.currentTime,offset:args[1]??0});
+        return start(...args);
+      };
+      source.stop=(...args)=>{if((source.buffer?.duration??0)>.9)observed.stops++;return stop(...args);};
+      return source;
+    };
+  },{id:remote.id,token:remote.ownerToken});
+  await page.goto('/kids');
+  await page.getByRole('button',{name:'Bedienung',exact:true}).click();
+  await page.getByRole('button',{name:'Klang einschalten',exact:true}).click();
+  await page.getByRole('button',{name:'Menü schließen',exact:true}).click();
+  const context=await browser.newContext({viewport:{width:390,height:844},locale:'de-DE'});
+  const phone=await context.newPage(),recordings:string[]=[],phoneAudio:string[]=[];
+  page.on('request',r=>{if(r.url().includes('/professor-bluff/'))recordings.push(r.url());});
+  phone.on('request',r=>{if(r.url().includes('/professor-bluff/'))phoneAudio.push(r.url());});
+  const observed=()=>page.evaluate(()=>(window as unknown as {phaseVoiceAudio:{starts:{delay:number;offset:number}[];stops:number}}).phaseVoiceAudio);
+  await phone.goto(`/kids/steuerung#id=${remote.id}&key=${remote.remoteToken}`);
+  await phone.getByRole('button',{name:'Leuchtsterne aufrufen am Beamer abspielen',exact:true}).click();
+  await expect.poll(async()=>(await observed()).starts.length).toBe(1);
+  expect(recordings.at(-1)).toContain('/professor-bluff/interjection-call-mittis.mp3');
+  await phone.getByRole('button',{name:'30 Sekunden starten',exact:true}).click();
+  await phone.getByRole('button',{name:'Countdown für letzte 5 Sekunden vormerken',exact:true}).click();
+  await expect.poll(async()=>(await observed()).starts.length).toBe(2);
+  const countdown=(await observed()).starts[1];
+  expect(countdown.delay).toBeGreaterThan(15);
+  expect(countdown.delay).toBeLessThanOrEqual(25);
+  expect(countdown.offset).toBe(0);
+  expect(recordings.at(-1)).toContain('/professor-bluff/interjection-signal-countdown.mp3');
+  const stopsBeforePause=(await observed()).stops;
+  await phone.getByRole('button',{name:'Pause',exact:false}).click();
+  await expect.poll(async()=>(await observed()).stops).toBe(stopsBeforePause+1);
+  await phone.getByRole('button',{name:'Pause · bleibt stehen am Beamer abspielen',exact:true}).click();
+  await expect.poll(async()=>(await observed()).starts.length).toBe(3);
+  expect(recordings.at(-1)).toContain('/professor-bluff/interjection-signal-pause.mp3');
+  await phone.getByRole('button',{name:'Spiel abschließen',exact:true}).click();
+  await phone.getByRole('button',{name:'Jetzt mit Punktestand abschließen',exact:true}).click();
+  await phone.getByRole('button',{name:'Bei Jesus sind wir willkommen am Beamer abspielen',exact:true}).click();
+  await expect.poll(async()=>(await observed()).starts.length).toBe(4);
+  expect(recordings.at(-1)).toContain('/professor-bluff/interjection-closing-jesus.mp3');
+  expect(phoneAudio).toEqual([]);
+  expect(await phone.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await context.close();
+});

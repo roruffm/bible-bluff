@@ -1,14 +1,15 @@
-# Professor Bluff: neue Phasenansagen (Entwurf)
+# Professor Bluff: Phasenansagen
 
-Status: Einbindung vorbereitet, noch nicht veröffentlicht. Die elf unten genannten
-MP3-Dateien fehlen. ElevenLabs hat die angefragte Erzeugung mit „Free Tier access
-has been disabled“ abgewiesen. Die bestehende Live-Version bleibt deshalb bestehen.
+Die elf unten genannten MP3-Dateien ergänzen die bisherigen zwölf freien Ansagen.
+Alle Clips sind in der Smartphone-Steuerung bei der passenden Spielphase und
+zusätzlich in der aufklappbaren Gesamtauswahl erreichbar. Sprache startet manuell
+und erklingt am Beamer.
 
 Stimme: Snorre – Nervous & Eccentric, über die ElevenLabs-Stimmensuche bestätigt.
 Voice-ID: `JSV4pJFuHRMCWZTxkpoQ`, Modell: `eleven_multilingual_v2`.
-Es wurden vier Varianten angefragt; alle vier sind mit der Kontosperre fehlgeschlagen.
-Erzeugungsversuche nicht automatisch wiederholen. Erst nach Freigabe der
-Spracherzeugung fortsetzen.
+Die Aufnahmen wurden am 16.10.2026 mit ElevenLabs erstellt und anhand der
+transkribierten Wortzeiten und der Pausen in der Aufnahme geschnitten.
+Erzeugungs-Flow: `pzQFLU40bOmd4qQ8g2Qa`, Sprachknoten: `eFQyjvneV16Xs8aFrFnU`.
 
 ## Aufnahmen
 
@@ -30,14 +31,14 @@ Zielverzeichnis: `src/client/public/professor-bluff/`.
 
 Der vorhandene Rückruf `interjection-return.mp3` bleibt unverändert verfügbar.
 
-## Countdown vorbereiten
+## Countdown
 
-Die Zahlen einzeln erzeugen beziehungsweise aus der Sammelaufnahme sauber schneiden.
+Die Zahlen wurden einzeln aus der Sammelaufnahme geschnitten.
 Jede Zahl beginnt am Anfang eines genau eine Sekunde langen Abschnitts: fünf bei
 0 s, vier bei 1 s, drei bei 2 s, zwei bei 3 s und eins bei 4 s. Die kombinierte Datei
-hat genau fünf Sekunden Audionutzdaten. Vor und nach jeder Zahl kurze Fades gegen
-Schnittknackser; eventuelle Stille auf genau eine Sekunde auffüllen. Aussprache und
-Lautstärke mit den vorhandenen Snorre-Clips vergleichen.
+hat genau fünf Sekunden Audionutzdaten (220500 Samples bei 44,1 kHz, nach MP3-Dekodierung
+geprüft). Kurze Fades vermeiden Schnittknackser; jede Zahl wurde mit Stille auf eine
+Sekunde ergänzt. Die neuen Clips sind auf -18 LUFS normalisiert.
 
 Die Technik aktiviert den gesprochenen Countdown manuell während der Antwortwahl.
 Der Beamer plant die Aufnahme anhand der laufenden Deadline ein. Bei verspätetem
@@ -45,10 +46,9 @@ Laden werden bereits vergangene Zahlen übersprungen; nach Ablauf startet nichts
 Pause, ein anderes Audio, Phasenwechsel und Neuladen lösen keine nachträgliche
 Sprachausgabe aus. Nach einer Pause die Vormerkung bei Bedarf erneut aktivieren.
 
-## Fertigstellen
+## Prüfung
 
-1. ElevenLabs-Freigabe prüfen und die fehlenden Aufnahmen erstellen.
-2. Elf MP3-Dateien unter den genannten Namen ergänzen, Schnitte und Countdown prüfen.
-3. `npm run check` und die vorhandenen Browserprüfungen ausführen. Der bestehende
-   Aufnahmentest verlangt zu jeder Ansage eine echte MP3-Datei.
-4. Zusammenführen und Veröffentlichung über die bestehende Cloudflare-Anbindung prüfen.
+`npm run check` prüft Typen, Spielzustand und Produktionsbuild. Der Aufnahmentest
+verlangt zu jeder Ansage eine echte MP3-Datei. Die Countdown-Tests prüfen geplanten
+Start, verspäteten Download, abgelaufene Zeit und Abbruch vor beziehungsweise nach
+dem Laden. Die Browserprüfungen prüfen weiterhin die geräteübergreifende Wiedergabe.
