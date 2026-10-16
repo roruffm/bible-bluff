@@ -5,6 +5,8 @@ import { professorInterjection, type ProfessorInterjectionId } from './professor
 export const KIDS_SECONDS = 30;
 /** Kurzshow: ein Kapitel und der Superbluff, 20 Sekunden, Abstimmen mit Fingern am Platz. */
 export const KIDS_SHORT_SECONDS = 20;
+/** Punkte für Professor Bluff je gewerteter Aufgabe; in der Kurzshow etwas weniger, damit die Kinder mit nur drei Aufgaben gut gewinnen können. */
+export function kidsProfessorPoints(game: Pick<KidsGame, 'short'>): number { return game.short ? 6 : 7; }
 export type KidsPhase = 'welcome' | 'chapter' | 'superbluff' | 'reading' | 'scene' | 'moving' | 'paused' | 'locked' | 'returning' | 'judging' | 'revealed' | 'finished';
 /** participated bleibt als gespeicherter Protokollwert erhalten: mindestens ein Kind richtig, ohne Mehrheit. */
 export type KidsResult = 'correct' | 'participated' | 'none';
@@ -61,7 +63,7 @@ export function kidsScores(game: KidsGame, hiddenIndex = -1) {
     if (i === 9) { bonus = kidsResultPoints(result); professor += 10; return; }
     const group = game.rounds[i].question.group as Exclude<KidsGroup, 'all'>;
     groups[group] += kidsResultPoints(result);
-    professor += 7;
+    professor += kidsProfessorPoints(game);
   });
   return { groups, bonus, team: groups.minis + groups.mittis + groups.maxis + bonus, professor, playedRounds };
 }

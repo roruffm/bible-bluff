@@ -3,7 +3,7 @@ import { kidsRoundReaction } from '../lib/kids-reactions';
 import { AnswerMotifArt } from './KidsAnswerArt';
 import type { ProfessorMotion } from '../lib/professor-motion';
 import type { RefObject } from 'preact';
-import { kidsActionLabel, kidsCanScore, kidsGroupResults, kidsOvertook, kidsPrimaryAction, kidsResultPoints, kidsScores, type KidsAction, type KidsGame } from '../../shared/kids-game';
+import { kidsActionLabel, kidsCanScore, kidsGroupResults, kidsOvertook, kidsPrimaryAction, kidsProfessorPoints, kidsResultPoints, kidsScores, type KidsAction, type KidsGame } from '../../shared/kids-game';
 import { KIDS_GROUPS, type KidsGroup, type StoryMotif } from '../../shared/kids-show-questions';
 
 export type ProfessorMood = 'confident' | 'nervous' | 'panic' | 'defeated' | 'victory' | 'startled' | 'kind';
@@ -92,7 +92,7 @@ export function ShowScoreboard({ game, hiddenIndex = -1 }: { game: KidsGame; hid
     <div class={`kids-race${overtook ? ' is-overtaking' : ''}`} aria-label={`Kinderteam ${s.team}, Professor Bluff ${s.professor}`}>
       <div class="kids-race-lane"><span style={{ left: `${s.team * .85}%` }}>♥</span>{overtook && <b class="kids-race-overtake">Überholt!</b>}</div><div class="kids-race-lane professor-lane"><span style={{ left: `${s.professor * .85}%` }}><ProfessorHead mood={hiddenIndex === game.index ? 'nervous' : professorMood(game)}/></span></div><small>{s.playedRounds} {s.playedRounds === 1 ? 'Aufgabe gewertet' : 'Aufgaben gewertet'} · Gemeinsam!</small>
     </div>
-    <div class="kids-prof-score"><span>PROFESSOR BLUFF</span><strong data-testid="prof-score">{s.professor}</strong><small>+7 je Aufgabe · Finale +10</small></div>
+    <div class="kids-prof-score"><span>PROFESSOR BLUFF</span><strong data-testid="prof-score">{s.professor}</strong><small>+{kidsProfessorPoints(game)} je Aufgabe · Finale +10</small></div>
   </section>;
 }
 export function ShowControls({ game, act, disabled = false, primaryRef }: { game: KidsGame; act: (action: Exclude<KidsAction, 'tick'>) => void; disabled?: boolean; primaryRef?: RefObject<HTMLButtonElement> }) {

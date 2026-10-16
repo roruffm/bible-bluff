@@ -29,7 +29,8 @@ test('Kurzshow: eigener Startknopf, ein Kapitel mit Fingerabstimmung, Finale und
   await expect(page.locator('.kids-clock')).toHaveAttribute('aria-label', '20 Sekunden');
   await task(page, '1');
   await expect(page.getByTestId('team-score')).toHaveText('10');
-  await expect(page.getByTestId('prof-score')).toHaveText('7');
+  await expect(page.getByTestId('prof-score')).toHaveText('6');
+  await expect(page.locator('.kids-prof-score small')).toHaveText('+6 je Aufgabe · Finale +10');
   await expect(page.locator('.charge-minis .kids-charge-pips i')).toHaveCount(1);
   await page.getByRole('button', { name: 'Bedienung', exact: false }).click();
   const plan = page.locator('.kids-operator-tools .kids-time-plan');
@@ -47,7 +48,7 @@ test('Kurzshow: eigener Startknopf, ein Kapitel mit Fingerabstimmung, Finale und
 
   // Auch die Kurzshow übersteht ein Neuladen.
   await page.reload();
-  await expect(page.locator('.kids-resume')).toContainText('Kurzshow · Leuchtsterne · Kinderteam 15 · Professor Bluff 14');
+  await expect(page.locator('.kids-resume')).toContainText('Kurzshow · Leuchtsterne · Kinderteam 15 · Professor Bluff 12');
   await page.getByRole('button', { name: 'Show fortsetzen', exact: true }).click();
   await page.getByRole('button', { name: 'Nächste Aufgabe', exact: true }).click();
   await task(page, '0');
@@ -58,7 +59,7 @@ test('Kurzshow: eigener Startknopf, ein Kapitel mit Fingerabstimmung, Finale und
   await page.getByRole('button', { name: 'Zum Abschluss', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Gemeinsam seid ihr stark!' })).toBeVisible();
   await expect(page.getByTestId('team-score')).toHaveText('25');
-  await expect(page.getByTestId('prof-score')).toHaveText('31');
+  await expect(page.getByTestId('prof-score')).toHaveText('28');
   await expect(page.locator('.kids-ending-count')).toContainText('4 Aufgaben');
 });
 
