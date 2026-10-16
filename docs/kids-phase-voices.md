@@ -16,6 +16,11 @@ Snorre-Aufnahmen vom 16.10.2026 (13:07:34, 13:08:20 und 13:08:45) ersetzt.
 Die Dateien wurden unverändert übernommen und anhand ihres gesprochenen Gruppennamens
 Glühwürmchen, Leuchtsterne beziehungsweise Fackelträger zugeordnet.
 
+Auch der gemeinsame Finalaufruf (`interjection-call-all.mp3`) und der Abschlussgedanke
+über Jesus (`interjection-closing-jesus.mp3`) verwenden die unveränderten Nutzer-Aufnahmen
+vom 16.10.2026 (17:06:40 beziehungsweise 17:11:02). Die gesprochenen Texte wurden vor
+dem Austausch geprüft.
+
 ## Aufnahmen
 
 Zielverzeichnis: `src/client/public/professor-bluff/`.
@@ -44,7 +49,8 @@ Jede Zahl beginnt am Anfang eines genau eine Sekunde langen Abschnitts: fünf be
 hat genau fünf Sekunden Audionutzdaten (220500 Samples bei 44,1 kHz, nach MP3-Dekodierung
 geprüft). Kurze Fades vermeiden Schnittknackser; jede Zahl wurde mit Stille auf eine
 Sekunde ergänzt. Die weiteren erzeugten Phasenansagen sind auf -18 LUFS normalisiert;
-die drei vom Nutzer gelieferten Gruppenaufrufe behalten ihre Original-Lautstärke.
+die vier vom Nutzer gelieferten Gruppenaufrufe und der Abschlussgedanke über Jesus
+behalten ihre Original-Lautstärke.
 
 Die Technik aktiviert den gesprochenen Countdown manuell während der Antwortwahl.
 Der Beamer plant die Aufnahme anhand der laufenden Deadline ein. Bei verspätetem
