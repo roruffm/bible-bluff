@@ -1,5 +1,6 @@
 import { KIDS_SHOW_QUESTIONS, type KidsShowQuestion, type KidsGroup } from './kids-show-questions';
 import { KIDS_SCENE_MS } from './kids-scenes';
+import { professorInterjection, type ProfessorInterjectionId } from './professor-interjections';
 
 export const KIDS_SECONDS = 30;
 export type KidsPhase = 'welcome' | 'chapter' | 'superbluff' | 'reading' | 'scene' | 'moving' | 'paused' | 'locked' | 'returning' | 'judging' | 'revealed' | 'finished';
@@ -9,9 +10,14 @@ export function kidsResultPoints(result: KidsResult | null): number { return res
 export interface KidsRound { question: KidsShowQuestion; answers: string[]; correctIndex: number }
 export interface KidsGame {
   rounds: KidsRound[]; index: number; phase: KidsPhase; remainingMs: number; deadline: number | null;
-  results: (KidsResult | null)[]; cueSeq: number; voiceSeq?: number; voicePlaying?: boolean; voiceCue?: string|null; voiceKind?: 'quote'|'question';
+  results: (KidsResult | null)[]; cueSeq: number; voiceSeq?: number; voicePlaying?: boolean; voiceCue?: string|null; voiceKind?: 'quote'|'question'|'interjection'; voiceClip?: ProfessorInterjectionId|null;
 }
-export type KidsAction = 'start' | 'pause' | 'resume' | 'tick' | 'return' | 'ready' | 'correct' | 'participated' | 'none' | 'next' | 'scene' | 'end-scene' | 'finish' | 'speak' | 'stop-speech' | 'read-question';
+export type KidsAction = 'start' | 'pause' | 'resume' | 'tick' | 'return' | 'ready' | 'correct' | 'participated' | 'none' | 'next' | 'scene' | 'end-scene' | 'finish' | 'speak' | 'stop-speech' | 'read-question' | 'correct-last' | 'participated-last' | 'none-last' | `interjection:${ProfessorInterjectionId}`;
+
+export function kidsLastScoredIndex(game: KidsGame): number {
+  for (let i = game.results.length - 1; i >= 0; i--) if (game.results[i] !== null) return i;
+  return -1;
+}
 
 function shuffle<T>(items: readonly T[], random: () => number): T[] {
   const result = [...items];
@@ -43,6 +49,17 @@ export function kidsScores(game: KidsGame) {
 /** Zeit und Punkte sind geräteunabhängig; doppelte oder unpassende Schritte ändern nichts. */
 export function updateKidsGame(game: KidsGame, action: KidsAction, now: number): KidsGame {
   const phase = game.phase;
+  if (action === 'correct-last' || action === 'participated-last' || action === 'none-last') {
+    const index = kidsLastScoredIndex(game), result = action.slice(0, -5) as KidsResult;
+    if (index < 0 || game.results[index] === result) return game;
+    const results = [...game.results]; results[index] = result;
+    return { ...game, results, voiceSeq: (game.voiceSeq ?? 0) + 1, voicePlaying: false, voiceCue: null };
+  }
+  if (action.startsWith('interjection:')) {
+    const clip = professorInterjection(action.slice('interjection:'.length));
+    if (!clip) return game;
+    return { ...game, voiceSeq: (game.voiceSeq ?? 0) + 1, voicePlaying: true, voiceCue: `${phase}:${game.index}`, voiceKind: 'interjection', voiceClip: clip.id };
+  }
   if (action === 'speak' && !['scene','returning','judging'].includes(phase)) return { ...game, voiceSeq: (game.voiceSeq ?? 0) + 1, voicePlaying: true, voiceCue: `${phase}:${game.index}`, voiceKind:'quote' };
   if (action === 'read-question' && phase === 'reading') return { ...game, voiceSeq: (game.voiceSeq ?? 0) + 1, voicePlaying: true, voiceCue: `${phase}:${game.index}`, voiceKind:'question' };
   if (action === 'stop-speech') return { ...game, voiceSeq: (game.voiceSeq ?? 0) + 1, voicePlaying: false, voiceCue: null };

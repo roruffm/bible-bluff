@@ -286,6 +286,16 @@
 .kids-remote-direction { font-size: 14px; background: #fff4d3; border-radius: 12px; padding: 13px; line-height: 1.5; margin-bottom: 18px; }
 .kids-remote-direction summary { font-weight: 800; cursor: pointer; }
 .kids-remote-direction p { margin-top: 10px; }
+.kids-soundboard { background: #e4f3ef; }
+.kids-soundboard > summary,.kids-score-correction > summary { min-height: 44px; align-content: center; }
+.kids-soundboard label { display: grid; gap: 6px; font-weight: 800; }
+.kids-soundboard select { width: 100%; min-height: 48px; padding: 10px; border: 2px solid #8db8af; border-radius: 10px; background: #fffdf8; color: #12324a; font: inherit; }
+.kids-soundboard-clips,.kids-correction-options { display: grid; gap: 12px; margin-block: 14px; }
+.kids-soundboard .kids-button,.kids-score-correction .kids-button { width: 100%; min-height: 48px; white-space: normal; font-size: 16px; text-align: left; }
+.kids-soundboard-clips > div { border-bottom: 1px solid #a9cfc5; padding-bottom: 8px; }
+.kids-soundboard-clips p { margin: 8px 2px 0; }
+.kids-soundboard small,.kids-score-correction small { display: block; margin-top: 12px; }
+.kids-correction-options [aria-pressed="true"] { background: #cdebdc; box-shadow: none; color: #12324a; opacity: 1; }
 .kids-remote-extras { display: grid; gap: 12px; margin-bottom: 18px; }
 .kids-remote-extras .kids-button { font-size: 16px; }
 .kids-remote-page .kids-controls { display: block; padding: 0; }

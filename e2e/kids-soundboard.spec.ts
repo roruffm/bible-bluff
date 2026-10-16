@@ -1,0 +1,58 @@
+import { expect, test } from '@playwright/test';
+import { createKidsGame } from '../src/shared/kids-game';
+import { packKidsGame } from '../src/shared/kids-remote';
+
+test('Smartphone: Wertung nach Weitergehen korrigieren, freie Ansagen und Ende synchronisieren', async ({ page, browser, request }) => {
+  const game=createKidsGame();
+  game.phase='reading'; game.index=1; game.results[0]='none';
+  const response=await request.post('/api/kids-remotes',{data:{easy:false,game:packKidsGame(game,Date.now())}});
+  expect(response.status()).toBe(201);
+  const remote=await response.json();
+  await page.addInitScript(({id,token})=>{
+    sessionStorage.setItem('bb:kids:display',JSON.stringify({id,token}));
+    const counts={starts:0,stops:0}; Object.assign(window,{soundboardAudio:counts});
+    const create=AudioContext.prototype.createBufferSource;
+    AudioContext.prototype.createBufferSource=function(){
+      const source=create.call(this),start=source.start.bind(source),stop=source.stop.bind(source);
+      source.start=(...args)=>{counts.starts++;return start(...args);};
+      source.stop=(...args)=>{counts.stops++;return stop(...args);};
+      return source;
+    };
+  },{id:remote.id,token:remote.ownerToken});
+  await page.goto('/kids');
+  await page.getByRole('button',{name:'Bedienung',exact:true}).click();
+  await page.getByRole('button',{name:'Klang einschalten',exact:true}).click();
+  await page.getByRole('button',{name:'Menü schließen',exact:true}).click();
+  const phoneContext=await browser.newContext({viewport:{width:390,height:844},locale:'de-DE'});
+  const phone=await phoneContext.newPage(),phoneAudio:string[]=[],recordings:string[]=[];
+  phone.on('request',r=>{if(r.url().includes('/professor-bluff/'))phoneAudio.push(r.url());});
+  page.on('request',r=>{if(r.url().includes('/professor-bluff/'))recordings.push(r.url());});
+  await phone.goto(`/kids/steuerung#id=${remote.id}&key=${remote.remoteToken}`);
+  await phone.getByText('Letzte Wertung ändern',{exact:true}).click();
+  await phone.getByRole('button',{name:'Mehrheit richtig · 10 Punkte',exact:true}).click();
+  await expect(page.getByTestId('team-score')).toHaveText('10');
+  await expect(page.getByRole('heading',{name:game.rounds[1].question.prompt,exact:true})).toBeVisible();
+  await expect(phone.getByRole('status').filter({hasText:'Aktuell:'})).toHaveText('Aktuell: 10 Punkte für das Kinderteam.');
+  await phone.getByText('Letzte Wertung ändern',{exact:true}).click();
+  await phone.getByText('♪ Zwischendurch-Sprüche',{exact:true}).click();
+  await phone.getByRole('button',{name:'Freunde anfeuern am Beamer abspielen',exact:true}).click();
+  const counts=()=>page.evaluate(()=>(window as unknown as {soundboardAudio:{starts:number;stops:number}}).soundboardAudio);
+  await expect.poll(async()=>(await counts()).starts).toBe(1);
+  expect(recordings.at(-1)).toContain('/professor-bluff/interjection-cheer.mp3');
+  await phone.getByRole('combobox',{name:'Art der Ansage'}).selectOption('Spannung');
+  await phone.getByRole('button',{name:'Richtig knifflig am Beamer abspielen',exact:true}).click();
+  await expect.poll(async()=>(await counts()).starts).toBe(2);
+  expect(recordings.at(-1)).toContain('/professor-bluff/interjection-tricky.mp3');
+  await phone.getByRole('button',{name:'Professor-Audio stoppen',exact:false}).click();
+  await expect.poll(async()=>(await counts()).stops).toBeGreaterThanOrEqual(1);
+  expect(phoneAudio).toEqual([]);
+  expect(await phone.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await phone.getByText('♪ Zwischendurch-Sprüche',{exact:true}).click();
+  await phone.getByRole('button',{name:'Spiel abschließen',exact:true}).click();
+  await phone.getByRole('button',{name:'Jetzt mit Punktestand abschließen',exact:true}).click();
+  await phone.getByText('Letzte Wertung ändern',{exact:true}).click();
+  await phone.getByRole('button',{name:'Mindestens ein Kind richtig · 5 Punkte',exact:true}).click();
+  await expect(page.getByTestId('team-score')).toHaveText('5');
+  await expect(phone.getByRole('heading',{name:'Gemeinsam seid ihr stark!',exact:true})).toBeVisible();
+  await phoneContext.close();
+});

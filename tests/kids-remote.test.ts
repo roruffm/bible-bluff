@@ -30,6 +30,37 @@ function setup(store: KidsRemoteStore = new MemoryKidsRemoteStore()) {
 }
 
 describe('Kids-Fernbedienung', () => {
+  it('korrigiert per Smartphone die letzte Wertung auch während der nächsten Runde und nach Neustart', async () => {
+    const t=setup(), base=reading();
+    const game={...base,index:1,phase:'reading' as const,results:base.results.map((_,i)=>i===0 ? 'none' as const : null)};
+    const made=await t.create(game), path=`/api/kids-remotes/${made.id}`;
+    await t.call('POST',path+'/action',{action:'start',version:1},made.remoteToken);
+    const corrected=await t.call('POST',path+'/action',{action:'correct-last',version:2},made.remoteToken);
+    expect(corrected.status).toBe(200);
+    expect(corrected.body.game).toMatchObject({index:1,phase:'moving',deadline:t.clock.now+30000});
+    expect(kidsScores(corrected.body.game)).toMatchObject({team:10,professor:7,playedRounds:1});
+    expect(corrected.body.game.results[1]).toBeNull();
+    t.reboot();
+    const restored=await t.call('GET',path,undefined,made.ownerToken);
+    expect(restored.body.game.results[0]).toBe('correct');
+    expect((await t.call('POST',path+'/action',{action:'none-last',version:2},made.remoteToken)).status).toBe(409);
+  });
+  it('überträgt freie Ansagen auch beim Rückweg und lehnt unbekannte Aufnahmen ab', async () => {
+    const t=setup(),made=await t.create({...reading(),phase:'returning'}),path=`/api/kids-remotes/${made.id}`;
+    const spoken=await t.call('POST',path+'/action',{action:'interjection:cheer',version:1},made.remoteToken);
+    expect(spoken.status).toBe(200);
+    expect(spoken.body.game).toMatchObject({phase:'returning',voiceKind:'interjection',voiceClip:'cheer',voicePlaying:true,voiceSeq:1});
+    expect(kidsScores(spoken.body.game)).toEqual(kidsScores(made.game));
+    t.reboot();
+    const restored=await t.call('GET',path,undefined,made.ownerToken);
+    expect(restored.body.game.voiceClip).toBe('cheer');
+    expect((await t.call('POST',path+'/action',{action:'interjection:unknown',version:2},made.remoteToken)).status).toBe(400);
+    const stopped=await t.call('POST',path+'/action',{action:'stop-speech',version:2},made.remoteToken);
+    expect(stopped.body.game.voicePlaying).toBe(false);
+    const invalid=packKidsGame(reading(),t.clock.now);
+    Object.assign(invalid,{voiceKind:'interjection',voiceClip:'../../other'});
+    expect((await t.call('POST','/api/kids-remotes',{easy:true,game:invalid})).status).toBe(400);
+  });
   it('überträgt Frage vorlesen als eigenen manuellen Sprachbefehl, ohne den Timer zu starten',async()=>{
     const t=setup(),made=await t.create(),path=`/api/kids-remotes/${made.id}`;
     const read=await t.call('POST',path+'/action',{action:'read-question',version:1},made.remoteToken);
