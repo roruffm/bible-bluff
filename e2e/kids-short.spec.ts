@@ -40,8 +40,9 @@ test('Kurzshow: eigener Startknopf, ein Kapitel mit Fingerabstimmung, Finale und
 
   await page.getByRole('button', { name: 'Nächste Aufgabe', exact: true }).click();
   await task(page, '2');
-  // Zu lange gebraucht: Der Zeitplan sagt es der Spielleitung.
-  await page.clock.runFor(5 * 60 * 1000);
+  // Zu lange gebraucht: Die Wanduhr springt fünf Minuten weiter, ohne Timer abzuarbeiten. Ein großes runFor
+  // bei laufender Testuhr kann den Sprung verlieren, wenn gleichzeitig deren Echtzeit-Takt Timer abarbeitet.
+  await page.clock.setSystemTime(await page.evaluate(() => Date.now()) + 5 * 60 * 1000);
   await page.getByRole('button', { name: 'Bedienung', exact: false }).click();
   await expect(plan.locator('.kids-time-plan-status')).toContainText('über dem Plan');
   await page.getByRole('button', { name: 'Menü schließen', exact: true }).click();
