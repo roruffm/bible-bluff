@@ -17,10 +17,18 @@ lokal erzeugte Klangbilder; Eltern und andere Gruppen machen Geräusche und Pant
 - Nach Stopp prüfen Helfer die Antwortfelder. **Zurück in die Gruppen → Alle sind zurück**
   zeigt Professor Bluff groß und animiert; erst danach wird die Wertung freigeschaltet. Nur das gemeinsame Resultat wird erfasst.
 - Kinderteam: Mehrheit richtig = 10 Punkte; sonst mindestens ein Kind richtig = 5; keiner richtig = 0. Maximal 30 je Altersgruppe.
-  Professor: immer +7 je gewerteter Runde. Keine heimliche Anpassung der Wertung.
+  Professor: immer +7 je gewerteter Runde (in der Kurzshow +6). Keine heimliche Anpassung der Wertung.
 - Superbluff: Professor +10, Kinder erhalten auch hier 10 / 5 / 0 nach derselben Regel. Endstand erst nach
   dem Finale. Die Spielleitung kann auch jederzeit früher mit dem erreichten Punktestand abschließen.
   Der Abschluss feiert alle Kinder mit Jesu Einladung (Markus 10,14).
+- **Kurzshow · 15 Minuten** hat in der Vorbereitung einen eigenen Startknopf: Begrüßung, ein Kapitel
+  (je eine Aufgabe für Glühwürmchen, Leuchtsterne und Fackelträger), Superbluff und Abschluss. 20 statt
+  30 Sekunden. Die Kinder bleiben sitzen und zeigen 1, 2 oder 3 Finger; nach dem Stopp wird sofort gewertet,
+  ohne die Bildschirme „Zurück in die Gruppen“ und „Alle sind zurück“. Punkte und Professor wie in der
+  vollen Show, nur bekommt Professor Bluff +6 statt +7 je Aufgabe (Kinder bis 40, Professor 28). „Bedienung“ und das Smartphone zeigen einen Zeitplan ab
+  „Mission starten“ (Aufgaben bis 2:30, 5:00, 7:30, Superbluff bis 11:30, Abschluss bis 13:30; plus
+  1:30 Begrüßung) und melden, ob ihr im Plan liegt. Fernbedienung, Sicherung und „Show fortsetzen“
+  funktionieren auch hier.
 - **Direkt ins Finale** springt jederzeit sofort zum Superbluff: am Beamer oben über „Finale“
   oder im Bedienmenü, auf dem Smartphone direkt unter dem Punktestand. Gewertete Aufgaben
   bleiben erhalten; übersprungene Aufgaben zählen für beide Seiten nicht. Laufender Ton,
@@ -80,6 +88,18 @@ lokal erzeugte Klangbilder; Eltern und andere Gruppen machen Geräusche und Pant
 - Befristete Links mit getrennten Zugriffsschlüsseln, Hashes in D1 und versionierten
   Spielzügen gegen Doppelklicks. Wiederverbindung nach Neuladen und Netzabbruch.
   Ohne Smartphone-Verbindung läuft die Show lokal ohne Serverzugriff.
+- **Neuladen kostet nichts:** Der Beamer-Rechner sichert jeden Spielstand (`localStorage`, bis zu 6 Stunden).
+  Nach versehentlichem Neuladen oder einem Absturz bietet die Vorbereitung **Show fortsetzen?** mit Kapitel,
+  Gruppe und Punkten an. Der Knopf hat den Fokus, die Leertaste genügt. Ein laufender Countdown ist danach
+  angehalten, eine Szene beendet, der Professor schweigt. **Verwerfen** oder **Zur Vorbereitung** am Ende löschen den Stand.
+- **Netzausfall:** **Show vorbereiten** lädt alle Professor-Aufnahmen vorab in den Speicher. Fällt das Internet
+  aus, spricht der Professor weiter. Über https legt die Show zusätzlich eine Offline-Kopie an (Service Worker
+  `kids-sw.js`, nur für `/kids`, immer zuerst das Netz). Dann lädt die Seite auch ganz ohne Internet neu.
+  Bricht die Verbindung zur Smartphone-Fernbedienung ab, geht es mit **Ohne Smartphone weiterspielen** per Maus
+  und Tastatur weiter.
+- **Technik-Check** in der Vorbereitung: spielt einen Testsatz über die Lautsprecher und zeigt Ton, geladene
+  Aufnahmen, Offline-Kopie, Internet für die Fernbedienung und Vollbild. Aufnahmen und Offline-Kopie stehen
+  auch im Bedienmenü.
 - Moderation, Beamer-Bedienung, Gruppenhelfer und genügend Platz inklusive begleitender
   Eltern einplanen. Helferplan und Ablauf stehen in der Vorbereitung.
 

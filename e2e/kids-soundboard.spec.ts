@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { createKidsGame } from '../src/shared/kids-game';
 import { packKidsGame } from '../src/shared/kids-remote';
+import { professorAudio, trackProfessorAudio } from './professor-audio';
 
 test('Smartphone: Wertung nach Weitergehen korrigieren, freie Ansagen und Ende synchronisieren', async ({ page, browser, request }) => {
   const game=createKidsGame();
@@ -8,25 +9,15 @@ test('Smartphone: Wertung nach Weitergehen korrigieren, freie Ansagen und Ende s
   const response=await request.post('/api/kids-remotes',{data:{easy:false,game:packKidsGame(game,Date.now())}});
   expect(response.status()).toBe(201);
   const remote=await response.json();
-  await page.addInitScript(({id,token})=>{
-    sessionStorage.setItem('bb:kids:display',JSON.stringify({id,token}));
-    const counts={starts:0,stops:0}; Object.assign(window,{soundboardAudio:counts});
-    const create=AudioContext.prototype.createBufferSource;
-    AudioContext.prototype.createBufferSource=function(){
-      const source=create.call(this),start=source.start.bind(source),stop=source.stop.bind(source);
-      source.start=(...args)=>{counts.starts++;return start(...args);};
-      source.stop=(...args)=>{counts.stops++;return stop(...args);};
-      return source;
-    };
-  },{id:remote.id,token:remote.ownerToken});
+  await trackProfessorAudio(page);
+  await page.addInitScript(({id,token})=>{ sessionStorage.setItem('bb:kids:display',JSON.stringify({id,token})); },{id:remote.id,token:remote.ownerToken});
   await page.goto('/kids');
   await page.getByRole('button',{name:'Bedienung',exact:true}).click();
   await page.getByRole('button',{name:'Klang einschalten',exact:true}).click();
   await page.getByRole('button',{name:'Menü schließen',exact:true}).click();
   const phoneContext=await browser.newContext({viewport:{width:390,height:844},locale:'de-DE'});
-  const phone=await phoneContext.newPage(),phoneAudio:string[]=[],recordings:string[]=[];
+  const phone=await phoneContext.newPage(),phoneAudio:string[]=[];
   phone.on('request',r=>{if(r.url().includes('/professor-bluff/'))phoneAudio.push(r.url());});
-  page.on('request',r=>{if(r.url().includes('/professor-bluff/'))recordings.push(r.url());});
   await phone.goto(`/kids/steuerung#id=${remote.id}&key=${remote.remoteToken}`);
   await phone.getByText('Letzte Wertung ändern',{exact:true}).click();
   await phone.getByRole('button',{name:'Mehrheit richtig · 10 Punkte',exact:true}).click();
@@ -36,13 +27,13 @@ test('Smartphone: Wertung nach Weitergehen korrigieren, freie Ansagen und Ende s
   await phone.getByText('Letzte Wertung ändern',{exact:true}).click();
   await phone.getByText('♪ Zwischendurch-Sprüche',{exact:true}).click();
   await phone.getByRole('button',{name:'Freunde anfeuern am Beamer abspielen',exact:true}).click();
-  const counts=()=>page.evaluate(()=>(window as unknown as {soundboardAudio:{starts:number;stops:number}}).soundboardAudio);
+  const counts=()=>professorAudio(page);
   await expect.poll(async()=>(await counts()).starts).toBe(1);
-  expect(recordings.at(-1)).toContain('/professor-bluff/interjection-cheer.mp3');
+  expect((await counts()).played.at(-1)).toBe('interjection-cheer');
   await phone.getByRole('combobox',{name:'Art der Ansage'}).selectOption('Spannung');
   await phone.getByRole('button',{name:'Richtig knifflig am Beamer abspielen',exact:true}).click();
   await expect.poll(async()=>(await counts()).starts).toBe(2);
-  expect(recordings.at(-1)).toContain('/professor-bluff/interjection-tricky.mp3');
+  expect((await counts()).played.at(-1)).toBe('interjection-tricky');
   await phone.getByRole('button',{name:'Professor-Audio stoppen',exact:false}).click();
   await expect.poll(async()=>(await counts()).stops).toBeGreaterThanOrEqual(1);
   expect(phoneAudio).toEqual([]);
@@ -63,6 +54,7 @@ test('Smartphone: Gruppenaufruf, vorgemerkter Countdown, Pause und Jesus-Abschlu
   const response=await request.post('/api/kids-remotes',{data:{easy:false,game:packKidsGame(game,Date.now())}});
   expect(response.status()).toBe(201);
   const remote=await response.json();
+  await trackProfessorAudio(page);
   await page.addInitScript(({id,token})=>{
     sessionStorage.setItem('bb:kids:display',JSON.stringify({id,token}));
     const observed={starts:[] as {delay:number;offset:number}[],stops:0};
@@ -83,14 +75,13 @@ test('Smartphone: Gruppenaufruf, vorgemerkter Countdown, Pause und Jesus-Abschlu
   await page.getByRole('button',{name:'Klang einschalten',exact:true}).click();
   await page.getByRole('button',{name:'Menü schließen',exact:true}).click();
   const context=await browser.newContext({viewport:{width:390,height:844},locale:'de-DE'});
-  const phone=await context.newPage(),recordings:string[]=[],phoneAudio:string[]=[];
-  page.on('request',r=>{if(r.url().includes('/professor-bluff/'))recordings.push(r.url());});
+  const phone=await context.newPage(),phoneAudio:string[]=[];
   phone.on('request',r=>{if(r.url().includes('/professor-bluff/'))phoneAudio.push(r.url());});
   const observed=()=>page.evaluate(()=>(window as unknown as {phaseVoiceAudio:{starts:{delay:number;offset:number}[];stops:number}}).phaseVoiceAudio);
   await phone.goto(`/kids/steuerung#id=${remote.id}&key=${remote.remoteToken}`);
   await phone.getByRole('button',{name:'Leuchtsterne aufrufen am Beamer abspielen',exact:true}).click();
   await expect.poll(async()=>(await observed()).starts.length).toBe(1);
-  expect(recordings.at(-1)).toContain('/professor-bluff/interjection-call-mittis.mp3');
+  expect((await professorAudio(page)).played.at(-1)).toBe('interjection-call-mittis');
   await phone.getByRole('button',{name:'30 Sekunden starten',exact:true}).click();
   await phone.getByRole('button',{name:'Countdown für letzte 5 Sekunden vormerken',exact:true}).click();
   await expect.poll(async()=>(await observed()).starts.length).toBe(2);
@@ -98,7 +89,7 @@ test('Smartphone: Gruppenaufruf, vorgemerkter Countdown, Pause und Jesus-Abschlu
   expect(countdown.delay).toBeGreaterThan(15);
   expect(countdown.delay).toBeLessThanOrEqual(25);
   expect(countdown.offset).toBe(0);
-  expect(recordings.at(-1)).toContain('/professor-bluff/interjection-signal-countdown.mp3');
+  expect((await professorAudio(page)).played.at(-1)).toBe('interjection-signal-countdown');
   const stopsBeforePause=(await observed()).stops;
   await phone.getByRole('button',{name:'Pause',exact:false}).click();
   await expect.poll(async()=>(await observed()).stops).toBe(stopsBeforePause+1);
@@ -108,12 +99,12 @@ test('Smartphone: Gruppenaufruf, vorgemerkter Countdown, Pause und Jesus-Abschlu
   await phone.getByRole('button',{name:'Pause',exact:false}).click();
   await phone.getByRole('button',{name:'Pause · bleibt stehen am Beamer abspielen',exact:true}).click();
   await expect.poll(async()=>(await observed()).starts.length).toBe(3);
-  expect(recordings.at(-1)).toContain('/professor-bluff/interjection-signal-pause.mp3');
+  expect((await professorAudio(page)).played.at(-1)).toBe('interjection-signal-pause');
   await phone.getByRole('button',{name:'Spiel abschließen',exact:true}).click();
   await phone.getByRole('button',{name:'Jetzt mit Punktestand abschließen',exact:true}).click();
   await phone.getByRole('button',{name:'Bei Jesus sind wir willkommen am Beamer abspielen',exact:true}).click();
   await expect.poll(async()=>(await observed()).starts.length).toBe(4);
-  expect(recordings.at(-1)).toContain('/professor-bluff/interjection-closing-jesus.mp3');
+  expect((await professorAudio(page)).played.at(-1)).toBe('interjection-closing-jesus');
   expect(phoneAudio).toEqual([]);
   expect(await phone.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
   await context.close();

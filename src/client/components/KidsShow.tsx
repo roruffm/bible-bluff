@@ -3,7 +3,7 @@ import { kidsRoundReaction } from '../lib/kids-reactions';
 import { AnswerMotifArt } from './KidsAnswerArt';
 import type { ProfessorMotion } from '../lib/professor-motion';
 import type { RefObject } from 'preact';
-import { kidsActionLabel, kidsGroupResults, kidsOvertook, kidsPrimaryAction, kidsResultPoints, kidsScores, type KidsAction, type KidsGame } from '../../shared/kids-game';
+import { kidsActionLabel, kidsCanScore, kidsGroupResults, kidsOvertook, kidsPrimaryAction, kidsProfessorPoints, kidsResultPoints, kidsScores, type KidsAction, type KidsGame } from '../../shared/kids-game';
 import { KIDS_GROUPS, type KidsGroup, type StoryMotif } from '../../shared/kids-show-questions';
 
 export type ProfessorMood = 'confident' | 'nervous' | 'panic' | 'defeated' | 'victory' | 'startled' | 'kind';
@@ -75,9 +75,10 @@ export function StoryPicture({ motif, animated = false }: { motif: StoryMotif; a
 }
 /** Jede Gruppe lädt ihr Symbol auf: drei Leuchtpunkte (voll = 10, halb = 5) und ein wachsendes Leuchten. Kein Kind muss Zahlen lesen. */
 function GroupCharge({ game, group, points, hiddenIndex, charging }: { game: KidsGame; group: Exclude<KidsGroup,'all'>; points: number; hiddenIndex: number; charging: boolean }) {
-  return <span class={`kids-group-charge charge-${group}${charging ? ' is-charging' : ''}`} style={{ '--charge': points / 30 }}>
+  const results = kidsGroupResults(game, group, hiddenIndex), max = results.length * 10;
+  return <span class={`kids-group-charge charge-${group}${charging ? ' is-charging' : ''}`} style={{ '--charge': points / max }}>
     <KidsGroupName group={group}/>
-    <span class="kids-charge-pips" role="img" aria-label={`${KIDS_GROUPS[group].name}: ${points} von 30 Punkten`}>{kidsGroupResults(game, group, hiddenIndex).map((result, i) => <i key={i} class={result === 'correct' ? 'is-full' : result === 'participated' ? 'is-half' : undefined}/>)}</span>
+    <span class="kids-charge-pips" role="img" aria-label={`${KIDS_GROUPS[group].name}: ${points} von ${max} Punkten`}>{results.map((result, i) => <i key={i} class={result === 'correct' ? 'is-full' : result === 'participated' ? 'is-half' : undefined}/>)}</span>
   </span>;
 }
 /** hiddenIndex hält eine Wertung zurück, solange der Trommelwirbel läuft. */
@@ -91,13 +92,13 @@ export function ShowScoreboard({ game, hiddenIndex = -1 }: { game: KidsGame; hid
     <div class={`kids-race${overtook ? ' is-overtaking' : ''}`} aria-label={`Kinderteam ${s.team}, Professor Bluff ${s.professor}`}>
       <div class="kids-race-lane"><span style={{ left: `${s.team * .85}%` }}>♥</span>{overtook && <b class="kids-race-overtake">Überholt!</b>}</div><div class="kids-race-lane professor-lane"><span style={{ left: `${s.professor * .85}%` }}><ProfessorHead mood={hiddenIndex === game.index ? 'nervous' : professorMood(game)}/></span></div><small>{s.playedRounds} {s.playedRounds === 1 ? 'Aufgabe gewertet' : 'Aufgaben gewertet'} · Gemeinsam!</small>
     </div>
-    <div class="kids-prof-score"><span>PROFESSOR BLUFF</span><strong data-testid="prof-score">{s.professor}</strong><small>+7 je Aufgabe · Finale +10</small></div>
+    <div class="kids-prof-score"><span>PROFESSOR BLUFF</span><strong data-testid="prof-score">{s.professor}</strong><small>+{kidsProfessorPoints(game)} je Aufgabe · Finale +10</small></div>
   </section>;
 }
 export function ShowControls({ game, act, disabled = false, primaryRef }: { game: KidsGame; act: (action: Exclude<KidsAction, 'tick'>) => void; disabled?: boolean; primaryRef?: RefObject<HTMLButtonElement> }) {
-  const action = kidsPrimaryAction(game.phase);
-  return <div class={`kids-controls${game.phase === 'judging' ? ' is-judging' : ''}`}>
-    {game.phase === 'judging' ? <div class="kids-score-actions" aria-label="Mehrheitsresultat eintragen">
+  const action = kidsPrimaryAction(game), scoring = kidsCanScore(game);
+  return <div class={`kids-controls${scoring ? ' is-judging' : ''}`}>
+    {scoring ? <div class="kids-score-actions" aria-label="Mehrheitsresultat eintragen">
       <button class="kids-button kids-primary" type="button" disabled={disabled} onClick={() => act('correct')}>Mehrheit richtig · +10</button>
       <button class="kids-button" type="button" disabled={disabled} onClick={() => act('participated')}>Mindestens ein Kind richtig · +5</button>
       <button class="kids-tool" type="button" disabled={disabled} onClick={() => act('none')}>Keiner richtig · +0</button>

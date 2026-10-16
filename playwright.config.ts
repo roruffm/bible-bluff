@@ -13,6 +13,8 @@ export default defineConfig({
     ...devices['Pixel 7'],
     locale: 'de-DE',
     trace: 'retain-on-failure',
+    // Der Offline-Helfer der Kids-Show würde Anfragen am Testrouting vorbeileiten; e2e/kids-recovery.spec.ts schaltet ihn gezielt ein.
+    serviceWorkers: 'block',
   },
   webServer: {
     env: { ADMIN_KEY: 'playwright-admin-key' },
