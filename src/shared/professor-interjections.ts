@@ -88,13 +88,13 @@ export const PROFESSOR_INTERJECTIONS = [
     "id": "call-mittis",
     "label": "Leuchtsterne aufrufen",
     "category": "Gruppenaufrufe",
-    "text": "Leuchtsterne, jetzt seid ihr dran! Zeigt uns euren Spürsinn!"
+    "text": "Leuchtsterne, jetzt seid ihr dran! Die anderen Teams feuern euch an!"
   },
   {
     "id": "call-maxis",
     "label": "Fackelträger aufrufen",
     "category": "Gruppenaufrufe",
-    "text": "Fackelträger, jetzt seid ihr dran! Knackt meinen nächsten Bluff!"
+    "text": "Fackelträger, jetzt seid ihr dran! Die anderen Teams feuern euch an!"
   },
   {
     "id": "call-all",
