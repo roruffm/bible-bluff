@@ -52,7 +52,10 @@ test('Professor: große Bewegungen bleiben von Text und Bedienung getrennt und l
     }
     expect(new Set(transforms).size,scene.motion).toBeGreaterThan(1);
     await page.emulateMedia({reducedMotion:'reduce'});
-    expect(await figure.evaluate(svg=>svg.getAnimations({subtree:true}).length)).toBe(0);
+    // Die Medienumschaltung wird erst beim nächsten Style-Abgleich wirksam.
+    // Pausierte Animationsobjekte aus den Stichproben sind kein Maß für sichtbare Bewegung.
+    await expect.poll(()=>figure.evaluate(svg=>[svg,...svg.querySelectorAll('*')].every(el=>getComputedStyle(el).animationName==='none'))).toBe(true);
+    await expect.poll(()=>figure.evaluate(svg=>Array.from(svg.querySelectorAll('.bluff-performer,.bluff-arm,.bluff-head,.bluff-glasses')).every(el=>getComputedStyle(el).transform==='none'))).toBe(true);
     await page.emulateMedia({reducedMotion:'no-preference'});
   }
 });
