@@ -2,6 +2,7 @@ import type { RefObject } from 'preact';
 import type { KidsAction, KidsGame } from '../../shared/kids-game';
 import { ProfessorBluff, ShowControls } from './KidsShow';
 import { ChildFigure } from './KidsChildrenArt';
+import { professorMotion } from '../lib/professor-motion';
 
 function RegroupPicture({ returned }: { returned: boolean }) {
   return <svg class="kids-regroup-picture" viewBox="0 0 520 160" aria-hidden="true">
@@ -21,7 +22,7 @@ function RegroupPicture({ returned }: { returned: boolean }) {
 export function KidsRegroup({ game, act, disabled, primaryRef }: { game: KidsGame; act: (action: Exclude<KidsAction,'tick'>)=>void; disabled:boolean; primaryRef:RefObject<HTMLButtonElement> }) {
   const returned=game.phase==='judging';
   return <section class={`kids-regroup is-${game.phase}`} aria-labelledby="kids-regroup-title">
-    <div class="kids-regroup-professor"><ProfessorBluff/><span>Professor Bluff</span></div>
+    <div class="kids-regroup-professor"><ProfessorBluff key={game.phase} motion={professorMotion(game)}/><span>Professor Bluff</span></div>
     <div class="kids-regroup-content">
       <p class="kids-eyebrow">{returned ? 'ALLE WIEDER ZUSAMMEN' : 'DIE ANTWORT BLEIBT NOCH GEHEIM'}</p>
       <h1 id="kids-regroup-title">{returned ? 'Alle sind zurück!' : 'Alle zurück zu eurer Gruppe!'}</h1>
