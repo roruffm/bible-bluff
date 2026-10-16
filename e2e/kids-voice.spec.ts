@@ -8,8 +8,10 @@ async function observeAudio(page:Page) {
     const create=AudioContext.prototype.createBufferSource;
     AudioContext.prototype.createBufferSource=function(){
       const source=create.call(this), start=source.start.bind(source), stop=source.stop.bind(source);
-      source.start=(...args)=>{counters.starts++;return start(...args);};
-      source.stop=(...args)=>{counters.stops++;return stop(...args);};
+      // Nur Sprachaufnahmen zählen, nicht die kurzen erzeugten Showklänge (Ticken, Trommelwirbel).
+      const voice=()=>(source.buffer?.duration ?? 0)>.9;
+      source.start=(...args)=>{if(voice())counters.starts++;return start(...args);};
+      source.stop=(...args)=>{if(voice())counters.stops++;return stop(...args);};
       return source;
     };
   });
@@ -30,11 +32,15 @@ test('Professor: manuell abspielen, stoppen, wiederholen und beim Weitergehen ab
   await expect.poll(async()=>(await counts(page)).starts).toBe(2);
   await page.getByRole('button',{name:'Mission starten',exact:true}).click();
   await expect.poll(async()=>(await counts(page)).stops).toBe(2);
-  await page.getByRole('button',{name:'Erste Aufgabe im Kapitel',exact:true}).click();
   expect((await counts(page)).starts).toBe(2);
   await page.getByRole('button',{name:'Professor-Spruch abspielen',exact:true}).click();
   await expect.poll(async()=>(await counts(page)).starts).toBe(3);
   expect(recordings.at(-1)).toContain('/professor-bluff/intro.mp3');
+  await page.getByRole('button',{name:'Erste Aufgabe im Kapitel',exact:true}).click();
+  await expect.poll(async()=>(await counts(page)).stops).toBe(3);
+  // Während der Aufgabe steht Professor Bluffs Behauptung am Beamer. Die Spielleitung liest sie selbst vor.
+  await expect(page.locator('.kids-bluff-claim')).toContainText('Daniel mit seinen Löwen');
+  await expect(page.getByRole('button',{name:'Professor-Spruch abspielen',exact:true})).toHaveCount(0);
   await expect(page.locator('.kids-clock')).toHaveAttribute('aria-label','30 Sekunden');
   await page.getByRole('button',{name:'Spiel mit Punktestand abschließen',exact:true}).click();
   await page.getByRole('button',{name:'Jetzt mit Punktestand abschließen',exact:true}).click();

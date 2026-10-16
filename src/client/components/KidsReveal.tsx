@@ -5,10 +5,13 @@ import type { KidsAction, KidsGame } from '../../shared/kids-game';
 import { kidsRoundReaction } from '../lib/kids-reactions';
 import { professorMotion } from '../lib/professor-motion';
 import { ProfessorBluff, ShowControls, StoryPicture } from './KidsShow';
+import { KidsSuspense } from './KidsBluff';
 
-export function KidsReveal({ game, act, disabled, primaryRef, children }: { game: KidsGame; act: (action: Exclude<KidsAction,'tick'>)=>void; disabled:boolean; primaryRef:RefObject<HTMLButtonElement>; children?:ComponentChildren }) {
+/** suspense zeigt zuerst den Trommelwirbel. Bedienung und Weiter bleiben dabei erreichbar. */
+export function KidsReveal({ game, act, disabled, primaryRef, suspense = false, children }: { game: KidsGame; act: (action: Exclude<KidsAction,'tick'>)=>void; disabled:boolean; primaryRef:RefObject<HTMLButtonElement>; suspense?: boolean; children?:ComponentChildren }) {
   const round=game.rounds[game.index], reaction=kidsRoundReaction(game);
-  return <section class={`kids-reveal is-revealed reaction-${reaction.mood}`} aria-labelledby="kids-reveal-title" data-points={reaction.points}>
+  return <section class={`kids-reveal is-revealed reaction-${reaction.mood}${suspense ? ' is-suspense' : ''}`} aria-labelledby="kids-reveal-title" data-points={reaction.points}>
+    {suspense && <KidsSuspense round={round}/>}
     <div class="kids-reveal-result">
       <header><p class="kids-eyebrow">AUFGELÖST · <KidsGroupName group={round.question.group}/></p><h1 id="kids-reveal-title">Feld {round.correctIndex+1} ist richtig!</h1></header>
       <div class={`kids-answer kids-reveal-answer kids-field-${round.correctIndex+1} is-correct has-picture`}>
@@ -23,7 +26,7 @@ export function KidsReveal({ game, act, disabled, primaryRef, children }: { game
       <blockquote class="kids-reaction-bubble"><span class="kids-professor-signature">PROFESSOR BLUFF <KidsVoiceButton labelled/></span><p class="kids-reaction-quote">{reaction.quote}</p></blockquote>
       <p class="kids-reaction-caption">{reaction.caption}</p>
     </aside>
-    <footer class="kids-reveal-footer"><p>{game.index===9 ? 'Alle Altersgruppen haben zusammengeholfen.' : 'Gemeinsam geht die Jagd weiter. Jeder Beitrag zählt!'}</p><ShowControls game={game} act={act} disabled={disabled} primaryRef={primaryRef}/></footer>
+    <footer class="kids-reveal-footer"><p>{suspense ? 'Wo hat Professor Bluff geflunkert?' : game.index===9 ? 'Alle Altersgruppen haben zusammengeholfen.' : 'Gemeinsam geht die Jagd weiter. Jeder Beitrag zählt!'}</p><ShowControls game={game} act={act} disabled={disabled} primaryRef={primaryRef}/></footer>
     {children}
   </section>;
 }

@@ -3,8 +3,8 @@ import { kidsRoundReaction } from '../lib/kids-reactions';
 import { AnswerMotifArt } from './KidsAnswerArt';
 import type { ProfessorMotion } from '../lib/professor-motion';
 import type { RefObject } from 'preact';
-import { kidsActionLabel, kidsPrimaryAction, kidsScores, type KidsAction, type KidsGame } from '../../shared/kids-game';
-import { type StoryMotif } from '../../shared/kids-show-questions';
+import { kidsActionLabel, kidsGroupResults, kidsOvertook, kidsPrimaryAction, kidsResultPoints, kidsScores, type KidsAction, type KidsGame } from '../../shared/kids-game';
+import { KIDS_GROUPS, type KidsGroup, type StoryMotif } from '../../shared/kids-show-questions';
 
 export type ProfessorMood = 'confident' | 'nervous' | 'panic' | 'defeated' | 'victory' | 'startled' | 'kind';
 export function professorMood(game: KidsGame): ProfessorMood {
@@ -15,11 +15,14 @@ export function professorMood(game: KidsGame): ProfessorMood {
   if (s.team >= s.professor && s.playedRounds > 3) return 'panic';
   return s.team >= s.professor && s.playedRounds > 0 ? 'nervous' : 'confident';
 }
+/** In diesen Phasen steht Professor Bluffs Behauptung zur laufenden Aufgabe am Beamer. */
+export function kidsClaimPhase(phase: KidsGame['phase']): boolean { return ['reading','moving','paused','locked'].includes(phase); }
 export function professorSays(game: KidsGame): string {
   if (game.phase === 'welcome') return 'Ha! Drei Detektivteams gegen MEIN Superhirn? Das wird ja heiter!';
   if (game.phase === 'superbluff') return 'ALARM! Mein Superbluff! Zehn Punkte für mich … aber ihr könnt sie auch holen!';
   if (game.phase === 'finished') return kidsScores(game).team > kidsScores(game).professor ? 'Ihr habt meinen Bluff geknackt! Hut ab, ihr großartigen Detektive. Es war wunderbar mit euch!' : 'Meine Punkte kann ich zählen. Euer Zusammenhalt ist unbezahlbar! Danke, ihr großartigen Detektive!';
   if (game.phase === 'revealed') return kidsRoundReaction(game).quote;
+  if (kidsClaimPhase(game.phase)) return `„${game.rounds[game.index].question.bluff.claim}“`;
   if (game.index >= 6) return 'Nur noch ein Kapitel! Meine Knie zittern? Das ist mein Denk-Tanz!';
   if (game.index >= 3) return 'Das war nur die Aufwärmrunde. Jetzt wird geblufft!';
   return 'Ich bin Professor Bluff. Mein Spezialgebiet? Mich selbst überschätzen!';
@@ -70,12 +73,23 @@ export function StoryPicture({ motif, animated = false }: { motif: StoryMotif; a
     </g>
   </svg>;
 }
-export function ShowScoreboard({ game }: { game: KidsGame }) {
-  const s = kidsScores(game);
+/** Jede Gruppe lädt ihr Symbol auf: drei Leuchtpunkte (voll = 10, halb = 5) und ein wachsendes Leuchten. Kein Kind muss Zahlen lesen. */
+function GroupCharge({ game, group, points, hiddenIndex, charging }: { game: KidsGame; group: Exclude<KidsGroup,'all'>; points: number; hiddenIndex: number; charging: boolean }) {
+  return <span class={`kids-group-charge charge-${group}${charging ? ' is-charging' : ''}`} style={{ '--charge': points / 30 }}>
+    <KidsGroupName group={group}/>
+    <span class="kids-charge-pips" role="img" aria-label={`${KIDS_GROUPS[group].name}: ${points} von 30 Punkten`}>{kidsGroupResults(game, group, hiddenIndex).map((result, i) => <i key={i} class={result === 'correct' ? 'is-full' : result === 'participated' ? 'is-half' : undefined}/>)}</span>
+  </span>;
+}
+/** hiddenIndex hält eine Wertung zurück, solange der Trommelwirbel läuft. */
+export function ShowScoreboard({ game, hiddenIndex = -1 }: { game: KidsGame; hiddenIndex?: number }) {
+  const s = kidsScores(game, hiddenIndex);
+  const shown = game.phase === 'revealed' && hiddenIndex !== game.index;
+  const scored = shown && kidsResultPoints(game.results[game.index]) > 0 ? game.rounds[game.index].question.group : null;
+  const overtook = shown && kidsOvertook(game);
   return <section class="kids-scoreboard" aria-label="Gemeinsame Punktejagd">
-    <div class="kids-team-score"><span>BIBLEBLUFF-TEAM</span><strong data-testid="team-score">{s.team}</strong><div>{(['minis','mittis','maxis'] as const).map(g=><span key={g}><KidsGroupName group={g}/> <b>{s.groups[g]}</b><small>/30</small></span>)}</div></div>
-    <div class="kids-race" aria-label={`Kinderteam ${s.team}, Professor Bluff ${s.professor}`}>
-      <div class="kids-race-lane"><span style={{ left: `${s.team * .85}%` }}>♥</span></div><div class="kids-race-lane professor-lane"><span style={{ left: `${s.professor * .85}%` }}><ProfessorHead mood={professorMood(game)}/></span></div><small>{s.playedRounds} {s.playedRounds === 1 ? 'Aufgabe gewertet' : 'Aufgaben gewertet'} · Gemeinsam!</small>
+    <div class="kids-team-score"><span>BIBLEBLUFF-TEAM</span><strong data-testid="team-score">{s.team}</strong><div class="kids-group-charges">{(['minis','mittis','maxis'] as const).map(g=><GroupCharge key={g} game={game} group={g} points={s.groups[g]} hiddenIndex={hiddenIndex} charging={scored === g || scored === 'all'}/>)}</div></div>
+    <div class={`kids-race${overtook ? ' is-overtaking' : ''}`} aria-label={`Kinderteam ${s.team}, Professor Bluff ${s.professor}`}>
+      <div class="kids-race-lane"><span style={{ left: `${s.team * .85}%` }}>♥</span>{overtook && <b class="kids-race-overtake">Überholt!</b>}</div><div class="kids-race-lane professor-lane"><span style={{ left: `${s.professor * .85}%` }}><ProfessorHead mood={hiddenIndex === game.index ? 'nervous' : professorMood(game)}/></span></div><small>{s.playedRounds} {s.playedRounds === 1 ? 'Aufgabe gewertet' : 'Aufgaben gewertet'} · Gemeinsam!</small>
     </div>
     <div class="kids-prof-score"><span>PROFESSOR BLUFF</span><strong data-testid="prof-score">{s.professor}</strong><small>+7 je Aufgabe · Finale +10</small></div>
   </section>;

@@ -1,0 +1,93 @@
+/* Professor Bluffs Behauptung, Mitmach-Gesten, Countdown zum Mitzählen, Trommelwirbel und aufladende Gruppensymbole. */
+
+/* Professor tippt auf ein Feld */
+.kids-bluff-pin { position: absolute; top: 8px; right: 10px; width: clamp(40px, 6.5vh, 96px); aspect-ratio: 1; border-radius: 50%; background: #f3eefb; border: 3px solid #7154a2; box-shadow: 0 3px 0 #7154a2; display: grid; place-items: center; z-index: 3; animation: kids-pin-wiggle 1.6s ease-in-out 4; }
+.kids-bluff-pin > span { width: 86%; height: 86%; display: block; }
+.kids-bluff-pin > b { position: absolute; right: -6px; bottom: -6px; width: 45%; aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center; background: #7154a2; color: #fff; font-size: clamp(14px, 2.2vh, 32px); font-weight: 900; line-height: 1; border: 2px solid #fff; }
+
+/* Behauptung unten am Beamer */
+.kids-bluff-claim { background: #f3eefb; border: 2px solid #7154a2; border-radius: 18px; box-shadow: 0 4px 0 #d3c6ea; justify-content: flex-start; }
+.kids-bluff-claim-head { flex: 0 0 auto; height: clamp(40px, 8vh, 120px); aspect-ratio: 175 / 166; }
+.kids-bluff-claim > div { min-width: 0; flex: 1 1 auto; }
+.kids-bluff-claim small { display: block; color: #7154a2; font-size: clamp(10px, min(1vw, 1.7vh), 20px); font-weight: 900; letter-spacing: .1em; margin: 0 0 2px; }
+.kids-show-stage .kids-bluff-claim div p { font-weight: 800; }
+.kids-bluff-question { flex: 0 0 auto; align-self: center; background: #7154a2; color: #fff; border-radius: 30px; padding: .3em .8em; font-size: clamp(14px, min(1.5vw, 2.4vh), 32px); font-weight: 900; white-space: nowrap; transform: rotate(-4deg); box-shadow: 0 3px 0 #4b3576; }
+
+/* Mitmach-Gesten der wartenden Gruppen */
+.kids-status .kids-cheers { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 4px; }
+.kids-cheer { display: inline-flex; align-items: center; gap: .3em; background: #fff6d8; border: 1px solid #e3c979; border-radius: 30px; padding: 1px .65em 1px .4em; color: #12324a; font-weight: 750; white-space: nowrap; }
+.kids-cheer-icon { display: inline-block; font-size: 1.35em; line-height: 1; }
+.kids-cheer[data-group="minis"] .kids-cheer-icon { animation: kids-cheer-twinkle .9s ease-in-out infinite; }
+.kids-cheer[data-group="mittis"] .kids-cheer-icon { animation: kids-cheer-drum .45s ease-in-out infinite alternate; }
+.kids-cheer[data-group="maxis"] .kids-cheer-icon { animation: kids-cheer-cross 1.1s ease-in-out infinite; }
+.is-paused .kids-cheer-icon { animation-play-state: paused; }
+
+/* Letzte fünf Sekunden: große Zahl zum Mitzählen */
+.kids-stage.kids-show-stage > .kids-countdown { position: absolute; inset: 0; z-index: 6; display: grid; place-items: center; pointer-events: none; }
+.kids-countdown > span { font-size: min(44vh, 30vw); font-weight: 900; line-height: 1; color: #b64531; opacity: .5; -webkit-text-stroke: clamp(4px, .6vh, 10px) #fffdf8; paint-order: stroke fill; text-shadow: 0 10px 0 #12324a22; font-variant-numeric: tabular-nums; animation: kids-count-pop .95s ease-out both; }
+
+/* Trommelwirbel vor der Auflösung */
+.kids-reveal.is-suspense > .kids-reveal-result, .kids-reveal.is-suspense > .kids-reaction { display: none; }
+.kids-suspense { grid-row: 1; grid-column: 1 / -1; min-height: 0; min-width: 0; display: grid; grid-template-rows: auto minmax(0, 1fr); gap: clamp(10px, 2vh, 30px); }
+.kids-suspense-title { margin: 0; text-align: center; font-size: clamp(28px, min(3.8vw, 6vh), 90px); font-weight: 900; color: #7154a2; animation: kids-suspense-title .5s ease-in-out 5 alternate; }
+.kids-suspense-cards { list-style: none; margin: 0; padding: 0; min-height: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(12px, 2.5vw, 48px); }
+.kids-suspense-card { position: relative; min-height: 0; min-width: 0; display: flex; flex-direction: column; align-items: center; text-align: center; padding: clamp(10px, 1.6vh, 26px) 14px; border: 3px solid #12324a; border-radius: clamp(20px, 2vw, 38px); background: linear-gradient(155deg, var(--field-soft, #fff0c7), var(--field, #ffe29b)); box-shadow: 0 8px 0 #12324a; --at: calc(1.15s + var(--step) * .75s); }
+.kids-suspense-card.is-bluff { animation: kids-bluff-card .4s ease var(--at) both, kids-suspense-shake .18s ease-in-out 6 alternate; }
+.kids-suspense-card.is-bluff > :not(.kids-bluff-stamp, .kids-bluff-pin) { animation: kids-bluff-fade .4s ease var(--at) both; }
+.kids-suspense-card.is-truth { animation: kids-truth-card .6s ease var(--at) both, kids-suspense-shake .18s ease-in-out 6 alternate; }
+.kids-suspense-number { position: absolute; top: 8px; left: 12px; font-size: clamp(32px, 5.5vh, 90px); font-weight: 900; line-height: 1; background: #fffdf1; border: 2px solid #12324a; border-radius: 12px; padding: 2px 6px; }
+.kids-suspense-card > .kids-story-picture { flex: 1; min-height: 0; width: min(85%, 260px); margin: 12px auto 4px; }
+.kids-suspense-text { font-size: clamp(21px, min(2.5vw, 3.8vh), 62px); font-weight: 800; line-height: 1.1; text-wrap: balance; }
+.kids-bluff-stamp { position: absolute; left: 50%; top: 45%; z-index: 4; translate: -50% -50%; rotate: -14deg; padding: .1em .45em; border: .12em solid #c2412d; border-radius: .25em; background: #fffdf8e8; color: #c2412d; font-size: clamp(30px, min(4.6vw, 7vh), 120px); font-weight: 900; letter-spacing: .04em; white-space: nowrap; animation: kids-stamp .35s cubic-bezier(.2, 1.6, .5, 1) var(--at) both; }
+.kids-truth-mark { position: absolute; top: -18px; right: -14px; z-index: 4; width: clamp(48px, 8vh, 120px); aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center; background: #176845; color: #fff; border: 4px solid #fff; font-size: clamp(26px, 4.5vh, 70px); font-weight: 900; animation: kids-stamp .45s cubic-bezier(.2, 1.6, .5, 1) var(--at) both; }
+
+/* Gruppensymbole laden sich mit jeder Wertung auf */
+.charge-minis { --glow: #ffe14d; }
+.charge-mittis { --glow: #ffc93d; }
+.charge-maxis { --glow: #ff8a3d; }
+.kids-team-score > .kids-group-charges { flex-wrap: nowrap; align-items: flex-end; gap: 4px clamp(14px, 2vw, 36px); }
+.kids-group-charge { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; }
+/* Name steht im Kopf und in der Sprachausgabe der Leuchtpunkte. Hier zählt das Symbol. */
+.kids-group-charge .kids-group-name > span { display: none; }
+.kids-group-charge .kids-group-symbol { width: 2.1em; height: 2.1em; flex-basis: 2.1em; transform: scale(calc(1 + var(--charge) * .3)); filter: drop-shadow(0 0 calc(var(--charge) * 9px) var(--glow)) drop-shadow(0 0 calc(var(--charge) * 3px) var(--glow)); transition: transform .8s ease, filter .8s ease; }
+.kids-group-charge.is-charging .kids-group-symbol { animation: kids-charge-pulse .7s ease-in-out 3; }
+.kids-charge-pips { display: flex; gap: 4px; }
+.kids-charge-pips i { width: clamp(9px, .85vw, 15px); aspect-ratio: 1; border-radius: 50%; border: 2px solid #9bbfb3; background: #fffdf8; }
+.kids-charge-pips i.is-full { background: var(--glow); border-color: #12324a88; }
+.kids-charge-pips i.is-half { background: linear-gradient(90deg, var(--glow) 50%, #fffdf8 50%); border-color: #12324a88; }
+
+/* Größeres Rennen mit Überholmoment */
+.kids-show .kids-race-lane { height: 22px; margin-bottom: 11px; }
+.kids-show .kids-race-lane span { top: -6px; width: 34px; height: 34px; font-size: 20px; box-shadow: 0 2px 0 #12324a33; }
+.kids-race-overtake { position: absolute; right: 6px; top: 50%; translate: 0 -50%; padding: 0 9px; border-radius: 12px; background: #116a55; color: #fff; font-size: clamp(11px, 1vw, 18px); font-weight: 900; line-height: 1.5; animation: kids-surprise-mark 1s ease-out both; }
+.kids-race.is-overtaking .kids-race-lane:first-child span { animation: kids-overtake-hop .45s ease-in-out 4; }
+
+@media (max-width: 759px) {
+  .kids-bluff-pin { width: 38px; top: 6px; right: 6px; }
+  .kids-bluff-question { display: none; }
+  .kids-bluff-claim-head { height: 44px; }
+  .kids-suspense-cards { grid-template-columns: 1fr; gap: 12px; }
+  .kids-suspense-card { display: grid; grid-template-columns: 44px 100px 1fr; align-items: center; min-height: 110px; text-align: left; }
+  .kids-suspense-number { position: static; font-size: 32px; }
+  .kids-suspense-card > .kids-story-picture { width: 100px; height: 90px; margin: 0; }
+  .kids-suspense-text { font-size: 22px; }
+  .kids-bluff-stamp { font-size: 30px; }
+  .kids-truth-mark { width: 44px; top: -10px; right: -6px; font-size: 24px; }
+  .kids-show .kids-scoreboard { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .kids-team-score > .kids-group-charges { flex-wrap: wrap; gap: 4px 8px; }
+  .kids-cheer { white-space: normal; min-width: 0; }
+}
+
+@keyframes kids-pin-wiggle { 0%, 60%, 100% { rotate: 0deg; } 70% { rotate: -12deg; } 80% { rotate: 10deg; } 90% { rotate: -6deg; } }
+@keyframes kids-cheer-twinkle { 50% { transform: scale(1.35) rotate(15deg); opacity: .7; } }
+@keyframes kids-cheer-drum { to { transform: translateY(-3px) rotate(-8deg); } }
+@keyframes kids-cheer-cross { 50% { transform: rotate(-14deg) scale(1.15); } }
+@keyframes kids-count-pop { 0% { transform: scale(1.6); opacity: 0; } 18% { transform: scale(1); opacity: .9; } 100% { transform: scale(.94); opacity: .4; } }
+@keyframes kids-suspense-title { to { transform: scale(1.06); } }
+@keyframes kids-suspense-shake { 0% { transform: rotate(-1.4deg) translateY(0); } 100% { transform: rotate(1.4deg) translateY(-4px); } }
+@keyframes kids-bluff-card { to { background: #eef1f2; border-color: #8a9ca4; box-shadow: 0 8px 0 #8a9ca4; } }
+@keyframes kids-bluff-fade { to { opacity: .4; filter: grayscale(.8); } }
+@keyframes kids-truth-card { 0% { transform: scale(1); } 55% { transform: scale(1.08); } 100% { transform: scale(1.05); background: #cff2d8; border-color: #176845; box-shadow: 0 8px 0 #176845, 0 0 0 6px #fff, 0 0 46px #4fd18b; } }
+@keyframes kids-stamp { 0% { opacity: 0; scale: 2.4; } 100% { opacity: 1; scale: 1; } }
+@keyframes kids-charge-pulse { 50% { transform: scale(calc(1.5 + var(--charge) * .3)); filter: drop-shadow(0 0 14px var(--glow)) brightness(1.2); } }
+@keyframes kids-overtake-hop { 50% { transform: translateY(-9px) scale(1.15); } }
