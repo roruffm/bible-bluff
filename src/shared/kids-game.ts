@@ -33,11 +33,12 @@ export function createKidsGame(random: () => number = Math.random): KidsGame {
   });
   return { rounds, index: 0, phase: 'welcome', remainingMs: 30000, deadline: null, results: rounds.map(() => null), cueSeq: 0 };
 }
-export function kidsScores(game: KidsGame) {
+/** hiddenIndex blendet eine Wertung aus, etwa solange der Trommelwirbel die Auflösung noch zurückhält. */
+export function kidsScores(game: KidsGame, hiddenIndex = -1) {
   const groups = { minis: 0, mittis: 0, maxis: 0 };
   let professor = 0; let bonus = 0; let playedRounds = 0;
   game.results.forEach((result, i) => {
-    if (result === null) return;
+    if (result === null || i === hiddenIndex) return;
     playedRounds++;
     if (i === 9) { bonus = kidsResultPoints(result); professor += 10; return; }
     const group = game.rounds[i].question.group as Exclude<KidsGroup, 'all'>;
@@ -45,6 +46,16 @@ export function kidsScores(game: KidsGame) {
     professor += 7;
   });
   return { groups, bonus, team: groups.minis + groups.mittis + groups.maxis + bonus, professor, playedRounds };
+}
+/** Ergebnisse der drei Aufgaben einer Altersgruppe in Spielreihenfolge, für die Leuchtpunkte am Beamer. */
+export function kidsGroupResults(game: KidsGame, group: Exclude<KidsGroup, 'all'>, hiddenIndex = -1): (KidsResult | null)[] {
+  return game.rounds.flatMap((round, i) => round.question.group === group ? [i === hiddenIndex ? null : game.results[i]] : []);
+}
+/** Das Kinderteam zieht mit der gerade aufgelösten Aufgabe an Professor Bluff vorbei. */
+export function kidsOvertook(game: KidsGame): boolean {
+  if (game.phase !== 'revealed' || game.results[game.index] === null) return false;
+  const before = kidsScores(game, game.index), after = kidsScores(game);
+  return before.team <= before.professor && after.team > after.professor;
 }
 /** Zeit und Punkte sind geräteunabhängig; doppelte oder unpassende Schritte ändern nichts. */
 export function updateKidsGame(game: KidsGame, action: KidsAction, now: number): KidsGame {

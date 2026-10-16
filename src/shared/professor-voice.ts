@@ -3,7 +3,8 @@ import { kidsResultPoints, kidsScores, type KidsGame } from './kids-game';
 /** Nur Aufnahmen, die zum aktuell sichtbaren Professor-Spruch passen. */
 export function professorVoiceKey(game: KidsGame, kind:'quote'|'question'='quote'): string | null {
   if (kind==='question') return game.phase==='reading' ? `question-${game.index}` : null;
-  if (['scene','returning','judging'].includes(game.phase)) return null;
+  // Während der Aufgabe zeigt der Beamer Professor Bluffs Behauptung. Dafür gibt es keine Aufnahme; die Spielleitung liest sie vor.
+  if (['scene','returning','judging','reading','moving','paused','locked'].includes(game.phase)) return null;
   if (game.phase === 'welcome') return 'welcome';
   if (game.phase === 'superbluff') return 'superbluff';
   if (game.phase === 'finished') return kidsScores(game).team > kidsScores(game).professor ? 'win' : 'lose';

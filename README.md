@@ -21,6 +21,23 @@ lokal erzeugte Klangbilder; Eltern und andere Gruppen machen Geräusche und Pant
 - Superbluff: Professor +10, Kinder erhalten auch hier 10 / 5 / 0 nach derselben Regel. Endstand erst nach
   dem Finale. Die Spielleitung kann auch jederzeit früher mit dem erreichten Punktestand abschließen.
   Der Abschluss feiert alle Kinder mit Jesu Einladung (Markus 10,14).
+- **Professor Bluff blufft in jeder Aufgabe:** Er behauptet selbstbewusst eine falsche Antwort.
+  Seine Behauptung steht unten am Beamer, ein kleiner Professor-Kopf mit „?“ markiert sein Feld.
+  Die Kinder entlarven ihn. Für die Behauptung gibt es keine Aufnahme; die Spielleitung liest sie
+  mit Professor-Stimme vor (sie steht auch auf dem Smartphone, ihr Feld ist dort markiert).
+- **Trommelwirbel vor der Auflösung:** Nach der Wertung wackeln die drei Felder, die falschen
+  bekommen nacheinander den Stempel „BLUFF!“ (Professor Bluffs Tipp zuletzt), dann leuchtet die
+  Wahrheit. Erst danach erscheinen Punkte, Konfetti und Professor-Reaktion. „Weiter“ bleibt
+  erreichbar. Kein Trommelwirbel nach Neuladen, bei Korrekturen oder bei „Bewegung reduzieren“.
+- **Countdown zum Mitzählen:** In den letzten fünf Sekunden erscheint eine große Zahl und
+  „Zählt laut mit!“. Mit Klang ticken die Sekunden, bei null ertönt ein Gong. Der Klang wird
+  auch beim ersten Start der 30 Sekunden am Beamer eingeschaltet.
+- **Leuchtende Gruppensymbole:** Jede Gruppe hat drei Leuchtpunkte (voll = 10, halb = 5). Ihr
+  Symbol leuchtet mit jeder Wertung stärker und pulsiert, wenn es gerade Punkte gab. Das
+  Punkterennen ist größer; zieht das Kinderteam an Professor Bluff vorbei, zeigt es „Überholt!“
+  (mit Klang).
+- **Mitmach-Gesten:** Während eine Gruppe läuft, zeigt der Beamer den anderen ihre feste Geste:
+  ✨ Glühwürmchen funkeln, 🥁 Leuchtsterne trommeln, 🤞 Fackelträger drücken die Daumen.
 - Professor mit spielstandsabhängigen Kommentaren. Jede Auflösung hat eine eigene Showbühne:
   bei 5 oder 10 Punkten erschrickt er mit einem neuen Spruch, bei 0 Punkten macht er Mut.
   Die richtige Antwort und die Erklärung bleiben dabei sichtbar. Die Animation wartet auf
