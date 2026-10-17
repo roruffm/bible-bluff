@@ -11,6 +11,7 @@
 .kids-show.is-projecting { --show-header: clamp(90px, 12vh, 132px); }
 .kids-show .kids-topbar { background: transparent; border: 0; }
 .kids-show .kids-back, .kids-show .kids-top-title { color: var(--show-cream); }
+.kids-show .kids-button, .kids-show .kids-tool { color: var(--show-ink); }
 .kids-show .kids-setup-card { color: var(--show-ink); }
 .kids-show .kids-intro h1 em { color: var(--show-mint); }
 .kids-show .kids-show-teams { color: var(--show-ink); }
@@ -134,7 +135,7 @@
 .kids-show .kids-final-bonuses > span { padding: 8px 12px; font-size: clamp(12px, 1.25vw, 24px); }
 .kids-show .kids-final-bonuses b { display: inline; margin-left: .3em; font-size: 1.4em; }
 /* Regrouping keeps the solution hidden until everyone is back. */
-.kids-show .kids-regroup { grid-template-columns: minmax(0, 3fr) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; align-items: stretch; }
+.kids-show .kids-regroup { grid-template-columns: minmax(0, 3fr) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; align-items: stretch; background: transparent; }
 .kids-show .kids-regroup-content { grid-column: 1; grid-row: 1; justify-content: center; background: var(--show-cream); color: var(--show-ink); border: 2px solid #082a3c; border-radius: var(--show-radius); padding: 24px; box-shadow: 0 6px 0 #082a3c; }
 .kids-show .kids-regroup-content .kids-eyebrow { color: #215e5c; background: #bcf1df; padding: 8px 16px; border-radius: 30px; }
 .kids-show .kids-regroup h1 { font-size: clamp(32px, min(4.3vw, 6.5vh), 88px); line-height: 1.15; }
