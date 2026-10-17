@@ -96,3 +96,18 @@ test('Professor: Frage vorlesen bleibt manuell und stoppt beim Start des Antwort
   await expect.poll(async()=>(await counts(page)).stops).toBe(2);
   await expect(page.getByRole('button',{name:'Frage vorlesen',exact:false})).toHaveCount(0);
 });
+
+test('Professor: auch die Finalfrage spielt die Aufnahme manuell ab und stoppt sie zum Countdown',async({page})=>{
+  await observeAudio(page);
+  await page.goto('/kids');
+  await page.getByRole('button',{name:'Show vorbereiten',exact:false}).click();
+  await page.getByRole('button',{name:'Direkt ins Finale',exact:true}).click();
+  await page.getByRole('button',{name:'Gemeinsam ins Finale',exact:true}).click();
+  await expect(page.locator('#kids-question')).toHaveText('Welche Geschichte spielen die Eltern?');
+  expect((await counts(page)).starts).toBe(0);
+  await page.getByRole('button',{name:'Frage vorlesen',exact:false}).click();
+  await expect.poll(async()=>(await counts(page)).played).toEqual(['question-9']);
+  await expect(page.locator('.kids-clock')).toHaveAttribute('aria-label','30 Sekunden');
+  await page.getByRole('button',{name:'30 Sekunden starten',exact:true}).click();
+  await expect.poll(async()=>(await counts(page)).stops).toBe(1);
+});

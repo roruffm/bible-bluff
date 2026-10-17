@@ -5,11 +5,10 @@ import { PROFESSOR_INTERJECTIONS } from './professor-interjections';
 const comfortClip = (index: number) => `comfort-${index === 4 ? 7 : index === 9 ? 2 : index}`;
 const series = (name: string, count: number) => Array.from({ length: count }, (_, i) => `${name}-${i}`);
 
-/** Alle Aufnahmen, die am Beamer erklingen können. „Show vorbereiten“ lädt sie vollständig vorab.
- * Die Finalfrage hat noch keine Aufnahme; sie liest vorläufig die Gerätestimme. */
+/** Alle Aufnahmen, die am Beamer erklingen können. „Show vorbereiten“ lädt sie vollständig vorab. */
 export const PROFESSOR_VOICE_KEYS: readonly string[] = [...new Set([
   'welcome', 'intro', 'chapter2', 'chapter3', 'superbluff', 'win', 'lose',
-  ...series('startled', 10), ...Array.from({ length: 10 }, (_, i) => comfortClip(i)), ...series('question', 9),
+  ...series('startled', 10), ...Array.from({ length: 10 }, (_, i) => comfortClip(i)), ...series('question', 10),
   ...PROFESSOR_INTERJECTIONS.map(clip => `interjection-${clip.id}`),
 ])];
 

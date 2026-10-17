@@ -4,9 +4,8 @@ import type { KidsAction, KidsGame } from '../../shared/kids-game';
 import { professorVoiceKey } from '../../shared/professor-voice';
 import { professorInterjection } from '../../shared/professor-interjections';
 import { playProfessorVoice } from '../lib/kids-sound';
-import { playDeviceQuestion } from '../lib/kids-device-speech';
 
-const VoiceContext = createContext<{ available:boolean; playing:'quote'|'question'|null; questionAvailable:boolean; questionDevice:boolean; busy:boolean; play:()=>void; read:()=>void; stop:()=>void } | null>(null);
+const VoiceContext = createContext<{ available:boolean; playing:'quote'|'question'|null; questionAvailable:boolean; busy:boolean; play:()=>void; read:()=>void; stop:()=>void } | null>(null);
 
 export function KidsVoiceProvider({ game, enabled, enable, act, busy, onError, children }: {
   game:KidsGame|null; enabled:boolean; enable:()=>Promise<void>; act:(action:KidsAction)=>void;
@@ -33,7 +32,7 @@ export function KidsVoiceProvider({ game, enabled, enable, act, busy, onError, c
     const controller=new AbortController(); playback.current=controller; setPlaying(game.voiceKind ?? 'quote');
     const ended=()=>{if(playback.current===controller){playback.current=null;setPlaying(null);}};
     const countdownDeadline=game.voiceKind==='interjection' && game.voiceClip==='signal-countdown' && game.phase==='moving' ? game.deadline ?? undefined : undefined;
-    const playbackPromise=game.voiceKind==='question' && game.index===9 ? playDeviceQuestion(game.rounds[game.index].question.prompt,controller.signal,ended) : playProfessorVoice(key,controller.signal,ended,countdownDeadline);
+    const playbackPromise=playProfessorVoice(key,controller.signal,ended,countdownDeadline);
     void playbackPromise.catch(error=>{
       if (playback.current!==controller) return;
       playback.current=null;setPlaying(null);onError(error instanceof Error ? error.message : 'Die Professor-Aufnahme konnte nicht abgespielt werden.');
@@ -42,7 +41,7 @@ export function KidsVoiceProvider({ game, enabled, enable, act, busy, onError, c
   },[game?.voiceSeq,game?.phase,game?.index,game?.voiceKind,game?.voiceClip,enabled]);
   useEffect(()=>()=>{currentCue.current=null;playback.current?.abort();},[]);
   const request=(action:'speak'|'read-question')=>{const cue=currentCue.current;onError('');setPreparing(true);void enable().then(()=>{if(cue!==null && currentCue.current===cue)act(action);}).catch(error=>onError(error instanceof Error ? error.message : 'Professor-Ton nicht verfügbar.')).finally(()=>setPreparing(false));};
-  return <VoiceContext.Provider value={{available:!!game && !!professorVoiceKey(game),questionAvailable:game?.phase==='reading',questionDevice:game?.index===9,playing:playing==='interjection' ? null : playing,busy:busy||preparing,
+  return <VoiceContext.Provider value={{available:!!game && !!professorVoiceKey(game),questionAvailable:game?.phase==='reading',playing:playing==='interjection' ? null : playing,busy:busy||preparing,
     play:()=>request('speak'),read:()=>request('read-question'),
     stop:()=>{stop();act('stop-speech');},
   }}>{children}</VoiceContext.Provider>;
@@ -59,5 +58,5 @@ export function KidsQuestionVoiceButton() {
   const voice=useContext(VoiceContext);
   if(!voice?.questionAvailable)return null;
   const reading=voice.playing==='question';
-  return <button type="button" class="kids-tool kids-question-voice" title={voice.questionDevice ? 'Finalfrage vorläufig mit deutscher Gerätestimme' : 'Professor Bluff liest die Frage vor'} disabled={voice.busy} onClick={reading ? voice.stop : voice.read}>{reading ? '■ Vorlesen stoppen' : '▶ Frage vorlesen'}</button>;
+  return <button type="button" class="kids-tool kids-question-voice" title="Professor Bluff liest die Frage vor" disabled={voice.busy} onClick={reading ? voice.stop : voice.read}>{reading ? '■ Vorlesen stoppen' : '▶ Frage vorlesen'}</button>;
 }
