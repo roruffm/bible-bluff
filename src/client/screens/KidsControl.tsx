@@ -1,6 +1,6 @@
 import { KidsGroupName, KidsGroupText } from '../components/KidsGroupName';
 import { useEffect, useState } from 'preact/hooks';
-import { kidsCanJumpToFinal, kidsCanSkipCountdown, kidsLastScoredIndex, kidsPreviousStep, kidsProfessorPoints, kidsResultPoints, kidsScores, updateKidsGame, type KidsGame, type KidsPhase } from '../../shared/kids-game';
+import { kidsAnswerMs, kidsCanJumpToFinal, kidsCanSkipCountdown, kidsLastScoredIndex, kidsPreviousStep, kidsProfessorPoints, kidsResultPoints, kidsScores, updateKidsGame, type KidsGame, type KidsPhase } from '../../shared/kids-game';
 import { KIDS_CHAPTERS, kidsAnswerPicture } from '../../shared/kids-show-questions';
 import { useKidsRemote } from '../lib/kids-remote';
 import { KidsFinishDialog } from '../components/KidsFinish';
@@ -42,8 +42,12 @@ export function KidsControlPage() {
   const lastScored = game ? kidsLastScoredIndex(game) : -1;
   const back = game ? kidsPreviousStep(game) : null;
   const backNote = !game ? '' : game.phase === 'revealed' ? 'Die Wertung dieser Aufgabe wird zurückgenommen.' : ['moving', 'paused', 'locked'].includes(game.phase) ? 'Der Countdown startet danach wieder von vorn.' : '';
+  // Am Desktop: Fortschritt der Show, Vorschau vor dem Aufgabenstart und eine gut lesbare Restzeit.
+  const upcoming = !!game && ['welcome', 'chapter', 'superbluff'].includes(game.phase);
+  const taskCount = game?.short ? 4 : 10, taskNumber = !game ? 0 : game.short && game.index === 9 ? 4 : game.index + 1;
+  const timing = game?.phase === 'moving' || game?.phase === 'paused', seconds = game ? Math.ceil(game.remainingMs / 1000) : 0;
   const phaseLabel = !game ? '' : game.phase === 'moving' ? `${Math.ceil(game.remainingMs / 1000)} s` : ({ welcome: 'Begrüßung', chapter: 'Kapitelstart', superbluff: 'Superbluff', reading: 'Vorlesen', scene: 'Szene läuft', paused: 'Pause', locked: 'Stopp!', returning: 'Rückweg', judging: 'Wertung', revealed: 'Aufgelöst', finished: 'Geschafft!' } as const)[game.phase];
-  const direction = !game ? '' : game.phase === 'finished' ? 'Der Endpunktestand bleibt am Beamer sichtbar. Feiert alle Kinder!' : game.phase === 'scene' ? 'Die Szene läuft zehn Sekunden. Danach vorlesen und den Antwort-Countdown starten.' : game.phase === 'locked' ? (game.short ? 'Helfer zählen die Finger. Danach hier das gemeinsame Ergebnis werten.' : 'Helfer prüfen die Felder. Danach alle Kinder zurückholen. Noch nicht auflösen.') : game.phase === 'returning' ? 'Erst weiterklicken, wenn alle Kinder wieder bei ihrer Gruppe sind.' : game.phase === 'judging' ? 'Das gemeldete Ergebnis wählen. Damit erscheint die Auflösung am Beamer.' : game.phase === 'moving' ? (game.short ? 'Die aktive Gruppe zeigt ihre Antwort mit den Fingern.' : 'Die aktive Gruppe wählt ihr Feld. Die anderen feuern an.') : game.phase === 'reading' ? 'Frage und Professor-Tipp abspielen oder vorlesen. Dann die Antwortzeit starten.' : 'Passende Ansage abspielen, dann mit dem großen Knopf weiter.';
+  const direction = !game ? '' : game.phase === 'finished' ? 'Der Endpunktestand bleibt am Beamer sichtbar. Feiert alle Kinder!' : game.phase === 'scene' ? 'Die Szene läuft zehn Sekunden. Danach vorlesen und den Antwort-Countdown starten.' : game.phase === 'locked' ? (game.short ? 'Helfer zählen die Finger. Danach hier das gemeinsame Ergebnis werten.' : 'Helfer prüfen die Felder. Danach alle Kinder zurückholen. Noch nicht auflösen.') : game.phase === 'returning' ? 'Erst weiterklicken, wenn alle Kinder wieder bei ihrer Gruppe sind.' : game.phase === 'judging' ? 'Das gemeldete Ergebnis wählen. Damit erscheint die Auflösung am Beamer.' : game.phase === 'moving' ? (game.short ? 'Die aktive Gruppe zeigt ihre Antwort mit den Fingern.' : 'Die aktive Gruppe wählt ihr Feld. Die anderen feuern an.') : game.phase === 'reading' ? 'Frage und Professor-Tipp abspielen oder vorlesen. Dann die Antwortzeit starten.' : game.phase === 'paused' ? 'Die Antwortzeit ist angehalten. Mit „Weiter geht’s“ läuft sie weiter.' : 'Passende Ansage abspielen, dann mit dem großen Knopf weiter.';
   const selectTab = (next: Tab) => {
     setTab(next);
     if (desktop) {
@@ -59,7 +63,7 @@ export function KidsControlPage() {
     <p class={`kids-remote-status${remote.error ? ' is-offline' : ''}`} role="status">{remote.error || (remote.view ? 'Mit der Beamer-Partie verbunden' : remote.active ? 'Verbindung wird aufgebaut …' : 'Scanne den QR-Code am Beamer.')}</p>
     {game && round && !remote.fatal && <>
       <div class="kids-remote-toolbar">
-        <div class={`kids-remote-live is-${game.phase}`}><span>{game.phase === 'finished' ? 'Alle gemeinsam' : game.index === 9 ? 'Finale · Alle gemeinsam' : <KidsGroupName group={round.question.group}/>}</span><strong>{phaseLabel}</strong></div>
+        <div class={`kids-remote-live is-${game.phase}`}><span>{game.phase === 'finished' || game.phase === 'welcome' ? 'Alle gemeinsam' : game.index === 9 ? 'Finale · Alle gemeinsam' : <KidsGroupName group={round.question.group}/>}</span><strong>{phaseLabel}</strong></div>
         {desktop ? scoreboard : <nav class="kids-remote-tabs" role="tablist" aria-label="Bereiche der Fernbedienung">{tabs.map((item, index) => <button key={item.id} id={`kids-tab-${item.id}`} type="button" role="tab" aria-selected={tab === item.id} aria-controls={`kids-panel-${item.id}`} tabIndex={tab === item.id ? 0 : -1} onClick={() => selectTab(item.id)} onKeyDown={event => {
           const next = event.key === 'ArrowRight' ? (index + 1) % tabs.length : event.key === 'ArrowLeft' ? (index + tabs.length - 1) % tabs.length : event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1 : null;
           if (next === null) return; event.preventDefault(); selectTab(tabs[next].id); document.getElementById(`kids-tab-${tabs[next].id}`)?.focus();
@@ -70,13 +74,14 @@ export function KidsControlPage() {
         <div class="kids-remote-main">
         {(desktop || tab === 'flow') && <section key="flow" id="kids-panel-flow" class="kids-remote-panel kids-remote-flow" role={desktop ? 'region' : 'tabpanel'} aria-labelledby={desktop ? 'kids-flow-title' : 'kids-tab-flow'} tabIndex={desktop ? -1 : 0}>
           {desktop && <div class="kids-remote-column-title"><h2 id="kids-flow-title">Spiel steuern</h2></div>}
-          {game.phase !== 'finished' && <div class="kids-remote-question"><span>{game.index === 9 ? 'SUPERBLUFF' : game.short ? 'Kurzshow' : `Kapitel ${Math.floor(game.index / 3) + 1}: ${KIDS_CHAPTERS[Math.min(2, Math.floor(game.index / 3))]}`}</span><h2>{round.question.prompt}</h2>{desktop && renderAnswers(true)}{desktop && kidsClaimPhase(game.phase) && <div class="kids-audio-claim"><b>Professor-Tipp · selbst vorlesen</b><p>{professorSays(game)}</p></div>}{game.index === 9 && <p>Finale: Kinderteam 20 / 10 / 0 Punkte · Professor Bluff +0</p>}</div>}
+          {game.phase !== 'finished' && <div class="kids-remote-question"><span>{desktop && upcoming && 'Als Nächstes · '}{game.index === 9 ? 'SUPERBLUFF' : game.short ? 'Kurzshow' : `Kapitel ${Math.floor(game.index / 3) + 1}: ${KIDS_CHAPTERS[Math.min(2, Math.floor(game.index / 3))]}`}{desktop && ` · Aufgabe ${taskNumber} von ${taskCount}`}</span><h2>{round.question.prompt}</h2>{desktop && renderAnswers(true)}{desktop && kidsClaimPhase(game.phase) && <div class="kids-audio-claim"><b>Professor-Tipp · selbst vorlesen</b><p>{professorSays(game)}</p></div>}{game.index === 9 && <p>Finale: Kinderteam 20 / 10 / 0 Punkte · Professor Bluff +0</p>}</div>}
           <section class="kids-remote-step" aria-labelledby="kids-next-step"><h2 id="kids-next-step">{!desktop && <span>1</span>} {desktop ? 'Nächster Schritt' : 'Jetzt steuern'}</h2><p>{direction}</p>
+            {desktop && timing && <div class={`kids-remote-timer${game.phase === 'paused' ? ' is-paused' : seconds <= 5 ? ' is-urgent' : ''}`} role="timer" aria-label={`${seconds} Sekunden${game.phase === 'paused' ? ', pausiert' : ''}`}><strong>{seconds}</strong><span>{game.phase === 'paused' ? 'Sekunden · pausiert' : 'Sekunden'}</span><span class="kids-remote-timer-bar" aria-hidden="true"><i style={{ width: `${Math.min(100, game.remainingMs / kidsAnswerMs(game) * 100)}%` }}/></span></div>}
             <div class="kids-remote-actions">{game.phase === 'finished' ? <div class="kids-remote-farewell"><h2>Gemeinsam seid ihr stark!</h2><p>{scores!.playedRounds} {scores!.playedRounds === 1 ? 'Aufgabe gewertet' : 'Aufgaben gewertet'}. Der Abschluss bleibt stehen.</p></div> : <ShowControls game={game} act={action => { void remote.send(action); }} disabled={disabled}/>}
               {kidsCanSkipCountdown(game) && <button type="button" class="kids-tool kids-skip-countdown" aria-label="Countdown überspringen" disabled={disabled} onClick={() => { void remote.send('skip-countdown'); }}>{!desktop && '⏭ '}Countdown überspringen</button>}
               {back && <button type="button" class="kids-tool kids-remote-back" disabled={disabled} onClick={() => { void remote.send('back'); }}>← Zurück {backTargets[back.phase]}</button>}
+              {back && backNote && <p class="kids-remote-back-note">{backNote}</p>}
             </div>
-            {back && backNote && <p class="kids-remote-back-note">{backNote}</p>}
             {game.phase === 'revealed' && lastScored >= 0 && <button type="button" class="kids-remote-correct-link" onClick={() => selectTab('tools')}>Letzte Wertung ändern</button>}
           </section>
           {desktop && <KidsTimePlan game={game} compact/>}
