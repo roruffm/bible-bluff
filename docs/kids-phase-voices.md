@@ -21,7 +21,7 @@ Auch der gemeinsame Finalaufruf (`interjection-call-all.mp3`) und der Abschlussg
 vom 16.10.2026 (17:06:40 beziehungsweise 17:11:02). Die gesprochenen Texte wurden vor
 dem Austausch geprüft.
 
-Am 17.10.2026 wurden fünf weitere Nutzer-Aufnahmen unverändert übernommen.
+Am 17.10.2026 wurden sechs weitere Nutzer-Aufnahmen unverändert übernommen.
 Die Zuordnung wurde anhand der Transkription geprüft:
 
 | Aufnahme vom 17.10.2026 | Zieldatei | Gesprochener Text |
@@ -31,6 +31,7 @@ Die Zuordnung wurde anhand der Transkription geprüft:
 | 11:55:47 | `interjection-walk.mp3` | Geht langsam zu eurem Feld. Wir haben Zeit für alle! |
 | 11:59:15 | `question-0.mp3` | Wer ist mit den Tieren auf dem großen Schiff? |
 | 12:00:33 | `question-9.mp3` | Welche Geschichte spielen die Eltern? |
+| 16:16:32 | `question-8.mp3` | Der Jünger Thomas hieß auch Didymus. Was heißt das? |
 
 Die Finalfrage nutzt damit ebenfalls eine Snorre-Aufnahme und wird für die
 Offline-Show vorgeladen. Die vorläufige Gerätestimme entfällt. Die Wiedergabe
