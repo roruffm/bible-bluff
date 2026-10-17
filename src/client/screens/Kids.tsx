@@ -28,6 +28,19 @@ import { KidsInterlude } from '../components/KidsInterlude';
 function Celebration({ variant }: { variant: number }) {
   return <div class={`kids-celebration kids-party-${variant % 4}`} aria-hidden="true">{Array.from({ length: 42 }, (_, i) => <i key={i} style={{ '--x': `${(i * 37 + 11) % 100}%`, '--delay': `${(i % 9) * 70}ms`, '--turn': `${i * 29}deg`, '--c': ['#ffd362', '#72d8c7', '#fba2af', '#95baf7'][i % 4] }}>{['✦','★','●'][variant % 3]}</i>)}</div>;
 }
+/** Two synchronized corner clocks; only one timer is announced to screen readers. */
+function KidsStageClock({ side, seconds, progress, locked, urgent }: {
+  side: 'left' | 'right'; seconds: number; progress: number; locked: boolean; urgent: boolean;
+}) {
+  return <div class={`kids-clock kids-corner-clock kids-clock-${side}${urgent ? ' is-urgent' : ''}`}
+    aria-label={side === 'left' ? `${seconds} Sekunden` : undefined}
+    aria-hidden={side === 'right' ? true : undefined}>
+    <svg viewBox="0 0 80 80" aria-hidden="true"><circle class="kids-clock-track" cx="40" cy="40" r="33"/><circle class="kids-clock-progress" cx="40" cy="40" r="33" style={{ strokeDasharray: '207.35', strokeDashoffset: `${207.35 * (1 - progress)}` }}/></svg>
+    <b aria-hidden="true">{locked ? '✋' : seconds}</b>
+    <small aria-hidden="true">{locked ? 'Stopp!' : 'Sekunden'}</small>
+  </div>;
+}
+
 export function KidsPage() {
   const [game, setGame] = useState<KidsGame | null>(null);
   const [showExit, setShowExit] = useState(false), [showPair, setShowPair] = useState(false), [showFinish, setShowFinish] = useState(false);
@@ -175,14 +188,18 @@ export function KidsPage() {
       {game.phase==='returning' || game.phase==='judging' ? <KidsRegroup game={game} act={act} disabled={remote.busy} primaryRef={primary}/> : revealed ? <KidsReveal key={`${game.index}-${game.results[game.index]}`} game={game} act={act} disabled={remote.busy} primaryRef={primary} suspense={suspenseIndex >= 0}>{suspenseIndex < 0 && kidsResultPoints(game.results[game.index])>0 && <Celebration variant={game.index}/>}</KidsReveal> : interlude ? <KidsInterlude game={game} chapter={chapter} act={act} disabled={remote.busy} primaryRef={primary}/> : round && <section class={`kids-stage kids-show-stage is-${game.phase}`} aria-labelledby="kids-question">
         <div class="kids-show-question">
           <div class="kids-active-group"><KidsGroupName group={round.question.group}/><span>{round.question.group === 'all' ? 'Alle Kinder' : `sind dran! · ${KIDS_GROUPS[round.question.group].ages}`}</span></div>
-          <div class={`kids-clock${game.phase === 'moving' && seconds <= 5 ? ' is-urgent' : ''}`} aria-label={`${seconds} Sekunden`}><svg viewBox="0 0 80 80" aria-hidden="true"><circle class="kids-clock-track" cx="40" cy="40" r="33"/><circle class="kids-clock-progress" cx="40" cy="40" r="33" style={{ strokeDasharray:'207.35', strokeDashoffset: `${207.35 * (1-game.remainingMs/kidsAnswerMs(game))}` }}/></svg><b aria-hidden="true">{game.phase==='locked' ? '✋' : seconds}</b><small aria-hidden="true">{game.phase==='locked' ? 'Stopp!' : 'Sekunden'}</small></div>
+
           <h1 id="kids-question">{round.question.prompt}</h1>
           <div class="kids-status" role="status"><strong>{status}</strong>{game.phase === 'locked' ? <span>{game.short ? 'Helfer zählen. Gleich kommt die Auflösung!' : 'Noch nicht auflösen. Gleich geht’s zurück.'}</span> : round.question.group !== 'all' && (game.phase === 'moving' || game.phase === 'paused') ? <KidsCheers active={round.question.group}/> : null}</div>
         </div>
         <aside class="kids-question-host" aria-label="Professor Bluffs Behauptung"><BluffClaim text={professorSays(game)}/><ProfessorBluff key={`${game.phase}:${game.index}`} mood={professorMood(game)} motion={professorMotion(game)}/></aside>
         <ol class="kids-answers has-pictures" aria-label="Antworten und Spielfelder">{round.answers.map((answer,i)=><li key={`${game.index}-${i}`} class={`kids-answer kids-field-${i+1}${answer===round.question.bluff.answer ? ' is-bluff-pick' : ''}`}><span class="kids-number">{i+1}</span><StoryPicture motif={kidsAnswerPicture(round.question,answer)}/><span class="kids-answer-text">{answer}</span>{answer===round.question.bluff.answer && <BluffPin/>}</li>)}</ol>
         {lastSeconds && <KidsCountdown seconds={seconds}/>}
-        <div class="kids-bottom"><div class="kids-operator-actions">{game.phase==='reading' && <div class="kids-extra-controls"><KidsQuestionVoiceButton/>{round.question.scene && <button type="button" class="kids-tool" disabled={remote.busy} onClick={()=>act('scene')}>Szene abspielen</button>}</div>}<ShowControls game={game} act={act} disabled={remote.busy} primaryRef={primary}/></div></div>
+        <div class="kids-bottom">
+          <KidsStageClock side="left" seconds={seconds} progress={game.remainingMs / kidsAnswerMs(game)} locked={game.phase==='locked'} urgent={game.phase==='moving' && seconds<=5}/>
+          <div class="kids-operator-actions">{game.phase==='reading' && <div class="kids-extra-controls"><KidsQuestionVoiceButton/>{round.question.scene && <button type="button" class="kids-tool" disabled={remote.busy} onClick={()=>act('scene')}>Szene abspielen</button>}</div>}<ShowControls game={game} act={act} disabled={remote.busy} primaryRef={primary}/></div>
+          <KidsStageClock side="right" seconds={seconds} progress={game.remainingMs / kidsAnswerMs(game)} locked={game.phase==='locked'} urgent={game.phase==='moving' && seconds<=5}/>
+        </div>
       </section>}
     </>}
     </>}
