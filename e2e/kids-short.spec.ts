@@ -26,7 +26,7 @@ test('Kurzshow: eigener Startknopf, ein Kapitel mit Fingerabstimmung, Finale und
   await page.clock.install();
   await startShort(page);
   await expect(page.locator('.kids-round-counter')).toContainText('Kurzshow');
-  await expect(page.locator('.kids-clock')).toHaveAttribute('aria-label', '20 Sekunden');
+  await expect(page.locator('.kids-clock-left')).toHaveAttribute('aria-label', '20 Sekunden');
   await task(page, '1');
   await expect(page.getByTestId('team-score')).toHaveText('10');
   await expect(page.getByTestId('prof-score')).toHaveText('6');
