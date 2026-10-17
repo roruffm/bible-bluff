@@ -54,7 +54,7 @@ test('Kurzshow: eigener Startknopf, ein Kapitel mit Fingerabstimmung, Finale und
   await page.getByRole('button', { name: 'Nächste Aufgabe', exact: true }).click();
   await task(page, '0');
   await page.getByRole('button', { name: 'Zum Superbluff', exact: true }).click();
-  await expect(page.getByText('ALARM! Der Superbluff!', { exact: true })).toBeVisible();
+  await expect(page.getByText('Knackt den Superbluff!', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Gemeinsam ins Finale', exact: true }).click();
   await task(page, '1');
   await page.getByRole('button', { name: 'Zum Abschluss', exact: true }).click();

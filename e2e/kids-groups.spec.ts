@@ -30,8 +30,10 @@ test('Kids: neue Gruppennamen tragen bei jedem Auftreten ihr festes Symbol',asyn
     expect(problems).toEqual([]);
   }
   await page.setViewportSize({width:1280,height:800});
-  await expect(page.locator('.kids-team-score .kids-group-symbol')).toHaveCount(3);
-  await expect(page.locator('.kids-round-counter [data-group="minis"]')).toHaveText('Glühwürmchen');
+  await expect(page.locator('.kids-compact-score')).toHaveCount(1);
+  await page.getByRole('button',{name:'Mission starten',exact:true}).click();
+  await page.getByRole('button',{name:'Erste Aufgabe im Kapitel',exact:true}).click();
+  await expect(page.locator('.kids-active-group [data-group="minis"]')).toHaveText('Glühwürmchen');
   await page.getByRole('button',{name:'Spiel mit Punktestand abschließen',exact:true}).click();
   await page.getByRole('button',{name:'Jetzt mit Punktestand abschließen',exact:true}).click();
   await expect(page.locator('.kids-ending header .kids-group-symbol')).toHaveCount(3);
