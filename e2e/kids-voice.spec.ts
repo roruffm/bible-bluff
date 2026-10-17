@@ -1,10 +1,11 @@
+import { showKidsOperator } from './kids-operator';
 import { expect, test } from '@playwright/test';
 import { professorAudio as counts, trackProfessorAudio as observeAudio } from './professor-audio';
 
 test.use({ viewport:{width:1280,height:800}, isMobile:false });
 test('Professor: manuell abspielen, stoppen, wiederholen und beim Weitergehen abbrechen',async({page})=>{
   await observeAudio(page);
-  await page.goto('/kids');await page.getByRole('button',{name:'Show vorbereiten',exact:false}).click();
+  await page.goto('/kids');await page.getByRole('button',{name:'Show vorbereiten',exact:false}).click(); await showKidsOperator(page);
   // Alle Aufnahmen werden vorab geladen, aber nichts erklingt von selbst.
   await expect(page.getByRole('button',{name:'Mission starten',exact:true})).toBeVisible();
   expect((await counts(page)).starts).toBe(0);
@@ -38,11 +39,11 @@ test('Professor: manuell abspielen, stoppen, wiederholen und beim Weitergehen ab
 
 test('Professor: Smartphone startet und stoppt am Beamer, Neuladen spielt nichts automatisch',async({page,browser})=>{
   await observeAudio(page);await page.goto('/kids');
-  await page.getByRole('button',{name:'Show vorbereiten',exact:false}).click();
+  await page.getByRole('button',{name:'Show vorbereiten',exact:false}).click(); await showKidsOperator(page);
   await page.getByRole('button',{name:'Bedienung',exact:false}).click();
   await page.getByRole('button',{name:'Smartphone verbinden',exact:true}).click();
   const link=page.getByRole('link',{name:'Fernbedienung öffnen',exact:false});await expect(link).toBeVisible();
-  const url=await link.getAttribute('href');await page.getByRole('button',{name:'Zur Partie',exact:true}).click();
+  const url=await link.getAttribute('href');await page.getByRole('button',{name:'Zur Partie',exact:true}).click(); await showKidsOperator(page);
   const context=await browser.newContext({viewport:{width:390,height:844},locale:'de-DE'}), phone=await context.newPage();
   const phoneAudio:string[]=[];phone.on('request',request=>{if(request.url().includes('/professor-bluff/'))phoneAudio.push(request.url());});
   await phone.goto(url!);await expect(phone.getByText('Mit der Beamer-Partie verbunden',{exact:true})).toBeVisible();
@@ -53,8 +54,9 @@ test('Professor: Smartphone startet und stoppt am Beamer, Neuladen spielt nichts
   await expect.poll(async()=>(await counts(page)).stops).toBe(1);
   await phone.getByRole('button',{name:'Spruch am Beamer abspielen',exact:false}).click();
   await expect.poll(async()=>(await counts(page)).starts).toBe(2);
-  await page.reload();await expect(page.getByRole('button',{name:'Mission starten',exact:true})).toBeVisible();
+  await page.reload();await showKidsOperator(page);await expect(page.getByRole('button',{name:'Mission starten',exact:true})).toBeVisible();
   expect((await counts(page)).starts).toBe(0);expect(phoneAudio).toEqual([]);
+  await showKidsOperator(page);
   await page.getByRole('button',{name:'Bedienung',exact:false}).click();
   await page.getByRole('button',{name:'Klang einschalten',exact:true}).click();
   await page.getByRole('button',{name:'Menü schließen',exact:true}).click();
@@ -81,7 +83,7 @@ test('Professor: Smartphone startet und stoppt am Beamer, Neuladen spielt nichts
 
 test('Professor: Frage vorlesen bleibt manuell und stoppt beim Start des Antwort-Countdowns',async({page})=>{
   await observeAudio(page);await page.goto('/kids');
-  await page.getByRole('button',{name:'Show vorbereiten',exact:false}).click();
+  await page.getByRole('button',{name:'Show vorbereiten',exact:false}).click(); await showKidsOperator(page);
   await page.getByRole('button',{name:'Mission starten',exact:true}).click();
   await page.getByRole('button',{name:'Erste Aufgabe im Kapitel',exact:true}).click();
   expect((await counts(page)).starts).toBe(0);
@@ -100,7 +102,7 @@ test('Professor: Frage vorlesen bleibt manuell und stoppt beim Start des Antwort
 test('Professor: auch die Finalfrage spielt die Aufnahme manuell ab und stoppt sie zum Countdown',async({page})=>{
   await observeAudio(page);
   await page.goto('/kids');
-  await page.getByRole('button',{name:'Show vorbereiten',exact:false}).click();
+  await page.getByRole('button',{name:'Show vorbereiten',exact:false}).click(); await showKidsOperator(page);
   await page.getByRole('button',{name:'Direkt ins Finale',exact:true}).click();
   await page.getByRole('button',{name:'Gemeinsam ins Finale',exact:true}).click();
   await expect(page.locator('#kids-question')).toHaveText('Welche Geschichte spielen die Eltern?');

@@ -44,7 +44,7 @@ export function KidsPage() {
   const [game, setGame] = useState<KidsGame | null>(null);
   const [showExit, setShowExit] = useState(false), [showPair, setShowPair] = useState(false), [showFinish, setShowFinish] = useState(false);
   const [fullscreen, setFullscreen] = useState(false), [fullscreenError, setFullscreenError] = useState('');
-  const [presentation, setPresentation] = useState(false), [toolsOpen, setToolsOpen] = useState(false);
+  const [presentation, setPresentation] = useState(true), [toolsOpen, setToolsOpen] = useState(false);
   const [sound, setSound] = useState<'unarmed'|'on'|'off'>('unarmed');
   const [suspense, setSuspense] = useState<number|null>(null);
   const [saved, setSaved] = useState(() => loadKidsShow());
@@ -115,10 +115,11 @@ export function KidsPage() {
   useEffect(() => {
     const key = (e: KeyboardEvent) => {
       const { game, showExit, showPair, showFinish, toolsOpen, act } = current.current;
-      if (!game || showExit || showPair || showFinish || toolsOpen || e.repeat || e.altKey || e.ctrlKey || e.metaKey) return;
+      if (!game || showExit || showPair || showFinish || e.repeat || e.altKey || e.ctrlKey || e.metaKey) return;
       const tag = (e.target as HTMLElement)?.tagName;
       if (['INPUT', 'SELECT', 'TEXTAREA'].includes(tag)) return;
-      if (e.code === 'KeyH') { e.preventDefault(); setPresentation(v => !v); return; }
+      if (e.code === 'KeyH') { e.preventDefault(); setPresentation(v => !v); setToolsOpen(false); return; }
+      if (toolsOpen) return;
       if (e.code === 'Space' && ['BUTTON', 'A', 'SUMMARY'].includes(tag)) return;
       const action = (e.code === 'Space' || e.code === 'ArrowRight') ? kidsPrimaryAction(game) : e.code === 'KeyP' ? (game.phase === 'moving' ? 'pause' : game.phase === 'paused' ? 'resume' : null) : kidsCanScore(game) ? ({ Digit1: 'correct', Digit2: 'participated', Digit0: 'none' } as const)[e.code as 'Digit1'|'Digit2'|'Digit0'] : null;
       if (action) { e.preventDefault(); act(action); }
@@ -129,11 +130,16 @@ export function KidsPage() {
   useEffect(()=>{ if(game?.phase==='superbluff') { setShowFinish(false); setShowExit(false); setShowPair(false); setToolsOpen(false); } },[game?.phase]);
   const toggleFullscreen = async () => { try { setFullscreenError(''); if (document.fullscreenElement) await document.exitFullscreen(); else await root.current?.requestFullscreen(); } catch { setFullscreenError('Nutze das Vollbild deines Browsers.'); } };
   const toggleSound = async () => { if (sound === 'on') { setSound('off'); return; } try { await enableKidsSound(); setSound('on'); } catch { setFullscreenError('Klang hier nicht verfügbar. Die Gruppen können die Geräusche selbst machen.'); } };
-  const exit = () => { void remote.disconnect(); clearKidsShow(); setSaved(null); setShowExit(false); setShowPair(false); setShowFinish(false); setToolsOpen(false); setPresentation(false); setGame(null); };
+  const exit = () => { void remote.disconnect(); clearKidsShow(); setSaved(null); setShowExit(false); setShowPair(false); setShowFinish(false); setToolsOpen(false); setPresentation(true); setGame(null); };
   const enableVoice = async () => { await enableKidsSound(); setSound('on'); };
-  const startShow = (short = false) => { setSaved(null); setGame(createKidsGame(Math.random, { short })); };
+  const startShow = (short = false, withRemote = false) => {
+    const next = createKidsGame(Math.random, { short });
+    setSaved(null); setGame(next); setPresentation(true);
+    void enableVoice().catch(() => setSound('off'));
+    if (withRemote) { setShowPair(true); void remote.connect(next, false); }
+  };
   // Der Klick aufs Fortsetzen darf den Ton gleich wieder einschalten; Browser verlangen dafür eine Geste.
-  const resume = () => { if (!saved) return; setSaved(null); setGame(saved.game); void enableVoice().catch(() => setSound('off')); };
+  const resume = () => { if (!saved) return; setSaved(null); setGame(saved.game); setPresentation(true); void enableVoice().catch(() => setSound('off')); };
   const discard = () => { clearKidsShow(); setSaved(null); };
   /** Lädt alles vorab, prüft das Internet und spielt einen Testsatz über die Beamer-Lautsprecher. */
   const checkTech = async () => {
@@ -180,7 +186,9 @@ export function KidsPage() {
         <li><b>Alle zurück, dann auflösen</b><span>Helfer prüfen die Felder. Alle kehren zurück. Die Spielleitung trägt nur das gemeinsame Ergebnis ein.</span></li>
       </ol><div class="kids-scoring-rule"><b>10</b> Mehrheit richtig · <b>5</b> mindestens ein Kind richtig<br/><b>0</b> keiner richtig<br/>Professor Bluff: +7 je Runde · Finale: Bluff +10 · Team bis +10</div>
       <button type="button" class={`kids-button${saved && !remote.active ? '' : ' kids-primary'}`} onClick={() => startShow()}>{saved && !remote.active ? 'Neue Show vorbereiten' : 'Show vorbereiten'} <span>→</span></button>
-      <button type="button" class="kids-button kids-short-start" onClick={() => startShow(true)}><span><b>⏱ Kurzshow · 15 Minuten</b><small>1 Kapitel + Superbluff · 20 Sekunden · Abstimmen mit Fingern am Platz</small></span><span aria-hidden="true">→</span></button><p class="kids-setup-note">Ein Beamer für alle · Kein Kinder-Smartphone<br/>Maus, Tastatur oder Smartphone der Spielleitung</p>
+      <button type="button" class="kids-button kids-short-start" onClick={() => startShow(true)}><span><b>⏱ Kurzshow · 15 Minuten</b><small>1 Kapitel + Superbluff · 20 Sekunden · Abstimmen mit Fingern am Platz</small></span><span aria-hidden="true">→</span></button>
+      <button type="button" class="kids-button kids-setup-remote" disabled={remote.busy} onClick={() => startShow(false, true)}>Smartphone-Fernbedienung einrichten</button>
+      <p class="kids-setup-note">Die Kinder sehen nur die Show. Die Helfer steuern per Fernbedienung.<br/><b>Am Computer: H</b> blendet die Mausbedienung ein oder aus. → / Leertaste: weiter · P: Pause.<br/>Für die Kurzshow: vorbereiten, dann H → Bedienung → Smartphone verbinden.</p>
       <KidsTechCheck checked={checked} testing={testing} sound={sound} onCheck={() => { void checkTech(); }} fullscreen={canFullscreen ? fullscreen : null} onFullscreen={() => { void toggleFullscreen(); }}/>
       <details class="kids-organizer"><summary>Helferplan & Ablauf</summary><p>Moderation, Beamer-Bedienung und Gruppenhelfer einplanen. Genug Platz für die aktive Gruppe und begleitende Eltern lassen. Elternkarten 1–3 und ein Kissen für die Final-Pantomime bereitlegen.</p><p>Begrüßung 5 Min. · 3 Kapitel je 9 Min. · Showeinlagen 6 Min. · Finale 7 Min. Alle Punkte sind fest geregelt. Gewertet werden nur abgeschlossene Aufgaben. Über „Abschluss“ könnt ihr jederzeit den Endbildschirm zeigen.</p><p><b>Kurzshow (15 Min.):</b> Begrüßung 1:30 · danach je Aufgabe 2:30 (Glühwürmchen, Leuchtsterne, Fackelträger) · Superbluff 4 Min. · Abschluss 2 Min. Die Kinder bleiben sitzen und zeigen 1, 2 oder 3 Finger; nach dem Stopp wird sofort gewertet. Professor Bluff bekommt hier nur +6 je Aufgabe (Finale +10): Kinder bis 40, Professor 28. Den Zeitplan zeigen „Bedienung“ und das Smartphone.</p></details></div>
     </section> : <>
@@ -209,7 +217,7 @@ export function KidsPage() {
       {remote.credentials?.remoteToken ? <><QRCode value={kidsControlUrl(remote.credentials)} label="QR-Code zur Smartphone-Fernbedienung" /><a class="kids-button kids-remote-link" href={kidsControlUrl(remote.credentials)} target="_blank" rel="noopener noreferrer">Fernbedienung öffnen ↗</a><p class="kids-pair-note">Start · Szene · Pause · Mehrheitswertung · Weiter<br />Die Kinder brauchen kein Smartphone.</p></> : <p role="status">{remote.error || 'QR-Code wird vorbereitet …'}</p>}
       <button type="button" class="kids-tool" disabled={sound==='on'} onClick={()=>{void toggleSound();}}>{sound==='on' ? 'Klänge am Beamer sind aktiviert' : 'Klänge für Smartphone-Steuerung aktivieren'}</button>
       {remote.error && !remote.active && <button type="button" class="kids-button" disabled={remote.busy} onClick={pair}>Erneut versuchen</button>}
-      <button type="button" class="kids-button kids-primary" autoFocus onClick={() => setShowPair(false)}>Zur Partie</button>
+      <button type="button" class="kids-button kids-primary" autoFocus onClick={() => { setShowPair(false); setPresentation(true); }}>Zur Partie</button>
       {remote.active && <button type="button" class="kids-tool" onClick={() => { void remote.disconnect(); setShowPair(false); }}>Smartphone-Verbindung trennen</button>}
     </div></div>}
     {showFinish && game && !finished && <KidsFinishDialog game={game} onCancel={()=>setShowFinish(false)} onFinish={()=>act('finish')} disabled={remote.busy || !!remote.error} error={remote.error}/>}

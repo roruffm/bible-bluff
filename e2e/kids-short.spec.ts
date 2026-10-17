@@ -1,3 +1,4 @@
+import { showKidsOperator } from './kids-operator';
 import { expect, test, type Page } from '@playwright/test';
 
 test.use({ viewport: { width: 1280, height: 800 }, isMobile: false });
@@ -5,7 +6,7 @@ test.beforeEach(async ({ page }) => { await page.emulateMedia({ reducedMotion: '
 
 async function startShort(page: Page) {
   await page.goto('/kids');
-  await page.getByRole('button', { name: /Kurzshow · 15 Minuten/ }).click();
+  await page.getByRole('button', { name: /Kurzshow · 15 Minuten/ }).click(); await showKidsOperator(page);
   await expect(page.getByText('Zeigt eure Antwort mit 1, 2 oder 3 Fingern.', { exact: false })).toBeVisible();
   await page.getByRole('button', { name: 'Mission starten', exact: true }).click();
   await expect(page.getByText('KURZSHOW · EIN KAPITEL FÜR ALLE', { exact: true })).toBeVisible();
@@ -32,6 +33,7 @@ test('Kurzshow: eigener Startknopf, ein Kapitel mit Fingerabstimmung, Finale und
   await expect(page.getByTestId('prof-score')).toHaveText('6');
   await expect(page.locator('.kids-compact-score')).toHaveAttribute('aria-label', 'Gemeinsame Punktejagd: Kinderteam 10, Professor Bluff 6');
   await expect(page.locator('.kids-reveal-points')).toHaveText('+10 für euer Team!');
+  await showKidsOperator(page);
   await page.getByRole('button', { name: 'Bedienung', exact: false }).click();
   const plan = page.locator('.kids-operator-tools .kids-time-plan');
   await expect(plan).toContainText('Jetzt Aufgabe 1, Ziel bis 2:30');
@@ -43,6 +45,7 @@ test('Kurzshow: eigener Startknopf, ein Kapitel mit Fingerabstimmung, Finale und
   // Zu lange gebraucht: Die Wanduhr springt fünf Minuten weiter, ohne Timer abzuarbeiten. Ein großes runFor
   // bei laufender Testuhr kann den Sprung verlieren, wenn gleichzeitig deren Echtzeit-Takt Timer abarbeitet.
   await page.clock.setSystemTime(await page.evaluate(() => Date.now()) + 5 * 60 * 1000);
+  await showKidsOperator(page);
   await page.getByRole('button', { name: 'Bedienung', exact: false }).click();
   await expect(plan.locator('.kids-time-plan-status')).toContainText('über dem Plan');
   await page.getByRole('button', { name: 'Menü schließen', exact: true }).click();
@@ -50,7 +53,7 @@ test('Kurzshow: eigener Startknopf, ein Kapitel mit Fingerabstimmung, Finale und
   // Auch die Kurzshow übersteht ein Neuladen.
   await page.reload();
   await expect(page.locator('.kids-resume')).toContainText('Kurzshow · Leuchtsterne · Kinderteam 15 · Professor Bluff 12');
-  await page.getByRole('button', { name: 'Show fortsetzen', exact: true }).click();
+  await page.getByRole('button', { name: 'Show fortsetzen', exact: true }).click(); await showKidsOperator(page);
   await page.getByRole('button', { name: 'Nächste Aufgabe', exact: true }).click();
   await task(page, '0');
   await page.getByRole('button', { name: 'Zum Superbluff', exact: true }).click();
@@ -66,17 +69,18 @@ test('Kurzshow: eigener Startknopf, ein Kapitel mit Fingerabstimmung, Finale und
 
 test('Kurzshow: Smartphone zeigt Zeitplan und wertet direkt nach dem Stopp', async ({ page, browser }) => {
   await startShort(page);
+  await showKidsOperator(page);
   await page.getByRole('button', { name: 'Bedienung', exact: false }).click();
   await page.getByRole('button', { name: 'Smartphone verbinden', exact: true }).click();
   const url = await page.getByRole('link', { name: 'Fernbedienung öffnen', exact: false }).getAttribute('href');
-  await page.getByRole('button', { name: 'Zur Partie', exact: true }).click();
+  await page.getByRole('button', { name: 'Zur Partie', exact: true }).click(); await showKidsOperator(page);
   const context = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: 'de-DE' }), phone = await context.newPage();
   await phone.goto(url!);
   await expect(phone.getByText('Mit der Beamer-Partie verbunden', { exact: true })).toBeVisible();
   await expect(phone.locator('.kids-time-plan')).toContainText('Jetzt Aufgabe 1, Ziel bis 2:30');
   await expect(phone.locator('.kids-remote-question')).toContainText('Kurzshow');
   await phone.getByRole('button', { name: '20 Sekunden starten', exact: true }).click();
-  await expect(phone.getByText('Kinder zeigen ihre Finger.', { exact: false })).toBeVisible({ timeout: 25000 });
+  await expect(phone.getByText('Helfer zählen die Finger.', { exact: false })).toBeVisible({ timeout: 25000 });
   await phone.getByRole('button', { name: 'Mehrheit richtig · +10', exact: true }).click();
   await expect(page.locator('.kids-answer.is-correct')).toHaveCount(1);
   await expect(page.getByTestId('team-score')).toHaveText('10');

@@ -1,3 +1,4 @@
+import { showKidsOperator } from './kids-operator';
 import { expect, test } from '@playwright/test';
 import { createKidsGame } from '../src/shared/kids-game';
 import { packKidsGame } from '../src/shared/kids-remote';
@@ -8,11 +9,12 @@ test.beforeEach(async ({ page }) => { await page.emulateMedia({ reducedMotion: '
 
 test('Countdown überspringen: nur im Bedienungsmenü und vor dem Start ohne vorzeitige Auflösung', async ({ page }) => {
   await page.goto('/kids');
-  await page.getByRole('button', { name: 'Show vorbereiten', exact: false }).click();
+  await page.getByRole('button', { name: 'Show vorbereiten', exact: false }).click(); await showKidsOperator(page);
   await page.getByRole('button', { name: 'Mission starten', exact: true }).click();
   await page.getByRole('button', { name: 'Erste Aufgabe im Kapitel', exact: true }).click();
   const skip = page.getByRole('button', { name: 'Countdown überspringen', exact: true });
   await expect(skip).toHaveCount(0);
+  await showKidsOperator(page);
   await page.getByRole('button', { name: 'Bedienung', exact: true }).click();
   await expect(page.locator('#kids-operator-tools').getByRole('button', { name: 'Countdown überspringen', exact: true })).toBeVisible();
   await skip.click();
@@ -35,6 +37,7 @@ test('Smartphone überspringt den laufenden Countdown, stoppt vorgemerkte Sprach
   }, { id: remote.id, token: remote.ownerToken });
   await trackProfessorAudio(page);
   await page.goto('/kids');
+  await showKidsOperator(page);
   await page.getByRole('button', { name: 'Bedienung', exact: true }).click();
   await page.getByRole('button', { name: 'Klang einschalten', exact: true }).click();
   await page.getByRole('button', { name: 'Menü schließen', exact: true }).click();

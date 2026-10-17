@@ -60,22 +60,31 @@ lokal erzeugte Klangbilder; Eltern und andere Gruppen machen Geräusche und Pant
   eine Verbeugung mit Abschiedswinken. Die positiven Auflösungen wechseln ihre Bewegungen;
   bei null Punkten bleibt der Professor ermutigend. Die Animationen laufen begrenzt und
   bleiben innerhalb der Figurfläche; „Bewegung reduzieren“ schaltet sie vollständig ab.
-- Vollbild direkt über **Vollbild** in der Kopfzeile. Größere Figuren, farbige Punktekarten
+- Die Kinderanzeige startet ohne Bedienknöpfe, Abspielbuttons oder Technikhinweise. Das gilt auch
+  beim Neuladen, bei Mausbewegungen, in der Auflösung und auf kleinen Displays.
+  **H** blendet am Computer die Mausbedienung ein und aus. Vor dem Einlass lässt sich über
+  **Smartphone-Fernbedienung einrichten** direkt eine Show mit QR-Code vorbereiten.
+- Vollbild in der Vorbereitung oder nach **H** über **Vollbild** in der Kopfzeile. Größere Figuren, farbige Punktekarten
   und eine klare Aufteilung für Frage, Auflösung und Professor auf der Leinwand.
-- Mausbedienung über **Maus** ein-/ausblenden. Leertaste oder Pfeil rechts: weiter;
+- Mausbedienung über **H** ein-/ausblenden. Leertaste oder Pfeil rechts: weiter;
   P: Pause/fortsetzen; H: Mausknöpfe. Während der Wertung: 1 = Mehrheit richtig,
   2 = mindestens ein Kind richtig, 0 = keiner richtig.
-- Smartphone der Spielleitung: **Bedienung → Smartphone verbinden**, QR-Code scannen.
+- Smartphone der Spielleitung: direkt in der Vorbereitung oder **H → Bedienung → Smartphone verbinden**, QR-Code scannen.
   Start, Pause, Rückweg, Mehrheitswertung, Szene und Abschluss steuern denselben
   Stand wie die Maus. Regiehinweise bleiben auf der Fernbedienung. Klang am Beamer aktivieren.
-- **Letzte Wertung ändern** auf dem Smartphone korrigiert die zuletzt abgeschlossene Aufgabe
+- Die Fernbedienung hat drei Reiter: **Ablauf** mit nächster Aktion, passenden Audios und aufklappbaren
+  Antworten/Regiehinweisen; **Zusatzaudios** mit Kategorien und einer Suche über alle Ansagen;
+  **Funktionen** mit Finalsprung, Abschluss, Wertungskorrektur und Technikhinweisen.
+  Die Stopptaste für Professor-Audios bleibt in allen drei Bereichen erreichbar. Neue Spielphasen
+  bringen im Ablauf die nächste Aktion wieder nach oben. Richtige Antworten sind nur für Helfer markiert.
+- **Letzte Wertung ändern** unter **Funktionen** korrigiert die zuletzt abgeschlossene Aufgabe
   auf 10 / 5 / 0 Punkte, auch nach dem Weitergehen oder am Endbildschirm. Aktuelle Frage,
   Countdown und Professor-Punkte bleiben bestehen; es wird keine Runde erneut gezählt.
 - **Zwischendurch-Sprüche** bietet 23 manuell abspielbare Professor-Ansagen in den Bereichen
   Mitmachen, Ablauf, Spannung, Mut machen, Gruppenaufrufe und Spielsignale. Alle Aufnahmen verwenden die bisherige Snorre-Stimme,
   erklingen am Beamer und lassen sich stoppen oder durch einen anderen Spruch ersetzen.
 - **Passende Phasenansagen** stehen direkt beim aktuellen Spielschritt: der Aufruf der aktiven
-  Altersgruppe vor der Frage, Start/Fortsetzen während der Antwortwahl, Pause, Stopp,
+  Altersgruppe vor der Frage, Countdown/Anfeuern während der Antwortwahl, Pause, Stopp,
   „Alle sind zurück“ vor der Auflösung und der Gedanke „Bei Jesus sind wir willkommen“ am Abschluss.
   **Countdown für letzte 5 Sekunden vormerken** lässt Professor Bluff synchron zum laufenden Timer
   fünf bis eins zählen. Pause, ein anderes Audio und Phasenwechsel heben die Vormerkung auf.
