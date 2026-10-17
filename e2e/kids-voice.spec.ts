@@ -24,7 +24,7 @@ test('Professor: manuell abspielen, stoppen, wiederholen und beim Weitergehen ab
   await page.getByRole('button',{name:'Erste Aufgabe im Kapitel',exact:true}).click();
   await expect.poll(async()=>(await counts(page)).stops).toBe(3);
   // Während der Aufgabe steht Professor Bluffs Behauptung am Beamer. Die Spielleitung liest sie selbst vor.
-  await expect(page.locator('.kids-bluff-claim')).toContainText('Daniel mit seinen Löwen');
+  await expect(page.locator('.kids-bluff-claim')).toContainText('Daniel kennt sich doch mit Löwen aus');
   await expect(page.getByRole('button',{name:'Professor-Spruch abspielen',exact:true})).toHaveCount(0);
   await expect(page.locator('.kids-clock')).toHaveAttribute('aria-label','30 Sekunden');
   await page.getByRole('button',{name:'Spiel mit Punktestand abschließen',exact:true}).click();
