@@ -36,8 +36,7 @@ function KidsStageClock({ side, seconds, progress, locked, urgent }: {
     aria-label={side === 'left' ? `${seconds} Sekunden` : undefined}
     aria-hidden={side === 'right' ? true : undefined}>
     <svg viewBox="0 0 80 80" aria-hidden="true"><circle class="kids-clock-track" cx="40" cy="40" r="33"/><circle class="kids-clock-progress" cx="40" cy="40" r="33" style={{ strokeDasharray: '207.35', strokeDashoffset: `${207.35 * (1 - progress)}` }}/></svg>
-    <b aria-hidden="true">{locked ? '✋' : seconds}</b>
-    <small aria-hidden="true">{locked ? 'Stopp!' : 'Sekunden'}</small>
+    <span class="kids-clock-text" aria-hidden="true"><b>{locked ? '✋' : seconds}</b><small>{locked ? 'Stopp!' : 'Sekunden'}</small></span>
   </div>;
 }
 
