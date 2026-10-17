@@ -3,7 +3,7 @@ import { PROFESSOR_INTERJECTIONS, professorInterjection } from '../../shared/pro
 import type { KidsGame } from '../../shared/kids-game';
 import type { KidsRemoteAction } from '../../shared/kids-remote';
 import { professorVoiceKey } from '../../shared/professor-voice';
-import { professorSays } from './KidsShow';
+import { kidsClaimPhase, professorSays } from './KidsShow';
 
 const categories = [...new Set(PROFESSOR_INTERJECTIONS.map(clip => clip.category))];
 type SoundboardProps = { game: KidsGame; disabled: boolean; send: (action: KidsRemoteAction) => Promise<void> };
@@ -32,7 +32,8 @@ export function KidsPhaseAudio({ game, disabled, send }: SoundboardProps) {
     <div class="kids-soundboard-clips">
       {groupCall && <InterjectionButton clip={groupCall} game={game} disabled={disabled} send={send}/>}
       {game.phase === 'reading' && <div class="kids-audio-clip"><button class="kids-button" type="button" disabled={disabled} onClick={() => { void send('read-question'); }}>▶ Frage am Beamer vorlesen</button></div>}
-      {professorVoiceKey(game) && <div class="kids-audio-clip"><button type="button" class="kids-button" disabled={disabled} onClick={() => { void send('speak'); }}>▶ {game.phase === 'reading' ? 'Professor-Tipp abspielen' : 'Spruch am Beamer abspielen'}</button><p>{professorSays(game)}</p></div>}
+      {professorVoiceKey(game) && <div class="kids-audio-clip"><button type="button" class="kids-button" disabled={disabled} onClick={() => { void send('speak'); }}>▶ Spruch am Beamer abspielen</button><p>{professorSays(game)}</p></div>}
+      {kidsClaimPhase(game.phase) && <div class="kids-audio-claim"><b>Professor-Tipp · selbst mit Professor-Stimme vorlesen</b><p>{professorSays(game)}</p></div>}
       {phaseAudio[game.phase].map(id => <InterjectionButton key={id} clip={professorInterjection(id)!} game={game} disabled={disabled} send={send}/>)}
     </div>
     {game.phase === 'reading' && game.rounds[game.index].question.scene && <button class="kids-button kids-scene-play" type="button" aria-label="Szene am Beamer abspielen" disabled={disabled} onClick={() => { void send('scene'); }}>▷ Szene am Beamer abspielen</button>}

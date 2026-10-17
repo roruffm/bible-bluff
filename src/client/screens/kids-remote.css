@@ -42,6 +42,8 @@
 .kids-remote-page .kids-audio-clip p { color: #40596a; font-size: 13px; line-height: 1.45; margin: 7px 3px 0; }
 .kids-remote-page .kids-soundboard .kids-button { border-radius: 11px; min-height: 48px; padding: 12px; font-size: 15px; line-height: 1.4; text-align: left; background: #fffdf8; white-space: normal; }
 .kids-remote-page .kids-scene-play { margin-top: 14px; }
+.kids-audio-claim { border-left: 3px solid #7651a5; padding: 10px 12px; background: #f1eafb; border-radius: 0 10px 10px 0; font-size: 13px; line-height: 1.5; }
+.kids-audio-claim > p { margin-top: 6px; }
 .kids-remote-page .kids-all-audio { background: #fffdf8; }
 .kids-all-audio > label { margin-top: 14px; }
 .kids-all-audio input { width: 100%; min-height: 48px; padding: 11px; border: 2px solid #a5bdc7; border-radius: 10px; background: white; color: #12324a; font: inherit; font-weight: 500; box-sizing: border-box; }

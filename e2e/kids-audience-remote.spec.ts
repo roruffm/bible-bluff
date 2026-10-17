@@ -30,6 +30,8 @@ test('Kinderbühne bleibt in allen Spielphasen ohne sichtbare Bedienung; Fernbed
     await phone.getByRole('button', { name: 'Erste Aufgabe im Kapitel', exact: true }).click();
     await expect(page.locator('#kids-question')).toBeVisible();
     await audienceOnly(page);
+    await expect(phone.locator('.kids-audio-claim')).toContainText('selbst mit Professor-Stimme vorlesen');
+    await expect(phone.locator('.kids-audio-claim')).toContainText(await page.locator('.kids-bluff-claim p').innerText());
     await phone.getByRole('button', { name: 'Szene am Beamer abspielen', exact: false }).click();
     await expect(page.locator('.kids-cinema')).toBeVisible();
     await audienceOnly(page);
