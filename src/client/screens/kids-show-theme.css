@@ -56,9 +56,10 @@
 }
 .kids-show .kids-show-stage .kids-show-question {
   position: relative;
-  display: grid; grid-template-columns: minmax(0, 1fr) clamp(86px, 10vw, 180px);
-  grid-template-rows: minmax(0, 1fr) auto; gap: 8px 12px; padding: clamp(14px, 1.6vw, 30px);
-  padding-top: clamp(48px, 5.5vh, 68px);
+  display: grid; grid-template-columns: minmax(0, 1fr);
+  /* Equal flexible rows above and below the heading keep it truly centered. */
+  grid-template-rows: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 8px; padding: clamp(14px, 1.6vw, 30px);
   border: 2px solid #082a3c; border-radius: var(--show-radius); background: var(--show-cream); color: var(--show-ink);
   box-shadow: 0 6px 0 #082a3c; align-items: center;
 }
@@ -74,17 +75,23 @@
 .kids-active-group .kids-group-name { font-size: inherit; gap: .35em; }
 .kids-active-group .kids-group-symbol { width: var(--active-group-symbol); height: var(--active-group-symbol); flex-basis: var(--active-group-symbol); }
 .kids-show .kids-show-stage .kids-show-question h1 {
-  grid-column: 1; grid-row: 1; width: auto; height: auto; font-size: clamp(28px, min(3.65vw, 5.8vh), 84px);
-  line-height: 1.2; padding-block: 4px; display: grid; place-items: center; text-align: center; font-weight: 900; text-wrap: balance; letter-spacing: -.025em;
+  grid-column: 1; grid-row: 2; width: 100%; height: auto; min-width: 0;
+  font-size: clamp(28px, min(3.65vw, 5.8vh), 84px); line-height: 1.2;
+  padding-block: 4px; display: block; text-align: center;
+  font-weight: 900; text-wrap: balance; letter-spacing: -.025em;
 }
-.kids-show .kids-show-stage .kids-clock { grid-column: 2; grid-row: 1; height: auto; max-height: none; width: 100%; align-self: center; color: white; }
+.kids-show .kids-show-stage .kids-corner-clock {
+  width: clamp(72px, min(11vw, 12vh), 150px);
+  height: clamp(72px, min(11vw, 12vh), 150px);
+  max-height: none; align-self: end; color: white;
+}
 .kids-show .kids-clock circle { fill: #087e79; stroke-width: 5; }
 .kids-show .kids-clock .kids-clock-progress { fill: none; stroke: #12324a; }
 .kids-show .kids-clock-track { stroke: #40c5b8; }
 .kids-show .kids-show-stage .kids-clock b { font-size: clamp(38px, 5vw, 92px); inset: 7% 0 25%; color: white; }
 .kids-show .kids-clock small { position: absolute; left: 0; right: 0; bottom: 24%; text-align: center; font-size: clamp(11px, 1.2vw, 24px); font-weight: 800; line-height: 1; }
 .kids-show .kids-clock.is-urgent circle { fill: #a64127; }
-.kids-show .kids-show-stage .kids-status { grid-column: 1 / -1; padding: 0; border: 0; box-shadow: none; background: none; display: flex; flex-wrap: wrap; justify-content: flex-start; gap: 4px 12px; color: #335765; }
+.kids-show .kids-show-stage .kids-status { grid-column: 1; grid-row: 3; align-self: end; padding: 0; border: 0; box-shadow: none; background: none; display: flex; flex-wrap: wrap; justify-content: center; text-align: center; gap: 4px 12px; color: #335765; }
 .kids-show .kids-show-stage .kids-status strong { font-size: clamp(14px, min(1.4vw, 2.4vh), 27px); line-height: 1.25; }
 .kids-show .kids-show-stage .kids-status > span { font-size: clamp(12px, 1vw, 19px); }
 .kids-show .kids-status .kids-cheers { margin: 0; font-size: clamp(11px, 1vw, 19px); }
@@ -104,11 +111,19 @@
 .kids-show .kids-show-stage .kids-answer > .kids-story-picture { width: 88%; max-width: 520px; height: 100%; margin: 18px auto 0; }
 .kids-show .kids-show-stage .has-pictures .kids-answer-text { font-size: clamp(23px, min(2.7vw, 4.5vh), 58px); line-height: 1.15; font-weight: 900; min-height: 1.2em; text-wrap: balance; padding-block: 5px; }
 .kids-show .kids-bluff-pin { width: clamp(35px, 4vw, 65px); }
-.kids-show .kids-show-stage .kids-bottom { grid-column: 1 / -1; grid-row: 3; display: flex; justify-content: flex-end; }
+.kids-show .kids-show-stage .kids-bottom {
+  grid-column: 1 / -1; grid-row: 3; width: 100%;
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2.2fr) minmax(0, 1fr);
+  align-items: end; gap: 12px;
+}
+.kids-show .kids-show-stage .kids-bottom .kids-clock-left { grid-column: 1; justify-self: start; }
+.kids-show .kids-show-stage .kids-bottom .kids-clock-right { grid-column: 3; justify-self: end; }
+.kids-show .kids-show-stage .kids-bottom > .kids-operator-actions { grid-column: 2; justify-self: center; }
 .kids-show .kids-show-stage .kids-operator-actions { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; max-width: none; gap: 12px; }
 .kids-show .kids-show-stage .kids-extra-controls { display: flex; gap: 8px; }
-.kids-show.is-projecting .kids-show-stage { grid-template-rows: minmax(0, 1fr) minmax(0, 1.12fr); }
-.kids-show.is-projecting .kids-show-stage .kids-bottom { display: none; }
+.kids-show.is-projecting .kids-show-stage { grid-template-rows: minmax(0, 1fr) minmax(0, 1.12fr) auto; }
+.kids-show.is-projecting .kids-show-stage .kids-bottom { display: grid; }
+.kids-show.is-projecting .kids-show-stage .kids-operator-actions { display: none; }
 .kids-show .kids-countdown { pointer-events: none; }
 .kids-show .kids-countdown > span { color: #ffdc72; opacity: .65; }
 /* Consistent larger character moments, with speech above the character. */
@@ -205,7 +220,7 @@
 @media (max-width: 1000px) {
   .kids-show .kids-playing-bar { grid-template-columns: 90px minmax(0, 1fr) minmax(240px, 38%); gap: 6px 10px; }
   .kids-show .kids-compact-score { padding: 8px 10px; gap: .35em; }
-  .kids-show .kids-show-stage .kids-show-question { grid-template-columns: minmax(0, 1fr) 85px; }
+  .kids-show .kids-show-stage .kids-show-question { grid-template-columns: minmax(0, 1fr); }
   .kids-show .kids-active-group { --active-group-symbol: 64px; font-size: 22px; }
   .kids-show .kids-show-stage .kids-show-question h1 { font-size: clamp(26px, 3.6vw, 38px); }
 }
@@ -224,9 +239,9 @@
   .kids-show .kids-operator-tools { position: fixed; top: 12px; right: 12px; max-height: calc(100dvh - 24px); overflow-y: auto; }
   .kids-show .kids-show-stage, .kids-show .kids-show-interlude, .kids-show .kids-regroup, .kids-show .kids-reveal, .kids-show .kids-ending, .kids-show .kids-cinema { height: auto; min-height: 0; padding: 16px 14px 28px; gap: 20px; }
   .kids-show .kids-show-stage, .kids-show.is-projecting .kids-show-stage { display: flex; flex-direction: column; }
-  .kids-show .kids-show-stage .kids-show-question { padding: 16px; gap: 12px 8px; grid-template-columns: minmax(0, 1fr) 70px; grid-template-rows: auto auto auto; }
+  .kids-show .kids-show-stage .kids-show-question { padding: 16px; gap: 12px 8px; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto auto; }
   .kids-show .kids-active-group { --active-group-symbol: 56px; position: static; transform: none; grid-column: 1 / -1; grid-row: 1; justify-self: center; max-width: 100%; font-size: 20px; padding: 5px 12px; border-radius: 24px; }
-  .kids-show .kids-show-stage .kids-clock { grid-row: 2; align-self: start; }
+  .kids-show .kids-show-stage .kids-corner-clock { width: 80px; height: 80px; }
   .kids-show .kids-show-stage .kids-clock b { font-size: 34px; }
   .kids-show .kids-clock small { font-size: 9px; }
   .kids-show .kids-show-stage .kids-show-question h1 { grid-column: 1; grid-row: 2; font-size: 28px; }
@@ -245,6 +260,15 @@
   .kids-show .kids-show-stage .kids-answer > .kids-story-picture { width: 80px; height: 85px; margin: 0; }
   .kids-show .kids-show-stage .has-pictures .kids-answer-text { font-size: 20px; text-align: left; min-height: 0; overflow-wrap: anywhere; }
   .kids-show .kids-bluff-pin { width: 30px; top: -10px; right: 8px; }
+  .kids-show .kids-show-stage .kids-bottom, .kids-show.is-projecting .kids-show-stage .kids-bottom {
+    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: auto auto; align-items: end; gap: 14px;
+  }
+  .kids-show .kids-show-stage .kids-bottom .kids-clock-left { grid-column: 1; grid-row: 1; }
+  .kids-show .kids-show-stage .kids-bottom .kids-clock-right { grid-column: 2; grid-row: 1; }
+  .kids-show .kids-show-stage .kids-bottom > .kids-operator-actions {
+    grid-column: 1 / -1; grid-row: 2; width: 100%;
+  }
   .kids-show .kids-show-stage .kids-operator-actions { flex-direction: column; width: 100%; align-items: stretch; gap: 14px; }
   .kids-show .kids-show-stage .kids-extra-controls { flex-wrap: wrap; }
   .kids-show .kids-show-stage .kids-controls .kids-button { width: 100%; min-height: 48px; }
