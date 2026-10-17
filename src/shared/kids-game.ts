@@ -19,11 +19,16 @@ export interface KidsGame {
   /** Gerätezeit, zu der die Mission nach der Begrüßung startete; für den Zeitplan der Kurzshow. */ startedAt?: number | null;
   voiceSeq?: number; voicePlaying?: boolean; voiceCue?: string|null; voiceKind?: 'quote'|'question'|'interjection'; voiceClip?: ProfessorInterjectionId|null;
 }
-export type KidsAction = 'start' | 'pause' | 'resume' | 'tick' | 'return' | 'ready' | 'correct' | 'participated' | 'none' | 'next' | 'scene' | 'end-scene' | 'finish' | 'jump-final' | 'speak' | 'stop-speech' | 'read-question' | 'correct-last' | 'participated-last' | 'none-last' | `interjection:${ProfessorInterjectionId}`;
+export type KidsAction = 'start' | 'pause' | 'resume' | 'skip-countdown' | 'tick' | 'return' | 'ready' | 'correct' | 'participated' | 'none' | 'next' | 'scene' | 'end-scene' | 'finish' | 'jump-final' | 'speak' | 'stop-speech' | 'read-question' | 'correct-last' | 'participated-last' | 'none-last' | `interjection:${ProfessorInterjectionId}`;
 
 export function kidsCanJumpToFinal(game: KidsGame): boolean {
   const final = game.rounds.length - 1;
   return game.results[final] === null && (game.index < final || game.phase === 'finished');
+}
+
+/** Nur die Spielleitung kann die Antwortzeit vorzeitig beenden; die Auflösung bleibt verborgen. */
+export function kidsCanSkipCountdown(game: Pick<KidsGame, 'phase'>): boolean {
+  return game.phase === 'reading' || game.phase === 'moving' || game.phase === 'paused';
 }
 
 /** Antwortzeit je Aufgabe in Millisekunden. */
@@ -81,6 +86,11 @@ export function kidsOvertook(game: KidsGame): boolean {
 /** Zeit und Punkte sind geräteunabhängig; doppelte oder unpassende Schritte ändern nichts. */
 export function updateKidsGame(game: KidsGame, action: KidsAction, now: number): KidsGame {
   const phase = game.phase;
+  if (action === 'skip-countdown') {
+    if (!kidsCanSkipCountdown(game)) return game;
+    return { ...game, phase: 'locked', remainingMs: 0, deadline: null,
+      voiceSeq: (game.voiceSeq ?? 0) + 1, voicePlaying: false, voiceCue: null };
+  }
   if (action === 'jump-final') {
     if (!kidsCanJumpToFinal(game)) return game;
     return { ...game, index: game.rounds.length - 1, phase: 'superbluff', remainingMs: kidsAnswerMs(game), deadline: null,

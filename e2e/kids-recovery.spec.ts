@@ -25,7 +25,7 @@ test('Kids: Neuladen mitten im Countdown setzt die Show angehalten mit allen Pun
   const question = await page.locator('#kids-question').innerText(), answers = await page.locator('.kids-answer-text').allInnerTexts();
   await page.getByRole('button', { name: '30 Sekunden starten', exact: true }).click();
   await page.clock.runFor(12000);
-  await expect(page.locator('.kids-clock')).toHaveAttribute('aria-label', '18 Sekunden');
+  await expect(page.locator('.kids-clock-left')).toHaveAttribute('aria-label', '18 Sekunden');
 
   await page.reload();
   const resume = page.getByRole('button', { name: 'Show fortsetzen', exact: true });
@@ -39,7 +39,7 @@ test('Kids: Neuladen mitten im Countdown setzt die Show angehalten mit allen Pun
   await expect(page.getByTestId('prof-score')).toHaveText('7');
   await expect(page.getByText('Kurze Pause. Bleibt, wo ihr seid!', { exact: true })).toBeVisible();
   await page.clock.runFor(5000);
-  await expect(page.locator('.kids-clock')).toHaveAttribute('aria-label', '18 Sekunden');
+  await expect(page.locator('.kids-clock-left')).toHaveAttribute('aria-label', '18 Sekunden');
   await page.getByRole('button', { name: /^Weiter geht/ }).click();
   await page.clock.runFor(18000);
   await expect(page.getByText('Stopp! Helfer prüfen die Felder.', { exact: true })).toBeVisible();

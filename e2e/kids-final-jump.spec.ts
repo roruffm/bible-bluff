@@ -20,7 +20,7 @@ test('Kids: Maus springt sofort aus dem Countdown ins Finale und zählt keine ü
   await page.clock.fastForward(60000);
   await expect(page.getByRole('heading',{name:'Knackt den Superbluff!',exact:true})).toBeVisible();
   await page.getByRole('button',{name:'Gemeinsam ins Finale',exact:true}).click();
-  await expect(page.locator('.kids-clock')).toHaveAttribute('aria-label','30 Sekunden');
+  await expect(page.locator('.kids-clock-left')).toHaveAttribute('aria-label','30 Sekunden');
   await page.getByRole('button',{name:'30 Sekunden starten',exact:true}).click();
   await page.clock.fastForward(30000);
   await page.getByRole('button',{name:'Zurück in die Gruppen',exact:true}).click();

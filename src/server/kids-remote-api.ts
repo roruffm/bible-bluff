@@ -5,7 +5,7 @@ import { GameError } from './state';
 import type { KidsRemoteRecord, KidsRemoteStore } from './kids-remote-store';
 
 export const KIDS_REMOTE_TTL = 6 * 60 * 60 * 1000;
-const ACTIONS: KidsRemoteAction[] = ['start', 'pause', 'resume', 'return', 'ready', 'correct', 'participated', 'none', 'next', 'scene', 'end-scene', 'finish', 'jump-final', 'speak', 'stop-speech', 'read-question', 'correct-last', 'participated-last', 'none-last', ...PROFESSOR_INTERJECTIONS.map(clip => `interjection:${clip.id}` as const)];
+const ACTIONS: KidsRemoteAction[] = ['start', 'pause', 'resume', 'skip-countdown', 'return', 'ready', 'correct', 'participated', 'none', 'next', 'scene', 'end-scene', 'finish', 'jump-final', 'speak', 'stop-speech', 'read-question', 'correct-last', 'participated-last', 'none-last', ...PROFESSOR_INTERJECTIONS.map(clip => `interjection:${clip.id}` as const)];
 const response = (data: unknown, status = 200) => new Response(JSON.stringify(data), { status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', 'x-content-type-options': 'nosniff' } });
 const token = (bytes = 24) => Array.from(crypto.getRandomValues(new Uint8Array(bytes)), (b) => b.toString(16).padStart(2, '0')).join('');
 async function hash(value: string) { return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value))), (b) => b.toString(16).padStart(2, '0')).join(''); }

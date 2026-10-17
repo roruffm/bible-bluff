@@ -98,6 +98,7 @@
 .kids-remote-answers .is-correct { background: #cff2d8; border-color: #176845; }
 .kids-remote-actions { position: sticky; bottom: 12px; z-index: 3; }
 .kids-remote-actions button { width: 100%; min-height: 68px; font-size: 23px; }
+.kids-remote-actions .kids-skip-countdown { margin-top: 10px; min-height: 48px; font-size: 17px; background: #fff0cf; }
 .kids-remote-note, .kids-remote-empty { margin-top: 20px; font-size: 13px; line-height: 1.55; color: #40596a; text-align: center; }
 .kids-stage { width: 100%; max-width: 2600px; margin: auto; padding: clamp(12px, 1.7vh, 30px) clamp(20px, 3vw, 100px); height: calc(100dvh - 68px); display: grid; grid-template-rows: minmax(0, 1.1fr) minmax(0, .85fr) minmax(0, 2.7fr) minmax(0, .9fr); gap: clamp(8px, 1.3vh, 24px); position: relative; isolation: isolate; }
 .kids-stage > :not(.kids-celebration) { min-height: 0; min-width: 0; position: relative; z-index: 2; }
