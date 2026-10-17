@@ -51,7 +51,7 @@
 }
 /* The current team sits centered above the question; the professor has his own column. */
 .kids-show .kids-show-stage {
-  --kids-clock-size: clamp(76px, min(11vw, 12vh), 140px);
+  --kids-clock-size: clamp(88px, min(14vw, 15vh), 180px);
   display: grid; grid-template-columns: minmax(0, 3.35fr) minmax(0, .85fr);
   grid-template-rows: minmax(0, 1fr) minmax(0, 1.12fr) auto;
 }
@@ -83,11 +83,17 @@
 }
 .kids-show .kids-show-stage .kids-corner-clock {
   width: var(--kids-clock-size); height: var(--kids-clock-size);
-  max-height: none; align-self: end; color: white; pointer-events: none;
+  max-height: none; align-self: end; color: var(--show-ink); pointer-events: none;
+  --kids-clock-beat: 1.06;
 }
-.kids-show .kids-corner-clock circle { fill: #087e79; stroke-width: 5; }
-.kids-show .kids-corner-clock .kids-clock-track { stroke: #40c5b8; }
-.kids-show .kids-corner-clock .kids-clock-progress { fill: none; stroke: var(--show-gold); stroke-linecap: round; }
+.kids-show .kids-corner-clock svg { filter: drop-shadow(0 0 8px #ffda6859); }
+.kids-show .kids-corner-clock circle { fill: var(--show-gold); stroke-width: 5.5; }
+.kids-show .kids-corner-clock .kids-clock-track { stroke: var(--show-cream); }
+.kids-show .kids-corner-clock .kids-clock-progress { fill: none; stroke: #087a70; stroke-linecap: round; }
+.kids-show .kids-corner-clock::after {
+  content: ''; position: absolute; inset: 6%; border: 3px solid var(--show-cream);
+  border-radius: 50%; opacity: 0; pointer-events: none;
+}
 /* Number and caption scale together with the circle, including on wide, shallow screens. */
 .kids-show .kids-corner-clock .kids-clock-text {
   position: absolute; inset: 16%; display: flex; flex-direction: column;
@@ -95,11 +101,24 @@
   text-align: center; white-space: nowrap;
 }
 .kids-show .kids-show-stage .kids-corner-clock b {
-  position: static; display: block; font-size: calc(var(--kids-clock-size) * .4);
+  position: static; display: block; font-size: calc(var(--kids-clock-size) * .45);
   line-height: 1; color: inherit;
 }
-.kids-show .kids-corner-clock small { font-size: calc(var(--kids-clock-size) * .11); font-weight: 800; line-height: 1; }
-.kids-show .kids-corner-clock.is-urgent .kids-clock-track { fill: #a64127; stroke: #d77451; }
+.kids-show .kids-corner-clock small { font-size: calc(var(--kids-clock-size) * .1); font-weight: 800; line-height: 1; }
+.kids-show .kids-corner-clock.is-urgent { --kids-clock-beat: 1.12; }
+.kids-show .kids-corner-clock.is-urgent .kids-clock-track { fill: #ffb3b9; }
+.kids-show .kids-corner-clock.is-urgent .kids-clock-progress { stroke: #a32c3e; }
+/* Both clocks start together. Only their inner contents pulse, keeping the layout steady. */
+.kids-show .kids-show-stage.is-moving .kids-corner-clock::after { animation: kids-clock-ring-pulse 1s ease-out infinite; }
+.kids-show .kids-show-stage.is-moving .kids-clock-text { animation: kids-clock-beat 1s ease-in-out infinite; }
+@keyframes kids-clock-ring-pulse {
+  0% { transform: scale(1); opacity: .9; }
+  75%, 100% { transform: scale(1.12); opacity: 0; }
+}
+@keyframes kids-clock-beat {
+  0%, 45%, 100% { transform: scale(1); }
+  18% { transform: scale(var(--kids-clock-beat)); }
+}
 .kids-show .kids-show-stage .kids-status { grid-column: 1; grid-row: 3; align-self: end; padding: 0; border: 0; box-shadow: none; background: none; display: flex; flex-wrap: wrap; justify-content: center; text-align: center; gap: 4px 12px; color: #335765; }
 .kids-show .kids-show-stage .kids-status strong { font-size: clamp(14px, min(1.4vw, 2.4vh), 27px); line-height: 1.25; }
 .kids-show .kids-show-stage .kids-status > span { font-size: clamp(12px, 1vw, 19px); }
@@ -247,7 +266,7 @@
   .kids-show.is-projecting .kids-top-actions { position: static; opacity: 1; }
   .kids-show .kids-operator-tools { position: fixed; top: 12px; right: 12px; max-height: calc(100dvh - 24px); overflow-y: auto; }
   .kids-show .kids-show-stage, .kids-show .kids-show-interlude, .kids-show .kids-regroup, .kids-show .kids-reveal, .kids-show .kids-ending, .kids-show .kids-cinema { height: auto; min-height: 0; padding: 16px 14px 28px; gap: 20px; }
-  .kids-show .kids-show-stage, .kids-show.is-projecting .kids-show-stage { --kids-clock-size: 80px; display: flex; flex-direction: column; }
+  .kids-show .kids-show-stage, .kids-show.is-projecting .kids-show-stage { --kids-clock-size: 96px; display: flex; flex-direction: column; }
   .kids-show .kids-show-stage .kids-show-question { padding: 16px; gap: 12px 8px; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto auto; }
   .kids-show .kids-active-group { --active-group-symbol: 56px; position: static; transform: none; grid-column: 1 / -1; grid-row: 1; justify-self: center; max-width: 100%; font-size: 20px; padding: 5px 12px; border-radius: 24px; }
   .kids-show .kids-show-stage .kids-show-question h1 { grid-column: 1; grid-row: 2; font-size: 28px; }
@@ -341,4 +360,6 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .kids-show .kids-top-actions { transition: none; }
+  .kids-show .kids-show-stage.is-moving .kids-corner-clock::after,
+  .kids-show .kids-show-stage.is-moving .kids-clock-text { animation: none; }
 }
