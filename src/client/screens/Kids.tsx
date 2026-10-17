@@ -35,8 +35,11 @@ function KidsStageClock({ side, seconds, progress, locked, urgent }: {
   return <div class={`kids-clock kids-corner-clock kids-clock-${side}${urgent ? ' is-urgent' : ''}`}
     aria-label={side === 'left' ? `${seconds} Sekunden` : undefined}
     aria-hidden={side === 'right' ? true : undefined}>
-    <svg viewBox="0 0 80 80" aria-hidden="true"><circle class="kids-clock-track" cx="40" cy="40" r="33"/><circle class="kids-clock-progress" cx="40" cy="40" r="33" style={{ strokeDasharray: '207.35', strokeDashoffset: `${207.35 * (1 - progress)}` }}/></svg>
-    <span class="kids-clock-text" aria-hidden="true"><b>{locked ? '✋' : seconds}</b><small>{locked ? 'Stopp!' : 'Sekunden'}</small></span>
+    {/* Re-keyed every second so the pulse lands exactly when the number (and the tick sound) changes. */}
+    <span class="kids-clock-beat" key={seconds} aria-hidden="true">
+      <svg viewBox="0 0 80 80" aria-hidden="true"><circle class="kids-clock-track" cx="40" cy="40" r="33"/><circle class="kids-clock-progress" cx="40" cy="40" r="33" style={{ strokeDasharray: '207.35', strokeDashoffset: `${207.35 * (1 - progress)}` }}/></svg>
+      <span class="kids-clock-text" aria-hidden="true"><b>{locked ? '✋' : seconds}</b><small>{locked ? 'Stopp!' : 'Sekunden'}</small></span>
+    </span>
   </div>;
 }
 
