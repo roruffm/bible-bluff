@@ -24,8 +24,8 @@ test('Kids: Startseitenlogo, 30 Sekunden, Pause, Rückweg und gemeinsame Wertung
   await page.getByRole('link',{name:'BibleBluff Kids – Beamer-Spiel für Kinder'}).click();
   await expect(page).toHaveURL(/\/kids$/); await begin(page);
   await expect(page.locator('.kids-answer')).toHaveCount(3);
-  await expect(page.locator('.professor-lane').getByRole('img',{name:'Professor Bluffs Kopf'})).toBeVisible();
-  await expect(page.locator('.professor-lane')).not.toHaveText('B');
+  await expect(page.locator('.kids-compact-score')).toContainText('Unser Team');
+  await expect(page.locator('.kids-compact-score')).toContainText('Professor Bluff');
   await expect(page.locator('.kids-answer > .kids-story-picture')).toHaveCount(3);
   await page.clock.install();
   await page.getByRole('button',{name:'30 Sekunden starten',exact:true}).click();
@@ -48,7 +48,7 @@ test('Kids: Startseitenlogo, 30 Sekunden, Pause, Rückweg und gemeinsame Wertung
   await expect(page.getByTestId('prof-score')).toHaveText('7');
   await expect(page.locator('.kids-celebration')).toBeVisible();
   await page.keyboard.press('ArrowRight');
-  await expect(page.locator('.kids-round-counter')).toContainText('Leuchtsterne');
+  await expect(page.locator('.kids-active-group')).toContainText('Leuchtsterne');
   await expect(page.locator('.kids-clock')).toHaveAttribute('aria-label','30 Sekunden');
 });
 test('Kids: vollständige Show mit Bildern, ohne Joker und mit jederzeit möglichem Abschluss',async({page})=>{
@@ -63,7 +63,7 @@ test('Kids: vollständige Show mit Bildern, ohne Joker und mit jederzeit möglic
     await expect(page.locator('.kids-answer.is-correct')).toHaveCount(1);
     await page.getByRole('button',{name:i===9?'Zum Abschluss':i===8?'Zum Superbluff':i===2||i===5?'Nächstes Kapitel':'Nächste Aufgabe',exact:true}).click();
     if(i===2||i===5) await page.getByRole('button',{name:'Erste Aufgabe im Kapitel',exact:true}).click();
-    if(i===8) { await expect(page.getByTestId('team-score')).toHaveText('90'); await expect(page.getByText('ALARM! Der Superbluff!',{exact:true})).toBeVisible(); await page.getByRole('button',{name:'Gemeinsam ins Finale',exact:true}).click(); }
+    if(i===8) { await expect(page.getByTestId('team-score')).toHaveText('90'); await expect(page.getByText('Knackt den Superbluff!',{exact:true})).toBeVisible(); await page.getByRole('button',{name:'Gemeinsam ins Finale',exact:true}).click(); }
   }
   await expect(page.getByRole('heading',{name:'Gemeinsam seid ihr stark!'})).toBeVisible();
   await expect(page.locator('.kids-treasure')).toHaveCount(0);
@@ -128,7 +128,7 @@ test('Kids: Smartphone synchronisiert Maus, Wertung, Neuladen und Netzabbruch',a
   await phone.getByRole('button',{name:'Mehrheit richtig · +10',exact:true}).click();
   await expect(page.getByTestId('team-score')).toHaveText('10');
   await phone.getByRole('button',{name:'Nächste Aufgabe',exact:true}).click();
-  await expect(page.locator('.kids-round-counter')).toContainText('Leuchtsterne');
+  await expect(page.locator('.kids-active-group')).toContainText('Leuchtsterne');
   await page.getByRole('button',{name:'Bedienung',exact:false}).click();
   await page.getByRole('button',{name:'Smartphone-Steuerung anzeigen',exact:true}).click();
   await page.getByRole('button',{name:'Smartphone-Verbindung trennen',exact:true}).click();
@@ -142,7 +142,7 @@ test('Kids: alle Showfragen passen bei 800×600, 4:3, 720p, Full HD und 1440p',a
   async function check() {
     const issues=await page.evaluate(()=>{
       const problems:string[]=[];
-      for(const selector of ['#kids-question','.kids-answer-text','.is-revealed .kids-discovery p','#kids-regroup-title','.kids-regroup-instruction','#kids-reveal-title','.kids-reaction-quote','.kids-reaction-caption','.kids-farewell','#kids-ending-title','.kids-ending-host blockquote','.kids-ending-count','.kids-ending-results strong','.kids-ending footer > p']) document.querySelectorAll<HTMLElement>(selector).forEach(el=>{
+      for(const selector of ['#kids-question','.kids-answer-text','.is-revealed .kids-discovery p','#kids-regroup-title','.kids-regroup-instruction','#kids-reveal-title','.kids-reaction-quote','.kids-reveal-points','.kids-farewell','#kids-ending-title','.kids-ending-host blockquote','.kids-ending-count','.kids-ending-results strong','.kids-ending footer > p']) document.querySelectorAll<HTMLElement>(selector).forEach(el=>{
         const range=document.createRange();range.selectNodeContents(el);const text=range.getBoundingClientRect(),box=(selector.includes('discovery')?el.closest('.kids-discovery')!:el).getBoundingClientRect();
         if(text.left<box.left-1||text.right>box.right+1||text.top<box.top-1||text.bottom>box.bottom+1) problems.push(`${innerWidth}×${innerHeight} ${selector}: ${el.textContent}; Text ${JSON.stringify({left:text.left,right:text.right,top:text.top,bottom:text.bottom})}; Box ${JSON.stringify({left:box.left,right:box.right,top:box.top,bottom:box.bottom})}`);
       });
@@ -197,7 +197,7 @@ test('Kids: Vollbild und Professor-Reaktion bei null, fünf und zehn Punkten',as
       expect(await page.locator('.kids-reaction-art .bluff-arm-left').evaluate(el=>getComputedStyle(el).animationName)).not.toBe('none');
     } else {
       await expect(page.getByRole('img',{name:'Professor Bluff erschrickt über eure Punkte',exact:true})).toBeVisible();
-      await expect(page.locator('.kids-reaction-caption')).toHaveText(`+${points} für euer Team!`);
+      await expect(page.locator('.kids-reveal-points')).toHaveText(`+${points} für euer Team!`);
       expect(await page.locator('.kids-reaction-art .bluff-performer').evaluate(el=>getComputedStyle(el).animationName)).not.toBe('none');
     }
     await page.emulateMedia({reducedMotion:'reduce'});

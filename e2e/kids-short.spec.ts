@@ -30,8 +30,8 @@ test('Kurzshow: eigener Startknopf, ein Kapitel mit Fingerabstimmung, Finale und
   await task(page, '1');
   await expect(page.getByTestId('team-score')).toHaveText('10');
   await expect(page.getByTestId('prof-score')).toHaveText('6');
-  await expect(page.locator('.kids-prof-score small')).toHaveText('+6 je Aufgabe · Finale +10');
-  await expect(page.locator('.charge-minis .kids-charge-pips i')).toHaveCount(1);
+  await expect(page.locator('.kids-compact-score')).toHaveAttribute('aria-label', 'Gemeinsame Punktejagd: Kinderteam 10, Professor Bluff 6');
+  await expect(page.locator('.kids-reveal-points')).toHaveText('+10 für euer Team!');
   await page.getByRole('button', { name: 'Bedienung', exact: false }).click();
   const plan = page.locator('.kids-operator-tools .kids-time-plan');
   await expect(plan).toContainText('Jetzt Aufgabe 1, Ziel bis 2:30');
@@ -54,7 +54,7 @@ test('Kurzshow: eigener Startknopf, ein Kapitel mit Fingerabstimmung, Finale und
   await page.getByRole('button', { name: 'Nächste Aufgabe', exact: true }).click();
   await task(page, '0');
   await page.getByRole('button', { name: 'Zum Superbluff', exact: true }).click();
-  await expect(page.getByText('ALARM! Der Superbluff!', { exact: true })).toBeVisible();
+  await expect(page.getByText('Knackt den Superbluff!', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Gemeinsam ins Finale', exact: true }).click();
   await task(page, '1');
   await page.getByRole('button', { name: 'Zum Abschluss', exact: true }).click();

@@ -8,14 +8,14 @@ import { ProfessorBluff, professorSays } from './KidsShow';
 export function KidsFinish({ game, children }: { game:KidsGame; children?:ComponentChildren }) {
   const s=kidsScores(game);
   return <section class="kids-ending" aria-labelledby="kids-ending-title">
-    <header><p class="kids-eyebrow">EURE GEMEINSAME BLUFF-JAGD</p><h1 id="kids-ending-title">Gemeinsam seid ihr stark!</h1><p>Ein großer Applaus für <KidsGroupName group="minis"/>, <KidsGroupName group="mittis"/> und <KidsGroupName group="maxis"/>!</p></header>
+    <header><p class="kids-eyebrow">EURE GEMEINSAME BLUFF-JAGD</p><h1 id="kids-ending-title">Gemeinsam seid ihr stark!</h1><div class="kids-ending-groups" aria-label="Ein großer Applaus für alle drei Gruppen">{(['minis','mittis','maxis'] as const).map(group=><KidsGroupName key={group} group={group}/>)}</div></header>
     <div class="kids-ending-host"><ProfessorBluff mood="kind" motion="bow"/><blockquote>{professorSays(game)}</blockquote><span class="kids-professor-signature">Professor Bluff <KidsVoiceButton/></span></div>
     <div class="kids-ending-results" aria-label="Endpunktestand">
-      <div class="kids-ending-team"><span>BIBLEBLUFF-TEAM</span><strong data-testid="team-score">{s.team}</strong><b>gemeinsam gesammelte Punkte</b></div>
-      <div class="kids-ending-professor"><span>PROFESSOR BLUFF</span><strong data-testid="prof-score">{s.professor}</strong><b>Punkte</b></div>
+      <div class="kids-ending-team"><span>UNSER TEAM</span><strong data-testid="team-score">{s.team}</strong><b>gemeinsam gesammelte Punkte</b></div>
+      <span class="kids-ending-colon" aria-hidden="true">:</span><div class="kids-ending-professor"><span>PROFESSOR BLUFF</span><strong data-testid="prof-score">{s.professor}</strong><b>Punkte</b></div>
       <p class="kids-ending-count">{s.playedRounds === 0 ? 'Danke, dass ihr dabei seid!' : `${s.playedRounds} ${s.playedRounds === 1 ? 'Aufgabe gemeinsam gespielt' : 'Aufgaben gemeinsam gespielt'}`}</p>
     </div>
-    <footer><p>Bei Jesus sind wir willkommen.</p><small>Jesus lädt die Kinder zu sich ein. · Markus 10,14</small><div class="kids-finale-seal"><span aria-hidden="true">♥</span> ALLE GEHÖREN DAZU <span aria-hidden="true">♥</span></div></footer>
+    <footer><h2>Noch viel Spaß bei Hello King!</h2><p>Bei Jesus sind wir willkommen.</p><small>Jesus lädt die Kinder zu sich ein. · Markus 10,14</small><div class="kids-finale-seal"><span aria-hidden="true">♥</span> ALLE GEHÖREN DAZU <span aria-hidden="true">♥</span></div></footer>
     {children}
   </section>;
 }

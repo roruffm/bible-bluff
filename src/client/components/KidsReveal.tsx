@@ -20,11 +20,11 @@ export function KidsReveal({ game, act, disabled, primaryRef, suspense = false, 
         <span class="kids-answer-text">{round.question.answer}</span><span class="kids-correct-mark">✓ Entdeckt!</span>
       </div>
       <div class="kids-discovery"><div><p>{round.question.explanation}</p><small>{round.question.ref}</small></div></div>
+      <p class="kids-reveal-points">{reaction.caption}</p>
     </div>
     <aside class="kids-reaction" aria-label="Professor Bluffs Reaktion">
       <div class="kids-reaction-art"><div class="kids-reaction-halo" aria-hidden="true"/><ProfessorBluff mood={reaction.mood} motion={professorMotion(game)}/><div class="kids-reaction-symbols" aria-hidden="true">{[0,1,2].map(i=><span key={i} style={{'--i':i}}>{reaction.points>0 ? ['!','✦','!'][i] : '♥'}</span>)}</div></div>
       <blockquote class="kids-reaction-bubble"><span class="kids-professor-signature">PROFESSOR BLUFF <KidsVoiceButton labelled/></span><p class="kids-reaction-quote">{reaction.quote}</p></blockquote>
-      <p class="kids-reaction-caption">{reaction.caption}</p>
     </aside>
     <footer class="kids-reveal-footer"><p>{suspense ? 'Wo hat Professor Bluff geflunkert?' : game.index===9 ? 'Alle Altersgruppen haben zusammengeholfen.' : 'Gemeinsam geht die Jagd weiter. Jeder Beitrag zählt!'}</p><ShowControls game={game} act={act} disabled={disabled} primaryRef={primaryRef}/></footer>
     {children}

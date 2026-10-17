@@ -1,10 +1,9 @@
-import { KidsGroupName } from './KidsGroupName';
 import { kidsRoundReaction } from '../lib/kids-reactions';
 import { AnswerMotifArt } from './KidsAnswerArt';
 import type { ProfessorMotion } from '../lib/professor-motion';
 import type { RefObject } from 'preact';
-import { kidsActionLabel, kidsCanScore, kidsGroupResults, kidsOvertook, kidsPrimaryAction, kidsProfessorPoints, kidsResultPoints, kidsScores, type KidsAction, type KidsGame } from '../../shared/kids-game';
-import { KIDS_GROUPS, type KidsGroup, type StoryMotif } from '../../shared/kids-show-questions';
+import { kidsActionLabel, kidsCanScore, kidsOvertook, kidsPrimaryAction, kidsScores, type KidsAction, type KidsGame } from '../../shared/kids-game';
+import { type StoryMotif } from '../../shared/kids-show-questions';
 
 export type ProfessorMood = 'confident' | 'nervous' | 'panic' | 'defeated' | 'victory' | 'startled' | 'kind';
 export function professorMood(game: KidsGame): ProfessorMood {
@@ -73,26 +72,14 @@ export function StoryPicture({ motif, animated = false }: { motif: StoryMotif; a
     </g>
   </svg>;
 }
-/** Jede Gruppe lädt ihr Symbol auf: drei Leuchtpunkte (voll = 10, halb = 5) und ein wachsendes Leuchten. Kein Kind muss Zahlen lesen. */
-function GroupCharge({ game, group, points, hiddenIndex, charging }: { game: KidsGame; group: Exclude<KidsGroup,'all'>; points: number; hiddenIndex: number; charging: boolean }) {
-  const results = kidsGroupResults(game, group, hiddenIndex), max = results.length * 10;
-  return <span class={`kids-group-charge charge-${group}${charging ? ' is-charging' : ''}`} style={{ '--charge': points / max }}>
-    <KidsGroupName group={group}/>
-    <span class="kids-charge-pips" role="img" aria-label={`${KIDS_GROUPS[group].name}: ${points} von ${max} Punkten`}>{results.map((result, i) => <i key={i} class={result === 'correct' ? 'is-full' : result === 'participated' ? 'is-half' : undefined}/>)}</span>
-  </span>;
-}
-/** hiddenIndex hält eine Wertung zurück, solange der Trommelwirbel läuft. */
+/** Ein gemeinsamer Punktestand hält die Spielfläche frei; die Wertung bleibt bis zur Auflösung verborgen. */
 export function ShowScoreboard({ game, hiddenIndex = -1 }: { game: KidsGame; hiddenIndex?: number }) {
   const s = kidsScores(game, hiddenIndex);
-  const shown = game.phase === 'revealed' && hiddenIndex !== game.index;
-  const scored = shown && kidsResultPoints(game.results[game.index]) > 0 ? game.rounds[game.index].question.group : null;
-  const overtook = shown && kidsOvertook(game);
-  return <section class="kids-scoreboard" aria-label="Gemeinsame Punktejagd">
-    <div class="kids-team-score"><span>BIBLEBLUFF-TEAM</span><strong data-testid="team-score">{s.team}</strong><div class="kids-group-charges">{(['minis','mittis','maxis'] as const).map(g=><GroupCharge key={g} game={game} group={g} points={s.groups[g]} hiddenIndex={hiddenIndex} charging={scored === g || scored === 'all'}/>)}</div></div>
-    <div class={`kids-race${overtook ? ' is-overtaking' : ''}`} aria-label={`Kinderteam ${s.team}, Professor Bluff ${s.professor}`}>
-      <div class="kids-race-lane"><span style={{ left: `${s.team * .85}%` }}>♥</span>{overtook && <b class="kids-race-overtake">Überholt!</b>}</div><div class="kids-race-lane professor-lane"><span style={{ left: `${s.professor * .85}%` }}><ProfessorHead mood={hiddenIndex === game.index ? 'nervous' : professorMood(game)}/></span></div><small>{s.playedRounds} {s.playedRounds === 1 ? 'Aufgabe gewertet' : 'Aufgaben gewertet'} · Gemeinsam!</small>
-    </div>
-    <div class="kids-prof-score"><span>PROFESSOR BLUFF</span><strong data-testid="prof-score">{s.professor}</strong><small>+{kidsProfessorPoints(game)} je Aufgabe · Finale +10</small></div>
+  const overtook = game.phase === 'revealed' && hiddenIndex !== game.index && kidsOvertook(game);
+  return <section class="kids-scoreboard kids-compact-score" aria-label={`Gemeinsame Punktejagd: Kinderteam ${s.team}, Professor Bluff ${s.professor}`}>
+    <span class="kids-score-label">Unser Team</span><strong class="kids-score-team" data-testid="team-score">{s.team}</strong>
+    <span class="kids-score-colon" aria-hidden="true">:</span><strong class="kids-score-professor" data-testid="prof-score">{s.professor}</strong><span class="kids-score-label">Professor Bluff</span>
+    {overtook && <b class="kids-score-overtake">Überholt!</b>}
   </section>;
 }
 export function ShowControls({ game, act, disabled = false, primaryRef }: { game: KidsGame; act: (action: Exclude<KidsAction, 'tick'>) => void; disabled?: boolean; primaryRef?: RefObject<HTMLButtonElement> }) {
