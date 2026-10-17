@@ -43,7 +43,6 @@ export function KidsPhaseAudio({ game, disabled, send }: SoundboardProps) {
       {groupCall && <InterjectionButton clip={groupCall} game={game} disabled={disabled} send={send}/>}
       {game.phase === 'reading' && <div>
         <button class="kids-button" type="button" disabled={disabled} onClick={() => { void send('read-question'); }}>▶ Frage am Beamer vorlesen</button>
-        {game.index === 9 && <small>Finalfrage vorläufig mit deutscher Gerätestimme.</small>}
       </div>}
       {professorVoiceKey(game) && <div>
         <button type="button" class="kids-button" disabled={disabled} onClick={() => { void send('speak'); }}>▶ Spruch am Beamer abspielen</button>

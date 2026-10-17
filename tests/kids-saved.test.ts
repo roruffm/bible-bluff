@@ -103,9 +103,10 @@ describe('Kids: Aufnahmen zum Vorladen', () => {
       for (const result of ['correct', 'none'] as const) states.push({ ...game, index, phase: 'revealed', results: game.results.map((_, i) => i <= index ? result : null) });
     }
     states.push({ ...game, phase: 'finished', results: Array(10).fill('correct') });
-    for (const state of states) for (const key of [professorVoiceKey(state), state.index < 9 ? professorVoiceKey(state, 'question') : null]) if (key) expect(PROFESSOR_VOICE_KEYS, key).toContain(key);
-    // Alte Schatztexte und die noch fehlende Finalaufnahme werden nie geladen.
-    for (const key of ['comfort-4', 'comfort-9', 'question-9']) expect(PROFESSOR_VOICE_KEYS).not.toContain(key);
+    for (const state of states) for (const key of [professorVoiceKey(state), professorVoiceKey(state, 'question')]) if (key) expect(PROFESSOR_VOICE_KEYS, key).toContain(key);
+    // Alte Schatztexte werden nie geladen; die Finalaufnahme gehört jetzt zur Offline-Kopie.
+    for (const key of ['comfort-4', 'comfort-9']) expect(PROFESSOR_VOICE_KEYS).not.toContain(key);
+    expect(PROFESSOR_VOICE_KEYS).toContain('question-9');
     expect(existsSync(new URL('../src/client/public/kids-sw.js', import.meta.url))).toBe(true);
   });
 });

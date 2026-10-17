@@ -13,9 +13,9 @@ describe('Professor-Aufnahmen', () => {
       expect(bytes.subarray(0,3).toString()==='ID3' || bytes[0]===255).toBe(true);
     }
   });
-  it('ordnet allen neun regulären Fragen eigene Aufnahmen zu und lässt den Countdown ungestartet',()=>{
+  it('ordnet allen zehn Fragen einschließlich Finale eigene Aufnahmen zu und lässt den Countdown ungestartet',()=>{
     const base=createKidsGame();
-    for(let index=0;index<9;index++){
+    for(let index=0;index<10;index++){
       const game={...base,index,phase:'reading' as const}, next=updateKidsGame(game,'read-question',100);
       expect(next).toMatchObject({phase:'reading',remainingMs:30000,deadline:null,voiceKind:'question',voiceCue:`reading:${index}`});
       const key=professorVoiceKey(next,'question');expect(key).toBe(`question-${index}`);
