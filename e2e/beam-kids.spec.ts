@@ -31,7 +31,7 @@ test('Kids: Startseitenlogo, 30 Sekunden, Pause, Rückweg und gemeinsame Wertung
   await page.getByRole('button',{name:'30 Sekunden starten',exact:true}).click();
   await page.clock.runFor(10000); await page.keyboard.press('p');
   await page.clock.runFor(40000);
-  await expect(page.locator('.kids-clock')).toHaveAttribute('aria-label','20 Sekunden');
+  await expect(page.locator('.kids-clock-left')).toHaveAttribute('aria-label','20 Sekunden');
   await page.keyboard.press('ArrowRight'); await page.clock.runFor(20000);
   await expect(page.getByText('Stopp! Helfer prüfen die Felder.',{exact:true})).toBeVisible();
   await page.emulateMedia({reducedMotion:'no-preference'});
@@ -49,7 +49,7 @@ test('Kids: Startseitenlogo, 30 Sekunden, Pause, Rückweg und gemeinsame Wertung
   await expect(page.locator('.kids-celebration')).toBeVisible();
   await page.keyboard.press('ArrowRight');
   await expect(page.locator('.kids-active-group')).toContainText('Leuchtsterne');
-  await expect(page.locator('.kids-clock')).toHaveAttribute('aria-label','30 Sekunden');
+  await expect(page.locator('.kids-clock-left')).toHaveAttribute('aria-label','30 Sekunden');
 });
 test('Kids: vollständige Show mit Bildern, ohne Joker und mit jederzeit möglichem Abschluss',async({page})=>{
   const requests:string[]=[]; page.on('request',r=>{if(r.url().includes('/api/'))requests.push(r.url());});
@@ -242,7 +242,7 @@ test('Kids: vier große Szenen mit Handlung, Klang, Wiederholung und separatem A
         await page.locator('.kids-cinema').getByRole('button',{name:'Klang ausschalten',exact:true}).click();
       }
       await page.clock.runFor(3400);await expect(page.locator('.kids-cinema')).toHaveCount(0);
-      await expect(page.locator('.kids-clock')).toHaveAttribute('aria-label','30 Sekunden');
+      await expect(page.locator('.kids-clock-left')).toHaveAttribute('aria-label','30 Sekunden');
       expect(await page.locator('.kids-answer-text').allTextContents()).toEqual(answers);
       await page.getByRole('button',{name:'Szene abspielen',exact:true}).click();
       await expect(page.locator('.kids-cinema-art')).toHaveClass(/beat-0/);
@@ -252,7 +252,7 @@ test('Kids: vier große Szenen mit Handlung, Klang, Wiederholung und separatem A
       expect(animation).toBe('none');
       await page.getByRole('button',{name:'Zur Frage',exact:false}).click();
       await page.emulateMedia({reducedMotion:'no-preference'});
-      await expect(page.locator('.kids-clock')).toHaveAttribute('aria-label','30 Sekunden');
+      await expect(page.locator('.kids-clock-left')).toHaveAttribute('aria-label','30 Sekunden');
     }
     await resolve(page);
     await page.getByRole('button',{name:i===9?'Zum Abschluss':i===8?'Zum Superbluff':i===2||i===5?'Nächstes Kapitel':'Nächste Aufgabe',exact:true}).click();
@@ -269,7 +269,7 @@ test('Kids: vorzeitiger Abschluss behält nur gewertete Punkte, stoppt die Zeit 
   await page.getByRole('button',{name:'Spiel mit Punktestand abschließen',exact:true}).click();
   await expect(page.getByRole('dialog',{name:'Spiel jetzt abschließen?'})).toBeVisible();
   await page.keyboard.press('Escape');await expect(page.getByRole('dialog')).toHaveCount(0);
-  await expect(page.locator('.kids-clock')).toHaveAttribute('aria-label','25 Sekunden');
+  await expect(page.locator('.kids-clock-left')).toHaveAttribute('aria-label','25 Sekunden');
   await page.getByRole('button',{name:'Spiel mit Punktestand abschließen',exact:true}).click();
   await page.getByRole('button',{name:'Jetzt mit Punktestand abschließen',exact:true}).click();
   await expect(page.getByRole('heading',{name:'Gemeinsam seid ihr stark!'})).toBeVisible();
