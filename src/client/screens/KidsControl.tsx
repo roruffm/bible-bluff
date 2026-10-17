@@ -1,6 +1,6 @@
 import { KidsGroupName, KidsGroupText } from '../components/KidsGroupName';
 import { useEffect, useState } from 'preact/hooks';
-import { kidsCanJumpToFinal, kidsCanSkipCountdown, kidsLastScoredIndex, kidsProfessorPoints, kidsResultPoints, kidsScores, updateKidsGame, type KidsGame } from '../../shared/kids-game';
+import { kidsCanJumpToFinal, kidsCanSkipCountdown, kidsLastScoredIndex, kidsPreviousStep, kidsProfessorPoints, kidsResultPoints, kidsScores, updateKidsGame, type KidsGame, type KidsPhase } from '../../shared/kids-game';
 import { KIDS_CHAPTERS, kidsAnswerPicture } from '../../shared/kids-show-questions';
 import { useKidsRemote } from '../lib/kids-remote';
 import { KidsFinishDialog } from '../components/KidsFinish';
@@ -13,6 +13,7 @@ import './kids-remote.css';
 
 const tabs = [{ id: 'flow', label: 'Ablauf' }, { id: 'audio', label: 'Zusatzaudios' }, { id: 'tools', label: 'Funktionen' }] as const;
 type Tab = typeof tabs[number]['id'];
+const backTargets: Partial<Record<KidsPhase, string>> = { welcome: 'zur Begrüßung', chapter: 'zum Kapitelstart', superbluff: 'zum Superbluff', reading: 'zum Vorlesen', locked: 'zum Stopp', returning: 'zum Rückweg', judging: 'zur Wertung', revealed: 'zur Auflösung' };
 
 export function KidsControlPage() {
   const [game, setGame] = useState<KidsGame | null>(null);
@@ -30,6 +31,8 @@ export function KidsControlPage() {
   const round = game?.rounds[game.index], scores = game ? kidsScores(game) : null;
   const disabled = remote.busy || !!remote.error;
   const lastScored = game ? kidsLastScoredIndex(game) : -1;
+  const back = game ? kidsPreviousStep(game) : null;
+  const backNote = !game ? '' : game.phase === 'revealed' ? 'Die Wertung dieser Aufgabe wird zurückgenommen.' : ['moving', 'paused', 'locked'].includes(game.phase) ? 'Der Countdown startet danach wieder von vorn.' : '';
   const phaseLabel = !game ? '' : game.phase === 'moving' ? `${Math.ceil(game.remainingMs / 1000)} s` : ({ welcome: 'Begrüßung', chapter: 'Kapitelstart', superbluff: 'Superbluff', reading: 'Vorlesen', scene: 'Szene läuft', paused: 'Pause', locked: 'Stopp!', returning: 'Rückweg', judging: 'Wertung', revealed: 'Aufgelöst', finished: 'Geschafft!' } as const)[game.phase];
   const direction = !game ? '' : game.phase === 'finished' ? 'Der Endpunktestand bleibt am Beamer sichtbar. Feiert alle Kinder!' : game.phase === 'scene' ? 'Die Szene läuft zehn Sekunden. Danach vorlesen und den Antwort-Countdown starten.' : game.phase === 'locked' ? (game.short ? 'Helfer zählen die Finger. Danach hier das gemeinsame Ergebnis werten.' : 'Helfer prüfen die Felder. Danach alle Kinder zurückholen. Noch nicht auflösen.') : game.phase === 'returning' ? 'Erst weiterklicken, wenn alle Kinder wieder bei ihrer Gruppe sind.' : game.phase === 'judging' ? 'Das gemeldete Ergebnis wählen. Damit erscheint die Auflösung am Beamer.' : game.phase === 'moving' ? (game.short ? 'Die aktive Gruppe zeigt ihre Antwort mit den Fingern.' : 'Die aktive Gruppe wählt ihr Feld. Die anderen feuern an.') : game.phase === 'reading' ? 'Frage und Professor-Tipp abspielen oder vorlesen. Dann die Antwortzeit starten.' : 'Passende Ansage abspielen, dann mit dem großen Knopf weiter.';
   const selectTab = (next: Tab) => { setTab(next); window.scrollTo({ top: 0, behavior: 'instant' }); };
@@ -51,7 +54,9 @@ export function KidsControlPage() {
           <section class="kids-remote-step" aria-labelledby="kids-next-step"><h2 id="kids-next-step"><span>1</span> Jetzt steuern</h2><p>{direction}</p>
             <div class="kids-remote-actions">{game.phase === 'finished' ? <div class="kids-remote-farewell"><h2>Gemeinsam seid ihr stark!</h2><p>{scores!.playedRounds} {scores!.playedRounds === 1 ? 'Aufgabe gewertet' : 'Aufgaben gewertet'}. Der Abschluss bleibt stehen.</p></div> : <ShowControls game={game} act={action => { void remote.send(action); }} disabled={disabled}/>}
               {kidsCanSkipCountdown(game) && <button type="button" class="kids-tool kids-skip-countdown" aria-label="Countdown überspringen" disabled={disabled} onClick={() => { void remote.send('skip-countdown'); }}>⏭ Countdown überspringen</button>}
+              {back && <button type="button" class="kids-tool kids-remote-back" disabled={disabled} onClick={() => { void remote.send('back'); }}>← Zurück {backTargets[back.phase]}</button>}
             </div>
+            {back && backNote && <p class="kids-remote-back-note">{backNote}</p>}
             {game.phase === 'revealed' && lastScored >= 0 && <button type="button" class="kids-remote-correct-link" onClick={() => selectTab('tools')}>Letzte Wertung ändern</button>}
           </section>
           <KidsPhaseAudio game={game} disabled={disabled} send={remote.send}/>

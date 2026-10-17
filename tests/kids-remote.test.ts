@@ -341,4 +341,20 @@ describe('Kids-Fernbedienung in D1 / SQLite', () => {
     t.clock.advance(KIDS_REMOTE_TTL); await store.cleanup(t.clock.now);
     expect(await store.load(made.id)).toBeNull(); db.close();
   });
+  it('geht per Smartphone Schritt für Schritt zurück, nimmt dabei die Wertung zurück und hält an der Begrüßung an', async () => {
+    const t = setup(), made = await t.create(), path = `/api/kids-remotes/${made.id}`;
+    const action = (action: string, version: number) => t.call('POST', `${path}/action`, { action, version }, made.remoteToken);
+    let version = 1;
+    for (const forward of ['start', 'skip-countdown', 'return', 'ready', 'correct']) expect((await action(forward, version++)).status, forward).toBe(200);
+    const phases: string[] = [];
+    for (;;) {
+      const back = await action('back', version);
+      if (back.status !== 200) { expect(back.status).toBe(409); break; }
+      version++; phases.push(back.body.game.phase);
+      if (back.body.game.phase === 'judging') expect(kidsScores(back.body.game).team).toBe(0);
+    }
+    expect(phases).toEqual(['judging', 'returning', 'locked', 'reading', 'chapter', 'welcome']);
+    const display = await t.call('GET', path, undefined, made.ownerToken);
+    expect(display.body.game).toMatchObject({ phase: 'welcome', index: 0, results: Array(10).fill(null) });
+  });
 });
