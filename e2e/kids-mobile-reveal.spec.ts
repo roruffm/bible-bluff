@@ -52,6 +52,8 @@ test('Kids: mobile Auflösung trennt Professor und Kommentar und lässt den Spru
           horizontalOverflow: document.documentElement.scrollWidth > innerWidth + 1 };
       });
       expect(problems, `${size.width}x${size.height}: ${result}`).toEqual({ overlap: false, covered: false, smallTarget: false, horizontalOverflow: false });
+      // Der Start des Countdowns spielt die Startansage; gezählt wird ab hier nur der Spruch zur Auflösung.
+      ({ starts, stops } = await audioCounts());
       await play.click();
       await expect.poll(async () => (await audioCounts()).starts).toBe(++starts);
       await page.getByRole('button', { name: 'Professor-Spruch stoppen', exact: true }).click();

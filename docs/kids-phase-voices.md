@@ -47,6 +47,14 @@ in der Gesamtauswahl unter „Auflösung“. Die Zuordnung wurde anhand der Tran
 | 15:13:28 | `interjection-result-participated.mp3` | Jemand richtig +5 | Zwar nicht die Mehrheit, aber mindestens einer von euch lag richtig. Das gibt fünf Punkte! |
 | 15:14:43 | `interjection-result-none.mp3` | Keiner richtig +0 | Diesmal lag keiner richtig. Nicht schlimm, man lernt immer dazu. |
 
+Die einzige automatische Ansage ist die Startansage: Sobald die Spielleitung den
+Antwort-Countdown startet, spricht der Professor am Beamer die unveränderte Nutzer-Aufnahme
+vom 17.10.2026 (15:57:43, `interjection-signal-go.mp3`): „Los geht’s! Wählt eure Antwort!
+Die Zeit läuft ab jetzt!“ Sie ersetzt eine noch laufende Ansage wie das Vorlesen der Frage.
+Fortsetzen nach einer Pause, Neuladen und Wiederverbinden lösen sie nicht erneut aus. Ist der
+Klang am Beamer aus, bleibt der Start stumm und ohne Fehlermeldung. Unter „Spielsignale“
+lässt sie sich auch von Hand abspielen.
+
 ## Aufnahmen
 
 Zielverzeichnis: `src/client/public/professor-bluff/`.

@@ -149,7 +149,9 @@ export function updateKidsGame(game: KidsGame, action: KidsAction, now: number):
       return { ...game, index, phase: index === 9 ? 'superbluff' : index % 3 === 0 ? 'chapter' : 'reading', remainingMs: kidsAnswerMs(game), deadline: null };
     }
   }
-  if (action === 'start' && phase === 'reading') return { ...game, phase: 'moving', deadline: now + kidsAnswerMs(game) };
+  // Den Start der Antwortzeit kündigt der Professor am Beamer gleich selbst an.
+  if (action === 'start' && phase === 'reading') return { ...game, phase: 'moving', deadline: now + kidsAnswerMs(game),
+    voiceSeq: (game.voiceSeq ?? 0) + 1, voicePlaying: true, voiceCue: `moving:${game.index}`, voiceKind: 'interjection', voiceClip: 'signal-go' };
   if ((action === 'tick' || action === 'pause') && phase === 'moving') {
     const remainingMs = Math.max(0, (game.deadline ?? now) - now);
     if (remainingMs === 0) return { ...game, phase: 'locked', remainingMs: 0, deadline: null };
