@@ -1,6 +1,6 @@
 import { KIDS_SHOW_QUESTIONS, type KidsShowQuestion, type KidsGroup } from './kids-show-questions';
 import { KIDS_SCENE_MS } from './kids-scenes';
-import { professorInterjection, type ProfessorInterjectionId } from './professor-interjections';
+import { professorInterjectionForRound, type ProfessorInterjectionId } from './professor-interjections';
 
 export const KIDS_SECONDS = 30;
 /** Kurzshow: ein Kapitel und der Superbluff, 20 Sekunden, Abstimmen mit Fingern am Platz. */
@@ -10,7 +10,10 @@ export function kidsProfessorPoints(game: Pick<KidsGame, 'short'>): number { ret
 export type KidsPhase = 'welcome' | 'chapter' | 'superbluff' | 'reading' | 'scene' | 'moving' | 'paused' | 'locked' | 'returning' | 'judging' | 'revealed' | 'finished';
 /** participated bleibt als gespeicherter Protokollwert erhalten: mindestens ein Kind richtig, ohne Mehrheit. */
 export type KidsResult = 'correct' | 'participated' | 'none';
-export function kidsResultPoints(result: KidsResult | null): number { return result === 'correct' ? 10 : result === 'participated' ? 5 : 0; }
+/** Reguläre Aufgaben: 10/5/0. Im gemeinsamen Finale zählen Kinderpunkte doppelt. */
+export function kidsResultPoints(result: KidsResult | null, index = 0): number {
+  return (result === 'correct' ? 10 : result === 'participated' ? 5 : 0) * (index === 9 ? 2 : 1);
+}
 export interface KidsRound { question: KidsShowQuestion; answers: string[]; correctIndex: number }
 export interface KidsGame {
   rounds: KidsRound[]; index: number; phase: KidsPhase; remainingMs: number; deadline: number | null;
@@ -91,7 +94,7 @@ export function kidsScores(game: KidsGame, hiddenIndex = -1) {
   game.results.forEach((result, i) => {
     if (result === null || i === hiddenIndex) return;
     playedRounds++;
-    if (i === 9) { bonus = kidsResultPoints(result); professor += 10; return; }
+    if (i === 9) { bonus = kidsResultPoints(result, i); return; }
     const group = game.rounds[i].question.group as Exclude<KidsGroup, 'all'>;
     groups[group] += kidsResultPoints(result);
     professor += kidsProfessorPoints(game);
@@ -130,7 +133,7 @@ export function updateKidsGame(game: KidsGame, action: KidsAction, now: number):
     return { ...game, results, voiceSeq: (game.voiceSeq ?? 0) + 1, voicePlaying: false, voiceCue: null };
   }
   if (action.startsWith('interjection:')) {
-    const clip = professorInterjection(action.slice('interjection:'.length));
+    const clip = professorInterjectionForRound(action.slice('interjection:'.length), game.index);
     if (!clip) return game;
     return { ...game, voiceSeq: (game.voiceSeq ?? 0) + 1, voicePlaying: true, voiceCue: `${phase}:${game.index}`, voiceKind: 'interjection', voiceClip: clip.id };
   }

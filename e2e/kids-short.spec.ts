@@ -62,8 +62,8 @@ test('Kurzshow: eigener Startknopf, ein Kapitel mit Fingerabstimmung, Finale und
   await task(page, '1');
   await page.getByRole('button', { name: 'Zum Abschluss', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Gemeinsam seid ihr stark!' })).toBeVisible();
-  await expect(page.getByTestId('team-score')).toHaveText('25');
-  await expect(page.getByTestId('prof-score')).toHaveText('28');
+  await expect(page.getByTestId('team-score')).toHaveText('35');
+  await expect(page.getByTestId('prof-score')).toHaveText('18');
   await expect(page.locator('.kids-ending-count')).toContainText('4 Aufgaben');
 });
 

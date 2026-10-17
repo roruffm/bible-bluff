@@ -17,15 +17,16 @@ lokal erzeugte Klangbilder; Eltern und andere Gruppen machen Geräusche und Pant
 - Nach Stopp prüfen Helfer die Antwortfelder. **Zurück in die Gruppen → Alle sind zurück**
   zeigt Professor Bluff groß und animiert; erst danach wird die Wertung freigeschaltet. Nur das gemeinsame Resultat wird erfasst.
 - Kinderteam: Mehrheit richtig = 10 Punkte; sonst mindestens ein Kind richtig = 5; keiner richtig = 0. Maximal 30 je Altersgruppe.
-  Professor: immer +7 je gewerteter Runde (in der Kurzshow +6). Keine heimliche Anpassung der Wertung.
-- Superbluff: Professor +10, Kinder erhalten auch hier 10 / 5 / 0 nach derselben Regel. Endstand erst nach
+  Professor: +7 je gewerteter regulärer Aufgabe (in der Kurzshow +6). Keine heimliche Anpassung der Wertung.
+- Superbluff: Kinder erhalten 20 / 10 / 0 Punkte (Mehrheit / mindestens ein Kind / niemand richtig).
+  Professor erhält im Finale keine neuen Punkte. So lässt sich ein Rückstand von weniger als 20 Punkten noch aufholen. Endstand erst nach
   dem Finale. Die Spielleitung kann auch jederzeit früher mit dem erreichten Punktestand abschließen.
   Der Abschluss feiert alle Kinder mit Jesu Einladung (Markus 10,14).
 - **Kurzshow · 15 Minuten** hat in der Vorbereitung einen eigenen Startknopf: Begrüßung, ein Kapitel
   (je eine Aufgabe für Glühwürmchen, Leuchtsterne und Fackelträger), Superbluff und Abschluss. 20 statt
   30 Sekunden. Die Kinder bleiben sitzen und zeigen 1, 2 oder 3 Finger; nach dem Stopp wird sofort gewertet,
   ohne die Bildschirme „Zurück in die Gruppen“ und „Alle sind zurück“. Punkte und Professor wie in der
-  vollen Show, nur bekommt Professor Bluff +6 statt +7 je Aufgabe (Kinder bis 40, Professor 28). „Bedienung“ und das Smartphone zeigen einen Zeitplan ab
+  vollen Show, nur bekommt Professor Bluff +6 statt +7 je Aufgabe (Kinder bis 50, Professor 18). „Bedienung“ und das Smartphone zeigen einen Zeitplan ab
   „Mission starten“ (Aufgaben bis 2:30, 5:00, 7:30, Superbluff bis 11:30, Abschluss bis 13:30; plus
   1:30 Begrüßung) und melden, ob ihr im Plan liegt. Fernbedienung, Sicherung und „Show fortsetzen“
   funktionieren auch hier.
@@ -78,7 +79,7 @@ lokal erzeugte Klangbilder; Eltern und andere Gruppen machen Geräusche und Pant
   Die Stopptaste für Professor-Audios bleibt in allen drei Bereichen erreichbar. Neue Spielphasen
   bringen im Ablauf die nächste Aktion wieder nach oben. Richtige Antworten sind nur für Helfer markiert.
 - **Letzte Wertung ändern** unter **Funktionen** korrigiert die zuletzt abgeschlossene Aufgabe
-  auf 10 / 5 / 0 Punkte, auch nach dem Weitergehen oder am Endbildschirm. Aktuelle Frage,
+  auf 10 / 5 / 0 Punkte (im Finale 20 / 10 / 0), auch nach dem Weitergehen oder am Endbildschirm. Aktuelle Frage,
   Countdown und Professor-Punkte bleiben bestehen; es wird keine Runde erneut gezählt.
 - **Zwischendurch-Sprüche** bietet 23 manuell abspielbare Professor-Ansagen in den Bereichen
   Mitmachen, Ablauf, Spannung, Mut machen, Gruppenaufrufe und Spielsignale. Alle Aufnahmen verwenden die bisherige Snorre-Stimme,

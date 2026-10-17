@@ -37,7 +37,7 @@ export function KidsInterlude({ game, chapter, act, disabled, primaryRef }: {
         <p>Jetzt sind alle drei Teams zusammen dran.</p>
         <StoryPicture motif="boat"/>
         <p>Welche Geschichte spielen die Eltern?</p>
-        <div class="kids-final-bonuses"><span>Professor Bluff <b>+10</b></span><span>Unser Team <b>bis zu +10</b></span></div>
+        <div class="kids-final-bonuses"><span>Professor Bluff <b>+0</b></span><span>Unser Team <b>bis zu +20</b></span></div>
       </> : <>
         {!welcome && <ChapterPicture/>}
         <div class="kids-team-badges">{(['minis','mittis','maxis'] as const).map(g=><div key={g}><b><KidsGroupName group={g}/></b><span class="kids-group-ages">{KIDS_GROUPS[g].ages}</span></div>)}</div>

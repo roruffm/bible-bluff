@@ -157,6 +157,18 @@ export const PROFESSOR_INTERJECTIONS = [
     "text": "Zwar nicht die Mehrheit, aber mindestens einer von euch lag richtig. Das gibt fünf Punkte!"
   },
   {
+    "id": "result-final-correct",
+    "label": "Finale: Mehrheit richtig +20",
+    "category": "Auflösung",
+    "text": "Die Mehrheit von euch hat richtig getippt. Das gibt zwanzig Punkte für euer Team!"
+  },
+  {
+    "id": "result-final-participated",
+    "label": "Finale: Jemand richtig +10",
+    "category": "Auflösung",
+    "text": "Zwar nicht die Mehrheit, aber mindestens einer von euch lag richtig. Das gibt im Finale zehn Punkte für euer Team!"
+  },
+  {
     "id": "result-none",
     "label": "Keiner richtig +0",
     "category": "Auflösung",
@@ -167,4 +179,11 @@ export const PROFESSOR_INTERJECTIONS = [
 export type ProfessorInterjectionId = typeof PROFESSOR_INTERJECTIONS[number]['id'];
 export function professorInterjection(id: unknown) {
   return PROFESSOR_INTERJECTIONS.find(clip => clip.id === id);
+}
+
+/** Auch bereits geöffnete Fernbedienungen spielen die zur Runde passende Punkteansage. */
+export function professorInterjectionForRound(id: unknown, index: number) {
+  if (id === 'result-correct' || id === 'result-final-correct') return professorInterjection(index === 9 ? 'result-final-correct' : 'result-correct');
+  if (id === 'result-participated' || id === 'result-final-participated') return professorInterjection(index === 9 ? 'result-final-participated' : 'result-participated');
+  return professorInterjection(id);
 }

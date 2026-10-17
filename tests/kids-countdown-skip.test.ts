@@ -30,7 +30,7 @@ describe('Kids: Countdown überspringen', () => {
       }
       const scored = updateKidsGame(ready, 'correct', 7000);
       expect(scored.phase).toBe('revealed');
-      expect(kidsScores(scored).team).toBe(before.team + 10);
+      expect(kidsScores(scored).team).toBe(before.team + (index === 9 ? 20 : 10));
       expect(scored.results[index]).toBe('correct');
     }
   });

@@ -38,7 +38,7 @@ describe('Kids: Kurzshow', () => {
     game = play(game, [['next', 90000], ...task(90000), ['next', 120000]]);
     expect(game.phase).toBe('finished');
     expect(game.results).toEqual(['correct', 'participated', 'correct', ...Array(6).fill(null), 'correct']);
-    expect(kidsScores(game)).toMatchObject({ team: 35, professor: 28, playedRounds: 4, bonus: 10 });
+    expect(kidsScores(game)).toMatchObject({ team: 45, professor: 18, playedRounds: 4, bonus: 20 });
     expect(kidsCanJumpToFinal(game)).toBe(false);
     // Jede Gruppe hat in der Kurzshow genau einen Leuchtpunkt.
     expect(kidsGroupResults(game, 'minis')).toEqual(['correct']);

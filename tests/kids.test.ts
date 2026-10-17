@@ -51,8 +51,8 @@ describe('Die große Bluff-Jagd', () => {
     expect(g.phase).toBe('superbluff'); expect(kidsScores(g).team).toBe(65); expect(kidsScores(g).professor).toBe(63);
     expect(kidsScores(g).playedRounds).toBe(9); expect(kidsScores(g).groups).toEqual({minis:25,mittis:20,maxis:20});
     g=updateKidsGame(g,'next',30000); expect(kidsScores(g).professor).toBe(63);
-    g=resolve(g,'correct'); expect(kidsScores(g).team).toBe(75);
-    g=updateKidsGame(g,'next',30000); expect(g.phase).toBe('finished'); expect(kidsScores(g).professor).toBe(73);
+    g=resolve(g,'correct'); expect(kidsScores(g).team).toBe(85);
+    g=updateKidsGame(g,'next',30000); expect(g.phase).toBe('finished'); expect(kidsScores(g).professor).toBe(63);
   });
   it('hat feste Punkte für alle Resultate und einen gemeinsamen Abschluss', () => {
     for (const result of ['correct','participated','none'] as const) {
@@ -63,8 +63,8 @@ describe('Die große Bluff-Jagd', () => {
         if(['chapter','superbluff'].includes(g.phase)) g=updateKidsGame(g,'next',30000);
       }
       expect(g.phase).toBe('finished'); const s=kidsScores(g);
-      expect(s.professor).toBe(73); expect(s.playedRounds).toBe(10);
-      expect(s.team).toBe(result==='correct' ? 100 : result==='participated' ? 50 : 0);
+      expect(s.professor).toBe(63); expect(s.playedRounds).toBe(10);
+      expect(s.team).toBe(result==='correct' ? 110 : result==='participated' ? 55 : 0);
       expect(Object.values(s.groups).every(n=>n<=30)).toBe(true);
     }
   });
@@ -173,7 +173,21 @@ describe('Die große Bluff-Jagd', () => {
     const g={...createKidsGame(),index:9,phase:'superbluff' as const,results:[...Array(9).fill('correct'),null]};
     expect(kidsScores(updateKidsGame(g,'finish',0))).toMatchObject({team:90,professor:63,bonus:0,playedRounds:9});
     const resolved={...g,phase:'revealed' as const,results:[...Array(9).fill('correct'),'none' as const]};
-    expect(kidsScores(updateKidsGame(resolved,'finish',0))).toMatchObject({team:90,professor:73,bonus:0,playedRounds:10});
+    expect(kidsScores(updateKidsGame(resolved,'finish',0))).toMatchObject({team:90,professor:63,bonus:0,playedRounds:10});
+  });
+
+  it('kann im Finale einen echten Rückstand aufholen, ohne Professorpunkte zu erhöhen', () => {
+    const base=createKidsGame();
+    const before: KidsGame={...base,index:9,phase:'judging',remainingMs:0,results:[...Array(9).fill('participated'),null]};
+    expect(kidsScores(before)).toMatchObject({team:45,professor:63,bonus:0});
+    for (const [result,points] of [['correct',20],['participated',10],['none',0]] as const) {
+      const after=updateKidsGame(before,result,0);
+      expect(kidsScores(after)).toMatchObject({team:45+points,professor:63,bonus:points,playedRounds:10});
+      expect(kidsScores(after,9)).toEqual(kidsScores(before));
+      expect(kidsRoundReaction(after).points).toBe(points);
+      expect(kidsOvertook(after)).toBe(result==='correct');
+      expect(updateKidsGame(after,result,0)).toBe(after);
+    }
   });
 
 });

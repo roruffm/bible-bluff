@@ -1,0 +1,69 @@
+import { expect, test } from '@playwright/test';
+import { createKidsGame } from '../src/shared/kids-game';
+import { packKidsGame } from '../src/shared/kids-remote';
+import { showKidsOperator } from './kids-operator';
+import { professorAudio, trackProfessorAudio } from './professor-audio';
+
+test.use({ viewport: { width: 1280, height: 800 }, isMobile: false });
+
+test('Finale: Smartphone holt Rückstand auf, spielt passende Punkteansagen und korrigiert 20/10/0', async ({ page, browser, request }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  const game = createKidsGame();
+  game.index = 9; game.phase = 'superbluff';
+  game.results = [...Array(9).fill('participated'), null];
+  const response = await request.post('/api/kids-remotes', { data: { easy: false, game: packKidsGame(game, Date.now()) } });
+  expect(response.status()).toBe(201);
+  const remote = await response.json();
+  await trackProfessorAudio(page);
+  await page.addInitScript(({ id, token }) => { sessionStorage.setItem('bb:kids:display', JSON.stringify({ id, token })); }, { id: remote.id, token: remote.ownerToken });
+  await page.goto('/kids');
+  await expect(page.locator('.kids-final-bonuses')).toContainText('bis zu +20');
+  await expect(page.locator('.kids-final-bonuses')).toContainText('Professor Bluff +0');
+  await showKidsOperator(page);
+  await page.getByRole('button', { name: 'Bedienung', exact: true }).click();
+  await page.getByRole('button', { name: 'Klang einschalten', exact: true }).click();
+  await page.getByRole('button', { name: 'Menü schließen', exact: true }).click();
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: 'de-DE' });
+  const phone = await context.newPage();
+  await phone.goto(`/kids/steuerung#id=${remote.id}&key=${remote.remoteToken}`);
+  // Die letzte reguläre Frage behält ihre 10/5/0, obwohl bereits das Finale angezeigt wird.
+  await phone.getByRole('tab', { name: 'Funktionen', exact: true }).click();
+  await expect(phone.getByRole('status').filter({ hasText: 'Aktuell:' })).toHaveText('Aktuell: 5 Punkte für das Kinderteam.');
+  await expect(phone.getByRole('button', { name: 'Mehrheit richtig · 10 Punkte', exact: true })).toBeVisible();
+  await phone.getByRole('tab', { name: 'Ablauf', exact: true }).click();
+  await phone.getByRole('button', { name: 'Spruch am Beamer abspielen', exact: false }).click();
+  await expect.poll(async () => (await professorAudio(page)).played.at(-1)).toBe('superbluff-finale20');
+  await phone.getByRole('button', { name: 'Gemeinsam ins Finale', exact: true }).click();
+  await phone.getByRole('button', { name: 'Countdown überspringen', exact: true }).click();
+  await phone.getByRole('button', { name: 'Zurück in die Gruppen', exact: true }).click();
+  await phone.getByRole('button', { name: 'Alle sind zurück', exact: true }).click();
+  await expect(phone.getByRole('button', { name: 'Mindestens ein Kind richtig · +10', exact: true })).toBeVisible();
+  await phone.getByRole('button', { name: 'Mehrheit richtig · +20', exact: true }).click();
+  await expect(page.getByTestId('team-score')).toHaveText('65');
+  await expect(page.getByTestId('prof-score')).toHaveText('63');
+  await expect(page.locator('.kids-reveal-points')).toHaveText('+20 für euer Team!');
+  await phone.getByRole('button', { name: 'Finale: Mehrheit richtig +20 am Beamer abspielen', exact: true }).click();
+  await expect.poll(async () => (await professorAudio(page)).played.at(-1)).toBe('interjection-result-final-correct');
+  await phone.getByRole('button', { name: 'Finale: Jemand richtig +10 am Beamer abspielen', exact: true }).click();
+  await expect.poll(async () => (await professorAudio(page)).played.at(-1)).toBe('interjection-result-final-participated');
+  await phone.getByRole('tab', { name: 'Zusatzaudios', exact: true }).click();
+  await phone.getByRole('combobox', { name: 'Art der Ansage' }).selectOption('Auflösung');
+  await expect(phone.getByRole('button', { name: 'Mehrheit richtig +10 am Beamer abspielen', exact: true })).toHaveCount(0);
+  await expect(phone.getByRole('button', { name: 'Jemand richtig +5 am Beamer abspielen', exact: true })).toHaveCount(0);
+  await phone.getByRole('tab', { name: 'Funktionen', exact: true }).click();
+  for (const [label, points] of [['Mindestens ein Kind richtig · 10 Punkte', '55'], ['Keiner richtig · 0 Punkte', '45'], ['Mehrheit richtig · 20 Punkte', '65']]) {
+    await phone.getByRole('button', { name: label, exact: true }).click();
+    await expect(page.getByTestId('team-score')).toHaveText(points);
+    await expect(page.getByTestId('prof-score')).toHaveText('63');
+  }
+  expect(await phone.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await phone.getByRole('tab', { name: 'Ablauf', exact: true }).click();
+  await phone.getByRole('button', { name: 'Zum Abschluss', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Gemeinsam seid ihr stark!', exact: true })).toBeVisible();
+  await expect(page.locator('.kids-ending')).toContainText('Ihr habt meinen Bluff geknackt!');
+  await page.reload(); await phone.reload();
+  await expect(page.getByTestId('team-score')).toHaveText('65');
+  await expect(page.getByTestId('prof-score')).toHaveText('63');
+  expect((await professorAudio(page)).starts).toBe(0);
+  await context.close();
+});

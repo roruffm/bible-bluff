@@ -60,7 +60,7 @@ test('Kids: vollständige Show mit Bildern, ohne Joker und mit jederzeit möglic
     await expect(page.locator('.kids-answer > .kids-story-picture')).toHaveCount(3);
     const motifs=await page.locator('.kids-answer > .kids-story-picture').evaluateAll(els=>els.map(el=>el.getAttribute('data-motif')));
     expect(new Set(motifs).size).toBe(3);
-    await resolve(page,'Mehrheit richtig · +10');
+    await resolve(page,i === 9 ? 'Mehrheit richtig · +20' : 'Mehrheit richtig · +10');
     await expect(page.locator('.kids-answer.is-correct')).toHaveCount(1);
     await page.getByRole('button',{name:i===9?'Zum Abschluss':i===8?'Zum Superbluff':i===2||i===5?'Nächstes Kapitel':'Nächste Aufgabe',exact:true}).click();
     if(i===2||i===5) await page.getByRole('button',{name:'Erste Aufgabe im Kapitel',exact:true}).click();
@@ -69,14 +69,14 @@ test('Kids: vollständige Show mit Bildern, ohne Joker und mit jederzeit möglic
   await expect(page.getByRole('heading',{name:'Gemeinsam seid ihr stark!'})).toBeVisible();
   await expect(page.locator('.kids-treasure')).toHaveCount(0);
   await expect(page.locator('.kids-ending')).toBeVisible();
-  await expect(page.getByTestId('team-score')).toHaveText('100'); await expect(page.getByTestId('prof-score')).toHaveText('73');
+  await expect(page.getByTestId('team-score')).toHaveText('110'); await expect(page.getByTestId('prof-score')).toHaveText('63');
   await expect(page.getByText('Bei Jesus sind wir willkommen.',{exact:true})).toBeVisible();
   await expect(page.locator('.kids-ending-count')).toContainText('10 Aufgaben');
   await expect(page.getByRole('button',{name:/Revanche|Vorbereitung/})).toHaveCount(0);
   await expect(page.locator('.kids-finale-seal')).toHaveText('♥ ALLE GEHÖREN DAZU ♥');
   await expect(page.locator('.kids-ending-host .bluff-professor')).toHaveClass(/mood-kind/);
   await page.keyboard.press('ArrowRight');
-  await expect(page.getByTestId('team-score')).toHaveText('100');
+  await expect(page.getByTestId('team-score')).toHaveText('110');
   expect(requests).toEqual([]);
 });
 test('Kids: reine Beameransicht ist über Maus und Tastatur bedienbar',async({page})=>{
@@ -159,7 +159,7 @@ test('Kids: alle Showfragen passen bei 800×600, 4:3, 720p, Full HD und 1440p',a
     const answers=await page.locator('.kids-answer-text').allTextContents();
     const motifs=await page.locator('.kids-answer > .kids-story-picture').evaluateAll(els=>els.map(el=>el.getAttribute('data-motif')));
     for(const viewport of viewports){await page.setViewportSize(viewport);await check();}
-    await resolve(page,'Mindestens ein Kind richtig · +5',async()=>{for(const viewport of viewports){await page.setViewportSize(viewport);await check();const professor=await page.locator('.kids-regroup-professor .bluff-professor').boundingBox();expect(professor!.width).toBeGreaterThan(160);}});
+    await resolve(page,i === 9 ? 'Mindestens ein Kind richtig · +10' : 'Mindestens ein Kind richtig · +5',async()=>{for(const viewport of viewports){await page.setViewportSize(viewport);await check();const professor=await page.locator('.kids-regroup-professor .bluff-professor').boundingBox();expect(professor!.width).toBeGreaterThan(160);}});
     for(const viewport of viewports){await page.setViewportSize(viewport);await check();const field=Number(await page.locator('.kids-reveal .kids-number').innerText());expect(await page.locator('.kids-reveal .kids-answer-text').innerText()).toBe(answers[field-1]);await expect(page.locator('.kids-reveal .kids-story-picture')).toHaveAttribute('data-motif',motifs[field-1]!);}
     await page.getByRole('button',{name:i===9?'Zum Abschluss':i===8?'Zum Superbluff':i===2||i===5?'Nächstes Kapitel':'Nächste Aufgabe',exact:true}).click();
     if(i===2||i===5||i===8) {
@@ -259,7 +259,7 @@ test('Kids: vier große Szenen mit Handlung, Klang, Wiederholung und separatem A
       await page.emulateMedia({reducedMotion:'no-preference'});
       await expect(page.locator('.kids-clock-left')).toHaveAttribute('aria-label','30 Sekunden');
     }
-    await resolve(page);
+    await resolve(page,i === 9 ? 'Mehrheit richtig · +20' : 'Mehrheit richtig · +10');
     await page.getByRole('button',{name:i===9?'Zum Abschluss':i===8?'Zum Superbluff':i===2||i===5?'Nächstes Kapitel':'Nächste Aufgabe',exact:true}).click();
     if(i===2||i===5||i===8)await page.getByRole('button',{name:i===8?'Gemeinsam ins Finale':'Erste Aufgabe im Kapitel',exact:true}).click();
   }
