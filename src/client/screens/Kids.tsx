@@ -16,7 +16,7 @@ import { clearKidsShow, loadKidsShow, saveKidsShow } from '../lib/kids-saved';
 import { checkKidsInternet, prepareKidsShow } from '../lib/kids-ready';
 import { KidsResume, KidsTechCheck, KidsTechStatus } from '../components/KidsPrepare';
 import { KidsTimePlan } from '../components/KidsTimePlan';
-import { BluffClaim, BluffPin, KidsCheers, KidsCountdown } from '../components/KidsBluff';
+import { BluffClaim, BluffPin, KidsCheers } from '../components/KidsBluff';
 import { createKidsGame, kidsAnswerMs, kidsCanJumpToFinal, kidsCanScore, kidsOvertook, kidsPrimaryAction, kidsResultPoints, updateKidsGame, type KidsAction, type KidsGame } from '../lib/kids';
 import { navigate } from '../lib/router';
 import './kids.css';
@@ -194,7 +194,6 @@ export function KidsPage() {
         </div>
         <aside class="kids-question-host" aria-label="Professor Bluffs Behauptung"><BluffClaim text={professorSays(game)}/><ProfessorBluff key={`${game.phase}:${game.index}`} mood={professorMood(game)} motion={professorMotion(game)}/></aside>
         <ol class="kids-answers has-pictures" aria-label="Antworten und Spielfelder">{round.answers.map((answer,i)=><li key={`${game.index}-${i}`} class={`kids-answer kids-field-${i+1}${answer===round.question.bluff.answer ? ' is-bluff-pick' : ''}`}><span class="kids-number">{i+1}</span><StoryPicture motif={kidsAnswerPicture(round.question,answer)}/><span class="kids-answer-text">{answer}</span>{answer===round.question.bluff.answer && <BluffPin/>}</li>)}</ol>
-        {lastSeconds && <KidsCountdown seconds={seconds}/>}
         <div class="kids-bottom">
           <KidsStageClock side="left" seconds={seconds} progress={game.remainingMs / kidsAnswerMs(game)} locked={game.phase==='locked'} urgent={game.phase==='moving' && seconds<=5}/>
           <div class="kids-operator-actions">{game.phase==='reading' && <div class="kids-extra-controls"><KidsQuestionVoiceButton/>{round.question.scene && <button type="button" class="kids-tool" disabled={remote.busy} onClick={()=>act('scene')}>Szene abspielen</button>}</div>}<ShowControls game={game} act={act} disabled={remote.busy} primaryRef={primary}/></div>
