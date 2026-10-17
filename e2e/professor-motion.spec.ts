@@ -9,10 +9,19 @@ test('Professor: große Bewegungen bleiben von Text und Bedienung getrennt und l
   const scenes: { phase: KidsPhase; index: number; result?: 'correct'|'none'; motion: string }[] = [
     { phase: 'welcome', index: 0, motion: 'greet' },
     { phase: 'chapter', index: 0, motion: 'spin' },
+    { phase: 'reading', index: 0, motion: 'present' },
+    { phase: 'moving', index: 0, motion: 'watch' },
+    { phase: 'paused', index: 0, motion: 'listen' },
+    { phase: 'locked', index: 0, motion: 'hold' },
     { phase: 'revealed', index: 0, result: 'correct', motion: 'startle' },
     { phase: 'revealed', index: 1, result: 'correct', motion: 'double-take' },
     { phase: 'revealed', index: 2, result: 'correct', motion: 'stumble' },
+    { phase: 'revealed', index: 3, result: 'correct', motion: 'adjust' },
+    { phase: 'revealed', index: 4, result: 'correct', motion: 'shrug' },
+    { phase: 'revealed', index: 5, result: 'correct', motion: 'facepalm' },
+    { phase: 'revealed', index: 9, result: 'correct', motion: 'celebrate' },
     { phase: 'revealed', index: 0, result: 'none', motion: 'encourage' },
+    { phase: 'revealed', index: 1, result: 'none', motion: 'applaud' },
     { phase: 'returning', index: 0, motion: 'guide' },
     { phase: 'judging', index: 0, motion: 'think' },
     { phase: 'superbluff', index: 9, motion: 'nervous' },
@@ -20,6 +29,7 @@ test('Professor: große Bewegungen bleiben von Text und Bedienung getrennt und l
   ];
   for (const scene of scenes) {
     const game=createKidsGame(); game.phase=scene.phase; game.index=scene.index;
+    if (scene.phase === 'moving') game.deadline=Date.now()+30000;
     game.results=game.results.map((_,index)=>index<scene.index ? 'correct' : index===scene.index ? scene.result??null : null);
     const response=await request.post('/api/kids-remotes',{data:{easy:false,game:packKidsGame(game,Date.now())}});
     expect(response.status()).toBe(201);
