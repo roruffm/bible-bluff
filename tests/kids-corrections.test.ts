@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { createKidsGame, kidsLastScoredIndex, kidsScores, updateKidsGame, type KidsGame, type KidsResult } from '../src/shared/kids-game';
-import { PROFESSOR_INTERJECTIONS } from '../src/shared/professor-interjections';
+import { PROFESSOR_INTERJECTIONS, professorInterjectionForRound } from '../src/shared/professor-interjections';
 
 function scored(result: KidsResult = 'none'): KidsGame {
   const game = createKidsGame();
@@ -32,7 +32,7 @@ describe('Kids-Wertung korrigieren', () => {
     const final: KidsGame = { ...base, index: 9, phase: 'finished', results: Array(10).fill('none') };
     const corrected = updateKidsGame(final, 'correct-last', 0);
     expect(corrected.phase).toBe('finished'); expect(corrected.index).toBe(9);
-    expect(kidsScores(corrected)).toMatchObject({ team: 10, bonus: 10, professor: 73, playedRounds: 10 });
+    expect(kidsScores(corrected)).toMatchObject({ team: 20, bonus: 20, professor: 63, playedRounds: 10 });
     const early = { ...scored(), index: 1, phase: 'finished' as const };
     expect(updateKidsGame(early, 'correct-last', 0).results[1]).toBeNull();
   });
@@ -55,12 +55,18 @@ describe('Freie Professor-Ansagen', () => {
       const game = { ...base, phase, deadline: 30000 };
       for (const clip of PROFESSOR_INTERJECTIONS) {
         const next = updateKidsGame(game, `interjection:${clip.id}`, 0);
-        expect(next).toMatchObject({ phase, voiceKind: 'interjection', voiceClip: clip.id, voicePlaying: true, voiceSeq: 1, voiceCue: `${phase}:0`, deadline: 30000 });
+        expect(next).toMatchObject({ phase, voiceKind: 'interjection', voiceClip: professorInterjectionForRound(clip.id, game.index)!.id, voicePlaying: true, voiceSeq: 1, voiceCue: `${phase}:0`, deadline: 30000 });
         expect(next.results).toBe(game.results);
         expect(next.remainingMs).toBe(game.remainingMs);
         expect(kidsScores(next)).toEqual(kidsScores(game));
         expect(updateKidsGame(next, 'stop-speech', 0).voicePlaying).toBe(false);
       }
     }
+  });
+  it('spielt im Finale auch für alte Fernbedienungsbefehle die passenden 20- und 10-Punkte-Ansagen', () => {
+    const game={...createKidsGame(),index:9,phase:'revealed' as const};
+    expect(updateKidsGame(game,'interjection:result-correct',0).voiceClip).toBe('result-final-correct');
+    expect(updateKidsGame(game,'interjection:result-participated',0).voiceClip).toBe('result-final-participated');
+    expect(updateKidsGame(game,'interjection:result-none',0).voiceClip).toBe('result-none');
   });
 });

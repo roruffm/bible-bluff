@@ -26,7 +26,7 @@ describe('Direkt ins Kids-Finale', () => {
     for (const [action,now] of [['next',0],['start',0],['tick',30000],['return',30000],['ready',30000],['correct',30000],['next',30000]] as const) game=updateKidsGame(game,action,now);
     expect(game.phase).toBe('finished');
     expect(game.results.slice(2,9)).toEqual(Array(7).fill(null));
-    expect(kidsScores(game)).toMatchObject({team:25,professor:24,playedRounds:3,bonus:10});
+    expect(kidsScores(game)).toMatchObject({team:35,professor:14,playedRounds:3,bonus:20});
     expect(kidsCanJumpToFinal(game)).toBe(false);
     expect(updateKidsGame(game,'jump-final',30001)).toBe(game);
   });

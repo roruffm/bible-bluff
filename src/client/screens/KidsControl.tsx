@@ -50,7 +50,7 @@ export function KidsControlPage() {
       </div>
       <section id={`kids-panel-${tab}`} class="kids-remote-panel" role="tabpanel" aria-labelledby={`kids-tab-${tab}`} tabIndex={0}>
         {tab === 'flow' && <>
-          {game.phase !== 'finished' && <div class="kids-remote-question"><span>{game.index === 9 ? 'SUPERBLUFF' : game.short ? 'Kurzshow' : `Kapitel ${Math.floor(game.index / 3) + 1}: ${KIDS_CHAPTERS[Math.min(2, Math.floor(game.index / 3))]}`}</span><h2>{round.question.prompt}</h2></div>}
+          {game.phase !== 'finished' && <div class="kids-remote-question"><span>{game.index === 9 ? 'SUPERBLUFF' : game.short ? 'Kurzshow' : `Kapitel ${Math.floor(game.index / 3) + 1}: ${KIDS_CHAPTERS[Math.min(2, Math.floor(game.index / 3))]}`}</span><h2>{round.question.prompt}</h2>{game.index === 9 && <p>Finale: Kinderteam 20 / 10 / 0 Punkte · Professor Bluff +0</p>}</div>}
           <section class="kids-remote-step" aria-labelledby="kids-next-step"><h2 id="kids-next-step"><span>1</span> Jetzt steuern</h2><p>{direction}</p>
             <div class="kids-remote-actions">{game.phase === 'finished' ? <div class="kids-remote-farewell"><h2>Gemeinsam seid ihr stark!</h2><p>{scores!.playedRounds} {scores!.playedRounds === 1 ? 'Aufgabe gewertet' : 'Aufgaben gewertet'}. Der Abschluss bleibt stehen.</p></div> : <ShowControls game={game} act={action => { void remote.send(action); }} disabled={disabled}/>}
               {kidsCanSkipCountdown(game) && <button type="button" class="kids-tool kids-skip-countdown" aria-label="Countdown überspringen" disabled={disabled} onClick={() => { void remote.send('skip-countdown'); }}>⏭ Countdown überspringen</button>}
@@ -63,7 +63,7 @@ export function KidsControlPage() {
           {game.phase !== 'finished' && <details class="kids-remote-direction kids-remote-guide" key={`${game.phase}:${game.index}`} open={game.phase === 'locked' || game.phase === 'judging'}><summary>Antworten & Regiehinweis · nur für Helfer</summary>
             <p><KidsGroupText text={round.question.direction}/></p>
             {game.short && <p>Kurzshow: Die aktive Gruppe bleibt sitzen und zeigt 1, 2 oder 3 Finger.</p>}
-            {game.phase === 'welcome' && <p>Mehrheit richtig = 10, mindestens ein Kind richtig = 5, keiner richtig = 0. Professor +{kidsProfessorPoints(game)} je Aufgabe, Finale +10. Niemand scheidet aus.</p>}
+            {game.phase === 'welcome' && <p>Mehrheit richtig = 10, mindestens ein Kind richtig = 5, keiner richtig = 0. Professor +{kidsProfessorPoints(game)} je regulärer Aufgabe. Finale: Kinder 20 / 10 / 0, Professor +0. Niemand scheidet aus.</p>}
             <ol class="kids-remote-answers">{round.answers.map((answer, i) => <li key={i} class={`kids-field-${i + 1}${i === round.correctIndex ? ' is-correct' : ''}`}><b>{i + 1}</b><StoryPicture motif={kidsAnswerPicture(round.question, answer)}/><span>{answer}{i === round.correctIndex && <small class="kids-remote-correct">✓ Richtige Antwort</small>}{answer === round.question.bluff.answer && <small class="kids-remote-bluff">Professor-Tipp (Bluff)</small>}</span></li>)}</ol>
           </details>}
         </>}
@@ -74,10 +74,10 @@ export function KidsControlPage() {
             {game.phase !== 'finished' && <button type="button" class="kids-button kids-remote-finish" disabled={disabled} onClick={() => setShowFinish(true)}>Spiel abschließen</button>}
             {game.phase === 'finished' && <p>Die Show ist abgeschlossen. Für eine neue Show am Computer H drücken und zur Vorbereitung zurückkehren.</p>}
           </section>
-          {lastScored >= 0 && <section class="kids-remote-direction kids-score-correction" aria-labelledby="kids-correction-title"><h2 id="kids-correction-title">Letzte Wertung ändern</h2><p>Aufgabe {lastScored + 1}: {game.rounds[lastScored].question.prompt}</p><p role="status">Aktuell: {kidsResultPoints(game.results[lastScored])} Punkte für das Kinderteam.</p>
+          {lastScored >= 0 && <section class="kids-remote-direction kids-score-correction" aria-labelledby="kids-correction-title"><h2 id="kids-correction-title">Letzte Wertung ändern</h2><p>Aufgabe {lastScored + 1}: {game.rounds[lastScored].question.prompt}</p><p role="status">Aktuell: {kidsResultPoints(game.results[lastScored], lastScored)} Punkte für das Kinderteam.</p>
             <div class="kids-correction-options">{([
-              ['correct', 'Mehrheit richtig · 10 Punkte'],
-              ['participated', 'Mindestens ein Kind richtig · 5 Punkte'],
+              ['correct', `Mehrheit richtig · ${kidsResultPoints('correct', lastScored)} Punkte`],
+              ['participated', `Mindestens ein Kind richtig · ${kidsResultPoints('participated', lastScored)} Punkte`],
               ['none', 'Keiner richtig · 0 Punkte'],
             ] as const).map(([result, label]) => <button key={result} type="button" class="kids-button" aria-pressed={game.results[lastScored] === result} disabled={disabled || game.results[lastScored] === result} onClick={() => { void remote.send(`${result}-last`); }}>{label}</button>)}</div>
             <small>Ändert nur diese Wertung. Die laufende Frage und der Timer bleiben bestehen.</small>

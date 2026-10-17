@@ -26,7 +26,7 @@ const COMFORT = [
 ];
 /** Die aktuelle Runde entscheidet über die Reaktion, unabhängig vom Gesamtstand. */
 export function kidsRoundReaction(game: KidsGame) {
-  const points = kidsResultPoints(game.results[game.index]);
+  const points = kidsResultPoints(game.results[game.index], game.index);
   return {
     points,
     mood: points > 0 ? 'startled' as const : 'kind' as const,

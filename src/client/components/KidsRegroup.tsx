@@ -1,5 +1,5 @@
 import type { RefObject } from 'preact';
-import type { KidsAction, KidsGame } from '../../shared/kids-game';
+import { kidsResultPoints, type KidsAction, type KidsGame } from '../../shared/kids-game';
 import { ProfessorBluff, ShowControls } from './KidsShow';
 import { ChildFigure } from './KidsChildrenArt';
 import { professorMotion } from '../lib/professor-motion';
@@ -29,6 +29,6 @@ export function KidsRegroup({ game, act, disabled, primaryRef }: { game: KidsGam
       <p class="kids-regroup-instruction">{returned ? 'Bleibt bei eurer Gruppe. Gleich kommt die Auflösung!' : 'Geht ruhig zurück. Wir warten, bis alle da sind.'}</p>
       <RegroupPicture key={game.phase} returned={returned}/>
     </div>
-    <div class="kids-regroup-operator"><ShowControls game={game} act={act} disabled={disabled} primaryRef={primaryRef}/><p>{returned ? 'Spielleitung: Helfer melden das Ergebnis. Bei richtiger Mehrheit immer +10 wählen.' : 'Spielleitung: Erst bestätigen, wenn alle Kinder wieder bei ihrer Gruppe sind.'}</p></div>
+    <div class="kids-regroup-operator"><ShowControls game={game} act={act} disabled={disabled} primaryRef={primaryRef}/><p>{returned ? `Spielleitung: Helfer melden das Ergebnis. Bei richtiger Mehrheit +${kidsResultPoints('correct', game.index)} wählen.` : 'Spielleitung: Erst bestätigen, wenn alle Kinder wieder bei ihrer Gruppe sind.'}</p></div>
   </section>;
 }

@@ -81,7 +81,7 @@ describe('Kids-Fernbedienung', () => {
     }
     const end=await t.call('GET',path,undefined,made.ownerToken);
     expect(end.body.game.phase).toBe('finished');
-    expect(kidsScores(end.body.game)).toMatchObject({team:25,professor:24,playedRounds:3});
+    expect(kidsScores(end.body.game)).toMatchObject({team:35,professor:14,playedRounds:3});
     expect((await t.call('POST',path+'/action',{action:'jump-final',version},made.ownerToken)).status).toBe(409);
   });
   it('akzeptiert vor dem Finale nur einen gewerteten Anfang mit anschließendem ungespielten Rest', async () => {
@@ -306,7 +306,7 @@ describe('Kids-Fernbedienung', () => {
     expect(read.body.game.rounds[5].question.pictures).toEqual(['donkey','raven','camel']);
     expect(read.body.game.rounds.map(r=>r.answers)).toEqual(made.game.rounds.map(r=>r.answers));
   });
-  it('vergibt auch im Finale fünf Punkte für mindestens ein richtiges Kind und bewahrt sie beim Neuladen', async () => {
+  it('vergibt im Finale zehn Punkte für mindestens ein richtiges Kind und bewahrt sie beim Neuladen', async () => {
     const t = setup();
     const game = { ...reading(), index: 9, phase: 'judging' as const, remainingMs: 0, results: [...Array(9).fill('none'), null] };
     const made = await t.create(game);
@@ -314,8 +314,8 @@ describe('Kids-Fernbedienung', () => {
     const result = await t.call('POST', `${path}/action`, { action: 'participated', version: 1 }, made.remoteToken);
     expect(result.status).toBe(200);
     expect(result.body.game.results[9]).toBe('participated');
-    expect(kidsScores(result.body.game).bonus).toBe(5);
-    expect(kidsScores(result.body.game).team).toBe(5);
+    expect(kidsScores(result.body.game).bonus).toBe(10);
+    expect(kidsScores(result.body.game).team).toBe(10);
     const restored = await t.call('POST', '/api/kids-remotes', { easy: false, game: packKidsGame(result.body.game, t.clock.now) });
     expect(restored.status).toBe(201);
     expect(restored.body.game.results[9]).toBe('participated');

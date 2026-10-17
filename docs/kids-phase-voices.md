@@ -55,6 +55,26 @@ Fortsetzen nach einer Pause, Neuladen und Wiederverbinden lösen sie nicht erneu
 Klang am Beamer aus, bleibt der Start stumm und ohne Fehlermeldung. Unter „Spielsignale“
 lässt sie sich auch von Hand abspielen.
 
+## Finalwertung mit Aufholchance
+
+Seit dem 17.10.2026 erhält das Kinderteam im Superbluff 20 / 10 / 0 Punkte.
+Professor Bluff erhält in dieser Runde keine neuen Punkte. Die regulären Aufgaben
+behalten 10 / 5 / 0. Beamer, Smartphone, Auflösung und Wertungskorrektur verwenden
+dieselbe Regel, auch in der Kurzshow und nach einem direkten Finalsprung.
+
+Drei neue Aufnahmen verwenden die bestätigte Snorre-Stimme mit
+`eleven_multilingual_v2`. Die gesprochenen Texte wurden per Transkription geprüft,
+die MP3s auf -18 LUFS normalisiert und für die Offline-Show registriert.
+Die bisherige Finalaufnahme mit der alten Punkteansage wird nicht mehr verwendet.
+Die beiden regulären Wertungsaufnahmen bleiben erhalten; im Finale werden in
+Phasenansagen und Soundboard ausschließlich die passenden Finalansagen angeboten.
+
+| Dateiname | Gesprochener Text | Erzeugungs-Flow |
+| --- | --- | --- |
+| `superbluff-finale20.mp3` | ALARM! Mein Superbluff! Jetzt könnt ihr zusammen bis zu zwanzig Punkte holen! Für mich gibt es diesmal keine neuen Punkte! | `St0hqg2DkJYqmQKioimh` |
+| `interjection-result-final-correct.mp3` | Die Mehrheit von euch hat richtig getippt. Das gibt zwanzig Punkte für euer Team! | `MO244N2cL77zLh98MwC4` |
+| `interjection-result-final-participated.mp3` | Zwar nicht die Mehrheit, aber mindestens einer von euch lag richtig. Das gibt im Finale zehn Punkte für euer Team! | `xxvpAW7UE9mxahSgn6RF` |
+
 ## Aufnahmen
 
 Zielverzeichnis: `src/client/public/professor-bluff/`.

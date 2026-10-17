@@ -26,10 +26,10 @@ test('Kids: Maus springt sofort aus dem Countdown ins Finale und zählt keine ü
   await page.clock.fastForward(30000);
   await page.getByRole('button',{name:'Zurück in die Gruppen',exact:true}).click();
   await page.getByRole('button',{name:'Alle sind zurück',exact:true}).click();
-  await page.getByRole('button',{name:'Mehrheit richtig · +10',exact:true}).click();
+  await page.getByRole('button',{name:'Mehrheit richtig · +20',exact:true}).click();
   await page.getByRole('button',{name:'Zum Abschluss',exact:true}).click();
-  await expect(page.getByTestId('team-score')).toHaveText('10');
-  await expect(page.getByTestId('prof-score')).toHaveText('10');
+  await expect(page.getByTestId('team-score')).toHaveText('20');
+  await expect(page.getByTestId('prof-score')).toHaveText('0');
   await expect(page.locator('.kids-ending-count')).toHaveText('1 Aufgabe gemeinsam gespielt');
 });
 
