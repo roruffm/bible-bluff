@@ -81,3 +81,21 @@ test('Kids: question is centered and synchronized timers sit in both bottom corn
   await page.getByRole('button', { name: 'Nur Spiel anzeigen', exact: true }).click();
   await inspect();
 });
+
+test('Kids: Kapitelanzeige bleibt in der Kinderansicht über dem Gruppenschild', async ({ page }) => {
+  await page.goto('/kids');
+  await page.getByRole('button', { name: 'Show vorbereiten', exact: false }).click();
+  await showKidsOperator(page);
+  await page.getByRole('button', { name: 'Mission starten', exact: true }).click();
+  await page.getByRole('button', { name: 'Erste Aufgabe im Kapitel', exact: true }).click();
+  await page.keyboard.press('h');
+  await expect(page.locator('.kids-show.is-projecting')).toBeVisible();
+  for (const size of [{ width: 800, height: 600 }, { width: 1024, height: 768 }, { width: 1280, height: 720 }, { width: 1440, height: 900 }, { width: 1920, height: 1080 }, { width: 2560, height: 1440 }, { width: 1024, height: 500 }]) {
+    await page.setViewportSize(size);
+    const gap = await page.evaluate(() => {
+      const range = document.createRange(); range.selectNodeContents(document.querySelector('.kids-round-counter')!);
+      return document.querySelector('.kids-active-group')!.getBoundingClientRect().top - range.getBoundingClientRect().bottom;
+    });
+    expect(gap, `${size.width}x${size.height}`).toBeGreaterThanOrEqual(6);
+  }
+});

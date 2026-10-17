@@ -43,6 +43,12 @@
 .kids-score-colon { font-size: clamp(25px, 2.8vw, 50px); font-weight: 900; }
 .kids-score-overtake { position: absolute; bottom: -15px; left: 15%; border-radius: 20px; padding: 4px 12px; background: var(--show-gold); font-size: 14px; box-shadow: 0 2px 0 #12324a; }
 .kids-show.is-projecting .kids-playing-bar { grid-template-rows: minmax(0, 1fr); }
+/* In der flacheren Kinderanzeige ragt das Gruppenschild in die Kopfzeile; die Kapitelanzeige rückt in den freien Streifen darüber. */
+@media (min-width: 760px) {
+  .kids-show.is-projecting:has(.kids-active-group) .kids-playing-bar > .kids-round-counter {
+    align-self: start; margin-top: clamp(0px, .8vh, 10px); font-size: clamp(16px, min(1.8vw, 3.2vh), 34px);
+  }
+}
 .kids-show.is-projecting .kids-top-actions { position: absolute; right: 2vw; bottom: 0; opacity: 0; transition: opacity .15s; }
 .kids-show.is-projecting .kids-top-actions:is(:hover, :focus-within), .kids-show.is-projecting .kids-playing-bar:hover .kids-top-actions { opacity: 1; }
 .kids-show .kids-show-stage, .kids-show .kids-show-interlude, .kids-show .kids-regroup, .kids-show .kids-reveal, .kids-show .kids-ending, .kids-show .kids-cinema {
