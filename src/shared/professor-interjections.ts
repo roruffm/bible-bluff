@@ -137,6 +137,24 @@ export const PROFESSOR_INTERJECTIONS = [
     "label": "Bei Jesus sind wir willkommen",
     "category": "Mut machen",
     "text": "Bei Jesus sind wir willkommen. Jesus lädt die Kinder zu sich ein. Jeder von euch gehört dazu!"
+  },
+  {
+    "id": "result-correct",
+    "label": "Mehrheit richtig +10",
+    "category": "Auflösung",
+    "text": "Die Mehrheit von euch hat richtig getippt. Das gibt zehn Punkte."
+  },
+  {
+    "id": "result-participated",
+    "label": "Jemand richtig +5",
+    "category": "Auflösung",
+    "text": "Zwar nicht die Mehrheit, aber mindestens einer von euch lag richtig. Das gibt fünf Punkte!"
+  },
+  {
+    "id": "result-none",
+    "label": "Keiner richtig +0",
+    "category": "Auflösung",
+    "text": "Diesmal lag keiner richtig. Nicht schlimm, man lernt immer dazu."
   }
 ] as const;
 

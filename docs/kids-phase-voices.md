@@ -36,6 +36,16 @@ Die Finalfrage nutzt damit ebenfalls eine Snorre-Aufnahme und wird für die
 Offline-Show vorgeladen. Die vorläufige Gerätestimme entfällt. Die Wiedergabe
 bleibt bei allen Aufnahmen manuell über Beamer oder Smartphone-Steuerung.
 
+Ebenfalls am 17.10.2026 kamen drei unveränderte Nutzer-Aufnahmen zur Wertung hinzu.
+Sie stehen in der Smartphone-Steuerung bei der Auflösung unter „Passende Audios“ und
+in der Gesamtauswahl unter „Auflösung“. Die Zuordnung wurde anhand der Transkription geprüft:
+
+| Aufnahme vom 17.10.2026 | Zieldatei | Knopf | Gesprochener Text |
+| --- | --- | --- | --- |
+| 15:11:49 | `interjection-result-correct.mp3` | Mehrheit richtig +10 | Die Mehrheit von euch hat richtig getippt. Das gibt zehn Punkte. |
+| 15:13:28 | `interjection-result-participated.mp3` | Jemand richtig +5 | Zwar nicht die Mehrheit, aber mindestens einer von euch lag richtig. Das gibt fünf Punkte! |
+| 15:14:43 | `interjection-result-none.mp3` | Keiner richtig +0 | Diesmal lag keiner richtig. Nicht schlimm, man lernt immer dazu. |
+
 ## Aufnahmen
 
 Zielverzeichnis: `src/client/public/professor-bluff/`.
