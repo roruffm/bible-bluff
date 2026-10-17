@@ -353,6 +353,10 @@
   .kids-show .kids-ending > footer > h2 { font-size: 27px; }
   .kids-show .kids-ending > footer > p { font-size: 23px; }
 }
+/* Preserve the answer pictures on compact projectors; contrast and the pulse still stand out. */
+@media (min-width: 760px) and (max-height: 700px) {
+  .kids-show .kids-show-stage { --kids-clock-size: clamp(76px, min(11vw, 12vh), 140px); }
+}
 @media (min-width: 760px) and (max-height: 599px) {
   .kids-show.is-playing { height: auto; min-height: 100dvh; overflow-x: clip; overflow-y: visible; }
   .kids-show .kids-show-stage, .kids-show .kids-show-interlude, .kids-show .kids-regroup, .kids-show .kids-reveal { height: 650px; }
