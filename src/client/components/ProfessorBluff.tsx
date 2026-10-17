@@ -3,7 +3,7 @@ import type { ProfessorMotion } from '../lib/professor-motion';
 export type ProfessorMood = 'confident' | 'nervous' | 'panic' | 'defeated' | 'victory' | 'startled' | 'kind';
 type Expression = 'smug' | 'curious' | 'surprised' | 'flustered' | 'warm' | 'delighted' | 'worried' | 'sheepish';
 type Pose = 'welcome' | 'explain' | 'watch' | 'stop' | 'startle' | 'balance' | 'glasses' | 'shrug' | 'facepalm' | 'think' | 'cheer' | 'applaud' | 'bow' | 'open' | 'support';
-type Hand = 'palm' | 'point' | 'fist' | 'thumb';
+type Hand = 'palm' | 'point' | 'fist' | 'thumb' | 'pinch';
 
 const POSES: Record<ProfessorMotion, Pose> = {
   greet: 'welcome', present: 'explain', watch: 'watch', hold: 'stop', listen: 'open',
@@ -69,6 +69,7 @@ function Arm({ side, d, x, y, hand = 'palm', angle = 0 }: { side: 'left'|'right'
       {hand === 'point' && <><path d="M-8 10-9-1q0-5 5-4l3 3v-21q0-6 5-5l2 23q5-4 8 0l-2 15q-10 7-20 0z"/><path d="m4 1 7 1" fill="none" stroke="#ce9273" stroke-width="2"/></>}
       {hand === 'fist' && <><path d="M-10 6v-12q5-8 13-6l9 4 1 12-9 8-10-1z"/><path d="M-8-3h13m-7-7v7m7-5v6" fill="none" stroke="#ce9273" stroke-width="2"/></>}
       {hand === 'thumb' && <><path d="M-9 9V-4l8-2 4-14q4-5 7 0L7-7l9 1-4 16-12 3z"/><path d="M-2-3v13" fill="none" stroke="#ce9273" stroke-width="2"/></>}
+      {hand === 'pinch' && <><path d="M-10 8-12-2q-1-5 3-7l7-3q4-1 5 3t-5 4l-3 1 7 4 5-6q4-3 7 1L9 8l-7 5z"/><path d="m-5-4 6 5m-5 5 6 2" fill="none" stroke="#ce9273" stroke-width="2"/></>}
     </g>
   </g>;
 }
@@ -79,7 +80,7 @@ function Arms({ pose }: { pose: Pose }) {
   const rightOpen = <Arm side="right" d="M169 195Q196 210 217 187" x={220} y={180} angle={45}/>;
   if (pose === 'explain') return <>{leftHip}<Arm side="right" d="M169 195Q210 215 211 175" x={212} y={164} hand="point" angle={10}/></>;
   if (pose === 'think' || pose === 'watch') return <>{leftHip}<Arm side="right" d="M169 195Q199 207 183 177L146 166" x={140} y={162} hand="fist" angle={-55}/></>;
-  if (pose === 'glasses') return <>{leftHip}<Arm side="right" d="M169 195Q209 181 189 145L177 122" x={174} y={114} hand="point" angle={-65}/></>;
+  if (pose === 'glasses') return <>{leftHip}<Arm side="right" d="M169 195Q209 181 189 145L177 122" x={176} y={112} hand="pinch" angle={-25}/></>;
   if (pose === 'facepalm') return <>{leftHip}<Arm side="right" d="M169 195Q210 177 183 130L158 88" x={152} y={79} angle={-35}/></>;
   if (pose === 'stop') return <>{leftHip}<Arm side="right" d="M169 195Q205 213 211 164" x={213} y={152}/></>;
   if (pose === 'startle' || pose === 'cheer') return <><Arm side="left" d="M72 193Q35 207 24 160" x={21} y={150} hand={pose === 'cheer' ? 'fist' : 'palm'} angle={-20}/><Arm side="right" d="M169 195Q205 207 216 160" x={219} y={150} hand={pose === 'cheer' ? 'fist' : 'palm'} angle={20}/></>;
