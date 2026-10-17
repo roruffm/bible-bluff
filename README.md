@@ -78,6 +78,11 @@ lokal erzeugte Klangbilder; Eltern und andere Gruppen machen Geräusche und Pant
   **Funktionen** mit Finalsprung, Abschluss, Wertungskorrektur und Technikhinweisen.
   Die Stopptaste für Professor-Audios bleibt in allen drei Bereichen erreichbar. Neue Spielphasen
   bringen im Ablauf die nächste Aktion wieder nach oben. Richtige Antworten sind nur für Helfer markiert.
+  Ab 1024 Pixel Fensterbreite wird die Fernbedienung automatisch zur Desktopübersicht:
+  Ablauf, passende Audios samt durchsuchbaren Zusatzaudios und Funktionen sind gleichzeitig sichtbar.
+  Ab 1280 Pixel stehen alle drei Bereiche nebeneinander; auf kleineren Laptops stehen die Funktionen darunter.
+  Gruppe, Phase, Punktestand und Audio-Stopp bleiben oben erreichbar. Der Wechsel zur Smartphoneansicht
+  erhält die Verbindung, den Spielstand und eine laufende Audiosuche.
 - **Letzte Wertung ändern** unter **Funktionen** korrigiert die zuletzt abgeschlossene Aufgabe
   auf 10 / 5 / 0 Punkte (im Finale 20 / 10 / 0), auch nach dem Weitergehen oder am Endbildschirm. Aktuelle Frage,
   Countdown und Professor-Punkte bleiben bestehen; es wird keine Runde erneut gezählt.
