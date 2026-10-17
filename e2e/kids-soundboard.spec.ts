@@ -87,9 +87,11 @@ test('Smartphone: Gruppenaufruf, vorgemerkter Countdown, Pause und Jesus-Abschlu
   await expect.poll(async()=>(await observed()).starts.length).toBe(1);
   expect((await professorAudio(page)).played.at(-1)).toBe('interjection-call-mittis');
   await phone.getByRole('button',{name:'30 Sekunden starten',exact:true}).click();
-  await phone.getByRole('button',{name:'Countdown für letzte 5 Sekunden vormerken',exact:true}).click();
   await expect.poll(async()=>(await observed()).starts.length).toBe(2);
-  const countdown=(await observed()).starts[1];
+  expect((await professorAudio(page)).played.at(-1)).toBe('interjection-signal-go');
+  await phone.getByRole('button',{name:'Countdown für letzte 5 Sekunden vormerken',exact:true}).click();
+  await expect.poll(async()=>(await observed()).starts.length).toBe(3);
+  const countdown=(await observed()).starts[2];
   expect(countdown.delay).toBeGreaterThan(15);
   expect(countdown.delay).toBeLessThanOrEqual(25);
   expect(countdown.offset).toBe(0);
@@ -102,12 +104,12 @@ test('Smartphone: Gruppenaufruf, vorgemerkter Countdown, Pause und Jesus-Abschlu
   await expect(phone.getByRole('status').filter({hasText:'Countdown vorgemerkt'})).toHaveCount(0);
   await phone.getByRole('button',{name:'Pause',exact:false}).click();
   await phone.getByRole('button',{name:'Pause · bleibt stehen am Beamer abspielen',exact:true}).click();
-  await expect.poll(async()=>(await observed()).starts.length).toBe(3);
+  await expect.poll(async()=>(await observed()).starts.length).toBe(4);
   expect((await professorAudio(page)).played.at(-1)).toBe('interjection-signal-pause');
   await phone.getByRole('tab', { name: 'Funktionen', exact: true }).click(); await phone.getByRole('button',{name:'Spiel abschließen',exact:true}).click();
   await phone.getByRole('button',{name:'Jetzt mit Punktestand abschließen',exact:true}).click();
   await phone.getByRole('button',{name:'Bei Jesus sind wir willkommen am Beamer abspielen',exact:true}).click();
-  await expect.poll(async()=>(await observed()).starts.length).toBe(4);
+  await expect.poll(async()=>(await observed()).starts.length).toBe(5);
   expect((await professorAudio(page)).played.at(-1)).toBe('interjection-closing-jesus');
   expect(phoneAudio).toEqual([]);
   expect(await phone.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);

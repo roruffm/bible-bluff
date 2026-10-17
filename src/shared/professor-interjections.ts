@@ -109,6 +109,12 @@ export const PROFESSOR_INTERJECTIONS = [
     "text": "Jetzt geht es los! Geht ruhig zu eurem Feld."
   },
   {
+    "id": "signal-go",
+    "label": "Los geht’s · Zeit läuft",
+    "category": "Spielsignale",
+    "text": "Los geht’s! Wählt eure Antwort! Die Zeit läuft ab jetzt!"
+  },
+  {
     "id": "signal-pause",
     "label": "Pause · bleibt stehen",
     "category": "Spielsignale",
