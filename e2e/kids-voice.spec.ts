@@ -26,7 +26,7 @@ test('Professor: manuell abspielen, stoppen, wiederholen und beim Weitergehen ab
   // Während der Aufgabe steht Professor Bluffs Behauptung am Beamer. Die Spielleitung liest sie selbst vor.
   await expect(page.locator('.kids-bluff-claim')).toContainText('Daniel kennt sich doch mit Löwen aus');
   await expect(page.getByRole('button',{name:'Professor-Spruch abspielen',exact:true})).toHaveCount(0);
-  await expect(page.locator('.kids-clock')).toHaveAttribute('aria-label','30 Sekunden');
+  await expect(page.locator('.kids-clock-left')).toHaveAttribute('aria-label','30 Sekunden');
   await page.getByRole('button',{name:'Spiel mit Punktestand abschließen',exact:true}).click();
   await page.getByRole('button',{name:'Jetzt mit Punktestand abschließen',exact:true}).click();
   await expect.poll(async()=>(await counts(page)).stops).toBe(3);
@@ -73,7 +73,7 @@ test('Professor: Smartphone startet und stoppt am Beamer, Neuladen spielt nichts
   await phone.getByRole('button',{name:'Frage am Beamer vorlesen',exact:false}).click();
   await expect.poll(async()=>(await counts(page)).starts).toBe(1);
   expect((await counts(page)).played).toEqual(['question-0']);
-  await expect(page.locator('.kids-clock')).toHaveAttribute('aria-label','30 Sekunden');
+  await expect(page.locator('.kids-clock-left')).toHaveAttribute('aria-label','30 Sekunden');
   await phone.getByRole('button',{name:'Professor-Audio stoppen',exact:false}).click();
   await expect.poll(async()=>(await counts(page)).stops).toBe(1);
   await context.close();
@@ -87,7 +87,7 @@ test('Professor: Frage vorlesen bleibt manuell und stoppt beim Start des Antwort
   expect((await counts(page)).starts).toBe(0);
   await page.getByRole('button',{name:'Frage vorlesen',exact:false}).click();
   await expect.poll(async()=>(await counts(page)).starts).toBe(1);
-  await expect(page.locator('.kids-clock')).toHaveAttribute('aria-label','30 Sekunden');
+  await expect(page.locator('.kids-clock-left')).toHaveAttribute('aria-label','30 Sekunden');
   await page.getByRole('button',{name:'Vorlesen stoppen',exact:false}).click();
   await expect.poll(async()=>(await counts(page)).stops).toBe(1);
   await page.getByRole('button',{name:'Frage vorlesen',exact:false}).click();
@@ -107,7 +107,7 @@ test('Professor: auch die Finalfrage spielt die Aufnahme manuell ab und stoppt s
   expect((await counts(page)).starts).toBe(0);
   await page.getByRole('button',{name:'Frage vorlesen',exact:false}).click();
   await expect.poll(async()=>(await counts(page)).played).toEqual(['question-9']);
-  await expect(page.locator('.kids-clock')).toHaveAttribute('aria-label','30 Sekunden');
+  await expect(page.locator('.kids-clock-left')).toHaveAttribute('aria-label','30 Sekunden');
   await page.getByRole('button',{name:'30 Sekunden starten',exact:true}).click();
   await expect.poll(async()=>(await counts(page)).stops).toBe(1);
 });
