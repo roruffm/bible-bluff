@@ -165,6 +165,7 @@
 .kids-show .kids-reaction-symbols span { color: var(--show-gold); text-shadow: none; }
 .kids-show .kids-reveal-footer > p { color: var(--show-cream); }
 .kids-show .kids-suspense-title { color: var(--show-cream); }
+.kids-show .kids-suspense-card { color: var(--show-ink); }
 /* One collective result, then the invitation to Hello King. */
 .kids-show .kids-ending { background: none; grid-template-columns: minmax(0, .85fr) minmax(0, 1.65fr); grid-template-rows: auto minmax(0, 1fr) auto; }
 .kids-show .kids-ending .kids-eyebrow { color: #bce5e0; }
