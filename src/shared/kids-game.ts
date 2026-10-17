@@ -19,7 +19,7 @@ export interface KidsGame {
   /** Gerätezeit, zu der die Mission nach der Begrüßung startete; für den Zeitplan der Kurzshow. */ startedAt?: number | null;
   voiceSeq?: number; voicePlaying?: boolean; voiceCue?: string|null; voiceKind?: 'quote'|'question'|'interjection'; voiceClip?: ProfessorInterjectionId|null;
 }
-export type KidsAction = 'start' | 'pause' | 'resume' | 'skip-countdown' | 'tick' | 'return' | 'ready' | 'correct' | 'participated' | 'none' | 'next' | 'scene' | 'end-scene' | 'finish' | 'jump-final' | 'speak' | 'stop-speech' | 'read-question' | 'correct-last' | 'participated-last' | 'none-last' | `interjection:${ProfessorInterjectionId}`;
+export type KidsAction = 'start' | 'pause' | 'resume' | 'skip-countdown' | 'back' | 'tick' | 'return' | 'ready' | 'correct' | 'participated' | 'none' | 'next' | 'scene' | 'end-scene' | 'finish' | 'jump-final' | 'speak' | 'stop-speech' | 'read-question' | 'correct-last' | 'participated-last' | 'none-last' | `interjection:${ProfessorInterjectionId}`;
 
 export function kidsCanJumpToFinal(game: KidsGame): boolean {
   const final = game.rounds.length - 1;
@@ -41,6 +41,32 @@ export function kidsCanScore(game: KidsGame): boolean {
 export function kidsLastScoredIndex(game: KidsGame): number {
   for (let i = game.results.length - 1; i >= 0; i--) if (game.results[i] !== null) return i;
   return -1;
+}
+
+/**
+ * Der Schritt vor dem aktuellen, falls die Spielleitung zu schnell weitergeklickt hat; null bei der Begrüßung.
+ * Ein laufender oder abgelaufener Countdown springt zurück vors Vorlesen, eine zurückgenommene Auflösung verliert ihre Wertung.
+ */
+export function kidsPreviousStep(game: KidsGame): KidsGame | null {
+  const { phase, index } = game;
+  const to = (target: number, targetPhase: KidsPhase, results = game.results): KidsGame => ({
+    ...game, index: target, phase: targetPhase, results, deadline: null,
+    remainingMs: ['locked', 'returning', 'judging', 'revealed'].includes(targetPhase) ? 0 : kidsAnswerMs(game),
+    voiceSeq: (game.voiceSeq ?? 0) + 1, voicePlaying: false, voiceCue: null,
+  });
+  // Vor einem Kapitel oder dem Finale liegt die zuletzt gewertete Auflösung, ganz am Anfang die Begrüßung.
+  const beforeTask = () => {
+    const last = kidsLastScoredIndex({ ...game, results: game.results.slice(0, index) });
+    return last >= 0 ? to(last, 'revealed') : to(0, 'welcome');
+  };
+  if (phase === 'welcome') return null;
+  if (phase === 'chapter' || phase === 'superbluff') return beforeTask();
+  if (phase === 'reading') return index === 9 ? to(9, 'superbluff') : index % 3 === 0 ? to(index, 'chapter') : beforeTask();
+  if (phase === 'scene' || phase === 'moving' || phase === 'paused' || phase === 'locked') return to(index, 'reading');
+  if (phase === 'returning') return to(index, 'locked');
+  if (phase === 'judging') return to(index, 'returning');
+  if (phase === 'revealed') return to(index, game.short ? 'locked' : 'judging', game.results.map((r, i) => i === index ? null : r));
+  return game.results[index] !== null ? to(index, 'revealed') : to(index, 'reading');
 }
 
 function shuffle<T>(items: readonly T[], random: () => number): T[] {
@@ -86,6 +112,7 @@ export function kidsOvertook(game: KidsGame): boolean {
 /** Zeit und Punkte sind geräteunabhängig; doppelte oder unpassende Schritte ändern nichts. */
 export function updateKidsGame(game: KidsGame, action: KidsAction, now: number): KidsGame {
   const phase = game.phase;
+  if (action === 'back') return kidsPreviousStep(game) ?? game;
   if (action === 'skip-countdown') {
     if (!kidsCanSkipCountdown(game)) return game;
     return { ...game, phase: 'locked', remainingMs: 0, deadline: null,

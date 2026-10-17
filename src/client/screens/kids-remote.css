@@ -34,6 +34,8 @@
 .kids-remote-page .kids-score-actions { background: transparent; gap: 10px; padding: 0; }
 .kids-remote-page .kids-score-actions .kids-tool { font-size: 16px; min-height: 48px; }
 .kids-remote-page .kids-remote-actions .kids-skip-countdown { min-height: 44px; font-size: 14px; background: #fff2d2; }
+.kids-remote-page .kids-remote-actions .kids-remote-back { margin-top: 10px; min-height: 44px; font-size: 15px; background: #eef4f6; white-space: normal; }
+.kids-remote-back-note { margin: 6px 0 0; font-size: 13px; line-height: 1.4; color: #40596a; text-align: center; }
 .kids-remote-correct-link { padding: 10px 0 0; min-height: 44px; border: 0; background: transparent; color: #3e5463; font: inherit; font-size: 14px; text-decoration: underline; cursor: pointer; }
 .kids-remote-page .kids-phase-audio { background: #e8f3ef; border-color: #b7d6c9; }
 .kids-remote-page .kids-phase-audio > p { margin: 0; font-size: 13px; color: #375e54; }
