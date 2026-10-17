@@ -75,7 +75,7 @@
 .kids-active-group .kids-group-symbol { width: var(--active-group-symbol); height: var(--active-group-symbol); flex-basis: var(--active-group-symbol); }
 .kids-show .kids-show-stage .kids-show-question h1 {
   grid-column: 1; grid-row: 1; width: auto; height: auto; font-size: clamp(28px, min(3.65vw, 5.8vh), 84px);
-  line-height: 1.2; padding-block: 4px; display: block; text-align: left; font-weight: 900; text-wrap: balance; letter-spacing: -.025em;
+  line-height: 1.2; padding-block: 4px; display: grid; place-items: center; text-align: center; font-weight: 900; text-wrap: balance; letter-spacing: -.025em;
 }
 .kids-show .kids-show-stage .kids-clock { grid-column: 2; grid-row: 1; height: auto; max-height: none; width: 100%; align-self: center; color: white; }
 .kids-show .kids-clock circle { fill: #087e79; stroke-width: 5; }
