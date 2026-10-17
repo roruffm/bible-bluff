@@ -1,3 +1,4 @@
+import { showKidsOperator } from './kids-operator';
 import { expect, test } from '@playwright/test';
 
 test.use({ isMobile: false });
@@ -8,7 +9,7 @@ test('Kids: Inhalte bleiben bei schmalen und flachen Fenstern erreichbar', async
   for (const size of sizes) {
     await page.setViewportSize(size);
     await page.goto('/kids');
-    await page.getByRole('button', { name: 'Show vorbereiten', exact: false }).click();
+    await page.getByRole('button', { name: 'Show vorbereiten', exact: false }).click(); await showKidsOperator(page);
     await page.getByRole('button', { name: 'Mission starten', exact: true }).click();
     await page.getByRole('button', { name: 'Erste Aufgabe im Kapitel', exact: true }).click();
     const inspect = async (stage: string) => {
@@ -39,7 +40,7 @@ test('Kids: Inhalte bleiben bei schmalen und flachen Fenstern erreichbar', async
 test('Kids: question is centered and synchronized timers sit in both bottom corners', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/kids');
-  await page.getByRole('button', { name: 'Show vorbereiten', exact: false }).click();
+  await page.getByRole('button', { name: 'Show vorbereiten', exact: false }).click(); await showKidsOperator(page);
   await page.getByRole('button', { name: 'Mission starten', exact: true }).click();
   await page.getByRole('button', { name: 'Erste Aufgabe im Kapitel', exact: true }).click();
 
@@ -75,6 +76,7 @@ test('Kids: question is centered and synchronized timers sit in both bottom corn
   };
 
   await inspect();
+  await showKidsOperator(page);
   await page.getByRole('button', { name: 'Bedienung', exact: true }).click();
   await page.getByRole('button', { name: 'Nur Spiel anzeigen', exact: true }).click();
   await inspect();

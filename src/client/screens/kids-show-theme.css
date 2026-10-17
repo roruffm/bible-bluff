@@ -357,3 +357,7 @@
 @media (prefers-reduced-motion: reduce) {
   .kids-show .kids-top-actions { transition: none; }
 }
+
+/* Die Kinderbühne bleibt auch bei Hover, Tastaturfokus und auf kleinen Displays frei von Bedienung. H öffnet bewusst die Computerbedienung. */
+.kids-show.is-projecting :is(.kids-top-actions, .kids-controls, .kids-voice-play, .kids-question-voice, .kids-extra-controls, .kids-cinema-controls, .kids-regroup-operator, .kids-control-hint, .kids-connection-note) { display: none !important; }
+.kids-show .kids-setup-remote { width: 100%; margin-top: 14px; font-size: 16px; white-space: normal; }

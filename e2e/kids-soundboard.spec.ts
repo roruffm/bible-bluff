@@ -1,3 +1,4 @@
+import { showKidsOperator } from './kids-operator';
 import { expect, test } from '@playwright/test';
 import { createKidsGame } from '../src/shared/kids-game';
 import { packKidsGame } from '../src/shared/kids-remote';
@@ -12,6 +13,7 @@ test('Smartphone: Wertung nach Weitergehen korrigieren, freie Ansagen und Ende s
   await trackProfessorAudio(page);
   await page.addInitScript(({id,token})=>{ sessionStorage.setItem('bb:kids:display',JSON.stringify({id,token})); },{id:remote.id,token:remote.ownerToken});
   await page.goto('/kids');
+  await showKidsOperator(page);
   await page.getByRole('button',{name:'Bedienung',exact:true}).click();
   await page.getByRole('button',{name:'Klang einschalten',exact:true}).click();
   await page.getByRole('button',{name:'Menü schließen',exact:true}).click();
@@ -19,13 +21,13 @@ test('Smartphone: Wertung nach Weitergehen korrigieren, freie Ansagen und Ende s
   const phone=await phoneContext.newPage(),phoneAudio:string[]=[];
   phone.on('request',r=>{if(r.url().includes('/professor-bluff/'))phoneAudio.push(r.url());});
   await phone.goto(`/kids/steuerung#id=${remote.id}&key=${remote.remoteToken}`);
-  await phone.getByText('Letzte Wertung ändern',{exact:true}).click();
+  await phone.getByRole('tab',{name:'Funktionen',exact:true}).click();
   await phone.getByRole('button',{name:'Mehrheit richtig · 10 Punkte',exact:true}).click();
   await expect(page.getByTestId('team-score')).toHaveText('10');
   await expect(page.getByRole('heading',{name:game.rounds[1].question.prompt,exact:true})).toBeVisible();
   await expect(phone.getByRole('status').filter({hasText:'Aktuell:'})).toHaveText('Aktuell: 10 Punkte für das Kinderteam.');
-  await phone.getByText('Letzte Wertung ändern',{exact:true}).click();
-  await phone.getByText('♪ Zwischendurch-Sprüche',{exact:true}).click();
+  await phone.getByRole('tab',{name:'Funktionen',exact:true}).click();
+  await phone.getByRole('tab',{name:'Zusatzaudios',exact:true}).click();
   await phone.getByRole('button',{name:'Freunde anfeuern am Beamer abspielen',exact:true}).click();
   const counts=()=>professorAudio(page);
   await expect.poll(async()=>(await counts()).starts).toBe(1);
@@ -38,12 +40,13 @@ test('Smartphone: Wertung nach Weitergehen korrigieren, freie Ansagen und Ende s
   await expect.poll(async()=>(await counts()).stops).toBeGreaterThanOrEqual(1);
   expect(phoneAudio).toEqual([]);
   expect(await phone.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
-  await phone.getByText('♪ Zwischendurch-Sprüche',{exact:true}).click();
-  await phone.getByRole('button',{name:'Spiel abschließen',exact:true}).click();
+  await phone.getByRole('tab',{name:'Zusatzaudios',exact:true}).click();
+  await phone.getByRole('tab', { name: 'Funktionen', exact: true }).click(); await phone.getByRole('button',{name:'Spiel abschließen',exact:true}).click();
   await phone.getByRole('button',{name:'Jetzt mit Punktestand abschließen',exact:true}).click();
-  await phone.getByText('Letzte Wertung ändern',{exact:true}).click();
+  await phone.getByRole('tab',{name:'Funktionen',exact:true}).click();
   await phone.getByRole('button',{name:'Mindestens ein Kind richtig · 5 Punkte',exact:true}).click();
   await expect(page.getByTestId('team-score')).toHaveText('5');
+  await phone.getByRole('tab',{name:'Ablauf',exact:true}).click();
   await expect(phone.getByRole('heading',{name:'Gemeinsam seid ihr stark!',exact:true})).toBeVisible();
   await phoneContext.close();
 });
@@ -71,6 +74,7 @@ test('Smartphone: Gruppenaufruf, vorgemerkter Countdown, Pause und Jesus-Abschlu
     };
   },{id:remote.id,token:remote.ownerToken});
   await page.goto('/kids');
+  await showKidsOperator(page);
   await page.getByRole('button',{name:'Bedienung',exact:true}).click();
   await page.getByRole('button',{name:'Klang einschalten',exact:true}).click();
   await page.getByRole('button',{name:'Menü schließen',exact:true}).click();
@@ -100,7 +104,7 @@ test('Smartphone: Gruppenaufruf, vorgemerkter Countdown, Pause und Jesus-Abschlu
   await phone.getByRole('button',{name:'Pause · bleibt stehen am Beamer abspielen',exact:true}).click();
   await expect.poll(async()=>(await observed()).starts.length).toBe(3);
   expect((await professorAudio(page)).played.at(-1)).toBe('interjection-signal-pause');
-  await phone.getByRole('button',{name:'Spiel abschließen',exact:true}).click();
+  await phone.getByRole('tab', { name: 'Funktionen', exact: true }).click(); await phone.getByRole('button',{name:'Spiel abschließen',exact:true}).click();
   await phone.getByRole('button',{name:'Jetzt mit Punktestand abschließen',exact:true}).click();
   await phone.getByRole('button',{name:'Bei Jesus sind wir willkommen am Beamer abspielen',exact:true}).click();
   await expect.poll(async()=>(await observed()).starts.length).toBe(4);

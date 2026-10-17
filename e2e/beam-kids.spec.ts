@@ -1,8 +1,9 @@
+import { showKidsOperator } from './kids-operator';
 import { expect, test, type Page } from '@playwright/test';
 test.use({ viewport: { width: 1280, height: 800 }, isMobile: false });
 test.beforeEach(async ({ page }) => { await page.emulateMedia({ reducedMotion: 'reduce' }); });
 async function begin(page: Page) {
-  await page.getByRole('button',{name:'Show vorbereiten',exact:false}).click();
+  await page.getByRole('button',{name:'Show vorbereiten',exact:false}).click(); await showKidsOperator(page);
   await page.getByRole('button',{name:'Mission starten',exact:true}).click();
   await page.getByRole('button',{name:'Erste Aufgabe im Kapitel',exact:true}).click();
 }
@@ -82,8 +83,9 @@ test('Kids: reine Beameransicht ist über Maus und Tastatur bedienbar',async({pa
   await page.goto('/kids'); await begin(page);
   await page.getByRole('button',{name:'Maussteuerung ausblenden',exact:true}).click();
   await expect(page.getByRole('button',{name:'30 Sekunden starten',exact:true})).toBeHidden();
-  await page.getByRole('button',{name:'Maussteuerung einblenden',exact:true}).click();
+  await page.keyboard.press('h');
   await page.getByRole('button',{name:'30 Sekunden starten',exact:true}).click();
+  await showKidsOperator(page);
   await page.getByRole('button',{name:'Ⅱ Pause',exact:true}).click();
   await expect(page.getByText('Kurze Pause. Bleibt, wo ihr seid!',{exact:true})).toBeVisible();
   await page.keyboard.press('h'); await page.keyboard.press('ArrowRight');
@@ -92,11 +94,12 @@ test('Kids: reine Beameransicht ist über Maus und Tastatur bedienbar',async({pa
 test('Kids: Smartphone synchronisiert Maus, Wertung, Neuladen und Netzabbruch',async({page,browser})=>{
   await page.goto('/kids'); await begin(page);
   const question=await page.locator('#kids-question').innerText();
+  await showKidsOperator(page);
   await page.getByRole('button',{name:'Bedienung',exact:false}).click();
   await page.getByRole('button',{name:'Smartphone verbinden',exact:true}).click();
   await expect(page.getByRole('img',{name:'QR-Code zur Smartphone-Fernbedienung'})).toBeVisible();
   const url=await page.getByRole('link',{name:'Fernbedienung öffnen',exact:false}).getAttribute('href');
-  await page.getByRole('button',{name:'Zur Partie',exact:true}).click();
+  await page.getByRole('button',{name:'Zur Partie',exact:true}).click(); await showKidsOperator(page);
   const context=await browser.newContext({viewport:{width:390,height:844},locale:'de-DE'}), phone=await context.newPage();
   await phone.addInitScript(()=>{const now=Date.now;Date.now=()=>now()+3600000;});
   await phone.goto(url!);
@@ -106,7 +109,7 @@ test('Kids: Smartphone synchronisiert Maus, Wertung, Neuladen und Netzabbruch',a
   await expect(phone.getByRole('button',{name:/Familienjoker|Revanche/})).toHaveCount(0);
   await phone.getByRole('button',{name:'Szene am Beamer abspielen',exact:true}).click();
   await expect(page.locator('.kids-cinema')).toHaveAttribute('data-scene','ark');
-  await expect(phone.locator('.kids-remote-phase strong')).toHaveText('Szene läuft');
+  await expect(phone.locator('.kids-remote-live strong')).toHaveText('Szene läuft');
   await expect(phone.getByRole('button',{name:'30 Sekunden starten',exact:true})).toHaveCount(0);
   await page.reload();
   await expect(page.locator('.kids-cinema')).toBeVisible();
@@ -114,8 +117,9 @@ test('Kids: Smartphone synchronisiert Maus, Wertung, Neuladen und Netzabbruch',a
   await expect(page.locator('#kids-question')).toHaveText(question);
   await phone.getByRole('button',{name:'30 Sekunden starten',exact:true}).click();
   await expect(page.getByText('1, 2 oder 3? Ab in euer Feld!',{exact:true})).toBeVisible();
+  await showKidsOperator(page);
   await page.getByRole('button',{name:'Ⅱ Pause',exact:true}).click();
-  await expect(phone.locator('.kids-remote-phase strong')).toHaveText('Pause');
+  await expect(phone.locator('.kids-remote-live strong')).toHaveText('Pause');
   await page.reload(); await expect(page.locator('#kids-question')).toHaveText(question);
   await context.setOffline(true);
   await expect(phone.getByRole('status')).toContainText('Verbindung unterbrochen');
@@ -129,6 +133,7 @@ test('Kids: Smartphone synchronisiert Maus, Wertung, Neuladen und Netzabbruch',a
   await expect(page.getByTestId('team-score')).toHaveText('10');
   await phone.getByRole('button',{name:'Nächste Aufgabe',exact:true}).click();
   await expect(page.locator('.kids-active-group')).toContainText('Leuchtsterne');
+  await showKidsOperator(page);
   await page.getByRole('button',{name:'Bedienung',exact:false}).click();
   await page.getByRole('button',{name:'Smartphone-Steuerung anzeigen',exact:true}).click();
   await page.getByRole('button',{name:'Smartphone-Verbindung trennen',exact:true}).click();
@@ -283,7 +288,7 @@ test('Kids: vorzeitiger Abschluss behält nur gewertete Punkte, stoppt die Zeit 
 
 test('Kids: Abschluss vor der ersten Aufgabe und während einer Szene',async({page})=>{
   for(const phase of ['welcome','scene']) {
-    await page.goto('/kids');await page.getByRole('button',{name:'Show vorbereiten',exact:false}).click();
+    await page.goto('/kids');await page.getByRole('button',{name:'Show vorbereiten',exact:false}).click(); await showKidsOperator(page);
     if(phase==='scene') {
       await page.getByRole('button',{name:'Mission starten',exact:true}).click();await page.getByRole('button',{name:'Erste Aufgabe im Kapitel',exact:true}).click();
       await page.getByRole('button',{name:'Szene abspielen',exact:true}).click();await expect(page.locator('.kids-cinema')).toBeVisible();
@@ -298,13 +303,14 @@ test('Kids: Abschluss vor der ersten Aufgabe und während einer Szene',async({pa
 test('Kids: Smartphone beendet die Show mit Endstand, der nach Neuladen erhalten bleibt',async({page,browser})=>{
   await page.goto('/kids');await begin(page);await page.clock.install();
   await resolve(page);await page.getByRole('button',{name:'Nächste Aufgabe',exact:true}).click();
+  await showKidsOperator(page);
   await page.getByRole('button',{name:'Bedienung',exact:false}).click();await page.getByRole('button',{name:'Smartphone verbinden',exact:true}).click();
-  const url=await page.getByRole('link',{name:'Fernbedienung öffnen',exact:false}).getAttribute('href');await page.getByRole('button',{name:'Zur Partie',exact:true}).click();
+  const url=await page.getByRole('link',{name:'Fernbedienung öffnen',exact:false}).getAttribute('href');await page.getByRole('button',{name:'Zur Partie',exact:true}).click(); await showKidsOperator(page);
   const context=await browser.newContext({viewport:{width:390,height:844},locale:'de-DE'}),phone=await context.newPage();
   await phone.goto(url!);await expect(phone.getByText('Mit der Beamer-Partie verbunden',{exact:true})).toBeVisible();
-  await phone.getByRole('button',{name:'Spiel abschließen',exact:true}).click();await phone.getByRole('button',{name:'Weiterspielen',exact:true}).click();
+  await phone.getByRole('tab', { name: 'Funktionen', exact: true }).click(); await phone.getByRole('button',{name:'Spiel abschließen',exact:true}).click();await phone.getByRole('button',{name:'Weiterspielen',exact:true}).click();await phone.getByRole('tab',{name:'Ablauf',exact:true}).click();
   await expect(phone.getByRole('button',{name:'30 Sekunden starten',exact:true})).toBeVisible();
-  await phone.getByRole('button',{name:'Spiel abschließen',exact:true}).click();await phone.getByRole('button',{name:'Jetzt mit Punktestand abschließen',exact:true}).click();
+  await phone.getByRole('tab', { name: 'Funktionen', exact: true }).click(); await phone.getByRole('button',{name:'Spiel abschließen',exact:true}).click();await phone.getByRole('button',{name:'Jetzt mit Punktestand abschließen',exact:true}).click();
   await expect(phone.getByRole('heading',{name:'Gemeinsam seid ihr stark!'})).toBeVisible();
   await page.clock.runFor(2000);await expect(page.locator('.kids-ending')).toBeVisible();
   await expect(page.getByTestId('team-score')).toHaveText('10');await expect(page.getByTestId('prof-score')).toHaveText('7');

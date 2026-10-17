@@ -1,3 +1,4 @@
+import { showKidsOperator } from './kids-operator';
 import { expect, test, type Page } from '@playwright/test';
 import { professorAudio, trackProfessorAudio } from './professor-audio';
 
@@ -5,7 +6,7 @@ test.use({ viewport: { width: 1280, height: 800 }, isMobile: false });
 test.beforeEach(async ({ page }) => { await page.emulateMedia({ reducedMotion: 'reduce' }); });
 
 async function begin(page: Page) {
-  await page.getByRole('button', { name: 'Show vorbereiten', exact: false }).click();
+  await page.getByRole('button', { name: 'Show vorbereiten', exact: false }).click(); await showKidsOperator(page);
   await page.getByRole('button', { name: 'Mission starten', exact: true }).click();
   await page.getByRole('button', { name: 'Erste Aufgabe im Kapitel', exact: true }).click();
 }
@@ -32,7 +33,7 @@ test('Kids: Neuladen mitten im Countdown setzt die Show angehalten mit allen Pun
   await expect(resume).toBeFocused();
   await expect(page.locator('.kids-resume')).toContainText('Kapitel 1 · Leuchtsterne · Kinderteam 10 · Professor Bluff 7');
   await expect(page.locator('.kids-resume')).toContainText('Der Countdown ist angehalten.');
-  await page.keyboard.press('Space');
+  await page.keyboard.press('Space'); await showKidsOperator(page);
   await expect(page.locator('#kids-question')).toHaveText(question);
   await expect(page.locator('.kids-answer-text')).toHaveText(answers);
   await expect(page.getByTestId('team-score')).toHaveText('10');
@@ -59,6 +60,7 @@ test('Kids: Neuladen mitten im Countdown setzt die Show angehalten mit allen Pun
   await begin(page);
   await page.getByRole('button', { name: 'Spiel mit Punktestand abschließen', exact: true }).click();
   await page.getByRole('button', { name: 'Jetzt mit Punktestand abschließen', exact: true }).click();
+  await showKidsOperator(page);
   await page.getByRole('button', { name: 'Bedienung', exact: false }).click();
   await page.getByRole('button', { name: 'Zur Vorbereitung', exact: true }).click();
   await page.getByRole('dialog').getByRole('button', { name: 'Zur Vorbereitung', exact: true }).click();
@@ -69,7 +71,7 @@ test('Kids: Neuladen mitten im Countdown setzt die Show angehalten mit allen Pun
 test('Kids: Fällt das Netz aus, spricht der Professor aus den vorab geladenen Aufnahmen weiter', async ({ page, context }) => {
   await trackProfessorAudio(page);
   await page.goto('/kids');
-  await page.getByRole('button', { name: 'Show vorbereiten', exact: false }).click();
+  await page.getByRole('button', { name: 'Show vorbereiten', exact: false }).click(); await showKidsOperator(page);
   await page.getByRole('button', { name: 'Bedienung', exact: false }).click();
   await expect(page.locator('.kids-tech-status')).toHaveText(allVoices);
   await page.getByRole('button', { name: 'Menü schließen', exact: true }).click();
@@ -85,11 +87,11 @@ test('Kids: Fällt das Netz aus, spricht der Professor aus den vorab geladenen A
 
 test('Kids: Ohne Netz für das Smartphone geht es mit Maus und Tastatur weiter', async ({ page, context }) => {
   await page.goto('/kids');
-  await page.getByRole('button', { name: 'Show vorbereiten', exact: false }).click();
+  await page.getByRole('button', { name: 'Show vorbereiten', exact: false }).click(); await showKidsOperator(page);
   await page.getByRole('button', { name: 'Bedienung', exact: false }).click();
   await page.getByRole('button', { name: 'Smartphone verbinden', exact: true }).click();
   await expect(page.getByRole('link', { name: 'Fernbedienung öffnen', exact: false })).toBeVisible();
-  await page.getByRole('button', { name: 'Zur Partie', exact: true }).click();
+  await page.getByRole('button', { name: 'Zur Partie', exact: true }).click(); await showKidsOperator(page);
   await context.setOffline(true);
   await page.getByRole('button', { name: 'Mission starten', exact: true }).click();
   const note = page.locator('.kids-connection-note', { hasText: 'Verbindung' });
@@ -123,8 +125,9 @@ test.describe('mit Offline-Kopie', () => {
     const question = await page.locator('#kids-question').innerText();
     await context.setOffline(true);
     await page.reload();
-    await page.getByRole('button', { name: 'Show fortsetzen', exact: true }).click();
+    await page.getByRole('button', { name: 'Show fortsetzen', exact: true }).click(); await showKidsOperator(page);
     await expect(page.locator('#kids-question')).toHaveText(question);
+    await showKidsOperator(page);
     await page.getByRole('button', { name: 'Bedienung', exact: false }).click();
     await expect(page.locator('.kids-tech-status')).toHaveText(/^✓ Aufnahmen (\d+)\/\1 · ✓ Offline-Kopie$/);
     await page.getByRole('button', { name: 'Menü schließen', exact: true }).click();

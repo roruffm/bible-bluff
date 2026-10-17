@@ -1,3 +1,4 @@
+import { showKidsOperator } from './kids-operator';
 import { expect, test } from '@playwright/test';
 
 test.use({ isMobile: true, hasTouch: true });
@@ -28,7 +29,7 @@ test('Kids: mobile Auflösung trennt Professor und Kommentar und lässt den Spru
   for (const size of sizes) {
     await page.setViewportSize(size);
     await page.goto('/kids');
-    await page.getByRole('button', { name: 'Show vorbereiten', exact: false }).click();
+    await page.getByRole('button', { name: 'Show vorbereiten', exact: false }).click(); await showKidsOperator(page);
     await page.getByRole('button', { name: 'Mission starten', exact: true }).click();
     await page.getByRole('button', { name: 'Erste Aufgabe im Kapitel', exact: true }).click();
     let starts = 0, stops = 0;
@@ -56,10 +57,10 @@ test('Kids: mobile Auflösung trennt Professor und Kommentar und lässt den Spru
       await page.getByRole('button', { name: 'Professor-Spruch stoppen', exact: true }).click();
       await expect.poll(async () => (await audioCounts()).stops).toBe(++stops);
       await page.getByRole('button', { name: 'Maussteuerung ausblenden', exact: true }).click();
-      await expect(play).toBeVisible();
+      await expect(play).toBeHidden();
+      await page.keyboard.press('h');
       await play.click();
       await expect.poll(async () => (await audioCounts()).starts).toBe(++starts);
-      await page.getByRole('button', { name: 'Maussteuerung einblenden', exact: true }).click();
       await page.getByRole('button', { name: 'Professor-Spruch stoppen', exact: true }).click();
       await expect.poll(async () => (await audioCounts()).stops).toBe(++stops);
       await page.getByRole('button', { name: result.startsWith('Mehrheit') ? 'Nächstes Kapitel' : 'Nächste Aufgabe', exact: true }).click();
