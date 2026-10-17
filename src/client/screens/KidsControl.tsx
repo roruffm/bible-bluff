@@ -1,6 +1,6 @@
 import { KidsGroupName, KidsGroupText } from '../components/KidsGroupName';
 import { useEffect, useState } from 'preact/hooks';
-import { kidsCanJumpToFinal, kidsLastScoredIndex, kidsProfessorPoints, kidsResultPoints, kidsScores, updateKidsGame, type KidsGame } from '../../shared/kids-game';
+import { kidsCanJumpToFinal, kidsCanSkipCountdown, kidsLastScoredIndex, kidsProfessorPoints, kidsResultPoints, kidsScores, updateKidsGame, type KidsGame } from '../../shared/kids-game';
 import { KIDS_CHAPTERS, kidsAnswerPicture } from '../../shared/kids-show-questions';
 import { useKidsRemote } from '../lib/kids-remote';
 import { KidsFinishDialog } from '../components/KidsFinish';
@@ -38,7 +38,9 @@ export function KidsControlPage() {
       {game.phase==='reading' && round.question.scene && <div class="kids-remote-extras"><button class="kids-button" type="button" disabled={disabled} onClick={()=>remote.send('scene')}>Szene am Beamer abspielen</button></div>}
       {kidsClaimPhase(game.phase) && <section class="kids-remote-direction kids-remote-voice" aria-label="Professor Bluffs Behauptung"><b>Professor Bluff behauptet · bitte mit Professor-Stimme vorlesen:</b><p>{professorSays(game)}</p></section>}
       <KidsPhaseAudio game={game} disabled={disabled} send={remote.send}/>
-      <div class="kids-remote-actions">{game.phase==='finished' ? <div class="kids-remote-farewell"><h2>Gemeinsam seid ihr stark!</h2><p>{professorSays(game)}</p><p>{scores!.playedRounds} {scores!.playedRounds===1 ? 'Aufgabe gewertet' : 'Aufgaben gewertet'}. Lasst den Abschluss am Beamer stehen und feiert alle Kinder.</p></div> : <ShowControls game={game} act={action=>{void remote.send(action);}} disabled={disabled}/>}</div>
+      <div class="kids-remote-actions">{game.phase==='finished' ? <div class="kids-remote-farewell"><h2>Gemeinsam seid ihr stark!</h2><p>{professorSays(game)}</p><p>{scores!.playedRounds} {scores!.playedRounds===1 ? 'Aufgabe gewertet' : 'Aufgaben gewertet'}. Lasst den Abschluss am Beamer stehen und feiert alle Kinder.</p></div> : <ShowControls game={game} act={action=>{void remote.send(action);}} disabled={disabled}/>}
+        {kidsCanSkipCountdown(game) && <button type="button" class="kids-tool kids-skip-countdown" aria-label="Countdown überspringen" disabled={disabled} onClick={()=>{void remote.send('skip-countdown');}}>⏭ Countdown überspringen</button>}
+      </div>
       {lastScored >= 0 && <details class="kids-remote-direction kids-score-correction">
         <summary>Letzte Wertung ändern</summary>
         <p>Aufgabe {lastScored + 1}: {game.rounds[lastScored].question.prompt}</p>
