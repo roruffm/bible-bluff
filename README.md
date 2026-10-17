@@ -78,10 +78,12 @@ lokal erzeugte Klangbilder; Eltern und andere Gruppen machen Geräusche und Pant
   **Funktionen** mit Finalsprung, Abschluss, Wertungskorrektur und Technikhinweisen.
   Die Stopptaste für Professor-Audios bleibt in allen drei Bereichen erreichbar. Neue Spielphasen
   bringen im Ablauf die nächste Aktion wieder nach oben. Richtige Antworten sind nur für Helfer markiert.
-  Ab 1024 Pixel Fensterbreite wird die Fernbedienung automatisch zur Desktopübersicht:
-  Ablauf, passende Audios samt durchsuchbaren Zusatzaudios und Funktionen sind gleichzeitig sichtbar.
-  Ab 1280 Pixel stehen alle drei Bereiche nebeneinander; auf kleineren Laptops stehen die Funktionen darunter.
-  Gruppe, Phase, Punktestand und Audio-Stopp bleiben oben erreichbar. Der Wechsel zur Smartphoneansicht
+  Ab 1024 Pixel Fensterbreite zeigt die Desktopübersicht zwei Bereiche: links die aktuelle Aufgabe,
+  kompakte Antwortfelder und den nächsten Schritt; rechts passende Audios und häufige Schnellansagen.
+  Regiehinweise, „Alle Zusatzaudios“ mit Suche und „Weitere Funktionen“ mit Wertungskorrektur,
+  Finalsprung und Abschluss lassen sich bei Bedarf aufklappen. Bei der Auflösung steht direkt nur die
+  zum Ergebnis passende Punkteansage; alle weiteren Aufnahmen bleiben in der Gesamtauswahl erreichbar.
+  Gruppe, Phase, Punktestand und Audio-Stopp bleiben oben sichtbar. Der Wechsel zur Smartphoneansicht
   erhält die Verbindung, den Spielstand und eine laufende Audiosuche.
 - **Letzte Wertung ändern** unter **Funktionen** korrigiert die zuletzt abgeschlossene Aufgabe
   auf 10 / 5 / 0 Punkte (im Finale 20 / 10 / 0), auch nach dem Weitergehen oder am Endbildschirm. Aktuelle Frage,

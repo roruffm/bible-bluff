@@ -6,7 +6,7 @@ import { professorAudio, trackProfessorAudio } from './professor-audio';
 
 test.use({ viewport: { width: 1280, height: 800 }, isMobile: false });
 
-test('Fernbedienung: Desktop zeigt alle Bereiche, steuert den Beamer und wechselt ohne Spielverlust zur Smartphoneansicht', async ({ page, browser, request }, info) => {
+test('Fernbedienung: Desktop priorisiert Aufgabe und Audios, klappt Extras auf und wechselt ohne Spielverlust zur Smartphoneansicht', async ({ page, browser, request }, info) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   const game = createKidsGame();
   game.index = 1; game.phase = 'reading'; game.results[0] = 'correct';
@@ -26,12 +26,16 @@ test('Fernbedienung: Desktop zeigt alle Bereiche, steuert den Beamer und wechsel
     await control.goto(`/kids/steuerung#id=${remote.id}&key=${remote.remoteToken}`);
     await expect(control.locator('.kids-remote-page')).toHaveClass(/is-desktop/);
     await expect(control.getByRole('tablist')).toHaveCount(0);
-    for (const name of ['Ablauf', 'Audios', 'Funktionen']) await expect(control.getByRole('region', { name, exact: true })).toBeVisible();
-    await expect(control.locator('.kids-remote-guide')).toHaveAttribute('open', '');
+    for (const name of ['Spiel steuern', 'Professor-Audios', 'Weitere Funktionen']) await expect(control.getByRole('region', { name, exact: true })).toBeVisible();
+    await expect(control.locator('.kids-remote-guide')).not.toHaveAttribute('open', '');
+    await expect(control.locator('.kids-remote-question .kids-remote-answers li')).toHaveCount(3);
+    await expect(control.locator('.kids-remote-question .kids-audio-claim')).toBeVisible();
+    await expect(control.locator('.kids-phase-audio .kids-audio-claim')).toHaveCount(0);
     await expect(control.getByRole('button', { name: '30 Sekunden starten', exact: true })).toBeVisible();
-    await expect(control.getByRole('searchbox', { name: 'Ansage suchen', exact: true })).toBeVisible();
-    await expect(control.getByRole('button', { name: 'Direkt ins Finale', exact: false })).toBeVisible();
-    // Laptop: zwei Hauptspalten und die Funktionen darunter. Ab 1280 px drei Spalten.
+    await expect(control.getByRole('searchbox', { name: 'Ansage suchen', exact: true })).toHaveCount(0);
+    await expect(control.getByRole('button', { name: 'Richtig knifflig am Beamer abspielen', exact: true })).toBeVisible();
+    await expect(control.getByRole('button', { name: 'Direkt ins Finale', exact: false })).toHaveCount(0);
+    // Zwei klare Bereiche auf allen Desktopbreiten; seltene Funktionen bleiben eingeklappt.
     for (const width of [1024, 1280, 1366, 1920, 2560]) {
       await control.setViewportSize({ width, height: 900 });
       const layout = await control.evaluate(() => {
@@ -41,8 +45,9 @@ test('Fernbedienung: Desktop zeigt alle Bereiche, steuert den Beamer und wechsel
       expect(layout.overflow).toBe(false);
       expect(layout.pageWidth).toBeGreaterThan(900);
       expect(layout.flow.right).toBeLessThan(layout.audio.x);
-      if (width >= 1280) expect(layout.audio.right).toBeLessThan(layout.tools.x);
-      else expect(layout.tools.y).toBeGreaterThan(Math.max(layout.flow.bottom, layout.audio.bottom));
+      expect(layout.tools.right).toBeLessThan(layout.audio.x);
+      expect(layout.tools.y).toBeGreaterThan(layout.flow.bottom);
+      await expect(control.getByRole('button', { name: '30 Sekunden starten', exact: true })).toBeInViewport();
     }
     await control.setViewportSize({ width: 1440, height: 900 });
     await control.screenshot({ path: info.outputPath('desktop-remote.png'), fullPage: true });
@@ -61,7 +66,7 @@ test('Fernbedienung: Desktop zeigt alle Bereiche, steuert den Beamer und wechsel
     await control.getByRole('tab', { name: 'Zusatzaudios', exact: true }).click();
     await control.getByRole('searchbox', { name: 'Ansage suchen', exact: true }).fill('knifflig');
     await control.setViewportSize({ width: 1440, height: 900 });
-    await expect(control.getByRole('region', { name: 'Ablauf', exact: true })).toBeVisible();
+    await expect(control.getByRole('region', { name: 'Spiel steuern', exact: true })).toBeVisible();
     await expect(control.getByRole('searchbox', { name: 'Ansage suchen', exact: true })).toHaveValue('knifflig');
     expect((await professorAudio(page)).starts).toBe(audioBeforeResize);
     await control.getByRole('button', { name: 'Countdown überspringen', exact: true }).click();
@@ -69,6 +74,9 @@ test('Fernbedienung: Desktop zeigt alle Bereiche, steuert den Beamer und wechsel
     await control.getByRole('button', { name: 'Alle sind zurück', exact: true }).click();
     await control.getByRole('button', { name: 'Mehrheit richtig · +10', exact: true }).click();
     await expect(page.getByTestId('team-score')).toHaveText('20');
+    await expect(control.locator('.kids-phase-audio').getByRole('button', { name: 'Jemand richtig +5 am Beamer abspielen', exact: true })).toHaveCount(0);
+    await control.getByRole('button', { name: 'Letzte Wertung ändern', exact: true }).click();
+    await expect(control.locator('.kids-remote-more')).toHaveAttribute('open', '');
     await control.getByRole('button', { name: 'Mindestens ein Kind richtig · 5 Punkte', exact: true }).click();
     await expect(page.getByTestId('team-score')).toHaveText('15');
     await control.getByRole('button', { name: 'Spiel abschließen', exact: true }).click();
@@ -77,7 +85,21 @@ test('Fernbedienung: Desktop zeigt alle Bereiche, steuert den Beamer und wechsel
     await control.reload();
     await expect(control.locator('.kids-remote-live strong')).toHaveText('Aufgelöst');
     await expect(control.locator('.kids-remote-score')).toHaveAttribute('aria-label', 'Punktestand: Kinderteam 15, Professor Bluff 14');
+    await control.getByText('Weitere Funktionen', { exact: true }).click();
+    await control.getByText('Alle Zusatzaudios', { exact: true }).click();
+    await expect(control.getByRole('searchbox', { name: 'Ansage suchen', exact: true })).toBeVisible();
     await control.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
     await expect(control.getByRole('button', { name: 'Professor-Audio stoppen', exact: false })).toBeInViewport();
+    await control.getByRole('button', { name: 'Direkt ins Finale', exact: true }).click();
+    await expect(control.locator('.kids-remote-more')).not.toHaveAttribute('open', '');
+    await control.getByRole('button', { name: 'Gemeinsam ins Finale', exact: true }).click();
+    await control.getByRole('button', { name: 'Countdown überspringen', exact: true }).click();
+    await control.getByRole('button', { name: 'Zurück in die Gruppen', exact: true }).click();
+    await control.getByRole('button', { name: 'Alle sind zurück', exact: true }).click();
+    await control.getByRole('button', { name: 'Mehrheit richtig · +20', exact: true }).click();
+    await expect(page.getByTestId('team-score')).toHaveText('35');
+    await expect(control.locator('.kids-phase-audio').getByRole('button', { name: 'Finale: Mehrheit richtig +20 am Beamer abspielen', exact: true })).toBeVisible();
+    await expect(control.locator('.kids-phase-audio').getByRole('button', { name: 'Finale: Jemand richtig +10 am Beamer abspielen', exact: true })).toHaveCount(0);
+
   } finally { await context.close(); }
 });

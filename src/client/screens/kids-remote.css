@@ -48,7 +48,7 @@
 .kids-audio-claim { border-left: 3px solid #7651a5; padding: 10px 12px; background: #f1eafb; border-radius: 0 10px 10px 0; font-size: 13px; line-height: 1.5; }
 .kids-audio-claim > p { margin-top: 6px; }
 .kids-remote-page .kids-all-audio { background: #fffdf8; }
-.kids-all-audio > label { margin-top: 14px; }
+.kids-audio-library > label { margin-top: 14px; }
 .kids-all-audio input { width: 100%; min-height: 48px; padding: 11px; border: 2px solid #a5bdc7; border-radius: 10px; background: white; color: #12324a; font: inherit; font-weight: 500; box-sizing: border-box; }
 .kids-all-audio .kids-audio-count { font-size: 12px; color: #40596a; }
 .kids-remote-page .kids-remote-guide { background: #fff8e6; }
@@ -65,57 +65,79 @@
 .kids-remote-score b { font-size: 18px; }
 .kids-remote-score > span { display: inline-flex; align-items: baseline; gap: 4px; }
 
-/* Ab Laptopbreite: Ablauf, Audios und Funktionen sind gleichzeitig erreichbar. */
+/* Auf dem Smartphone bleiben die drei Reiter erhalten. */
+.kids-remote-main { display: contents; }
+.kids-remote-tools-content { display: grid; gap: 16px; }
+.kids-remote-more > summary[hidden], .kids-audio-library-toggle > summary[hidden] { display: none; }
+
+/* Am Desktop stehen Aufgabe und Audios im Vordergrund. */
 @media (min-width: 1024px) {
   .kids-remote-page.is-desktop {
     display: grid; grid-template-columns: minmax(0, 1fr) auto; align-content: start; column-gap: 24px;
-    max-width: 1600px; padding: 26px 32px 40px; overflow: visible;
+    max-width: 1440px; padding: 20px 28px 32px; overflow: visible;
   }
-  .is-desktop > .kids-remote-header { margin-bottom: 20px; }
-  .is-desktop .kids-remote-header .kids-logo { width: 112px; }
-  .kids-remote-page.is-desktop .kids-remote-header h1 { font-size: 28px; }
-  .is-desktop .kids-remote-header p { font-size: 13px; }
-  .is-desktop > .kids-remote-status { align-self: center; margin-bottom: 20px; padding: 10px 14px; }
+  .is-desktop > .kids-remote-header { margin-bottom: 16px; }
+  .is-desktop .kids-remote-header .kids-logo { width: 88px; }
+  .kids-remote-page.is-desktop .kids-remote-header h1 { font-size: 24px; }
+  .is-desktop > .kids-remote-status { align-self: center; margin-bottom: 16px; padding: 8px 12px; font-size: 11px; }
   .is-desktop > :is(.kids-remote-toolbar, .kids-remote-dashboard, .kids-remote-empty) { grid-column: 1 / -1; }
   .is-desktop .kids-remote-toolbar {
-    grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 20px;
-    margin: 0 0 24px; padding: 12px 16px; border: 1px solid #c8d7dc; border-radius: 16px;
-    background: #f8fbfa; box-shadow: 0 4px 12px #12324a0c;
+    grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 18px;
+    margin: 0 0 20px; padding: 10px 14px; border: 1px solid #c8d7dc; border-radius: 14px;
+    background: #f8fbfa; box-shadow: 0 3px 10px #12324a0c;
   }
-  .is-desktop .kids-remote-live { justify-content: flex-start; gap: 20px; }
-  .is-desktop .kids-remote-live > span { font-size: 17px; }
-  .is-desktop .kids-remote-live > strong { font-size: 16px; }
-  .is-desktop .kids-remote-live .kids-group-symbol { width: 30px; height: 30px; }
-  .is-desktop .kids-remote-score {
-    gap: 18px; margin: 0; padding: 5px 14px; border: 1px solid #cadbd7; border-radius: 12px;
-    background: #eaf2ee; font-size: 12px;
-  }
-  .is-desktop .kids-remote-score b { font-size: 24px; }
-  .is-desktop .kids-remote-stop { min-height: 46px; padding: 10px 14px; }
-  .is-desktop .kids-remote-dashboard { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+  .is-desktop .kids-remote-live { justify-content: flex-start; gap: 16px; }
+  .is-desktop .kids-remote-live > span { font-size: 16px; }
+  .is-desktop .kids-remote-live > strong { font-size: 15px; }
+  .is-desktop .kids-remote-live .kids-group-symbol { width: 28px; height: 28px; }
+  .is-desktop .kids-remote-score { gap: 16px; margin: 0; padding: 4px 12px; border: 1px solid #cadbd7; border-radius: 10px; background: #eaf2ee; font-size: 12px; }
+  .is-desktop .kids-remote-score b { font-size: 23px; }
+  .is-desktop .kids-remote-stop { min-height: 44px; padding: 10px 12px; }
+  .is-desktop .kids-remote-dashboard { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+  .is-desktop .kids-remote-main { display: grid; gap: 14px; min-width: 0; }
   .is-desktop .kids-remote-panel { margin: 0; gap: 14px; align-content: start; }
   .kids-remote-column-title { padding: 0 2px 2px; }
-  .kids-remote-column-title > span { display: block; color: #547080; font-size: 10px; font-weight: 850; letter-spacing: .1em; margin-bottom: 5px; }
-  .kids-remote-column-title > h2 { margin: 0; font-size: 23px; line-height: 1.2; }
-  .is-desktop .kids-remote-question { padding: 20px; background: #fff; }
-  .is-desktop .kids-remote-question h2 { font-size: 24px; }
-  .is-desktop .kids-remote-tools { grid-column: 1 / -1; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
-  .is-desktop .kids-remote-tools > .kids-remote-column-title { grid-column: 1 / -1; }
-  .is-desktop .kids-remote-tools > .kids-time-plan { margin: 0; }
-  .is-desktop .kids-remote-function { border-top: 4px solid #e5b54d; }
-  .is-desktop .kids-remote-guide summary { font-size: 14px; }
+  .kids-remote-column-title > h2 { margin: 0; font-size: 20px; line-height: 1.2; }
+  .is-desktop .kids-remote-question { padding: 18px; background: #fff; }
+  .is-desktop .kids-remote-question h2 { font-size: 25px; }
+  .is-desktop .kids-remote-answers.is-compact { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 16px; }
+  .is-desktop .kids-remote-answers.is-compact li { grid-template-columns: minmax(0, 1fr); align-content: start; align-items: start; padding: 10px 8px; gap: 6px; font-size: 14px; line-height: 1.35; border-width: 1.5px; border-radius: 10px; }
+  .is-desktop .kids-remote-answers.is-compact b { width: auto; font-size: 11px; text-align: left; color: #40596a; }
+  .is-desktop .kids-remote-answers.is-compact small { font-size: 11px; }
+  .is-desktop .kids-remote-question .kids-audio-claim { margin-top: 14px; font-size: 13px; }
+  .is-desktop .kids-remote-question .kids-audio-claim > p { margin-top: 4px; }
+  .is-desktop .kids-remote-step { padding: 18px; }
+  .is-desktop .kids-remote-step > h2 { font-size: 20px; }
+  .is-desktop .kids-remote-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .is-desktop .kids-remote-actions > .kids-controls, .is-desktop .kids-remote-actions > .kids-remote-farewell { grid-column: 1 / -1; }
+  .kids-remote-page.is-desktop .kids-remote-actions > :is(.kids-skip-countdown, .kids-remote-back) { margin: 0; min-height: 40px; padding: 8px; font-size: 13px; border: 1px solid #c7d5da; background: #eef4f6; box-shadow: 0 2px 0 #cedce1; }
+  .is-desktop .kids-remote-back-note { font-size: 12px; }
+  .is-desktop .kids-remote-guide { padding: 6px 14px; background: transparent; }
+  .is-desktop .kids-remote-guide summary { min-height: 34px; font-size: 13px; color: #476272; }
   .is-desktop .kids-remote-guide > p { font-size: 13px; }
-  .is-desktop .kids-all-audio { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 10px 12px; }
-  .is-desktop .kids-all-audio > :is(h2, p, small, .kids-soundboard-clips) { grid-column: 1 / -1; }
-  .is-desktop .kids-all-audio > label { margin-top: 2px; font-size: 13px; min-width: 0; }
-  .is-desktop .kids-all-audio > p { margin: 0; }
-  .is-desktop .kids-all-audio > small { margin-top: 2px; font-size: 11px; line-height: 1.5; color: #547080; }
-  .is-desktop .kids-all-audio .kids-soundboard-clips { max-height: 360px; overflow-y: auto; overscroll-behavior-y: contain; margin: 0; padding: 4px; scrollbar-gutter: stable; }
-  .is-desktop .kids-all-audio .kids-audio-clip p { font-size: 12px; }
-}
-@media (min-width: 1280px) {
-  .is-desktop .kids-remote-dashboard { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1.15fr) minmax(0, .85fr); }
-  .is-desktop .kids-remote-tools { grid-column: auto; grid-template-columns: minmax(0, 1fr); }
+  .is-desktop .kids-remote-more { border: 1px solid #c9d9dd; border-radius: 12px; background: #f8fbfa; }
+  .is-desktop .kids-remote-more > summary { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 12px; padding: 14px; font-size: 14px; font-weight: 800; cursor: pointer; list-style: none; }
+  .is-desktop .kids-remote-more > summary::before { content: '▸'; }
+  .is-desktop .kids-remote-more[open] > summary::before { transform: rotate(90deg); }
+  .is-desktop .kids-remote-more > summary small { margin-left: auto; font-size: 12px; font-weight: 500; color: #547080; }
+  .is-desktop .kids-remote-tools-content { padding: 0 12px 12px; gap: 12px; }
+  .is-desktop .kids-remote-tools-content > .kids-time-plan { margin: 0; }
+  .is-desktop .kids-remote-function .kids-final-jump, .is-desktop .kids-remote-function .kids-remote-finish { background: #eef4f6; font-size: 14px; min-height: 42px; }
+  .is-desktop .kids-phase-audio.is-compact .kids-audio-clip > p, .is-desktop .kids-quick-audio .kids-audio-clip > p { display: none; }
+  .is-desktop .kids-phase-audio.is-compact .kids-soundboard-clips { margin-top: 14px; gap: 10px; }
+  .is-desktop .kids-phase-audio.is-compact > h2 { font-size: 18px; }
+  .is-desktop .kids-all-audio.is-compact { display: block; }
+  .is-desktop .kids-all-audio.is-compact > h2 { font-size: 18px; }
+  .is-desktop .kids-quick-audio { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 14px; }
+  .is-desktop .kids-quick-audio .kids-button { height: 100%; min-height: 44px; padding: 10px; font-size: 13px; border-color: #bccfd5; box-shadow: 0 2px 0 #c6d5da; }
+  .is-desktop .kids-audio-library-toggle > summary { min-height: 44px; margin-top: 12px; padding-top: 10px; border-top: 1px solid #d4dfe3; font-size: 14px; font-weight: 800; color: #476272; cursor: pointer; }
+  .is-desktop .kids-audio-library { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 10px 12px; padding-top: 10px; }
+  .is-desktop .kids-audio-library > label { margin: 0; font-size: 13px; min-width: 0; }
+  .is-desktop .kids-audio-library > :is(p, small, .kids-soundboard-clips) { grid-column: 1 / -1; }
+  .is-desktop .kids-audio-library > p { margin: 0; }
+  .is-desktop .kids-audio-library > small { margin: 0; font-size: 11px; line-height: 1.5; color: #547080; }
+  .is-desktop .kids-audio-library .kids-soundboard-clips { max-height: 300px; overflow-y: auto; overscroll-behavior-y: contain; margin: 0; padding: 4px; scrollbar-gutter: stable; }
+  .is-desktop .kids-audio-library .kids-audio-clip p { font-size: 12px; }
 }
 @media (max-width: 360px) {
   .kids-remote-page { padding-inline: 10px; }
