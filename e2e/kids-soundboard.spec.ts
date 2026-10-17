@@ -113,3 +113,31 @@ test('Smartphone: Gruppenaufruf, vorgemerkter Countdown, Pause und Jesus-Abschlu
   expect(await phone.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
   await context.close();
 });
+
+test('Smartphone: Wertungsansagen stehen bei der Auflösung und erklingen am Beamer', async ({ page, browser, request }) => {
+  const game=createKidsGame();
+  game.phase='revealed'; game.index=0; game.results[0]='participated';
+  const response=await request.post('/api/kids-remotes',{data:{easy:false,game:packKidsGame(game,Date.now())}});
+  expect(response.status()).toBe(201);
+  const remote=await response.json();
+  await trackProfessorAudio(page);
+  await page.addInitScript(({id,token})=>{ sessionStorage.setItem('bb:kids:display',JSON.stringify({id,token})); },{id:remote.id,token:remote.ownerToken});
+  await page.goto('/kids');
+  await showKidsOperator(page);
+  await page.getByRole('button',{name:'Bedienung',exact:true}).click();
+  await page.getByRole('button',{name:'Klang einschalten',exact:true}).click();
+  await page.getByRole('button',{name:'Menü schließen',exact:true}).click();
+  const context=await browser.newContext({viewport:{width:390,height:844},locale:'de-DE'});
+  const phone=await context.newPage();
+  await phone.goto(`/kids/steuerung#id=${remote.id}&key=${remote.remoteToken}`);
+  const phaseAudio=phone.getByRole('region',{name:'Audio zur aktuellen Spielphase'});
+  for(const label of ['Mehrheit richtig +10','Jemand richtig +5','Keiner richtig +0']) await expect(phaseAudio.getByRole('button',{name:`${label} am Beamer abspielen`,exact:true})).toBeVisible();
+  const counts=()=>professorAudio(page);
+  for(const [label,clip] of [['Jemand richtig +5','interjection-result-participated'],['Mehrheit richtig +10','interjection-result-correct'],['Keiner richtig +0','interjection-result-none']] as const) {
+    const before=(await counts()).starts;
+    await phaseAudio.getByRole('button',{name:`${label} am Beamer abspielen`,exact:true}).click();
+    await expect.poll(async()=>(await counts()).starts).toBe(before+1);
+    expect((await counts()).played.at(-1)).toBe(clip);
+  }
+  await context.close();
+});

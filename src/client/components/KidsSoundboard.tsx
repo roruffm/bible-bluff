@@ -13,7 +13,7 @@ const phaseAudio = {
   welcome: ['together'], chapter: ['listen'], superbluff: ['nervous'], reading: [],
   scene: ['support'], moving: ['signal-countdown', 'cheer'], paused: ['signal-pause', 'think'],
   locked: ['signal-stop'], returning: ['return'], judging: ['regroup-ready'],
-  revealed: ['applause'], finished: ['closing-jesus', 'applause'],
+  revealed: ['result-correct', 'result-participated', 'result-none', 'applause'], finished: ['closing-jesus', 'applause'],
 } as const satisfies Record<KidsGame['phase'], readonly typeof PROFESSOR_INTERJECTIONS[number]['id'][]>;
 
 function InterjectionButton({ clip, game, disabled, send }: SoundboardProps & { clip: typeof PROFESSOR_INTERJECTIONS[number] }) {
