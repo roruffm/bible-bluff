@@ -103,3 +103,46 @@ test('Fernbedienung: Desktop priorisiert Aufgabe und Audios, klappt Extras auf u
 
   } finally { await context.close(); }
 });
+
+test('Fernbedienung: Desktop zeigt Fortschritt, gut lesbare Restzeit, eindeutige Lösung und alle Wertungen als Knöpfe', async ({ page, request }) => {
+  const game = createKidsGame();
+  game.index = 1; game.phase = 'reading'; game.results[0] = 'correct';
+  const response = await request.post('/api/kids-remotes', { data: { easy: false, game: packKidsGame(game, Date.now()) } });
+  expect(response.status()).toBe(201);
+  const remote = await response.json();
+  await page.goto(`/kids/steuerung#id=${remote.id}&key=${remote.remoteToken}`);
+  await expect(page.locator('.kids-remote-page')).toHaveClass(/is-desktop/);
+  await expect(page.locator('.kids-remote-question > span')).toContainText('Aufgabe 2 von 10');
+  const correct = page.locator('.kids-remote-question .kids-remote-answers li.is-correct');
+  await expect(correct).toHaveCount(1);
+  await expect(correct).toContainText(game.rounds[1].question.answer);
+  await expect(correct.locator('.kids-remote-correct')).toHaveText('✓ Richtige Antwort');
+  await expect(page.locator('.kids-remote-timer')).toHaveCount(0);
+
+  await page.getByRole('button', { name: '30 Sekunden starten', exact: true }).click();
+  const timer = page.getByRole('timer');
+  await expect(timer).toHaveAttribute('aria-label', /^\d+ Sekunden$/);
+  const box = async (name: string) => (await page.getByRole('button', { name, exact: true }).boundingBox())!;
+  const back = await box('← Zurück zum Vorlesen'), skip = await box('Countdown überspringen');
+  expect(back.x + back.width).toBeLessThanOrEqual(skip.x);
+  expect(Math.abs(back.y - skip.y)).toBeLessThan(2);
+  const note = (await page.getByText('Der Countdown startet danach wieder von vorn.', { exact: true }).boundingBox())!;
+  expect(note.y).toBeGreaterThan(back.y + back.height - 1);
+  expect(note.x).toBeLessThan(skip.x);
+  await page.getByRole('button', { name: 'Ⅱ Pause', exact: true }).click();
+  await expect(timer).toHaveAttribute('aria-label', /^\d+ Sekunden, pausiert$/);
+  await expect(page.getByText('Die Antwortzeit ist angehalten. Mit „Weiter geht’s“ läuft sie weiter.', { exact: true })).toBeVisible();
+
+  await page.getByRole('button', { name: 'Countdown überspringen', exact: true }).click();
+  await page.getByRole('button', { name: 'Zurück in die Gruppen', exact: true }).click();
+  await page.getByRole('button', { name: 'Alle sind zurück', exact: true }).click();
+  for (const name of ['Mehrheit richtig · +10', 'Mindestens ein Kind richtig · +5', 'Keiner richtig · +0']) {
+    const button = page.getByRole('button', { name, exact: true });
+    expect((await button.boundingBox())!.height, name).toBeGreaterThanOrEqual(44);
+    expect(await button.evaluate(el => getComputedStyle(el).borderTopWidth), name).not.toBe('0px');
+  }
+  await page.getByRole('button', { name: 'Keiner richtig · +0', exact: true }).click();
+  const link = page.getByRole('button', { name: 'Letzte Wertung ändern', exact: true });
+  await expect(link).toBeVisible();
+  expect(await link.evaluate(el => getComputedStyle(el).boxShadow)).toBe('none');
+});

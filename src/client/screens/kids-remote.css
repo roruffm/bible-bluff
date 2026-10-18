@@ -37,7 +37,7 @@
 .kids-remote-page .kids-remote-actions .kids-skip-countdown { min-height: 44px; font-size: 14px; background: #fff2d2; }
 .kids-remote-page .kids-remote-actions .kids-remote-back { margin-top: 10px; min-height: 44px; font-size: 15px; background: #eef4f6; white-space: normal; }
 .kids-remote-back-note { margin: 6px 0 0; font-size: 13px; line-height: 1.4; color: #40596a; text-align: center; }
-.kids-remote-correct-link { padding: 10px 0 0; min-height: 44px; border: 0; background: transparent; color: #3e5463; font: inherit; font-size: 14px; text-decoration: underline; cursor: pointer; }
+.kids-remote-page .kids-remote-correct-link { padding: 10px 0 0; min-height: 44px; border: 0; background: transparent; color: #3e5463; font: inherit; font-size: 14px; text-decoration: underline; cursor: pointer; box-shadow: none; }
 .kids-remote-page .kids-phase-audio { background: #e8f3ef; border-color: #b7d6c9; }
 .kids-remote-page .kids-phase-audio > p { margin: 0; font-size: 13px; color: #375e54; }
 .kids-remote-page .kids-soundboard-clips { gap: 12px; margin: 14px 0 0; }
@@ -103,17 +103,41 @@
   .is-desktop .kids-remote-question { padding: 18px; background: #fff; }
   .is-desktop .kids-remote-question h2 { font-size: 25px; }
   .is-desktop .kids-remote-answers.is-compact { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 16px; }
-  .is-desktop .kids-remote-answers.is-compact li { grid-template-columns: minmax(0, 1fr); align-content: start; align-items: start; padding: 10px 8px; gap: 6px; font-size: 14px; line-height: 1.35; border-width: 1.5px; border-radius: 10px; }
-  .is-desktop .kids-remote-answers.is-compact b { width: auto; font-size: 11px; text-align: left; color: #40596a; }
-  .is-desktop .kids-remote-answers.is-compact small { font-size: 11px; }
+  /* Neutrale Felder mit Feldfarbe als Etikett; nur die richtige Antwort ist grün hervorgehoben. */
+  .is-desktop .kids-remote-answers.is-compact li { grid-template-columns: minmax(0, 1fr); align-content: start; align-items: start; padding: 10px 12px 12px; gap: 6px; font-size: 15px; font-weight: 750; line-height: 1.35; background: #fff; border: 1.5px solid #cbd8dd; border-radius: 12px; }
+  .is-desktop .kids-remote-answers.is-compact li.is-correct { background: #e9f8ef; border: 2px solid #1f8a57; box-shadow: 0 0 0 3px #1f8a5726; }
+  .is-desktop .kids-remote-answers.is-compact b { justify-self: start; width: auto; padding: 2px 9px; border-radius: 999px; background: var(--field); border: 1px solid #12324a33; font-size: 11px; line-height: 1.5; color: #12324a; }
+  .is-desktop .kids-remote-answers.is-compact small { width: fit-content; margin-top: 6px; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 800; }
+  .is-desktop .kids-remote-answers.is-compact .kids-remote-correct { background: #1f8a57; color: #fff; }
+  .is-desktop .kids-remote-answers.is-compact .kids-remote-bluff { background: #efe4fb; color: #5e328d; }
   .is-desktop .kids-remote-question .kids-audio-claim { margin-top: 14px; font-size: 13px; }
   .is-desktop .kids-remote-question .kids-audio-claim > p { margin-top: 4px; }
   .is-desktop .kids-remote-step { padding: 18px; }
   .is-desktop .kids-remote-step > h2 { font-size: 20px; }
   .is-desktop .kids-remote-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
   .is-desktop .kids-remote-actions > .kids-controls, .is-desktop .kids-remote-actions > .kids-remote-farewell { grid-column: 1 / -1; }
-  .kids-remote-page.is-desktop .kids-remote-actions > :is(.kids-skip-countdown, .kids-remote-back) { margin: 0; min-height: 40px; padding: 8px; font-size: 13px; border: 1px solid #c7d5da; background: #eef4f6; box-shadow: 0 2px 0 #cedce1; }
-  .is-desktop .kids-remote-back-note { font-size: 12px; }
+  /* Zurück steht links mit seinem Hinweis darunter, Überspringen rechts und farblich als Abkürzung erkennbar. */
+  .kids-remote-page.is-desktop .kids-remote-actions > :is(.kids-skip-countdown, .kids-remote-back) { margin: 0; min-height: 42px; padding: 8px 12px; font-size: 14px; border: 1px solid #c7d5da; background: #fff; box-shadow: 0 2px 0 #cedce1; }
+  .is-desktop .kids-remote-actions > .kids-remote-back { order: 1; grid-column: 1; text-align: left; color: #344e60; }
+  .kids-remote-page.is-desktop .kids-remote-actions > .kids-skip-countdown { order: 2; grid-column: 2; background: #fff2d2; border-color: #e6cd8c; box-shadow: 0 2px 0 #e3cd92; color: #5d4309; }
+  .is-desktop .kids-remote-actions > .kids-remote-back-note { order: 3; grid-column: 1; margin: -2px 2px 0; font-size: 12px; text-align: left; }
+  /* „Keiner richtig“ ist am Beamer bewusst klein; hier ein vollwertiger, ruhiger Knopf. */
+  .kids-remote-page.is-desktop .kids-score-actions > .kids-tool { justify-self: stretch; min-height: 46px; padding: 10px 12px; border: 2px solid #9db2bb; border-radius: 13px; background: #fff; color: #12324a; box-shadow: 0 3px 0 #b7c7cd; font-size: 16px; font-weight: 800; }
+  /* Gut lesbare Restzeit während der Antwortwahl. */
+  .kids-remote-timer { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: baseline; gap: 8px 10px; margin: 0 0 14px; padding: 12px 14px; border: 1px solid #f0d58a; border-radius: 12px; background: #fff6dc; }
+  .kids-remote-timer > strong { font-size: 40px; line-height: 1; font-variant-numeric: tabular-nums; }
+  .kids-remote-timer > span:not(.kids-remote-timer-bar) { font-size: 14px; font-weight: 800; color: #6b5418; }
+  .kids-remote-timer-bar { grid-column: 1 / -1; height: 8px; border-radius: 999px; background: #f1e4bd; overflow: hidden; }
+  .kids-remote-timer-bar > i { display: block; height: 100%; border-radius: inherit; background: #d39b16; transition: width .1s linear; }
+  .kids-remote-timer.is-urgent { background: #fde6e1; border-color: #eaa99c; }
+  .kids-remote-timer.is-urgent > strong { color: #a3321f; }
+  .kids-remote-timer.is-urgent > span:not(.kids-remote-timer-bar) { color: #8a2c1c; }
+  .kids-remote-timer.is-urgent .kids-remote-timer-bar { background: #f5cfc6; }
+  .kids-remote-timer.is-urgent .kids-remote-timer-bar > i { background: #c8422c; }
+  .kids-remote-timer.is-paused { background: #eef4f6; border-color: #c7d5da; }
+  .kids-remote-timer.is-paused > span:not(.kids-remote-timer-bar) { color: #476272; }
+  .kids-remote-timer.is-paused .kids-remote-timer-bar { background: #dbe6ea; }
+  .kids-remote-timer.is-paused .kids-remote-timer-bar > i { background: #7f97a3; }
   .is-desktop .kids-remote-guide { padding: 6px 14px; background: transparent; }
   .is-desktop .kids-remote-guide summary { min-height: 34px; font-size: 13px; color: #476272; }
   .is-desktop .kids-remote-guide > p { font-size: 13px; }
