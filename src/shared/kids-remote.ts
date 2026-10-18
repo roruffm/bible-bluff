@@ -80,7 +80,7 @@ function unpack(value: unknown, now: number): KidsGame {
   if (!Number.isSafeInteger(game.cueSeq) || Number(game.cueSeq) < 0 || Number(game.cueSeq) > 1000) return invalid();
   const voiceSeq = game.voiceSeq ?? 0, voicePlaying = game.voicePlaying ?? false, voiceCue = game.voiceCue ?? null, voiceKind = game.voiceKind ?? 'quote';
   const voiceClip = game.voiceClip ?? null;
-  if (!Number.isSafeInteger(voiceSeq) || Number(voiceSeq) < 0 || Number(voiceSeq) > 1000000 || typeof voicePlaying !== 'boolean' || !['quote','question','interjection'].includes(voiceKind as string)) return invalid();
+  if (!Number.isSafeInteger(voiceSeq) || Number(voiceSeq) < 0 || Number(voiceSeq) > 1000000 || typeof voicePlaying !== 'boolean' || !['quote','question','answers','interjection'].includes(voiceKind as string)) return invalid();
   if ((voiceClip !== null && !professorInterjection(voiceClip)) || (voiceKind === 'interjection' && !professorInterjection(voiceClip))) return invalid();
   if (voiceCue !== null && (typeof voiceCue !== 'string' || !/^[a-z]+:[0-9]$/.test(voiceCue) || !PHASES.includes(voiceCue.split(':')[0] as KidsPhase))) return invalid();
   let sceneRemainingMs=0;

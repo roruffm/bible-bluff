@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { KidsGroupName } from '../components/KidsGroupName';
 import { KidsScene } from '../components/KidsScene';
-import { KidsQuestionVoiceButton, KidsVoiceProvider } from '../components/KidsVoice';
+import { KidsAnswersVoiceButton, KidsQuestionVoiceButton, KidsVoiceProvider } from '../components/KidsVoice';
 import { KIDS_SCENE_MS } from '../../shared/kids-scenes';
 import { KidsFinish, KidsFinishDialog } from '../components/KidsFinish';
 import { KidsReveal } from '../components/KidsReveal';
@@ -207,7 +207,7 @@ export function KidsPage() {
         <ol class="kids-answers has-pictures" aria-label="Antworten und Spielfelder">{round.answers.map((answer,i)=><li key={`${game.index}-${i}`} class={`kids-answer kids-field-${i+1}${answer===round.question.bluff.answer ? ' is-bluff-pick' : ''}`}><span class="kids-number">{i+1}</span><StoryPicture motif={kidsAnswerPicture(round.question,answer)}/><span class="kids-answer-text">{answer}</span>{answer===round.question.bluff.answer && <BluffPin/>}</li>)}</ol>
         <div class="kids-bottom">
           <KidsStageClock side="left" seconds={seconds} progress={game.remainingMs / kidsAnswerMs(game)} locked={game.phase==='locked'} urgent={game.phase==='moving' && seconds<=5}/>
-          <div class="kids-operator-actions">{game.phase==='reading' && <div class="kids-extra-controls"><KidsQuestionVoiceButton/>{round.question.scene && <button type="button" class="kids-tool" disabled={remote.busy} onClick={()=>act('scene')}>Szene abspielen</button>}</div>}<ShowControls game={game} act={act} disabled={remote.busy} primaryRef={primary}/></div>
+          <div class="kids-operator-actions">{game.phase==='reading' && <div class="kids-extra-controls"><KidsQuestionVoiceButton/><KidsAnswersVoiceButton/>{round.question.scene && <button type="button" class="kids-tool" disabled={remote.busy} onClick={()=>act('scene')}>Szene abspielen</button>}</div>}<ShowControls game={game} act={act} disabled={remote.busy} primaryRef={primary}/></div>
           <KidsStageClock side="right" seconds={seconds} progress={game.remainingMs / kidsAnswerMs(game)} locked={game.phase==='locked'} urgent={game.phase==='moving' && seconds<=5}/>
         </div>
       </section>}

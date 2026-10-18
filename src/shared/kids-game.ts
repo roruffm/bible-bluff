@@ -20,9 +20,9 @@ export interface KidsGame {
   results: (KidsResult | null)[]; cueSeq: number;
   /** Kurzshow; fehlt bei der vollen Show. */ short?: boolean;
   /** Gerätezeit, zu der die Mission nach der Begrüßung startete; für den Zeitplan der Kurzshow. */ startedAt?: number | null;
-  voiceSeq?: number; voicePlaying?: boolean; voiceCue?: string|null; voiceKind?: 'quote'|'question'|'interjection'; voiceClip?: ProfessorInterjectionId|null;
+  voiceSeq?: number; voicePlaying?: boolean; voiceCue?: string|null; voiceKind?: 'quote'|'question'|'answers'|'interjection'; voiceClip?: ProfessorInterjectionId|null;
 }
-export type KidsAction = 'start' | 'pause' | 'resume' | 'skip-countdown' | 'back' | 'tick' | 'return' | 'ready' | 'correct' | 'participated' | 'none' | 'next' | 'scene' | 'end-scene' | 'finish' | 'jump-final' | 'speak' | 'stop-speech' | 'read-question' | 'correct-last' | 'participated-last' | 'none-last' | `interjection:${ProfessorInterjectionId}`;
+export type KidsAction = 'start' | 'pause' | 'resume' | 'skip-countdown' | 'back' | 'tick' | 'return' | 'ready' | 'correct' | 'participated' | 'none' | 'next' | 'scene' | 'end-scene' | 'finish' | 'jump-final' | 'speak' | 'stop-speech' | 'read-question' | 'read-answers' | 'correct-last' | 'participated-last' | 'none-last' | `interjection:${ProfessorInterjectionId}`;
 
 export function kidsCanJumpToFinal(game: KidsGame): boolean {
   const final = game.rounds.length - 1;
@@ -139,6 +139,7 @@ export function updateKidsGame(game: KidsGame, action: KidsAction, now: number):
   }
   if (action === 'speak' && !['scene','returning','judging'].includes(phase)) return { ...game, voiceSeq: (game.voiceSeq ?? 0) + 1, voicePlaying: true, voiceCue: `${phase}:${game.index}`, voiceKind:'quote' };
   if (action === 'read-question' && phase === 'reading') return { ...game, voiceSeq: (game.voiceSeq ?? 0) + 1, voicePlaying: true, voiceCue: `${phase}:${game.index}`, voiceKind:'question' };
+  if (action === 'read-answers' && phase === 'reading') return { ...game, voiceSeq: (game.voiceSeq ?? 0) + 1, voicePlaying: true, voiceCue: `${phase}:${game.index}`, voiceKind:'answers', voiceClip: null };
   if (action === 'stop-speech') return { ...game, voiceSeq: (game.voiceSeq ?? 0) + 1, voicePlaying: false, voiceCue: null };
   if (action === 'finish' && phase !== 'finished') return { ...game, phase: 'finished', remainingMs: 0, deadline: null };
   if (phase === 'scene' && (action === 'end-scene' || (action === 'tick' && now >= (game.deadline ?? now)))) return { ...game, phase: 'reading', deadline: null };

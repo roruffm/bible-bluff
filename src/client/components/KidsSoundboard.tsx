@@ -35,6 +35,7 @@ export function KidsPhaseAudio({ game, disabled, send, compact = false }: Compac
     <div class="kids-soundboard-clips">
       {groupCall && <InterjectionButton clip={groupCall} game={game} disabled={disabled} send={send} compact={compact}/>}
       {game.phase === 'reading' && <div class="kids-audio-clip"><button class="kids-button kids-question-read" type="button" disabled={disabled} onClick={() => { void send('read-question'); }}>▶ Frage am Beamer vorlesen</button></div>}
+      {game.phase === 'reading' && <div class="kids-audio-clip"><button class="kids-button kids-question-read" type="button" disabled={disabled} title="Alle drei Antworten in der Reihenfolge der Felder 1, 2, 3 am Beamer vorlesen" onClick={() => { void send('read-answers'); }}>▶ Antworten vorlesen</button></div>}
       {professorVoiceKey(game) && <div class="kids-audio-clip"><button type="button" class="kids-button" disabled={disabled} title={compact ? professorSays(game) : undefined} onClick={() => { void send('speak'); }}>▶ Spruch am Beamer abspielen</button><p>{professorSays(game)}</p></div>}
       {!compact && kidsClaimPhase(game.phase) && <div class="kids-audio-claim"><b>Professor-Tipp · selbst mit Professor-Stimme vorlesen</b><p>{professorSays(game)}</p></div>}
       {clips.map(id => <InterjectionButton key={id} clip={professorInterjectionForRound(id, game.index)!} game={game} disabled={disabled} send={send} compact={compact}/>)}

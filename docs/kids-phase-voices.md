@@ -118,3 +118,24 @@ Sprachausgabe aus. Nach einer Pause die Vormerkung bei Bedarf erneut aktivieren.
 verlangt zu jeder Ansage eine echte MP3-Datei. Die Countdown-Tests prüfen geplanten
 Start, verspäteten Download, abgelaufene Zeit und Abbruch vor beziehungsweise nach
 dem Laden. Die Browserprüfungen prüfen weiterhin die geräteübergreifende Wiedergabe.
+
+## Antwortmöglichkeiten vorlesen (18.10.2026)
+
+„Antworten vorlesen“ steht während der Frage neben „Frage vorlesen“ in der
+Mausbedienung und neben „Frage am Beamer vorlesen“ in der Smartphone- und
+Desktop-Fernbedienung. Ein Klick liest alle drei sichtbaren Felder als
+„Antwort eins … Antwort zwei … Antwort drei …“ am Beamer vor. Die Kinderansicht
+zeigt keinen neuen Knopf. Der Countdown wartet weiterhin auf die Spielleitung.
+
+Die 30 Antwortclips (`answer-0-0.mp3` bis `answer-9-2.mp3`) und drei Feldnummern
+(`answer-number-0.mp3` bis `answer-number-2.mp3`) stammen aus einer Snorre-Aufnahme
+mit `eleven_multilingual_v2`, Flow `zHuF8ivp8Vi8wHq2KxlM`,
+Sprachknoten `fpRtlM91y5RRxknXEqRy`. Das vollständige Transkript wurde geprüft.
+Schnitt anhand der Wortzeiten, 94 % Sprechtempo, -18 LUFS, kurze Pausen zwischen
+Nummer und Antwort sowie nach jeder Antwort. Alle Clips werden für die Offline-Show
+vorgeladen. Keine neue Generierung während des Spiels.
+
+Die Antwortclips werden in der tatsächlichen gemischten Feldreihenfolge abgespielt;
+die Nummer bezieht sich stets auf das sichtbare Feld. Neues Audio, Stoppen,
+Countdownstart und Phasenwechsel brechen die gesamte Folge ab, auch wenn ein Clip
+noch lädt. Nach Neuladen startet keine Aufnahme von selbst.
