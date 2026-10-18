@@ -72,17 +72,28 @@ export function kidsPreviousStep(game: KidsGame): KidsGame | null {
   return game.results[index] !== null ? to(index, 'revealed') : to(index, 'reading');
 }
 
-function shuffle<T>(items: readonly T[], random: () => number): T[] {
-  const result = [...items];
-  for (let i = result.length - 1; i > 0; i--) { const j = Math.floor(random() * (i + 1)); [result[i], result[j]] = [result[j], result[i]]; }
-  return result;
-}
-export function createKidsGame(random: () => number = Math.random, { short = false }: { short?: boolean } = {}): KidsGame {
-  // Die drei Aufgaben der Kurzshow nutzen jedes Feld genau einmal.
-  const positions = short ? [...shuffle([0, 1, 2], random), ...shuffle([0, 1, 2, 0, 1, 2], random)] : shuffle([0, 1, 2, 0, 1, 2, 0, 1, 2], random);
-  const rounds = KIDS_SHOW_QUESTIONS.map((question, i) => {
-    const correctIndex = i === 9 ? Math.floor(random() * 3) : positions[i];
-    const answers = shuffle(question.distractors, random); answers.splice(correctIndex, 0, question.answer);
+/** Feste Zuordnung je Frage: Feld 1 gelb, Feld 2 türkis, Feld 3 rosa.
+ * Die neun regulären Antworten sind gleichmäßig auf die drei Felder verteilt.
+ * Die Kennung statt der Rundenposition verhindert Änderungen durch eine neue Fragenreihenfolge. */
+const KIDS_CORRECT_FIELDS: Readonly<Record<string, 0 | 1 | 2>> = {
+  '1petr-arche': 1,
+  'lt-jona': 2,
+  'mt-muenze': 0,
+  'lt-krippe': 2,
+  'lt-taube': 0,
+  '2petr-eselin': 1,
+  'lt-loewengrube': 0,
+  'joh-junge': 2,
+  'joh-thomas': 1,
+  'mk-kissen': 1,
+};
+export function createKidsGame(_random: () => number = Math.random, { short = false }: { short?: boolean } = {}): KidsGame {
+  // _random bleibt für bestehende Aufrufer erhalten, beeinflusst aber keine Antwortposition mehr.
+  const rounds = KIDS_SHOW_QUESTIONS.map((question) => {
+    const correctIndex = KIDS_CORRECT_FIELDS[question.sourceId];
+    if (correctIndex === undefined) throw new Error(`Keine feste Kids-Antwortposition für ${question.sourceId}`);
+    const answers = [...question.distractors];
+    answers.splice(correctIndex, 0, question.answer);
     return { question, answers, correctIndex };
   });
   return { rounds, index: 0, phase: 'welcome', remainingMs: kidsAnswerMs({ short }), deadline: null, results: rounds.map(() => null), cueSeq: 0, ...(short ? { short } : {}) };
