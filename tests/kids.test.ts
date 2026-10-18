@@ -151,7 +151,7 @@ describe('Die große Bluff-Jagd', () => {
       // Für die Behauptung gibt es keine Aufnahme. Die Spielleitung liest sie selbst vor.
       expect(professorVoiceKey(state)).toBeNull();
     }
-    g=resolve(g,'correct');expect(professorVoiceKey(g)).toBe('startled-0');
+    g=resolve(g,'correct');expect(professorVoiceKey(g)).toBe('reveal-0');
   });
   it('hält die Wertung während des Trommelwirbels zurück und erkennt das Überholen', () => {
     let g=resolve(reading(),'correct');

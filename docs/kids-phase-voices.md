@@ -171,3 +171,37 @@ So werden die Nummern eins, zwei, drei und die jeweiligen Antworttexte passend z
 gemischten Anzeige zusammengesetzt. Die 21 ersetzten Antwortclips sowie die 21 neuen
 Nummernclips wurden auf Dekodierung, hörbare Sprache und Übersteuerung geprüft und
 werden von „Show vorbereiten“ vollständig vorgeladen.
+
+
+### Zehn Auflösungssprüche mit Nutzer-Aufnahmen (18.10.2026)
+
+Nach jeder Auflösung zeigt Professor Bluffs Sprechblase den neuen, zur Geschichte
+passenden Spruch (`revealQuote`). Smartphone- und Desktop-Fernbedienung zeigen
+über denselben Text die passende Wiedergabe an. Der Spruch ist für alle drei
+Wertungen derselbe; Mimik, Punkte und die separaten Wertungsansagen bleiben vom
+Rundenergebnis abhängig. Die bisherigen sachlichen Erklärungen und Bibelstellen
+bleiben bei der richtigen Antwort stehen. Audio startet weiterhin nur manuell.
+
+Die zehn Original-MP3s wurden unverändert übernommen. Ihre Zuordnung wurde per
+Transkription einer Prüfdatei in chronologischer Reihenfolge bestätigt
+(ElevenLabs-Flow `WBf0xAyyP3D4z8F22Z3X`). Die erste Aufnahme sagt „Auch bei uns gehört
+jeder dazu“; der sichtbare Text verwendet wie gewünscht „Auch in unserem Team
+gehört jeder dazu“. Die übrigen Aufnahmen entsprechen dem gewünschten Wortlaut.
+
+| Zeit im Dateinamen | Zieldatei | Frage |
+| --- | --- | --- |
+| 17:06:46 | `reveal-0.mp3` | Noah mit den Tieren |
+| 17:08:11 | `reveal-1.mp3` | Jona im Fisch |
+| 17:10:02 | `reveal-2.mp3` | Petrus und die Münze |
+| 17:11:00 | `reveal-3.mp3` | Jesuskind in der Krippe |
+| 17:11:43 | `reveal-4.mp3` | Taube mit Olivenblatt |
+| 17:18:38 | `reveal-5.mp3` | Bileams Eselin |
+| 17:21:30 | `reveal-6.mp3` | Daniel bei den Löwen |
+| 17:24:45 | `reveal-7.mp3` | Fünf Brote und zwei Fische |
+| 17:34:21 | `reveal-8.mp3` | Thomas / Didymus |
+| 17:37:37 | `reveal-9.mp3` | Jesus stillt den Sturm |
+
+`Show vorbereiten` lädt alle zehn neuen Aufnahmen für die Offline-Show vor.
+Die alten `startled-*`- und `comfort-*`-Aufnahmen werden nicht mehr verwendet
+oder vorgeladen. Jede neue Aufnahme wurde auf erfolgreiche MP3-Dekodierung und
+identischen Dateiinhalt zum Upload geprüft.

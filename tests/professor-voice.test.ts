@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { createKidsGame, kidsScores, updateKidsGame, type KidsGame } from '../src/shared/kids-game';
 import { professorVoiceKey } from '../src/shared/professor-voice';
+import { kidsRoundReaction } from '../src/client/lib/kids-reactions';
 import { PROFESSOR_INTERJECTIONS } from '../src/shared/professor-interjections';
 
 describe('Professor-Aufnahmen', () => {
@@ -42,6 +43,10 @@ describe('Professor-Aufnahmen', () => {
     games.push({...games[games.length-1],phase:'finished',results:Array(10).fill('correct')});
     for(const state of games){
       const key=professorVoiceKey(state);expect(key).not.toBeNull();
+      if(state.phase==='revealed') {
+        expect(key).toBe(`reveal-${state.index}`);
+        expect(kidsRoundReaction(state).quote).toBe(state.rounds[state.index].question.revealQuote);
+      }
       const bytes=readFileSync(new URL(`../src/client/public/professor-bluff/${key}.mp3`,import.meta.url));
       expect(bytes.length).toBeGreaterThan(1500);expect(bytes.subarray(0,3).toString()==='ID3' || bytes[0]===255).toBe(true);
       expect(['comfort-4','comfort-9']).not.toContain(key);
