@@ -34,6 +34,7 @@ export function KidsPhaseAudio({ game, disabled, send, compact = false }: Compac
     <h2>{!compact && <span>2</span>} {compact ? 'Jetzt passend' : 'Passende Audios'}</h2>{!compact && <p>Antippen → Professor spricht am Beamer</p>}
     <div class="kids-soundboard-clips">
       {groupCall && <InterjectionButton clip={groupCall} game={game} disabled={disabled} send={send} compact={compact}/>}
+      {game.index === 9 && (game.phase === 'superbluff' || game.phase === 'reading') && <div class="kids-audio-clip"><button class="kids-button kids-question-read" type="button" disabled={disabled} onClick={() => { void send('interjection:finale-parents'); }}>▶ Eltern-Pantomime erklären</button></div>}
       {game.phase === 'reading' && <div class="kids-audio-clip"><button class="kids-button kids-question-read" type="button" disabled={disabled} onClick={() => { void send('read-question'); }}>▶ Frage am Beamer vorlesen</button></div>}
       {game.phase === 'reading' && <div class="kids-audio-clip"><button class="kids-button kids-question-read" type="button" disabled={disabled} title="Alle drei Antworten in der Reihenfolge der Felder 1, 2, 3 am Beamer vorlesen" onClick={() => { void send('read-answers'); }}>▶ Antworten vorlesen</button></div>}
       {professorVoiceKey(game) && <div class="kids-audio-clip"><button type="button" class="kids-button" disabled={disabled} title={compact ? professorSays(game) : undefined} onClick={() => { void send('speak'); }}>▶ Spruch am Beamer abspielen</button><p>{professorSays(game)}</p></div>}
@@ -53,6 +54,7 @@ export function KidsSoundboard({ game, disabled, send, compact = false }: Compac
   const last = game.voiceKind === 'interjection' ? professorInterjection(game.voiceClip) : null;
   const term = query.trim().toLocaleLowerCase('de');
   const clips = PROFESSOR_INTERJECTIONS.filter(clip => professorInterjectionForRound(clip.id, game.index)?.id === clip.id)
+    .filter(clip => clip.id !== 'finale-parents' || game.index === 9)
     .filter(clip => term ? `${clip.label} ${clip.text} ${clip.category}`.toLocaleLowerCase('de').includes(term) : clip.category === category);
   return <section class={`kids-remote-direction kids-soundboard kids-all-audio${compact ? ' is-compact' : ''}`} aria-labelledby="kids-soundboard-title">
     <h2 id="kids-soundboard-title">{compact ? 'Für zwischendurch' : 'Zwischendurch-Sprüche'}</h2>{!compact && <p>Freie Ansagen für jede Situation. Alle Aufnahmen starten am Beamer.</p>}

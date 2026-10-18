@@ -1,6 +1,12 @@
 /** Kurze, jederzeit manuell abspielbare Ansagen in Professor Bluffs Snorre-Stimme. */
 export const PROFESSOR_INTERJECTIONS = [
   {
+    "id": "finale-parents",
+    "label": "Eltern-Pantomime erklären",
+    "category": "Ablauf",
+    "text": "Ha! Jetzt müssen im Superbluff-Finale die Eltern ran! Liebe Eltern, kommt nach vorne – eure Schauspielkünste sind gefragt! Ihr bekommt auf einem Schild eine Szene aus der Bibel gezeigt. Pssst … die Kinder dürfen das Schild nicht sehen! Diese Szene spielt ihr den Kindern vor. Aber: ohne Worte und ohne Geräusche! Nur mit Bewegungen und Gesichtsausdrücken. Ja, liebe Eltern, diesmal müsst ihr wirklich still sein! Kinder, schaut ganz genau hin: Welche biblische Szene stellen eure Eltern dar? Könnt ihr sie erraten? Bühne frei für die Eltern!"
+  },
+  {
     "id": "cheer",
     "label": "Freunde anfeuern",
     "category": "Mitmachen",
