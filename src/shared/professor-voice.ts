@@ -9,6 +9,7 @@ const series = (name: string, count: number) => Array.from({ length: count }, (_
 export const PROFESSOR_VOICE_KEYS: readonly string[] = [...new Set([
   'welcome', 'intro', 'chapter2', 'chapter3', 'superbluff-finale20', 'win', 'lose',
   ...series('startled', 10), ...Array.from({ length: 10 }, (_, i) => comfortClip(i)), ...series('question', 10),
+  ...series('answer-number', 3), ...Array.from({ length: 10 }, (_, i) => series(`answer-${i}`, 3)).flat(),
   ...PROFESSOR_INTERJECTIONS.map(clip => `interjection-${clip.id}`),
 ])];
 
@@ -25,4 +26,12 @@ export function professorVoiceKey(game: KidsGame, kind:'quote'|'question'='quote
     return comfortClip(game.index);
   }
   return game.index >= 6 ? 'chapter3' : game.index >= 3 ? 'chapter2' : 'intro';
+}
+
+/** Die Felder werden gemischt: Nummer und Antwort folgen der sichtbaren Reihenfolge. */
+export function professorAnswerVoiceKeys(game: KidsGame): string[] {
+  if (game.phase !== 'reading') return [];
+  const { question, answers } = game.rounds[game.index];
+  const original = [question.answer, ...question.distractors];
+  return answers.flatMap((answer, field) => [`answer-number-${field}`, `answer-${game.index}-${original.indexOf(answer)}`]);
 }

@@ -57,6 +57,19 @@ export async function playProfessorVoice(key: string, signal: AbortSignal, onEnd
   if (untilEnd === null) source.start();
   else source.start(ctx.currentTime + Math.max(0, untilEnd - 5), Math.max(0, 5 - untilEnd));
 }
+/** Gemeinsamer Abbruch für die ganze Folge, auch während noch eine Antwort lädt. */
+export async function playProfessorVoiceSequence(keys: readonly string[], signal: AbortSignal, onEnded: () => void) {
+  for (const key of keys) {
+    if (signal.aborted) return;
+    await new Promise<void>((resolve, reject) => {
+      const finished = () => { signal.removeEventListener('abort', finished); resolve(); };
+      signal.addEventListener('abort', finished, { once: true });
+      void playProfessorVoice(key, signal, finished).catch(error => { signal.removeEventListener('abort', finished); reject(error); });
+    });
+  }
+  if (!signal.aborted) onEnded();
+}
+
 type Tone=(frequency:number,at:number,duration:number,type?:OscillatorType,volume?:number,to?:number)=>void;
 type Noise=(at:number,duration:number,frequency:number,volume:number,filter?:BiquadFilterType)=>void;
 /** Plant erzeugte Klänge ab einem Versatz ein. Die zurückgegebene Funktion blendet sie sofort aus. */

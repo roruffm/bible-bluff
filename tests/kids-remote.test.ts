@@ -129,6 +129,21 @@ describe('Kids-Fernbedienung', () => {
     await t.call('POST',path+'/action',{action:'start',version:3},made.ownerToken);
     expect((await t.call('POST',path+'/action',{action:'read-question',version:4},made.remoteToken)).status).toBe(409);
   });
+  it('überträgt Antworten vorlesen, Wiederholen und Stoppen ohne den Timer zu starten',async()=>{
+    const t=setup(),made=await t.create(),path=`/api/kids-remotes/${made.id}`;
+    const read=await t.call('POST',path+'/action',{action:'read-answers',version:1},made.remoteToken);
+    expect(read.status).toBe(200);
+    expect(read.body.game).toMatchObject({voiceKind:'answers',voicePlaying:true,voiceCue:'reading:0',voiceSeq:1,remainingMs:30000,deadline:null,phase:'reading'});
+    expect(read.body.game.rounds[0].answers).toEqual(made.game.rounds[0].answers);
+    t.reboot();
+    expect((await t.call('GET',path,undefined,made.ownerToken)).body.game.voiceKind).toBe('answers');
+    const replay=await t.call('POST',path+'/action',{action:'read-answers',version:2},made.remoteToken);
+    expect(replay.body.game.voiceSeq).toBe(2);
+    const stop=await t.call('POST',path+'/action',{action:'stop-speech',version:3},made.remoteToken);
+    expect(stop.body.game.voicePlaying).toBe(false);
+    await t.call('POST',path+'/action',{action:'start',version:4},made.ownerToken);
+    expect((await t.call('POST',path+'/action',{action:'read-answers',version:5},made.remoteToken)).status).toBe(409);
+  });
   it('überträgt manuelles Abspielen und Stoppen ohne den Countdown oder Punkte zu ändern', async () => {
     const t=setup(), made=await t.create(), path=`/api/kids-remotes/${made.id}`;
     const play=await t.call('POST',path+'/action',{action:'speak',version:1},made.remoteToken);
