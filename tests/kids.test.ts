@@ -26,6 +26,21 @@ describe('Die große Bluff-Jagd', () => {
     game.rounds.slice(0,9).forEach(r=>{positions[r.correctIndex]++; expect(r.answers[r.correctIndex]).toBe(r.question.answer);});
     expect(positions).toEqual([3,3,3]);
   });
+  it('behält Nummer, Farbe und Antwort bei jeder neuen Show und in der Kurzshow bei', () => {
+    // Index 0/1/2 entspricht dem gelben/türkisen/rosa Teppich.
+    const expected = [1, 2, 0, 2, 0, 1, 0, 2, 1, 1];
+    const reference = createKidsGame(() => 0);
+    expect(reference.rounds.map(round => round.correctIndex)).toEqual(expected);
+    for (const short of [false, true]) for (const value of [0, .25, .5, .75, .999]) {
+      const game = createKidsGame(() => value, { short });
+      expect(game.rounds.map(round => round.correctIndex)).toEqual(expected);
+      expect(game.rounds.map(round => round.answers)).toEqual(reference.rounds.map(round => round.answers));
+      for (const round of game.rounds) {
+        expect(new Set(round.answers).size).toBe(3);
+        expect(round.answers[round.correctIndex]).toBe(round.question.answer);
+      }
+    }
+  });
   it('gibt nach dem Vorlesen 30 Sekunden, pausiert und verlangt den Rückweg vor der Wertung', () => {
     let g=reading();
     expect(updateKidsGame(g,'correct',0)).toBe(g);
@@ -76,7 +91,7 @@ describe('Die große Bluff-Jagd', () => {
     behind.results[8]='correct';
     expect(kidsRoundReaction(behind)).toMatchObject({mood:'startled',points:10});
   });
-  it('behält eindeutige Bilder bei jeder gemischten Antwortreihenfolge', () => {
+  it('behält eindeutige Bilder bei den fest zugeordneten Antworten', () => {
     for (const value of [0, .25, .5, .75, .999]) for (const round of createKidsGame(()=>value).rounds) {
       const q=round.question;
       expect(new Set(q.pictures).size,q.sourceId).toBe(3);
