@@ -5,11 +5,15 @@ import { PROFESSOR_INTERJECTIONS } from './professor-interjections';
 const comfortClip = (index: number) => `comfort-${index === 4 ? 7 : index === 9 ? 2 : index}`;
 const series = (name: string, count: number) => Array.from({ length: count }, (_, i) => `${name}-${i}`);
 
+// Diese Aufgaben verwenden auch die Feldnummern aus den hochgeladenen Antwortaufnahmen.
+const uploadedAnswerRounds = [2, 3, 4, 5, 6, 8, 9];
+
 /** Alle Aufnahmen, die am Beamer erklingen können. „Show vorbereiten“ lädt sie vollständig vorab. */
 export const PROFESSOR_VOICE_KEYS: readonly string[] = [...new Set([
   'welcome', 'intro', 'chapter2', 'chapter3', 'superbluff-finale20', 'win', 'lose',
   ...series('startled', 10), ...Array.from({ length: 10 }, (_, i) => comfortClip(i)), ...series('question', 10),
   ...series('answer-number', 3), ...Array.from({ length: 10 }, (_, i) => series(`answer-${i}`, 3)).flat(),
+  ...uploadedAnswerRounds.flatMap(index => series(`answer-number-${index}`, 3)),
   ...PROFESSOR_INTERJECTIONS.map(clip => `interjection-${clip.id}`),
 ])];
 
@@ -33,5 +37,6 @@ export function professorAnswerVoiceKeys(game: KidsGame): string[] {
   if (game.phase !== 'reading') return [];
   const { question, answers } = game.rounds[game.index];
   const original = [question.answer, ...question.distractors];
-  return answers.flatMap((answer, field) => [`answer-number-${field}`, `answer-${game.index}-${original.indexOf(answer)}`]);
+  const numberPrefix = uploadedAnswerRounds.includes(game.index) ? `answer-number-${game.index}` : 'answer-number';
+  return answers.flatMap((answer, field) => [`${numberPrefix}-${field}`, `answer-${game.index}-${original.indexOf(answer)}`]);
 }

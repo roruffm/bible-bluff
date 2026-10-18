@@ -148,3 +148,26 @@ erhalten. Snorre, `eleven_multilingual_v2`, Flow `zHuF8ivp8Vi8wHq2KxlM`,
 Sprachknoten `1x5dUoivlIw6hOfI12fb`. Wortlaut per Transkription geprüft,
 Schnitt aus dekodiertem PCM anhand der Wortzeiten, 94 % Sprechtempo und -18 LUFS.
 Alle drei MP3s wurden auf hörbare Sprache und Übersteuerung geprüft.
+
+### Sieben Nutzer-Aufnahmen für die Antworten (18.10.2026)
+
+Die Aufnahmen vom 18.10.2026 wurden per Transkription zugeordnet:
+
+| Zeit im Dateinamen | Frage | Inhalt der drei Antworten in der Aufnahme |
+| --- | --- | --- |
+| 16:42:46, Variante (2) | 3 · Petrus und die Münze | Im Maul eines Fisches / In einem Brot / Unter einem Kopfkissen |
+| 16:45:53 | 4 · Jesuskind | Unter einem Baum / In der Krippe / Im großen Schiff |
+| 16:47:25 | 5 · Noahs Taube | Ein Brot / Ein Olivenblatt / Eine Krone |
+| 16:48:54 | 6 · Bileam | Ein Kamel / Ein Rabe / Seine Eselin |
+| 16:50:00 | 7 · Löwen | Jesus in der Krippe / Daniel bei den Löwen / Noah auf der Arche |
+| 16:51:30 | 9 · Thomas | Der Kleine / Der Schnellste / Zwilling |
+| 16:53:43 | 10 · Finale | Jesus wird geboren / Jesus stillt den Sturm / Noah baut die Arche |
+
+Schnitt aus dekodiertem PCM anhand der transkribierten Wortzeiten, jeweils in den
+Sprechpausen. Tempo und Lautstärke der Nutzer-Aufnahmen bleiben erhalten; vier
+Millisekunden Fades liegen an den Schnittgrenzen. Pro Frage stammen auch die drei
+Feldnummern aus derselben Nutzer-Aufnahme (`answer-number-<Frageindex>-<Feldindex>`).
+So werden die Nummern eins, zwei, drei und die jeweiligen Antworttexte passend zur
+gemischten Anzeige zusammengesetzt. Die 21 ersetzten Antwortclips sowie die 21 neuen
+Nummernclips wurden auf Dekodierung, hörbare Sprache und Übersteuerung geprüft und
+werden von „Show vorbereiten“ vollständig vorgeladen.
