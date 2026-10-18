@@ -27,7 +27,7 @@ export function professorVoiceKey(game: KidsGame, kind:'quote'|'question'='quote
   return game.index >= 6 ? 'chapter3' : game.index >= 3 ? 'chapter2' : 'intro';
 }
 
-/** Die Felder werden gemischt: Nummer und Antwort folgen der sichtbaren Reihenfolge. */
+/** Nummer und Antwort folgen stets der sichtbaren, pro Frage festgelegten Feldreihenfolge. */
 export function professorAnswerVoiceKeys(game: KidsGame): string[] {
   if (game.phase !== 'reading') return [];
   const { question, answers } = game.rounds[game.index];
