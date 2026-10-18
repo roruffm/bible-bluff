@@ -79,6 +79,7 @@ export function KidsControlPage() {
             {back && backNote && <p class="kids-remote-back-note">{backNote}</p>}
             {game.phase === 'revealed' && lastScored >= 0 && <button type="button" class="kids-remote-correct-link" onClick={() => selectTab('tools')}>Letzte Wertung ändern</button>}
           </section>
+          {game.phase === 'revealed' && <section class="kids-remote-direction kids-remote-impulse" aria-labelledby="kids-impulse-title"><h2 id="kids-impulse-title">Professor Bluffs Gedanke</h2><p>{round.question.explanation}</p><small>Selbst vorlesen · der Gedanke steht auch am Beamer.</small></section>}
           {desktop && <KidsTimePlan game={game} compact/>}
           {!desktop && <KidsPhaseAudio game={game} disabled={disabled} send={remote.send}/>}
           {game.phase !== 'finished' && <details class="kids-remote-direction kids-remote-guide" key={`${game.phase}:${game.index}`} open={!desktop && (game.phase === 'locked' || game.phase === 'judging')}><summary>{desktop ? 'Regiehinweis' : 'Antworten & Regiehinweis · nur für Helfer'}</summary>
