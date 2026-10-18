@@ -139,3 +139,12 @@ Die Antwortclips werden in der tatsächlichen gemischten Feldreihenfolge abgespi
 die Nummer bezieht sich stets auf das sichtbare Feld. Neues Audio, Stoppen,
 Countdownstart und Phasenwechsel brechen die gesamte Folge ab, auch wenn ein Clip
 noch lädt. Nach Neuladen startet keine Aufnahme von selbst.
+
+### Jona-Antworten präzisiert (18.10.2026)
+
+Die drei Antwortaufnahmen zu Frage 2 sagen nun „Drei Tage“, „Ein Tag“ und
+„Vierzig Tage“ statt nur der Zahlen. Die Zuordnung zu den gemischten Feldern bleibt
+erhalten. Snorre, `eleven_multilingual_v2`, Flow `zHuF8ivp8Vi8wHq2KxlM`,
+Sprachknoten `1x5dUoivlIw6hOfI12fb`. Wortlaut per Transkription geprüft,
+Schnitt aus dekodiertem PCM anhand der Wortzeiten, 94 % Sprechtempo und -18 LUFS.
+Alle drei MP3s wurden auf hörbare Sprache und Übersteuerung geprüft.
