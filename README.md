@@ -12,8 +12,10 @@ Pro Kapitel kommt jede Altersgruppe einmal dran: neun Aufgaben aus dem bestehend
 Fragenpool und ein gemeinsamer Superbluff. Für Glühwürmchen gibt es animierte Bilder und kurze,
 lokal erzeugte Klangbilder; Eltern und andere Gruppen machen Geräusche und Pantomime.
 
-- Drei nummerierte Felder im Raum, 30 Sekunden nach dem Vorlesen. Andere Gruppen bleiben
-  in ihren Bereichen. Eltern dürfen Glühwürmchen begleiten. Keine Kinderkonten oder Einzelwertung.
+- Drei feste Teppich-Felder: **1 = gelb, 2 = türkis, 3 = rosa**, 30 Sekunden nach dem Vorlesen.
+  Jede Frage hat dauerhaft dieselbe Antwort auf derselben Nummer – auch nach Neustart oder in der Kurzshow.
+  Die richtigen Antworten sind auf die drei Felder verteilt (in den neun regulären Fragen je dreimal).
+  Andere Gruppen bleiben in ihren Bereichen. Eltern dürfen Glühwürmchen begleiten. Keine Kinderkonten oder Einzelwertung.
 - Nach Stopp prüfen Helfer die Antwortfelder. **Zurück in die Gruppen → Alle sind zurück**
   zeigt Professor Bluff groß und animiert; erst danach wird die Wertung freigeschaltet. Nur das gemeinsame Resultat wird erfasst.
 - Kinderteam: Mehrheit richtig = 10 Punkte; sonst mindestens ein Kind richtig = 5; keiner richtig = 0. Maximal 30 je Altersgruppe.
