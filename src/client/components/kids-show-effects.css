@@ -55,7 +55,7 @@
 .kids-points-token b { font-size: clamp(32px, 3.6vw, 68px); font-weight: 900; line-height: 1; }
 .kids-points-token .kids-group-name { display: flex; }
 .kids-points-token .kids-group-name > span { display: none; }
-.kids-points-token .kids-group-name > .kids-group-symbol { width: clamp(32px, 3.2vw, 56px); height: auto; }
+.kids-points-token .kids-group-name > .kids-group-symbol { width: clamp(32px, 3.2vw, 56px); height: auto; flex-basis: clamp(32px, 3.2vw, 56px); }
 .kids-points-spark { position: absolute; right: -17px; top: -15px; color: #fffdf1; font-size: 29px; text-shadow: 0 2px 0 #102d43; }
 .kids-show:has(.kids-points-flight:not(:empty)) .kids-score-team { animation: kids-score-arrival .45s 1.3s ease-out both; }
 @keyframes kids-points-travel {
