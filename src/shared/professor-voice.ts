@@ -4,7 +4,7 @@ import { PROFESSOR_INTERJECTIONS } from './professor-interjections';
 const series = (name: string, count: number) => Array.from({ length: count }, (_, i) => `${name}-${i}`);
 
 // Diese Aufgaben verwenden auch die Feldnummern aus den hochgeladenen Antwortaufnahmen.
-const uploadedAnswerRounds = [2, 3, 4, 5, 6, 8, 9];
+const uploadedAnswerRounds = [0, 2, 3, 4, 5, 6, 8, 9];
 
 /** Alle Aufnahmen, die am Beamer erklingen können. „Show vorbereiten“ lädt sie vollständig vorab. */
 export const PROFESSOR_VOICE_KEYS: readonly string[] = [...new Set([

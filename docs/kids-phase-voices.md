@@ -205,3 +205,25 @@ gehört jeder dazu“. Die übrigen Aufnahmen entsprechen dem gewünschten Wortl
 Die alten `startled-*`- und `comfort-*`-Aufnahmen werden nicht mehr verwendet
 oder vorgeladen. Jede neue Aufnahme wurde auf erfolgreiche MP3-Dekodierung und
 identischen Dateiinhalt zum Upload geprüft.
+
+
+### Zwei Nutzer-Aufnahmen ersetzt (19.10.2026)
+
+Die beiden gelieferten Snorre-MP3s wurden anhand einer gemeinsamen Transkription
+zugeordnet (ElevenLabs-Flow `zgaemEOnfAhCrovpnujg`):
+
+| Zeit im Dateinamen | Ziel | Gesprochener Text |
+| --- | --- | --- |
+| 16:23:27 | `interjection-signal-stop.mp3` | Stopp! Bleibt auf eurem Feld. Unsere Helfer schauen nach. |
+| 16:26:08 | Antworten zu Frage 1 · Noah | Antwort eins: Maria und das Baby. Antwort zwei: Noah. Antwort drei: Daniel bei den Löwen. |
+
+Die Stopp-Aufnahme wurde unverändert übernommen. Die Noah-Aufnahme wurde anhand
+der Wortzeiten in den Sprechpausen in drei Feldnummern (`answer-number-0-0.mp3`
+bis `answer-number-0-2.mp3`) und drei Antworttexte (`answer-0-0.mp3` bis
+`answer-0-2.mp3`) aufgeteilt. Die Antworttexte behalten ihre inhaltlichen Indizes:
+0 = Noah, 1 = Maria und das Baby, 2 = Daniel bei den Löwen. Die Wiedergabe folgt
+der festen sichtbaren Feldreihenfolge Maria / Noah / Daniel. Tempo und Lautstärke
+bleiben erhalten, vier Millisekunden Fades schützen die Schnittgrenzen.
+
+Alle neuen Clips sind für das Vorladen und die Offline-Kopie registriert.
+Die Stopp-Ansage bleibt im bisherigen Bedienablauf erreichbar.

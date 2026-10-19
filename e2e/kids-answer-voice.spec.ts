@@ -22,7 +22,7 @@ test('Antworten: Smartphone und Desktop lesen alle drei gemischten Felder am Bea
   await expect(page.getByRole('button',{name:'Antworten vorlesen',exact:false})).toHaveCount(0);
   const answers=await page.locator('.kids-answer-text').allTextContents();
   const q=KIDS_SHOW_QUESTIONS[0],canonical=[q.answer,...q.distractors];
-  const expected=answers.flatMap((a,field)=>[`answer-number-${field}`,`answer-0-${canonical.indexOf(a)}`]);
+  const expected=answers.flatMap((a,field)=>[`answer-number-0-${field}`,`answer-0-${canonical.indexOf(a)}`]);
   await remote.getByRole('button',{name:'Antworten vorlesen',exact:false}).click();
   await expect.poll(async()=>(await professorAudio(page)).played,{timeout:20000}).toEqual(expected);
   await expect(page.locator('.kids-clock-left')).toHaveAttribute('aria-label','30 Sekunden');

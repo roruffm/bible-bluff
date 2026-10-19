@@ -14,7 +14,7 @@ describe('Antwortmöglichkeiten vorlesen', () => {
       const spoken=updateKidsGame(game,'read-answers',100);
       expect(spoken).toMatchObject({voiceKind:'answers',voicePlaying:true,voiceCue:`reading:${index}`,remainingMs:30000,deadline:null,phase:'reading'});
       expect(kidsScores(spoken)).toEqual(kidsScores(game));
-      const numberPrefix = [2,3,4,5,6,8,9].includes(index) ? `answer-number-${index}` : 'answer-number';
+      const numberPrefix = [0,2,3,4,5,6,8,9].includes(index) ? `answer-number-${index}` : 'answer-number';
       expect(professorAnswerVoiceKeys(spoken)).toEqual(order.flatMap((answer,field)=>[`${numberPrefix}-${field}`,`answer-${index}-${answer}`]));
       for(const key of professorAnswerVoiceKeys(spoken)) {
         expect(PROFESSOR_VOICE_KEYS).toContain(key);
