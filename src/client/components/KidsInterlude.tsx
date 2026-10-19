@@ -45,7 +45,7 @@ export function KidsInterlude({ game, chapter, act, disabled, primaryRef }: {
         <p>{welcome ? <>Wir sammeln alle für EIN Team.<br/><span class="kids-welcome-promise">Niemand scheidet aus. Alle gehören dazu!</span></> : chapter === 0 ? 'Eure erste Spur wartet auf alle drei Gruppen!' : chapter === 1 ? 'Zusammen findet ihr die nächste Spur!' : 'Jeder Beitrag zählt. Gemeinsam geht die Punktejagd weiter!'}</p>
         {!welcome && <ol class="kids-chapter-progress" aria-label="Kapitelfortschritt">{[0,1,2].map(i=><li key={i} aria-current={i === chapter ? 'step' : undefined} class={i <= chapter ? 'is-reached' : ''}>{i + 1}</li>)}</ol>}
       </>}
-      <KidsIntroControls game={game} act={act} disabled={disabled}/>
+      {!game.introVideo && <KidsIntroControls game={game} act={act} disabled={disabled}/>}
       <ShowControls game={game} act={act} disabled={disabled || !!game.introVideo} primaryRef={primaryRef}/>
     </div>
   </section>;
