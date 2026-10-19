@@ -1,88 +1,250 @@
+import type { ComponentChildren } from 'preact';
+import { useId } from 'preact/hooks';
 import { KIDS_SCENES, type KidsSceneMotif } from '../../shared/kids-scenes';
+import { Cheek, Cloud, Eye, Flower, Frown, Happy, Hull, Kid, Manger, Smile, Spark, Star, Sun } from './KidsCuteParts';
 
-/** Große, eigenständige Bildergeschichte; drei erkennbare Handlungsschritte statt eines Symbol-Resets. */
+/** Große Bildergeschichte im Stil der Antwortkarten, drei erkennbare Handlungsschritte.
+ * Die Schritte (beat) blenden Figuren ein und aus; Auftritte laufen nach Szenenzeit und stehen nach dem Neuladen an derselben Stelle. */
 export function KidsSceneArt({ scene, beat }: { scene:KidsSceneMotif; beat:0|1|2 }) {
+  const id = useId();
   return <svg class={`kids-cinema-art scene-${scene} beat-${beat}`} viewBox="0 0 1000 500" role="img" aria-label={KIDS_SCENES[scene].description}>
-    <defs><linearGradient id={`scene-sky-${scene}`} x2="0" y2="1"><stop stop-color={scene==='manger' ? '#273d69' : '#bde5e5'}/><stop offset="1" stop-color={scene==='manger' ? '#677ca3' : '#f5f6d9'}/></linearGradient></defs>
-    <rect width="1000" height="500" fill={`url(#scene-sky-${scene})`}/>
-    <g stroke="#12324a" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
-      {scene==='ark' ? <ArkScene/> : scene==='manger' ? <MangerScene/> : scene==='lion' ? <LionScene/> : <BoatScene/>}
+    <g stroke="#12324a" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+      {scene==='ark' ? <ArkScene/> : scene==='manger' ? <MangerScene id={id}/> : scene==='lion' ? <LionScene/> : <BoatScene/>}
     </g>
   </svg>;
 }
 
-function Sun() { return <g class="scene-sun"><circle cx="840" cy="85" r="40" fill="#ffd362" stroke="#c58a1c"/>{Array.from({length:8},(_,i)=><path key={i} d="M840 25v-12" transform={`rotate(${i*45} 840 85)`} stroke="#c58a1c"/>)}</g>; }
-function Clouds() { return <g class="scene-clouds" fill="#e5edf1" stroke="none"><path d="M0 72Q45 15 105 61q18-67 85-32 65-6 80 52H0zm590-9q35-54 89-30 47-49 94 2 73-26 102 37H590z"/><path d="M276 48q18-37 53-26 20-36 69-15 42-10 69 41z"/></g>; }
-function Rain() { return <g class="scene-rain" stroke="#549aba" stroke-width="5" opacity=".7">{Array.from({length:25},(_,i)=><g key={i} transform={`translate(${(i*137)%1030} ${20+(i*83)%260})`}><path class="scene-raindrop" d="m0 0-13 29" style={{'--drop-delay':`${i%7*-.13}s`}}/></g>)}</g>; }
-function Waves() { return <g class="scene-water" stroke="#3c98aa" stroke-width="4"><path d="M0 399q50-35 100 0t100 0 100 0 100 0 100 0 100 0 100 0 100 0 100 0 100 0v101H0z" fill="#78c9d2"/><g class="scene-wave-lines" fill="none"><path d="M-50 442q50-25 100 0t100 0 100 0 100 0 100 0 100 0 100 0 100 0 100 0 100 0 100 0"/><path d="M0 477q50-20 100 0t100 0 100 0 100 0 100 0 100 0 100 0 100 0 100 0 100 0"/></g></g>; }
-
-function ArkScene() { return <>
-  <Sun/><Clouds/><path d="M0 405q200-30 420 0t580 0v95H0z" fill="#c9db9c" stroke="none"/>
-  <g class="scene-ark-float"><g class="scene-ark-ship">
-    <path d="M310 330h545l-75 110H390z" fill="#bb8150"/><path d="M346 360h465M365 391h425M400 420h367" fill="none" stroke="#8c5d39"/>
-    <path d="M385 326V205h365v121" fill="#ffe2a0"/><path d="m350 205 217-99 220 99z" fill="#d57a67"/><path d="M523 329v-97h92v97" fill="#694f48"/>
-    <g class="scene-onboard"><g transform="translate(411 246)"><Animal kind="sheep"/></g><g transform="translate(658 242)"><Animal kind="giraffe"/></g><circle cx="575" cy="263" r="18" fill="#efb98e"/><path d="M554 257q18-30 40 0m-33 15q14 26 27 0" fill="#fff0ad"/></g>
-  </g></g>
-  <path class="scene-gangplank" d="m190 425 335-95 7 17-335 95z" fill="#c89762"/>
-  <g class="scene-builder" transform="translate(230 235)"><ScenePerson robe="#81c3b3" beard/><g class="scene-hammer-arm"><path d="m66 99 46-15 13-35" fill="none" stroke="#efb98e" stroke-width="14"/><path d="m123 51 14-34" stroke="#906744" stroke-width="10"/><path d="m123 18 30 12" stroke="#7a8e98" stroke-width="17"/></g></g>
-  <g class="scene-animal-board"><g transform="translate(75 342)"><Animal kind="sheep"/></g><g transform="translate(180 300)"><Animal kind="giraffe"/></g></g>
-  <g class="scene-ark-weather"><Rain/><Waves/></g>
-</>; }
-function MangerScene() { return <>
-  <g class="scene-stars" fill="#fff0ad" stroke="none">{[[80,60],[150,170],[280,45],[718,60],[865,160],[930,50],[72,280]].map(([x,y],i)=><path key={i} d={`m${x} ${y-7} 3 5 6 2-6 3-3 6-3-6-6-3 6-2z`}/>)}</g>
-  <path d="M0 427q300-32 500 0t500 0v73H0z" fill="#c9b48d" stroke="none"/>
-  <path d="M195 420V145h610v275" fill="#b98b62"/><path d="m155 147 345-110 345 110z" fill="#7e6253"/>
-  <path d="M235 420V165h530v255" fill="#856955" stroke="none"/><path d="M235 385h530M255 180v200m480-200v200" stroke="#aa835c"/>
-  <g transform="translate(500 72)"><g class="scene-guiding-star"><path d="m0-49 12 33 34 4-27 22 9 34L0 25l-28 19 9-34-27-22 34-4z" fill="#ffd362" stroke="#b58d31"/><circle r="63" fill="none" stroke="#ffe7a1" stroke-width="2" opacity=".55"/></g></g>
-  <g class="scene-parents"><g transform="translate(300 234)"><ScenePerson robe="#80c6d5" hair="#654d42"/></g><g transform="translate(638 232)"><ScenePerson robe="#ceaaa9" beard hair="#685244"/></g></g>
-  <path d="m292 434 33-18m-20 40 22-13m403-10-38-18m16 44-27-15m-304-6 13 18m-10-42 20 20m278-9-14 20" stroke="#ebd17e"/>
-  <g transform="translate(410 319)"><g class="scene-cradle">
-    <path d="m-17 24 40 85h148l39-85z" fill="#c89862"/><path d="m23 107-16 25m162-25 18 25" stroke="#78533d" stroke-width="9"/>
-    <path d="m-12 22 29-18 22 18L65 2l26 20 21-19 28 19 24-18 36 18" fill="#f3d57e"/>
-    <ellipse cx="108" cy="29" rx="62" ry="31" fill="#f7f2dc"/><path d="m96 3 15 54m10-52 15 45" stroke="#e3d6bc" stroke-width="3"/>
-    <circle cx="44" cy="21" r="25" fill="#efb98e"/><path d="m29 20q6 8 12 0m8 0q6 8 12 0m-20 12q5 5 10 0" fill="none" stroke-width="3"/>
-  </g></g>
-  <g class="scene-sleep-marks" fill="#fff0ad" stroke="none"><text x="578" y="288" font-size="34" font-weight="800">z</text><text x="611" y="259" font-size="24" font-weight="800">z</text></g>
-</>; }
-function LionScene() { return <>
-  <path d="M0 0h1000v500H0z" fill="#e0c7ab" stroke="none"/><path d="M101 450V245q0-192 400-197 398 5 398 197v205" fill="#ac907e" stroke="#927867" stroke-width="12"/>
-  <path d="M152 443V258q0-158 350-161 345 3 345 161v185" fill="#f3dfb5" stroke="none"/>
-  <path d="m17 130 73-28m-56 97 56-16m822-84 65 30m-56 64 66 25M37 347l50 3m839 4 50-8" stroke="#bea187" stroke-width="9"/>
-  <ellipse cx="500" cy="429" rx="435" ry="37" fill="#d9bd94" stroke="none"/>
-  <g class="scene-angel"><path d="M483 213q-155 23-183-104 92-10 183 104m34 0q155 23 183-104-92-10-183 104" fill="#fffaf0" stroke="#d9ba79"/><path d="m324 134 98 60m253-60-98 60" stroke="#ead9b6" stroke-width="3"/><circle cx="500" cy="136" r="28" fill="#f6ccab"/><path d="M471 136q0-47 29-37 35-8 29 37l-27-20z" fill="#e9c574"/><ellipse cx="500" cy="83" rx="35" ry="9" fill="none" stroke="#d6ac43"/><path d="m482 163-33 87h104l-33-87" fill="#fffdf1"/></g>
-  <g transform="translate(455 243)"><ScenePerson robe="#8fbfcb" beard/><path d="m29 95 16 21 14-21" fill="none" stroke="#efb98e" stroke-width="12"/></g>
-  <g transform="translate(168 277)"><g class="scene-lion-rest"><FriendlyLion/></g></g><g transform="translate(656 277)"><g class="scene-lion-rest"><FriendlyLion/></g></g>
-  <g class="scene-peace-hearts" fill="#cf8e9a" stroke="none"><path d="M358 285c-19-24-43 9 0 33 43-24 19-57 0-33m279 0c-19-24-43 9 0 33 43-24 19-57 0-33"/></g>
-</>; }
-function BoatScene() { return <>
-  <Sun/><Clouds/><Rain/>
-  <g class="scene-boat-rock"><g class="scene-small-boat">
-    <g transform="translate(340 244) scale(.72)"><ScenePerson robe="#dba079" beard/></g><g transform="translate(437 235) scale(.72)"><ScenePerson robe="#9fb984" beard/></g>
-    <g class="scene-sleeper"><rect x="563" y="322" width="90" height="35" rx="13" fill="#fffdf5"/><path d="M613 326q76-53 137 12l-10 26H595z" fill="#9c8cc8"/><circle cx="593" cy="321" r="24" fill="#efb98e"/><path d="M570 312q21-23 45 0m-34 9q7 9 14 0" fill="none" stroke="#765447"/><path d="m583 333 18 11 18-14" fill="#765447"/>
-      <text x="666" y="289" font-size="33" font-weight="800" fill="#12324a" stroke="none">z z</text>
+/** Auftritt at Sekunden nach Szenenbeginn. */
+function Enter({ at, how = 'pop', children }: { at:number; how?:'pop'|'fade'|'drop'|'left'|'right'; children:ComponentChildren }) {
+  return <g class={`scene-enter scene-${how}`} style={{ '--at': `${at}s` }}>{children}</g>;
+}
+const Sky = ({ fill }: { fill:string }) => <rect width="1000" height="500" fill={fill} stroke="none"/>;
+const Heart = ({ x, y, s = 1 }: { x:number; y:number; s?:number }) => <path transform={`translate(${x} ${y}) scale(${s})`} d="M0 -6q-8-10-16-2t16 16q24-8 16-16t-16 2z" fill="#ff8ea8" stroke-width="2.5"/>;
+const Sea = ({ y, fill, line, wave = 14 }: { y:number; fill:string; line:string; wave?:number }) => <>
+  <path d={`M-100 ${y}${`q40 ${-wave} 80 0t80 0`.repeat(8)}V500h-1400z`} fill={fill}/>
+  <path class="scene-wave-line" d={`M-100 ${y + 40}${`q40 ${-wave * .8} 80 0t80 0`.repeat(8)}`} fill="none" stroke={line} stroke-width="5"/>
+</>;
+function Rain() {
+  return <g class="scene-rain">{Array.from({ length:34 }, (_, i) => <g key={i} transform={`translate(${(i * 131) % 1000 + 10} ${(i * 67) % 200})`}><path class="scene-raindrop" style={{ '--d': `${-(i % 9) * .1}s` }} d="M0 -12q8 10 8 16a8 8 0 0 1-16 0q0-6 8-16z" fill="#8fd3f0" stroke-width="3"/></g>)}</g>;
+}
+/** Kleine Schäfchenwolke mit Gesicht, für Regen und Sturm. */
+function FaceCloud({ x, y, s, grumpy = false }: { x:number; y:number; s:number; grumpy?:boolean }) {
+  return <><Cloud x={x} y={y} s={s} fill={grumpy ? '#a9b6cc' : '#e3e9f2'}/><g transform={`translate(${x} ${y}) scale(${s})`}>
+    {grumpy ? <><Eye x={13} y={-3} s={.3}/><Eye x={23} y={-3} s={.3}/><Frown x={18} y={1} s={.3}/></> : <><Happy x={13} y={-3} s={.32}/><Happy x={23} y={-3} s={.32}/></>}
+    <Cheek x={10} y={0} s={.28}/><Cheek x={26} y={0} s={.28}/>
+  </g></>;
+}
+/** Wolliges Schaf; lying = liegt und schläft. */
+function Sheep({ lying = false }: { lying?:boolean }) {
+  const wool = [[-18, 0], [-6, -9], [8, -9], [18, 0], [6, 9], [-8, 9]];
+  return <>
+    {!lying && <path d="M-16 12v16m10-16v16m14-16v16m10-16v16" stroke-width="5"/>}
+    {wool.map(([x, y]) => <circle key={`${x}${y}`} cx={x} cy={y} r="12" fill="#fffdf6"/>)}
+    {wool.map(([x, y]) => <circle key={`i${x}${y}`} cx={x} cy={y} r="12" fill="#fffdf6" stroke="none"/>)}
+    <ellipse cx="0" cy="0" rx="20" ry="12" fill="#fffdf6" stroke="none"/>
+    <g transform={lying ? 'translate(4 8)' : undefined}>
+      <ellipse cx="17" cy="-22" rx="7" ry="4" fill="#e9dfd4" transform="rotate(-30 17 -22)"/><ellipse cx="41" cy="-22" rx="7" ry="4" fill="#e9dfd4" transform="rotate(30 41 -22)"/>
+      <ellipse cx="29" cy="-14" rx="12" ry="14" fill="#e9dfd4"/><circle cx="29" cy="-27" r="7" fill="#fffdf6"/>
+      {lying ? <><Happy x={24} y={-14} s={.45}/><Happy x={34} y={-14} s={.45}/></> : <g class="blink"><Eye x={24} y={-15} s={.45}/><Eye x={34} y={-15} s={.45}/></g>}
+      <Cheek x={21} y={-8} s={.4}/><Cheek x={37} y={-8} s={.4}/>
     </g>
-    <g class="scene-standing" transform="translate(574 176)"><ScenePerson robe="#f8efda" beard/><path d="m68 95 30-29 2-45m-9 12 8-13 8 14" fill="none" stroke="#efb98e" stroke-width="13"/><path d="m23 85 29 70" stroke="#b58e81" stroke-width="12"/></g>
-    <path d="M271 357h521l-60 93H330z" fill="#bd8753"/><path d="M299 383h464M318 412h427" stroke="#926238"/><path d="m300 345 465 0" stroke="#e0b279" stroke-width="10"/>
-  </g></g>
-  <Waves/>
-  <g class="scene-calm-birds" fill="none" stroke="#557c91"><path d="M180 126q13-14 26 0 13-14 26 0m440-34q13-14 26 0 13-14 26 0"/></g>
-</>; }
+  </>;
+}
+function Giraffe() {
+  return <>
+    <path d="M-18 8v28m10-28v28m22-28v28m10-28v28" stroke="#e0a85a" stroke-width="7"/>
+    <path d="M-30 -2q-8 4-8 12" fill="none" stroke-width="3"/>
+    <path d="M10 -2V-64q0-14 8-14t8 14v62" fill="#ffd36e"/><ellipse cx="0" cy="4" rx="30" ry="16" fill="#ffd36e"/>
+    <circle cx="18" cy="-82" r="12" fill="#ffd36e"/><path d="M11 -92l-1-8m15 8 1-8" stroke-width="3"/>
+    {[[-12, 0], [4, 8], [-2, -4], [16, -40], [20, -60], [14, -20]].map(([x, y]) => <circle key={`${x}${y}`} cx={x} cy={y} r="3" fill="#d9963a" stroke="none"/>)}
+    <g class="blink"><Eye x={14} y={-84} s={.45}/><Eye x={22} y={-84} s={.45}/></g><Cheek x={11} y={-78} s={.45}/><Cheek x={25} y={-78} s={.45}/>
+  </>;
+}
+function Bear() {
+  return <>
+    <path d="M-12 10v16m26-16v16" stroke="#a87a52" stroke-width="9"/>
+    <ellipse cx="0" cy="2" rx="22" ry="17" fill="#c99467"/>
+    <circle cx="8" cy="-28" r="6" fill="#c99467"/><circle cx="28" cy="-28" r="6" fill="#c99467"/>
+    <circle cx="18" cy="-16" r="16" fill="#c99467"/><ellipse cx="21" cy="-10" rx="7" ry="5" fill="#f1d9b8" stroke-width="2"/>
+    <g class="blink"><Eye x={13} y={-18} s={.45}/><Eye x={24} y={-18} s={.45}/></g><Cheek x={9} y={-11} s={.4}/><Cheek x={29} y={-11} s={.4}/>
+  </>;
+}
+/** Noah wie auf der Antwortkarte „Noah baut die Arche“. */
+const Noah = ({ x, y, s = 1 }: { x:number; y:number; s?:number }) => <Kid x={x} y={y} s={s} hair="#fffdf6" beard="#fffdf6" robe="#c7a6f0"/>;
 
-function ScenePerson({ robe, hair='#745544', beard=false }: { robe:string; hair?:string; beard?:boolean }) { return <>
-  <path d="m25 149-7 29m45-29 7 29" stroke="#614f43" stroke-width="13"/>
-  <path d="M20 74q24-23 48 0l18 81H4z" fill={robe}/><path d="m19 88-15 32m64-32 15 30" stroke="#efb98e" stroke-width="13"/>
-  <circle cx="44" cy="43" r="31" fill="#efb98e"/><path d="M13 40q-3-42 32-38 34-2 30 38L57 23 41 29 28 21z" fill={hair}/>
-  {beard && <path d="M17 54q28 51 55 0L55 67H35z" fill={hair}/>}<path d="m29 44 1 1m26-1 1 1m-22 11q9 9 18 0" fill="none" stroke-width="3.5"/>
-</>; }
-function Animal({ kind }: { kind:'sheep'|'giraffe' }) { return kind==='sheep' ? <g>
-  <path d="m13 61-2 27m47-26 2 26" stroke="#796052" stroke-width="8"/>
-  <path d="M2 38q-7-19 14-23 8-21 28-8 23-11 30 12 17 13 5 33-4 28-30 18-25 14-36-8-21-1-11-24" fill="#fffaf0"/>
-  <ellipse cx="70" cy="39" rx="21" ry="26" fill="#c79e7b"/><path d="m52 22-13-7m47 7 14-7" stroke="#c79e7b" stroke-width="10"/><circle cx="76" cy="37" r="3" fill="#12324a" stroke="none"/><path d="m76 50 5-2"/>
-  </g> : <g><path d="m9 70 1 33m45-33 4 33" stroke="#dba759" stroke-width="8"/><path d="M4 51h47V-7h20v80H4z" fill="#edc879"/><ellipse cx="75" cy="-7" rx="27" ry="17" fill="#edc879"/><path d="m59-18-6-13m18 11 1-14" stroke="#9d7443" stroke-width="5"/><circle cx="83" cy="-12" r="3" fill="#12324a" stroke="none"/><path d="m14 57 7 4m17-4 4 7m18-35 7 3m-7-26 6 3" stroke="#b88346" stroke-width="8"/></g>; }
-function FriendlyLion() { return <>
-  <path d="M21 119q-38-4-23-38" fill="none" stroke="#bc7843" stroke-width="10"/>
-  <ellipse cx="78" cy="119" rx="74" ry="33" fill="#e6b461"/><path d="M25 139h31m56 0h28" stroke="#bd874a" stroke-width="14"/>
-  <g class="scene-lion-head"><circle cx="88" cy="67" r="63" fill="#bb7843"/><circle cx="88" cy="72" r="44" fill="#ffd47d"/>
-  <path d="M62 61q9-10 18 0m18 0q9-10 18 0m-38 18h19l-9 10z" fill="#12324a"/><path d="M88 89v11m-18-1q18 15 36 0" fill="none"/>
-  <path d="m51 81-21-4m22 15-23 4m96-15 21-4m-22 15 23 4" stroke-width="3"/></g>
-</>; }
+function ArkScene() {
+  return <>
+    <Sky fill="#cdeffd"/>
+    <rect class="scene-from-2" width="1000" height="500" fill="#a6b6cf" fill-opacity=".8" stroke="none"/>
+    <g class="scene-before-2"><Sun x={880} y={92} r={40} rays={[8, 22]}/><Cloud x={70} y={80} s={3}/><Cloud x={500} y={60} s={2.4}/></g>
+    <g class="scene-from-2"><Enter at={8.8} how="fade"><g fill="none" stroke-width="14"><path d="M70 300a130 130 0 0 1 260 0" stroke="#ff9fb4"/><path d="M84 300a116 116 0 0 1 232 0" stroke="#ffe17a"/><path d="M98 300a102 102 0 0 1 204 0" stroke="#9fe0c8"/></g></Enter></g>
+    <path d="M0 392q250-40 500-12t500-6V500H0z" fill="#a9e08f"/>
+    <Flower x={60} y={420} s={2.4}/><Flower x={130} y={452} s={2.4} fill="#ffd96a"/><Flower x={950} y={430} s={2.4} fill="#b9a7f0"/>
+    <g class="scene-ark-rise"><g class="scene-ark-rock"><g transform="translate(400 102) scale(2.6)" stroke-width="2.7">
+      <g class="scene-only-0" fill="none" stroke="#c98d55" stroke-width="3.2"><path d="M40 86V58m26 28V48m26 38V43m26 43V42m26 44V45m26 41V54"/><path d="M34 60q76-36 148-6"/></g>
+      <g class="scene-from-1"><Enter at={3}>
+        <rect x="58" y="42" width="104" height="44" rx="14" fill="#ffe08f"/><path d="M50 46q60-42 120 0z" fill="#f08a80"/>
+        <path d="M64 86V66q0-9 10-9t10 9v20z" fill="#c98d55"/>
+        <circle cx="110" cy="62" r="12" fill="#fff8e6"/><circle cx="140" cy="62" r="12" fill="#fff8e6"/>
+      </Enter></g>
+      <g class="scene-from-2 scene-onboard"><Enter at={7.4} how="fade">
+        <path d="M84 40V20q0-8 6-8t6 8v20" fill="#ffd36e"/><circle cx="90" cy="6" r="8" fill="#ffd36e"/><path d="M85 0l-1-5m11 5 1-5" stroke-width="2"/>
+        <Eye x={87} y={5} s={.32}/><Eye x={93} y={5} s={.32}/><Cheek x={85} y={9} s={.3}/><Cheek x={95} y={9} s={.3}/>
+        <circle cx="110" cy="64" r="8" fill="#c99467"/><circle cx="104" cy="57" r="3.4" fill="#c99467"/><circle cx="116" cy="57" r="3.4" fill="#c99467"/><Eye x={107} y={63} s={.32}/><Eye x={113} y={63} s={.32}/>
+        <circle cx="140" cy="64" r="8" fill="#fffdf6"/><path d="M133 58q7-7 14 0" fill="#fffdf6"/><Eye x={137} y={63} s={.32}/><Eye x={143} y={63} s={.32}/>
+        <Noah x={74} y={72} s={.42}/>
+      </Enter></g>
+      <Hull/>
+      <g class="scene-only-0"><path class="scene-knock" d="M30 64l-6-6m4 14h-8m14-16v-8" fill="none" stroke="#ffb547" stroke-width="2"/></g>
+    </g></g></g>
+    <g class="scene-only-1"><path d="M296 446 572 326l8 14-276 120z" fill="#c89762"/><path d="M338 438l-6-14m62-12-6-14m62-12-6-14m62-12-6-14" stroke="#9c6d43" stroke-width="4"/></g>
+    <g class="scene-only-0 scene-builder" transform="translate(380 250) scale(2.4)" stroke-width="2.9">
+      <Noah x={0} y={0}/>
+      <g class="scene-hammer-arm"><path d="M10 32 32 20" stroke-width="7"/><path d="M10 32 32 20" stroke="#ffdcc4" stroke-width="3.6"/><g transform="rotate(-25 34 12)"><rect x="31" y="-2" width="6" height="26" rx="3" fill="#c99467"/><rect x="24" y="-8" width="20" height="10" rx="3" fill="#9aa6b8"/></g></g>
+    </g>
+    <g class="scene-only-1"><Enter at={3.3}><g transform="translate(868 232) scale(1.5)" stroke-width="3.2">
+      <g class="scene-wave-arm"><path d="M12 30 26 8" stroke-width="7"/><path d="M12 30 26 8" stroke="#ffdcc4" stroke-width="3.6"/><circle cx="27" cy="6" r="5" fill="#ffdcc4"/></g>
+      <Noah x={0} y={0}/>
+    </g></Enter></g>
+    <g class="scene-only-1 scene-animal-board">
+      <g class="scene-walker" style={{ '--at': '3s' }}><g class="scene-hop"><g transform="translate(300 410) scale(1.5)"><Giraffe/></g></g></g>
+      <g class="scene-walker" style={{ '--at': '3.55s' }}><g class="scene-hop"><g transform="translate(300 420) scale(1.5)"><Sheep/></g></g></g>
+      <g class="scene-walker" style={{ '--at': '4.1s' }}><g class="scene-hop"><g transform="translate(300 418) scale(1.5)"><Bear/></g></g></g>
+    </g>
+    <g class="scene-from-2"><Enter at={6.5} how="drop"><FaceCloud x={120} y={92} s={4.2}/><FaceCloud x={780} y={74} s={3.6}/></Enter></g>
+    <g class="scene-from-2"><Rain/></g>
+    <g class="scene-from-2"><g class="scene-flood"><Sea y={352} fill="#7cc8e8" line="#45a6c8"/></g></g>
+  </>;
+}
+
+function MangerScene({ id }: { id:string }) {
+  return <>
+    <defs>
+      <linearGradient id={`${id}-sky`} x2="0" y2="1"><stop stop-color="#34437a"/><stop offset="1" stop-color="#5a6aa6"/></linearGradient>
+      <radialGradient id={`${id}-glow`}><stop stop-color="#ffe27a" stop-opacity=".75"/><stop offset="1" stop-color="#ffe27a" stop-opacity="0"/></radialGradient>
+    </defs>
+    <rect width="1000" height="500" fill={`url(#${id}-sky)`} stroke="none"/>
+    {[[60, 60], [150, 170], [260, 40], [380, 90], [640, 40], [760, 110], [880, 50], [940, 190], [70, 290], [930, 300], [330, 200], [690, 200]].map(([x, y], i) => <g key={i} style={{ '--d': `${-(i % 5) * .35}s` }}><Star x={x} y={y} s={3.2}/></g>)}
+    <path d="M0 420q250-26 500-4t500 0V500H0z" fill="#c9b48e"/>
+    <path d="M205 430V250L500 135l295 115v180z" fill="#8a6a52"/>
+    <path d="M205 300h590M205 360h590" stroke="#a07c5f" stroke-width="5"/>
+    <g class="scene-from-1"><Enter at={3} how="fade"><path d="M478 95h44l150 335H328z" fill="#fff3b8" stroke="none" opacity=".28"/></Enter></g>
+    <g fill="none">
+      <path d="M200 248V432m600-184V432" stroke-width="30"/><path d="M200 248V432m600-184V432" stroke="#c98d55" stroke-width="20"/>
+      <path d="M150 268 500 125l350 143" stroke-width="34"/><path d="M150 268 500 125l350 143" stroke="#c98d55" stroke-width="24"/>
+    </g>
+    <path d="M232 432q38-34 84-2zm470 0q40-30 76 0z" fill="#f2cf7a"/>
+    <g class="scene-breathe"><g transform="translate(245 402) scale(1.6)" stroke-width="3"><Sheep lying/></g></g>
+    <g class="scene-breathe"><g transform="translate(772 398) scale(-1.6 1.6)" stroke-width="3">
+      <ellipse cx="0" cy="4" rx="34" ry="17" fill="#c7c5d6"/>
+      <path d="M22 -30q-6-22 0-30 8 4 8 26zm14 0q6-22 0-30-8 4-8 26z" fill="#b9b7c8"/>
+      <ellipse cx="30" cy="-16" rx="17" ry="15" fill="#c7c5d6"/><ellipse cx="34" cy="-8" rx="11" ry="8" fill="#f1e8dc"/>
+      <Happy x={24} y={-19} s={.45}/><Happy x={36} y={-19} s={.45}/><Cheek x={20} y={-12} s={.4}/><Cheek x={42} y={-12} s={.4}/>
+    </g></g>
+    <g class="scene-from-1 scene-parents">
+      <g transform="translate(350 292) scale(2.3)" stroke-width="3"><Enter at={3.6} how="left"><Kid x={0} y={0} robe="#8cbcf2" hood="#8cbcf2"/></Enter></g>
+      <g transform="translate(650 292) scale(2.3)" stroke-width="3"><Enter at={3.6} how="right"><Kid x={0} y={0} robe="#c99467" beard="#8a5a3c"/></Enter></g>
+    </g>
+    <g class="scene-cradle"><g transform="translate(500 360) scale(2.4)" stroke-width="2.9"><Manger x={0} y={0} babyClass="scene-baby"/></g></g>
+    <g class="scene-only-1"><g class="scene-burst">{[[430, 300, 14], [575, 290, 12], [500, 268, 16], [455, 250, 9], [548, 245, 10]].map(([x, y, r], i) => <Spark key={i} x={x} y={y} r={r} fill="#ffd96a"/>)}</g></g>
+    <g class="scene-from-2" fill="#fff6c2" stroke-width="4" paint-order="stroke" font-weight="900">
+      <text class="scene-z" x="440" y="318" font-size="44" style={{ '--d': '0s' }}>z</text><text class="scene-z" x="468" y="288" font-size="34" style={{ '--d': '-.7s' }}>z</text><text class="scene-z" x="492" y="262" font-size="26" style={{ '--d': '-1.4s' }}>z</text>
+    </g>
+    <g class="scene-from-2"><g class="scene-float" style={{ '--d': '0s' }}><Heart x={410} y={240} s={1.6}/></g><g class="scene-float" style={{ '--d': '-1s' }}><Heart x={600} y={236} s={1.4}/></g></g>
+    <g class="scene-star-fly"><g transform="translate(500 66)">
+      <circle class="scene-star-glow" r="80" fill={`url(#${id}-glow)`} stroke="none"/>
+      <path d="M0 -50 14 -18 48 -15 22 8 30 42 0 24 -30 42 -22 8 -48 -15 -14 -18z" fill="#ffd96a" stroke-width="6"/>
+      <g class="blink"><Eye x={-10} y={-2} s={.9}/><Eye x={10} y={-2} s={.9}/></g><Cheek x={-17} y={9} s={.7}/><Cheek x={17} y={9} s={.7}/><Smile x={0} y={8} s={.7}/>
+    </g></g>
+    {[[160, 150, 10], [260, 108, 12], [360, 80, 9]].map(([x, y, r], i) => <g key={i} class="scene-trail" style={{ '--at': `${.35 + i * .35}s` }}><Spark x={x} y={y} r={r}/></g>)}
+  </>;
+}
+
+/** Liegender Löwe aus der Antwortkarte, groß; brüllt im ersten Schritt, lächelt und schläft danach. */
+function BigLion({ x, y, flip = 1 }: { x:number; y:number; flip?:number }) {
+  return <g transform={`translate(${x} ${y}) scale(${3.6 * flip} 3.6)`} stroke-width="1.9">
+    <g class="scene-lion-tail"><path d="M-32 6q-12-2-12-12" fill="none" stroke-width="3"/><circle cx="-45" cy="-8" r="4" fill="#d58b4c"/></g>
+    <path d="M-4 18q-30 2-30-14 0-14 20-14h24z" fill="#f2c26c"/>
+    <path d="M-22 18v6m14-6v6" stroke-width="5"/>
+    <ellipse cx="14" cy="20" rx="7" ry="4" fill="#f2c26c"/><ellipse cx="26" cy="20" rx="7" ry="4" fill="#f2c26c"/>
+    <g class="scene-lion-head">
+      {Array.from({ length:9 }, (_, i) => { const a = i / 9 * Math.PI * 2; return <circle key={i} cx={12 + Math.cos(a) * 15} cy={-6 + Math.sin(a) * 15} r="7.5" fill="#d58b4c"/>; })}
+      <circle cx="12" cy="-6" r="15" fill="#d58b4c" stroke="none"/><circle cx="12" cy="-4" r="12" fill="#ffd98a"/>
+      <g class="scene-before-2"><g class="blink"><Eye x={7} y={-8} s={.5}/><Eye x={17} y={-8} s={.5}/></g></g>
+      <g class="scene-from-2"><Happy x={7} y={-7} s={.55}/><Happy x={17} y={-7} s={.55}/></g>
+      <Cheek x={4} y={-1} s={.5}/><Cheek x={20} y={-1} s={.5}/>
+      <path d="M10 -2h4l-2 2.5z" fill="#7a4a2a" stroke-width="1.6"/>
+      <g class="scene-only-0"><ellipse cx="12" cy="4" rx="3.6" ry="3.2" fill="#7a4a2a" stroke-width="1.4"/><ellipse cx="12" cy="5.4" rx="2" ry="1.2" fill="#ff9fb4" stroke="none"/></g>
+      <g class="scene-from-1"><Smile x={12} y={2} s={.4}/></g>
+    </g>
+    <g class="scene-only-0"><path class="scene-roar" d="M30 -10q5 6 0 12m6-18q9 12 0 24" fill="none" stroke="#fff6c2" stroke-width="2.2"/></g>
+  </g>;
+}
+function LionScene() {
+  return <>
+    <Sky fill="#d9c6a4"/>
+    <path d="M40 520V270Q40 40 500 30q460 10 460 240v250z" fill="#d9c6a4"/>
+    <path d="M70 160q20-10 34 0m800 0q18-12 32 0M60 360q16-8 30 0m826 6q16-10 30 0" fill="none" stroke="#bfa985" stroke-width="5"/>
+    <path d="M120 520V285Q120 110 500 100q380 10 380 185v235z" fill="#9b8669"/>
+    <circle class="scene-glow" cx="500" cy="290" r="160" fill="#fff3b8" stroke="none"/>
+    <path d="M70 478q430-46 860 0V500H70z" fill="#c9b48e"/>
+    <g class="scene-from-1"><Enter at={3} how="drop">
+      <g class="scene-angel"><g transform="translate(500 112) scale(1.9)" stroke-width="3">
+        <g transform="rotate(25 -26 34)"><ellipse class="scene-wing scene-wing-left" cx="-26" cy="34" rx="24" ry="12" fill="#fff"/></g>
+        <g transform="rotate(-25 26 34)"><ellipse class="scene-wing scene-wing-right" cx="26" cy="34" rx="24" ry="12" fill="#fff"/></g>
+        <Kid x={0} y={0} robe="#fffdf6" hair="#ffd96a"/>
+        <ellipse cx="0" cy="-30" rx="15" ry="4.5" fill="none" stroke="#e8b84a" stroke-width="4"/>
+      </g></g>
+      <g class="scene-sparkle"><Spark x={370} y={86} r={13}/><Spark x={636} y={100} r={11}/><Spark x={392} y={196} r={9}/><Spark x={612} y={204} r={10}/></g>
+    </Enter></g>
+    <g transform="translate(500 300) scale(2.5)" stroke-width="2.8"><Kid x={0} y={0} robe="#8cc4ee"/><path d="M-5 34l5-8 5 8z" fill="#ffdcc4" stroke-width="2"/></g>
+    <BigLion x={250} y={400}/><BigLion x={750} y={400} flip={-1}/>
+    <g class="scene-from-2"><g class="scene-float" style={{ '--d': '0s' }}><Heart x={300} y={300} s={1.7}/></g><g class="scene-float" style={{ '--d': '-.9s' }}><Heart x={700} y={296} s={1.5}/></g></g>
+    <Flower x={100} y={470} s={2.8}/><Flower x={150} y={488} s={2.4} fill="#ffd96a"/><Flower x={900} y={474} s={2.8} fill="#b9a7f0"/>
+  </>;
+}
+
+/** Ein Jünger, der sich am Bootsrand festhält; im Sturm besorgt, danach froh. */
+const Disciple = ({ x, robe, worried }: { x:number; robe:string; worried?:boolean }) => <g transform={`translate(${x} 300) scale(1.8)`} stroke-width="3.6"><Kid x={0} y={0} robe={robe} beard="#8a5a3c" worried={worried}/></g>;
+function BoatScene() {
+  return <>
+    <Sky fill="#cdeffd"/>
+    <rect class="scene-before-2" width="1000" height="500" fill="#97a8c6" stroke="none"/>
+    <g class="scene-from-2"><Enter at={6.6}><Sun x={860} y={92} r={40} rays={[8, 22]}/></Enter></g>
+    <g class="scene-from-2"><Enter at={6.9} how="fade"><Cloud x={90} y={86} s={3}/><Cloud x={520} y={64} s={2.4}/><path d="M180 186q13-14 26 0 13-14 26 0m430-40q13-14 26 0 13-14 26 0" fill="none" stroke="#557c91" stroke-width="5"/></Enter></g>
+    <g class="scene-before-2">
+      <FaceCloud x={70} y={110} s={5} grumpy/><FaceCloud x={640} y={96} s={4.4} grumpy/>
+      <g class="scene-flash" fill="none"><path d="M150 160l-22 44h28l-22 46m596-104-20 40h26l-20 42" stroke-width="17"/><path d="M150 160l-22 44h28l-22 46m596-104-20 40h26l-20 42" stroke="#ffd24a" stroke-width="9"/></g>
+      <Rain/>
+      <Sea y={330} fill="#6fb6d6" line="#3f8fb6" wave={30}/>
+    </g>
+    <g class="scene-from-2"><Sea y={352} fill="#7cc8e8" line="#45a6c8" wave={10}/></g>
+    <g class="scene-boat-rock">
+      <g class="scene-before-2"><Disciple x={360} robe="#dba079" worried/><Disciple x={640} robe="#9fb984" worried/></g>
+      <g class="scene-from-2"><Disciple x={360} robe="#dba079"/><Disciple x={640} robe="#9fb984"/></g>
+      <g class="scene-only-1"><ellipse class="scene-sleep-glow" cx="470" cy="345" rx="100" ry="54" fill="#fff3b8" stroke="none" opacity=".85"/></g>
+      <g class="scene-before-2 scene-sleeper">
+        <path d="M470 340q80-26 140 8l-6 30H470z" fill="#fffdf6"/>
+        <ellipse cx="436" cy="362" rx="38" ry="17" fill="#9c8cc8"/>
+        <circle cx="452" cy="340" r="28" fill="#ffdcc4"/>
+        <path d="M428 348q4 22 24 22t24-22q-8 8-24 8t-24-8z" fill="#8a5a3c"/>
+        <path d="M424 338q2-26 28-26t28 26q-10-10-28-10t-28 10z" fill="#8a5a3c"/>
+        <Happy x={442} y={340} s={.7}/><Happy x={462} y={340} s={.7}/><Cheek x={434} y={350} s={.6}/><Cheek x={470} y={350} s={.6}/>
+      </g>
+      <g class="scene-only-1" fill="#fff6c2" stroke-width="4" paint-order="stroke" font-weight="900">
+        <text class="scene-z" x="490" y="300" font-size="40" style={{ '--d': '0s' }}>z</text><text class="scene-z" x="520" y="270" font-size="30" style={{ '--d': '-.7s' }}>z</text><text class="scene-z" x="545" y="244" font-size="24" style={{ '--d': '-1.4s' }}>z</text>
+      </g>
+      <g class="scene-from-2 scene-standing"><Enter at={6.5}>
+        <g transform="translate(500 270) scale(2)" stroke-width="3.2">
+          <path d="M12 30 40 -6" stroke-width="7"/><path d="M12 30 40 -6" stroke="#ffdcc4" stroke-width="3.6"/><circle cx="41" cy="-8" r="5.5" fill="#ffdcc4"/>
+          <Kid x={0} y={0} robe="#fffdf6" beard="#8a5a3c"/>
+        </g>
+        <g class="scene-sparkle"><Spark x={612} y={226} r={13}/><Spark x={560} y={190} r={9}/><Spark x={640} y={270} r={8}/></g>
+      </Enter></g>
+      <path d="M280 372h440l-64 84H344z" fill="#e0a26a"/><path d="M306 404h388" stroke="#b97c48" stroke-width="5"/>
+      <circle cx="392" cy="372" r="9" fill="#ffdcc4" stroke-width="5"/><circle cx="608" cy="372" r="9" fill="#ffdcc4" stroke-width="5"/>
+    </g>
+    <g class="scene-before-2"><Sea y={420} fill="#6fb6d6" line="#3f8fb6" wave={26}/></g>
+    <g class="scene-from-2"><Sea y={428} fill="#7cc8e8" line="#45a6c8" wave={8}/></g>
+  </>;
+}
