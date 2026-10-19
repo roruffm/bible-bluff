@@ -16,7 +16,7 @@ import { enableKidsSound, KIDS_SUSPENSE_MS, playKidsCue, playKidsScene, playProf
 import { clearKidsShow, loadKidsShow, saveKidsShow } from '../lib/kids-saved';
 import { checkKidsInternet, prepareKidsShow } from '../lib/kids-ready';
 import { KidsResume, KidsTechCheck, KidsTechStatus } from '../components/KidsPrepare';
-import { BluffClaim, BluffPin, KidsCheers } from '../components/KidsBluff';
+import { BluffClaim, BluffPin, KidsCheers, KidsStopSign } from '../components/KidsBluff';
 import { createKidsGame, KIDS_ANSWER_MS, kidsCanJumpToFinal, kidsCanSkipCountdown, kidsCanScore, kidsOvertook, kidsPrimaryAction, kidsResultPoints, updateKidsGame, type KidsAction, type KidsGame } from '../lib/kids';
 import { navigate } from '../lib/router';
 import './kids.css';
@@ -183,7 +183,7 @@ export function KidsPage() {
     {remote.error && !showPair && <p class="kids-connection-note" role="status">{remote.error}{remote.lost && game && <button type="button" class="kids-tool" onClick={() => { void remote.disconnect(); }}>Ohne Smartphone weiterspielen</button>}</p>}
     {remote.active && !remote.view && <div class="kids-exit"><div><h2>Show wiederherstellen …</h2><p>{remote.error || 'Die Fernbedienung wird wieder verbunden.'}</p><button type="button" class="kids-button" onClick={() => { void remote.disconnect(); }}>Zur Vorbereitung</button></div></div>}
     {!game ? <section class="kids-setup">
-      <div class="kids-intro"><KidsLogo/><p class="kids-eyebrow">DAS GEMEINSAME BIBELABENTEUER</p><h1>Die große<br/><em>Bluff-Jagd!</em></h1><p>Drei Detektivteams. Ein frecher Professor.<br/>Gemeinsam knackt ihr seine Bibelrätsel.</p><ProfessorBluff/><div class="kids-show-teams">{(['minis','mittis','maxis'] as const).map(g=><span><b><KidsGroupName group={g}/></b><small>{KIDS_GROUPS[g].ages}</small></span>)}</div></div>
+      <div class="kids-intro"><KidsLogo/><p class="kids-eyebrow">DAS GEMEINSAME BIBELABENTEUER</p><h1>Die große<br/><em>Bluff-Jagd!</em></h1><p>Drei Detektivteams. Ein frecher Professor.<br/>Gemeinsam knackt ihr seine Bibelrätsel.</p><ProfessorBluff/><div class="kids-show-teams">{(['minis','mittis','maxis'] as const).map(g=><span key={g} class={`group-${g}`}><StoryPicture motif={KIDS_GROUPS[g].symbol}/><b><KidsGroupName group={g}/></b><small>{KIDS_GROUPS[g].ages}</small></span>)}</div></div>
       <div class="kids-setup-card">{saved && !remote.active && <KidsResume saved={saved} onResume={resume} onDiscard={discard} resumeRef={resumeButton}/>}<p class="kids-eyebrow">FÜR DIE SPIELLEITUNG · CA. 45 MINUTEN</p><h2>Gemeinsam auf Punktejagd</h2><ol class="kids-rules">
         <li><b>Drei Felder vorbereiten</b><span>1, 2, 3 von links nach rechts markieren. Die aktive Altersgruppe wählt mit den Füßen. Andere bleiben bei ihrer Gruppe.</span></li>
         <li><b>Bis zu 9 Aufgaben + 1 Superbluff</b><span>Pro Kapitel spielen alle drei Gruppen. Erst vorlesen, dann 30 Sekunden starten. Eltern helfen bei Geräuschen und Pantomime. Ihr könnt die Show jederzeit mit Punktestand abschließen.</span></li>
@@ -201,7 +201,8 @@ export function KidsPage() {
           <div class="kids-active-group"><KidsGroupName group={round.question.group}/><span>{round.question.group === 'all' ? 'Alle Kinder' : `sind dran! · ${KIDS_GROUPS[round.question.group].ages}`}</span></div>
 
           <h1 id="kids-question">{round.question.prompt}</h1>
-          <div class="kids-status" role="status"><strong>{status}</strong>{game.phase === 'locked' ? <span>Noch nicht auflösen. Gleich geht’s zurück.</span> : round.question.group !== 'all' && (game.phase === 'moving' || game.phase === 'paused') ? <KidsCheers active={round.question.group}/> : null}</div>
+          <div class="kids-status" role="status"><strong>{status}</strong>{round.question.group !== 'all' && (game.phase === 'moving' || game.phase === 'paused') && <KidsCheers active={round.question.group}/>}</div>
+          {game.phase === 'locked' && <><KidsStopSign side="left"/><KidsStopSign side="right"/></>}
         </div>
         <aside class="kids-question-host" aria-label="Professor Bluffs Behauptung"><BluffClaim text={professorSays(game)}/><ProfessorBluff key={`${game.phase}:${game.index}`} mood={professorMood(game)} motion={professorMotion(game)}/></aside>
         <ol class="kids-answers has-pictures" aria-label="Antworten und Spielfelder">{round.answers.map((answer,i)=><li key={`${game.index}-${i}`} class={`kids-answer kids-field-${i+1}${answer===round.question.bluff.answer ? ' is-bluff-pick' : ''}`}><span class="kids-number">{i+1}</span><StoryPicture motif={kidsAnswerPicture(round.question,answer)}/><span class="kids-answer-text">{answer}</span>{answer===round.question.bluff.answer && <BluffPin/>}</li>)}</ol>

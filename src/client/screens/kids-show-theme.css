@@ -13,6 +13,31 @@
 .kids-show .kids-back, .kids-show .kids-top-title { color: var(--show-cream); }
 .kids-show .kids-button, .kids-show .kids-tool { color: var(--show-ink); }
 .kids-show .kids-setup-card { color: var(--show-ink); }
+/* Vorbereitung: wächst auf großen Bildschirmen mit, die drei Gruppen zeigen ihre Bilder. */
+.kids-show .kids-setup { max-width: min(1680px, 94vw); gap: clamp(20px, 3vh, 40px) clamp(40px, 4vw, 90px); }
+.kids-show .kids-intro h1 { font-size: clamp(28px, 3.4vw, 72px); }
+.kids-show .kids-intro > p:last-of-type { font-size: clamp(18px, 1.25vw, 26px); }
+.kids-show .kids-intro > .kids-eyebrow { font-size: clamp(11px, .8vw, 16px); }
+.kids-show .kids-intro > .bluff-professor { width: clamp(150px, 12vw, 250px); height: clamp(175px, 14vw, 290px); }
+.kids-show .kids-show-teams { gap: clamp(10px, 1vw, 20px); margin-top: clamp(8px, 1.4vh, 20px); }
+.kids-show .kids-show-teams > span { --team-tint: var(--show-mint); display: flex; flex-direction: column; align-items: center; gap: 2px; width: clamp(120px, 10vw, 210px); padding: clamp(6px, .6vw, 12px); border: 3px solid #082a3c; border-radius: 22px; background: var(--team-tint); box-shadow: 0 5px 0 #082a3c; }
+.kids-show .kids-show-teams > .group-mittis { --team-tint: var(--show-gold); }
+.kids-show .kids-show-teams > .group-maxis { --team-tint: #f8a1ad; }
+.kids-show .kids-show-teams .kids-story-picture { width: 100%; height: auto; }
+.kids-show .kids-show-teams .kids-group-name { font-size: clamp(15px, 1.05vw, 22px); font-weight: 850; }
+.kids-show .kids-show-teams small { font-size: clamp(12px, .8vw, 16px); font-weight: 750; }
+.kids-show .kids-setup-card { padding: clamp(28px, 2vw, 46px); }
+.kids-show .kids-setup-card h2 { font-size: clamp(24px, 1.8vw, 38px); }
+.kids-show .kids-setup-card > .kids-eyebrow { font-size: clamp(10px, .7vw, 15px); }
+.kids-show .kids-rules { gap: clamp(18px, 1.6vh, 26px); }
+.kids-show .kids-rules li { padding-left: clamp(44px, 2.8vw, 58px); }
+.kids-show .kids-rules li::before { width: clamp(30px, 2vw, 40px); height: clamp(30px, 2vw, 40px); background: var(--show-mint); border: 2px solid #082a3c; font-size: clamp(15px, 1vw, 20px); }
+.kids-show .kids-rules b { font-size: clamp(16px, 1.15vw, 23px); }
+.kids-show .kids-rules li span { font-size: clamp(14px, .95vw, 19px); }
+.kids-show .kids-scoring-rule { font-size: clamp(13px, .9vw, 18px); border: 2px solid #082a3c; border-radius: 16px; }
+.kids-show .kids-scoring-rule b { font-size: clamp(19px, 1.3vw, 26px); }
+.kids-show .kids-setup-card > .kids-button { font-size: clamp(21px, 1.4vw, 28px); }
+.kids-show .kids-setup-note, .kids-show .kids-organizer { font-size: clamp(12px, .8vw, 16px); }
 .kids-show .kids-intro h1 em { color: var(--show-mint); }
 .kids-show .kids-show-teams { color: var(--show-ink); }
 .kids-show .kids-playing-bar {
@@ -168,21 +193,44 @@
 .kids-show .kids-show-story > .kids-eyebrow { font-size: clamp(10px, 1vw, 19px); color: #426270; letter-spacing: .09em; }
 .kids-show .is-welcome .kids-show-story { background: none; box-shadow: none; border-color: transparent; color: var(--show-cream); padding-inline: 0; }
 .kids-show .is-welcome .kids-show-story > .kids-eyebrow { color: #bce5e0; }
-.kids-show .kids-team-badges > div { color: var(--show-ink); border: 2px solid #082a3c; border-radius: 22px; padding: clamp(10px, 1.4vh, 18px) 20px; }
-.kids-show .kids-team-badges b { font-size: clamp(22px, min(2.7vw, 4.1vh), 52px); }
-.kids-show .kids-team-badges .kids-group-symbol { width: 1.8em; height: 1.8em; flex-basis: 1.8em; }
+/* Begrüßung: drei Gruppenkarten im Stil der Antwortkarten, das Gruppensymbol klebt in der Bildecke. */
+.kids-show .kids-show-story { container-type: inline-size; }
+.kids-show .is-welcome .kids-team-badges { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(10px, 1.4vw, 28px); }
+.kids-show .kids-team-badges > div { --team-tint: var(--show-mint); position: relative; display: flex; flex-direction: column; align-items: center; gap: clamp(2px, .6vh, 8px); min-width: 0; padding: clamp(8px, .9vw, 18px) clamp(8px, .8vw, 16px) clamp(10px, 1.2vh, 18px); color: var(--show-ink); background: var(--team-tint); border: 3px solid #082a3c; border-radius: var(--show-radius); box-shadow: 0 6px 0 #082a3c; }
+.kids-show .kids-team-badges > .group-mittis { --team-tint: var(--show-gold); }
+.kids-show .kids-team-badges > .group-maxis { --team-tint: #f8a1ad; }
+.kids-show .kids-team-badges .kids-story-picture { width: 100%; height: auto; max-height: min(22vh, 300px); }
+.kids-show .kids-team-badges b { font-size: clamp(22px, min(2vw, 3.6vh), 44px); text-align: center; }
+.kids-show .kids-team-badges .kids-group-symbol { position: absolute; top: clamp(2px, .4vw, 8px); left: clamp(2px, .4vw, 8px); width: clamp(40px, 3.4vw, 70px); height: clamp(40px, 3.4vw, 70px); padding: 4px; border: 2px solid #082a3c; border-radius: 50%; background: #fffdf1; box-shadow: 0 3px 0 #082a3c; }
+.kids-show .kids-team-badges .kids-group-ages { font-size: clamp(14px, min(1.3vw, 2.3vh), 26px); font-weight: 800; }
 .kids-show .kids-welcome-promise { display: inline-block; margin-top: 8px; padding: 6px 18px; border-radius: 30px; color: var(--show-ink); background: var(--show-mint); font-size: .8em; font-weight: 850; }
-.kids-show .kids-chapter-picture { width: min(260px, 30%); height: min(19vh, 220px); flex-shrink: 1; min-height: 60px; }
-.kids-show .is-chapter .kids-team-badges { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
-.kids-show .is-chapter .kids-team-badges > div { display: flex; flex-direction: column; gap: 3px; padding: 8px 4px; border: 0; background: transparent; }
-.kids-show .is-chapter .kids-team-badges b { font-size: clamp(14px, 1.5vw, 28px); }
-.kids-show .is-chapter .kids-group-name { flex-direction: column; gap: 4px; }
-.kids-show .is-chapter .kids-group-ages { font-size: clamp(12px, 1vw, 20px); }
+/* Ist die Spalte zu schmal für drei Karten, werden es drei Zeilen; auf flachen Leinwänden ohne Bild. */
+@container (max-width: 559px) {
+  .kids-show .is-welcome .kids-team-badges { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .kids-show .kids-team-badges > div { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 0 12px; padding: 6px 14px 6px 6px; border-radius: 20px; }
+  .kids-show .kids-team-badges .kids-story-picture { grid-row: 1 / 3; width: 96px; }
+  .kids-show .kids-team-badges b { grid-column: 2; align-self: end; text-align: left; }
+  .kids-show .kids-team-badges .kids-group-ages { grid-column: 2; align-self: start; text-align: left; }
+  .kids-show .kids-team-badges .kids-group-symbol { position: static; width: 1.4em; height: 1.4em; flex-basis: 1.4em; padding: 0; border: 0; background: none; box-shadow: none; }
+}
+@media (max-height: 700px) { @container (max-width: 559px) {
+  .kids-show .kids-team-badges .kids-story-picture { display: none; }
+  .kids-show .kids-team-badges > div { grid-template-columns: minmax(0, 1fr) auto; padding-left: 14px; }
+  .kids-show .kids-team-badges b, .kids-show .kids-team-badges .kids-group-ages { grid-column: auto; grid-row: 1; align-self: center; }
+} }
+/* Kapitel: ein großes Bild je Kapitel und die drei Gruppen als Schilder wie am Ende. */
+.kids-show .is-chapter .kids-show-story > .kids-story-picture { flex: 0 1 auto; width: min(540px, 82%); height: min(30vh, 340px); min-height: 80px; }
+.kids-chapter-groups { display: flex; justify-content: center; flex-wrap: wrap; gap: clamp(8px, 1vw, 18px); }
 .kids-chapter-progress { display: flex; gap: 30px; list-style: none; margin: 0; padding: 0; }
 .kids-chapter-progress li { position: relative; display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; border: 3px solid #35788a; font-weight: 900; color: #41636d; }
 .kids-chapter-progress li + li::before { position: absolute; content: ''; right: 100%; top: 50%; width: 33px; height: 3px; background: #35788a; }
 .kids-chapter-progress .is-reached { background: var(--show-mint); color: var(--show-ink); }
 .kids-chapter-progress [aria-current] { border-color: var(--show-ink); }
+/* Stoppschilder links und rechts der Frage, sobald die Antwortzeit um ist. */
+.kids-show .kids-show-stage.is-locked .kids-show-question { --stop-size: clamp(60px, min(9vw, 16vh), 190px); padding-inline: calc(var(--stop-size) + clamp(16px, 2vw, 40px)); }
+.kids-stop-sign { --tilt: -8deg; position: absolute; top: 50%; left: clamp(10px, 1.2vw, 24px); z-index: 1; width: var(--stop-size); height: auto; max-height: 86%; transform: translateY(-50%) rotate(var(--tilt)); filter: drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff) drop-shadow(0 6px 5px rgba(8, 42, 60, .3)); animation: kids-stop-pop .6s cubic-bezier(.3, 1.6, .5, 1) both; }
+.kids-stop-sign.is-right { --tilt: 8deg; left: auto; right: clamp(10px, 1.2vw, 24px); animation-delay: .12s; }
+@keyframes kids-stop-pop { from { transform: translateY(-50%) rotate(var(--tilt)) scale(0); } to { transform: translateY(-50%) rotate(var(--tilt)) scale(1); } }
 .kids-final-groups { display: flex; gap: 8px; align-items: center; justify-content: center; padding: 7px 18px; background: var(--show-mint); border-radius: 30px; font-size: clamp(16px, 1.7vw, 30px); order: -1; }
 .kids-final-groups .kids-group-name > span { display: none; }
 .kids-show .is-superbluff .kids-show-story > .kids-story-picture { height: min(22vh, 260px); width: min(400px, 70%); flex: 1 1 0; min-height: 70px; }
@@ -227,9 +275,9 @@
 .kids-ending > header { grid-column: 1 / -1; text-align: center; }
 .kids-show .kids-ending h1 { margin: 0; font-size: clamp(32px, min(4.6vw, 7.4vh), 104px); line-height: 1.2; font-weight: 900; text-wrap: balance; text-shadow: 0 4px 0 #082a3c; }
 .kids-ending-groups { display: flex; justify-content: center; gap: clamp(8px, 1vw, 18px); flex-wrap: wrap; margin-top: clamp(8px, 1.4vh, 18px); }
-.kids-ending-groups > .kids-group-name { border: 2px solid #082a3c; background: var(--show-mint); color: var(--show-ink); border-radius: 30px; padding: 4px 18px; font-size: clamp(15px, min(1.7vw, 3vh), 33px); font-weight: 850; box-shadow: 0 3px 0 #082a3c; }
-.kids-ending-groups > .group-mittis { background: var(--show-gold); }
-.kids-ending-groups > .group-maxis { background: #f8a1ad; }
+:is(.kids-ending-groups, .kids-chapter-groups) > .kids-group-name { border: 2px solid #082a3c; background: var(--show-mint); color: var(--show-ink); border-radius: 30px; padding: 4px 18px; font-size: clamp(15px, min(1.7vw, 3vh), 33px); font-weight: 850; box-shadow: 0 3px 0 #082a3c; }
+:is(.kids-ending-groups, .kids-chapter-groups) > .group-mittis { background: var(--show-gold); }
+:is(.kids-ending-groups, .kids-chapter-groups) > .group-maxis { background: #f8a1ad; }
 /* Professor Bluff verbeugt sich groß, seine Sprechblase steht neben ihm. */
 .kids-show .kids-ending-host { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); grid-template-rows: minmax(0, 1fr) auto; align-items: center; justify-items: center; gap: 4px clamp(10px, 1vw, 20px); min-height: 0; }
 .kids-show .kids-ending-host blockquote { position: relative; grid-column: 2; grid-row: 1; align-self: start; margin-top: clamp(10px, 4vh, 60px); text-align: center; font-size: clamp(16px, min(1.5vw, 2.8vh), 34px); }
@@ -320,14 +368,17 @@
   .kids-show .kids-show-story { padding: 22px 16px; gap: 16px; }
   .kids-show .kids-show-story h1 { font-size: 32px; }
   .kids-show .kids-show-story > p { font-size: 18px; }
-  .kids-show .kids-team-badges > div { padding: 10px; gap: 6px; }
-  .kids-show .kids-team-badges b { font-size: 20px; }
-  .kids-show .kids-team-badges .kids-group-symbol { width: 1.4em; height: 1.4em; flex-basis: 1.4em; }
-  .kids-show .kids-team-badges .kids-group-ages { font-size: 13px; }
-  .kids-show .kids-chapter-picture { width: 160px; height: 120px; }
-  .kids-show .is-chapter .kids-team-badges { grid-template-columns: minmax(0, 1fr); }
-  .kids-show .is-chapter .kids-team-badges > div { display: grid; grid-template-columns: 1fr auto; }
-  .kids-show .is-chapter .kids-group-name { flex-direction: row; }
+  .kids-show .kids-team-badges b { font-size: 22px; }
+  .kids-show .kids-show-teams { flex-direction: column; align-items: stretch; width: 100%; }
+  .kids-show .kids-show-teams > span { display: grid; grid-template-columns: 84px minmax(0, 1fr); align-items: center; gap: 0 12px; width: auto; text-align: left; }
+  .kids-show .kids-show-teams .kids-story-picture { grid-row: 1 / 3; }
+  .kids-show .kids-show-teams b { align-self: end; }
+  .kids-show .kids-show-teams small { align-self: start; }
+  .kids-show .kids-show-teams .kids-group-name { font-size: 18px; }
+  .kids-show .kids-team-badges .kids-group-ages { font-size: 14px; }
+  .kids-show .is-chapter .kids-show-story > .kids-story-picture { width: 260px; height: 165px; flex: none; }
+  .kids-show .kids-show-stage.is-locked .kids-show-question { padding-inline: 16px; }
+  .kids-stop-sign { display: none; }
   .kids-show .is-superbluff .kids-show-story > .kids-story-picture { height: 160px; flex: none; }
   .kids-show .kids-final-groups { font-size: 16px; padding: 6px 10px; gap: 4px; }
   .kids-show .kids-regroup { display: flex; flex-direction: column; }
@@ -356,7 +407,7 @@
   .kids-show .kids-reveal-footer > p { font-size: 16px; }
   .kids-show .kids-ending { display: flex; flex-direction: column; gap: 22px; }
   .kids-show .kids-ending h1 { font-size: 34px; }
-  .kids-ending-groups > .kids-group-name { font-size: 16px; padding: 5px 12px; }
+  :is(.kids-ending-groups, .kids-chapter-groups) > .kids-group-name { font-size: 16px; padding: 5px 12px; }
   .kids-show .kids-ending-host { display: flex; flex-direction: column; gap: 8px; }
   .kids-show .kids-ending-host > .bluff-professor { flex: none; height: 200px; width: 210px; }
   .kids-show .kids-ending-host blockquote { margin: 0 0 12px; font-size: 20px; }

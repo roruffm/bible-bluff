@@ -7,16 +7,8 @@ import { KidsVoiceButton } from './KidsVoice';
 import { ProfessorBluff, professorMood, professorSays, ShowControls, StoryPicture } from './KidsShow';
 import { KidsIntroControls } from './KidsIntroVideo';
 
-function ChapterPicture() {
-  return <svg class="kids-chapter-picture" viewBox="0 0 240 180" aria-hidden="true">
-    <ellipse cx="120" cy="165" rx="85" ry="9" fill="#12324a18"/>
-    <path d="m91 113-58 44q-10 7-17-3t2-17l59-43" fill="#bc8142" stroke="#12324a" stroke-width="7"/>
-    <circle cx="137" cy="76" r="62" fill="#ffd362" stroke="#12324a" stroke-width="7"/>
-    <circle cx="137" cy="76" r="48" fill="#bceafa" stroke="#12324a" stroke-width="6"/>
-    <path d="M119 58q0-21 20-21 21 0 21 19 0 14-17 21-6 3-6 11" fill="none" stroke="#12324a" stroke-width="12" stroke-linecap="round"/>
-    <circle cx="137" cy="108" r="7" fill="#12324a"/>
-  </svg>;
-}
+/** Je Kapitel ein eigenes Bild: die erste Spur, die Schatzkarte, die Zielflagge. */
+const CHAPTER_PICTURES = ['clue', 'map', 'flag'] as const;
 
 /** Die Übergänge teilen sich die Bühne, behalten aber ihre vorhandenen Ansagen und Steuerung. */
 export function KidsInterlude({ game, chapter, act, disabled, primaryRef }: {
@@ -40,8 +32,10 @@ export function KidsInterlude({ game, chapter, act, disabled, primaryRef }: {
         <p>Welche Geschichte spielen die Eltern?</p>
         <div class="kids-final-bonuses"><span>Professor Bluff <b>+0</b></span><span>Unser Team <b>bis zu +20</b></span></div>
       </> : <>
-        {!welcome && <ChapterPicture/>}
-        <div class="kids-team-badges">{(['minis','mittis','maxis'] as const).map(g=><div key={g}><b><KidsGroupName group={g}/></b><span class="kids-group-ages">{KIDS_GROUPS[g].ages}</span></div>)}</div>
+        {welcome ? <div class="kids-team-badges">{(['minis','mittis','maxis'] as const).map(g=><div key={g} class={`group-${g}`}><StoryPicture motif={KIDS_GROUPS[g].symbol}/><b><KidsGroupName group={g}/></b><span class="kids-group-ages">{KIDS_GROUPS[g].ages}</span></div>)}</div> : <>
+          <StoryPicture motif={CHAPTER_PICTURES[chapter]}/>
+          <div class="kids-chapter-groups">{(['minis','mittis','maxis'] as const).map(g=><KidsGroupName key={g} group={g}/>)}</div>
+        </>}
         <p>{welcome ? <>Wir sammeln alle für EIN Team.<br/><span class="kids-welcome-promise">Niemand scheidet aus. Alle gehören dazu!</span></> : chapter === 0 ? 'Eure erste Spur wartet auf alle drei Gruppen!' : chapter === 1 ? 'Zusammen findet ihr die nächste Spur!' : 'Jeder Beitrag zählt. Gemeinsam geht die Punktejagd weiter!'}</p>
         {!welcome && <ol class="kids-chapter-progress" aria-label="Kapitelfortschritt">{[0,1,2].map(i=><li key={i} aria-current={i === chapter ? 'step' : undefined} class={i <= chapter ? 'is-reached' : ''}>{i + 1}</li>)}</ol>}
       </>}
