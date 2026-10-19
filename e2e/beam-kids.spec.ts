@@ -73,7 +73,8 @@ test('Kids: vollständige Show mit Bildern, ohne Joker und mit jederzeit möglic
   await expect(page.getByText('Bei Jesus sind wir willkommen.',{exact:true})).toBeVisible();
   await expect(page.locator('.kids-ending-count')).toContainText('10 Aufgaben');
   await expect(page.getByRole('button',{name:/Revanche|Vorbereitung/})).toHaveCount(0);
-  await expect(page.locator('.kids-finale-seal')).toHaveText('♥ ALLE GEHÖREN DAZU ♥');
+  await expect(page.locator('.kids-ending-sticker')).toHaveAttribute('data-sticker','trophy');
+  await expect(page.getByRole('heading',{name:'Noch viel Spaß bei Hello King!',exact:true})).toBeVisible();
   await expect(page.locator('.kids-ending-host .bluff-professor')).toHaveClass(/mood-kind/);
   await page.keyboard.press('ArrowRight');
   await expect(page.getByTestId('team-score')).toHaveText('110');
