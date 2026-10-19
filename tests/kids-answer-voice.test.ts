@@ -56,29 +56,29 @@ describe('Abbrechbare Folge am Beamer', () => {
   afterEach(()=>vi.unstubAllGlobals());
   const prepare=async()=>{const sound=await import('../src/client/lib/kids-sound');await sound.enableKidsSound();return sound;};
   it('spielt jede Nummer und Antwort nacheinander und meldet nur das Ende der ganzen Folge', async()=>{
-    const sound=await prepare(), ended=vi.fn(), keys=['answer-number-0','answer-0-2','answer-number-1','answer-0-0','answer-number-2','answer-0-1'];
-    const playing=sound.playProfessorVoiceSequence(keys,new AbortController().signal,ended);
+    const sound=await prepare(), ended=vi.fn(), started=vi.fn(), clipEnded=vi.fn(), keys=['answer-number-0','answer-0-2','answer-number-1','answer-0-0','answer-number-2','answer-0-1'];
+    const playing=sound.playProfessorVoiceSequence(keys,new AbortController().signal,ended,started,clipEnded);
     for(let i=0;i<keys.length;i++) {
       await vi.waitFor(()=>expect(sources).toHaveLength(i+1));
-      expect(sources[i].start).toHaveBeenCalledOnce();expect(ended).not.toHaveBeenCalled();sources[i].onended!();
+      expect(sources[i].start).toHaveBeenCalledOnce();expect(started).toHaveBeenLastCalledWith(i);expect(ended).not.toHaveBeenCalled();sources[i].onended!();
     }
-    await playing;expect(ended).toHaveBeenCalledOnce();
+    await playing;expect(ended).toHaveBeenCalledOnce();expect(started).toHaveBeenCalledTimes(6);expect(clipEnded).toHaveBeenCalledTimes(6);
     expect(vi.mocked(fetch).mock.calls.map(args=>args[0])).toEqual(keys.map(k=>`/professor-bluff/${k}.mp3`));
   });
   it('stoppt die aktuelle Aufnahme und lässt keine weitere Antwort starten',async()=>{
-    const sound=await prepare(), controller=new AbortController(), ended=vi.fn();
-    const playing=sound.playProfessorVoiceSequence(['answer-number-0','answer-0-0'],controller.signal,ended);
+    const sound=await prepare(), controller=new AbortController(), ended=vi.fn(), started=vi.fn();
+    const playing=sound.playProfessorVoiceSequence(['answer-number-0','answer-0-0'],controller.signal,ended,started);
     await vi.waitFor(()=>expect(sources).toHaveLength(1));
     controller.abort();await playing;
-    expect(sources[0].stop).toHaveBeenCalledOnce();expect(sources).toHaveLength(1);expect(ended).not.toHaveBeenCalled();
+    expect(sources[0].stop).toHaveBeenCalledOnce();expect(sources).toHaveLength(1);expect(ended).not.toHaveBeenCalled();expect(started).toHaveBeenCalledTimes(1);
   });
   it('bleibt nach Abbruch während des Ladens auch bei verspäteter Antwort stumm',async()=>{
     let release!:(response:Response)=>void;
     vi.mocked(fetch).mockReturnValueOnce(new Promise<Response>(resolve=>{release=resolve;}));
-    const sound=await prepare(), controller=new AbortController(), ended=vi.fn();
-    const playing=sound.playProfessorVoiceSequence(['answer-number-0','answer-0-0'],controller.signal,ended);
+    const sound=await prepare(), controller=new AbortController(), ended=vi.fn(), started=vi.fn();
+    const playing=sound.playProfessorVoiceSequence(['answer-number-0','answer-0-0'],controller.signal,ended,started);
     controller.abort();await playing;release(new Response(new ArrayBuffer(8)));
     await new Promise(resolve=>setTimeout(resolve,0));
-    expect(sources).toHaveLength(0);expect(ended).not.toHaveBeenCalled();
+    expect(sources).toHaveLength(0);expect(ended).not.toHaveBeenCalled();expect(started).not.toHaveBeenCalled();
   });
 });

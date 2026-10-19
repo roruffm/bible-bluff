@@ -31,7 +31,7 @@ export async function preloadProfessorVoices(onLoaded: (loaded: number, total: n
   return loaded;
 }
 /** Ein Abbruch verhindert auch, dass eine noch ladende Aufnahme später losspielt. */
-export async function playProfessorVoice(key: string, signal: AbortSignal, onEnded: () => void, countdownDeadline?: number) {
+export async function playProfessorVoice(key: string, signal: AbortSignal, onEnded: () => void, countdownDeadline?: number, onStarted?: () => void) {
   if (!PROFESSOR_VOICE_KEYS.includes(key) || !context || context.state !== 'running') throw new Error('Professor-Ton bitte am Beamer aktivieren.');
   const ctx = context;
   let buffer = professorBuffers.get(key);
@@ -56,15 +56,17 @@ export async function playProfessorVoice(key: string, signal: AbortSignal, onEnd
   source.onended = () => { signal.removeEventListener('abort', stop); source.disconnect(); onEnded(); };
   if (untilEnd === null) source.start();
   else source.start(ctx.currentTime + Math.max(0, untilEnd - 5), Math.max(0, 5 - untilEnd));
+  onStarted?.();
 }
 /** Gemeinsamer Abbruch für die ganze Folge, auch während noch eine Antwort lädt. */
-export async function playProfessorVoiceSequence(keys: readonly string[], signal: AbortSignal, onEnded: () => void) {
-  for (const key of keys) {
+export async function playProfessorVoiceSequence(keys: readonly string[], signal: AbortSignal, onEnded: () => void, onClipStarted?: (index: number) => void, onClipEnded?: () => void) {
+  for (const [index, key] of keys.entries()) {
     if (signal.aborted) return;
     await new Promise<void>((resolve, reject) => {
       const finished = () => { signal.removeEventListener('abort', finished); resolve(); };
       signal.addEventListener('abort', finished, { once: true });
-      void playProfessorVoice(key, signal, finished).catch(error => { signal.removeEventListener('abort', finished); reject(error); });
+      const clipEnded = () => { if (!signal.aborted) onClipEnded?.(); finished(); };
+      void playProfessorVoice(key, signal, clipEnded, undefined, () => onClipStarted?.(index)).catch(error => { signal.removeEventListener('abort', finished); reject(error); });
     });
   }
   if (!signal.aborted) onEnded();

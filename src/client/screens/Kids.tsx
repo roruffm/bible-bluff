@@ -2,6 +2,8 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { KidsGroupName } from '../components/KidsGroupName';
 import { KidsScene } from '../components/KidsScene';
 import { KidsTrail } from '../components/KidsTrail';
+import { KidsAnswers } from '../components/KidsAnswers';
+import { KidsPointsFlight, useKidsPresentationMoment } from '../components/KidsShowEffects';
 import { KidsAnswersVoiceButton, KidsQuestionVoiceButton, KidsVoiceProvider } from '../components/KidsVoice';
 import { KIDS_SCENE_MS } from '../../shared/kids-scenes';
 import { KidsFinish, KidsFinishDialog } from '../components/KidsFinish';
@@ -9,14 +11,14 @@ import { KidsReveal } from '../components/KidsReveal';
 import { KidsRegroup } from '../components/KidsRegroup';
 import { KidsLogo } from '../components/KidsLogo';
 import { QRCode } from '../components/QR';
-import { ProfessorBluff, professorMood, professorSays, ShowControls, ShowScoreboard, StoryPicture } from '../components/KidsShow';
-import { KIDS_GROUPS, kidsAnswerPicture } from '../../shared/kids-show-questions';
+import { ProfessorBluff, professorMood, professorSays, ShowControls, ShowScoreboard } from '../components/KidsShow';
+import { KIDS_GROUPS } from '../../shared/kids-show-questions';
 import { kidsControlUrl, useKidsRemote } from '../lib/kids-remote';
 import { enableKidsSound, KIDS_SUSPENSE_MS, playKidsCue, playKidsScene, playProfessorVoice, type KidsCue } from '../lib/kids-sound';
 import { clearKidsShow, loadKidsShow, saveKidsShow } from '../lib/kids-saved';
 import { checkKidsInternet, prepareKidsShow } from '../lib/kids-ready';
 import { KidsResume, KidsTechCheck, KidsTechStatus } from '../components/KidsPrepare';
-import { BluffClaim, BluffPin, KidsCheers } from '../components/KidsBluff';
+import { BluffClaim, KidsCheers } from '../components/KidsBluff';
 import { createKidsGame, KIDS_ANSWER_MS, kidsCanJumpToFinal, kidsCanSkipCountdown, kidsCanScore, kidsOvertook, kidsPrimaryAction, kidsResultPoints, updateKidsGame, type KidsAction, type KidsGame } from '../lib/kids';
 import { navigate } from '../lib/router';
 import './kids.css';
@@ -46,6 +48,7 @@ function KidsStageClock({ side, seconds, progress, locked, urgent }: {
 
 export function KidsPage() {
   const [game, setGame] = useState<KidsGame | null>(null);
+  const moment = useKidsPresentationMoment(game);
   const [showExit, setShowExit] = useState(false), [showPair, setShowPair] = useState(false), [showFinish, setShowFinish] = useState(false);
   const [fullscreen, setFullscreen] = useState(false), [fullscreenError, setFullscreenError] = useState('');
   const [presentation, setPresentation] = useState(true), [toolsOpen, setToolsOpen] = useState(false);
@@ -163,6 +166,7 @@ export function KidsPage() {
   const displayPhase = !game ? '' : finished ? 'Unsere gemeinsame Bluff-Jagd' : game.phase === 'welcome' ? 'Willkommen!' : game.index === 9 ? 'Das große Finale' : game.phase === 'chapter' ? `Kapitel ${chapter + 1} von 3` : game.phase === 'revealed' ? 'Auflösung' : `Kapitel ${chapter + 1} · Frage ${game.index % 3 + 1}`;
   const status = !game ? '' : game.phase === 'reading' ? 'Erst zuhören. Dann geht’s los!' : game.phase === 'moving' ? (lastSeconds ? 'Zählt laut mit!' : '1, 2 oder 3? Ab in euer Feld!') : game.phase === 'paused' ? 'Kurze Pause. Bleibt, wo ihr seid!' : game.phase === 'locked' ? 'Stopp! Helfer prüfen die Felder.' : game.phase === 'returning' ? 'Alle zurück zu eurer Gruppe!' : game.phase === 'judging' ? 'Jetzt wird’s spannend …' : `Richtig ist Feld ${round!.correctIndex + 1}!`;
   return <KidsVoiceProvider game={game} enabled={sound==='on'} enable={enableVoice} act={act} busy={remote.busy} onError={setFullscreenError}><main class={`kids-page kids-show${game ? ' is-playing' : ''}${presentation && game ? ' is-projecting' : ''}${fullscreen ? ' is-fullscreen' : ''}`} ref={root} tabIndex={-1}>
+    {game && moment?.kind === 'points' && <KidsPointsFlight key={`${moment.index}-${moment.result}`} game={game} points={moment.points}/>}
     <KidsIntroVideo game={game} act={act} onError={setFullscreenError}/>
     {game?.introVideo && <div class="kids-intro-local-controls"><KidsIntroControls game={game} act={act} disabled={remote.busy}/></div>}
     <header class={`kids-topbar${game ? ' kids-playing-bar' : ''}`}>
@@ -198,13 +202,13 @@ export function KidsPage() {
       {finished ? <KidsFinish game={game}><Celebration variant={3}/></KidsFinish> : game.phase==='scene' ? <KidsScene key={`${game.index}-${game.cueSeq}`} game={game} act={act} sound={sound==='on'} toggleSound={()=>{void toggleSound();}} disabled={remote.busy} primaryRef={primary}/> : <>
       {game.phase==='returning' || game.phase==='judging' ? <KidsRegroup game={game} act={act} disabled={remote.busy} primaryRef={primary}/> : revealed ? <KidsReveal key={`${game.index}-${game.results[game.index]}`} game={game} act={act} disabled={remote.busy} primaryRef={primary} suspense={suspenseIndex >= 0}>{suspenseIndex < 0 && kidsResultPoints(game.results[game.index], game.index)>0 && <Celebration variant={game.index}/>}</KidsReveal> : interlude ? <KidsInterlude game={game} chapter={chapter} act={act} disabled={remote.busy} primaryRef={primary}/> : round && <section class={`kids-stage kids-show-stage is-${game.phase} is-group-${round.question.group}`} aria-labelledby="kids-question">
         <div class="kids-show-question">
-          <div class="kids-active-group"><KidsGroupName group={round.question.group}/><span>{round.question.group === 'all' ? 'Alle Kinder' : `sind dran! · ${KIDS_GROUPS[round.question.group].ages}`}</span></div>
+          <div class={`kids-active-group${moment?.kind === 'group' ? ' is-mascot-entering' : ''}`}><KidsGroupName group={round.question.group}/><span>{round.question.group === 'all' ? 'Alle Kinder' : `sind dran! · ${KIDS_GROUPS[round.question.group].ages}`}</span></div>
 
           <h1 id="kids-question">{round.question.prompt}</h1>
           <div class="kids-status" role="status"><strong>{status}</strong>{game.phase === 'locked' ? <span>Noch nicht auflösen. Gleich geht’s zurück.</span> : round.question.group !== 'all' && (game.phase === 'moving' || game.phase === 'paused') ? <KidsCheers active={round.question.group}/> : null}</div>
         </div>
         <aside class="kids-question-host" aria-label="Professor Bluffs Behauptung"><BluffClaim text={professorSays(game)}/><ProfessorBluff key={`${game.phase}:${game.index}`} mood={professorMood(game)} motion={professorMotion(game)}/></aside>
-        <ol class="kids-answers has-pictures" aria-label="Antworten und Spielfelder">{round.answers.map((answer,i)=><li key={`${game.index}-${i}`} class={`kids-answer kids-field-${i+1}${answer===round.question.bluff.answer ? ' is-bluff-pick' : ''}`}><span class="kids-number">{i+1}</span><StoryPicture motif={kidsAnswerPicture(round.question,answer)}/><span class="kids-answer-text">{answer}</span>{answer===round.question.bluff.answer && <BluffPin/>}</li>)}</ol>
+        <KidsAnswers game={game}/>
         <div class="kids-bottom">
           <KidsStageClock side="left" seconds={seconds} progress={game.remainingMs / KIDS_ANSWER_MS} locked={game.phase==='locked'} urgent={game.phase==='moving' && seconds<=5}/>
           <div class="kids-operator-actions">{game.phase==='reading' && <div class="kids-extra-controls"><KidsQuestionVoiceButton/><KidsAnswersVoiceButton/>{round.question.scene && <button type="button" class="kids-tool" disabled={remote.busy} onClick={()=>act('scene')}>Szene abspielen</button>}</div>}<ShowControls game={game} act={act} disabled={remote.busy} primaryRef={primary}/></div>
