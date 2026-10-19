@@ -99,3 +99,37 @@ test('Kids: Kapitelanzeige bleibt in der Kinderansicht über dem Gruppenschild',
     expect(gap, `${size.width}x${size.height}`).toBeGreaterThanOrEqual(6);
   }
 });
+
+test('Kids: Kinderansicht stellt den Professor zwischen die Uhren und zeigt die Spur nur auf Beamerbreite', async ({ page }) => {
+  await page.goto('/kids');
+  await page.getByRole('button', { name: 'Show vorbereiten', exact: false }).click();
+  await showKidsOperator(page);
+  await page.getByRole('button', { name: 'Mission starten', exact: true }).click();
+  await page.getByRole('button', { name: 'Erste Aufgabe im Kapitel', exact: true }).click();
+  await page.keyboard.press('h');
+  await expect(page.locator('.kids-show.is-projecting')).toBeVisible();
+  for (const size of [{ width: 1280, height: 720 }, { width: 1920, height: 1080 }, { width: 1024, height: 768 }]) {
+    await page.setViewportSize(size);
+    const layout = await page.evaluate(() => {
+      const rect = (selector: string) => document.querySelector(selector)!.getBoundingClientRect();
+      const trail = document.querySelector('.kids-trail');
+      return {
+        host: rect('.kids-question-host'), answers: rect('.kids-answers'), left: rect('.kids-clock-left'), right: rect('.kids-clock-right'),
+        pill: rect('.kids-active-group'), trail: trail && getComputedStyle(trail).display !== 'none' ? trail.getBoundingClientRect() : null,
+        stageGroup: document.querySelector('.kids-show-stage')!.classList.contains('is-group-minis'),
+      };
+    });
+    const label = `${size.width}x${size.height}`;
+    expect(layout.host.left, label).toBeGreaterThan(layout.left.right);
+    expect(layout.host.right, label).toBeLessThan(layout.right.left);
+    expect(layout.host.top, label).toBeGreaterThan(layout.answers.bottom);
+    expect(layout.host.bottom, label).toBeLessThanOrEqual(size.height);
+    expect(layout.stageGroup, label).toBe(true);
+    if (size.width >= 1100) {
+      expect(layout.trail, label).not.toBeNull();
+      expect(layout.pill.top - layout.trail!.bottom, label).toBeGreaterThanOrEqual(4);
+    } else expect(layout.trail, label).toBeNull();
+  }
+  await expect(page.locator('.kids-trail > li')).toHaveCount(10);
+  await expect(page.locator('.kids-trail > .is-now')).toHaveText('1');
+});
