@@ -3,13 +3,16 @@ import { expect,test } from '@playwright/test';
 test.use({viewport:{width:1280,height:800},isMobile:false});
 test('Kids: neue Gruppennamen tragen bei jedem Auftreten ihr festes Symbol',async({page})=>{
   await page.goto('/kids');
-  for(const [group,name,age] of [['minis','Glühwürmchen','3–5 Jahre'],['mittis','Leuchtsterne','6–8 Jahre'],['maxis','Fackelträger','9–11 Jahre']] as const){
+  for(const [group,name,age] of [['minis','Forscher','3–5 Jahre'],['mittis','Leuchtsterne','6–8 Jahre'],['maxis','Fackelträger','9–11 Jahre']] as const){
     const badge=page.locator(`.kids-show-teams [data-group="${group}"]`);
     await expect(badge).toHaveText(name);await expect(badge.locator('svg')).toHaveCount(1);
     await expect(badge.locator('../..')).toContainText(age);
   }
+  await expect(page.locator('.kids-show-teams [data-motif="magnifier"]')).toHaveCount(1);
+  await expect(page.locator('[data-motif="firefly"]')).toHaveCount(0);
   await page.getByRole('button',{name:'Show vorbereiten',exact:false}).click(); await showKidsOperator(page);
   await expect(page.locator('.kids-team-badges .kids-group-symbol')).toHaveCount(3);
+  await expect(page.locator('.kids-team-badges [data-motif="magnifier"]')).toHaveCount(1);
   await expect(page.locator('.kids-team-badges .kids-group-ages')).toHaveText(['3–5 Jahre','6–8 Jahre','9–11 Jahre']);
   await expect(page.locator('.kids-show-interlude')).not.toContainText(/Die Spürnasen|Die Rätselknacker|Die Bluffjäger/);
   for(const viewport of [{width:800,height:600},{width:1024,height:768},{width:1280,height:720},{width:1920,height:1080},{width:2560,height:1440}]) {
@@ -34,9 +37,9 @@ test('Kids: neue Gruppennamen tragen bei jedem Auftreten ihr festes Symbol',asyn
   await expect(page.locator('.kids-compact-score')).toHaveCount(1);
   await page.getByRole('button',{name:'Mission starten',exact:true}).click();
   await page.getByRole('button',{name:'Erste Aufgabe im Kapitel',exact:true}).click();
-  await expect(page.locator('.kids-active-group [data-group="minis"]')).toHaveText('Glühwürmchen');
+  await expect(page.locator('.kids-active-group [data-group="minis"]')).toHaveText('Forscher');
   await page.getByRole('button',{name:'Spiel mit Punktestand abschließen',exact:true}).click();
   await page.getByRole('button',{name:'Jetzt mit Punktestand abschließen',exact:true}).click();
   await expect(page.locator('.kids-ending header .kids-group-symbol')).toHaveCount(3);
-  await expect(page.locator('.kids-page')).not.toContainText(/Minis|Mittis|Maxis/);
+  await expect(page.locator('.kids-page')).not.toContainText(/Minis|Mittis|Maxis|Glühwürmchen/);
 });

@@ -17,16 +17,16 @@
 /* Nur beim Aufruf einer neuen Gruppe. Die Beschriftung bleibt während des Auftritts an ihrem Platz. */
 .kids-show .kids-show-stage .kids-active-group.is-mascot-entering .kids-group-symbol {
   transform-origin: center;
-  animation: kids-firefly-arrival 2.2s ease-out both;
+  animation: kids-researcher-arrival 2.2s ease-out both;
   filter: drop-shadow(0 0 10px #ffda68a0);
 }
 .kids-show .is-group-mittis .kids-active-group.is-mascot-entering .kids-group-symbol { animation-name: kids-star-arrival; }
 .kids-show .is-group-maxis .kids-active-group.is-mascot-entering .kids-group-symbol { animation-name: kids-torch-arrival; }
-@keyframes kids-firefly-arrival {
-  0% { opacity: 0; transform: translate(-55px, 14px) scale(.65) rotate(-18deg); }
-  25% { opacity: 1; transform: translate(5px, -8px) scale(1.14) rotate(12deg); }
-  45% { transform: translate(-4px, 3px) scale(1.08) rotate(-10deg); }
-  65% { transform: translate(2px, -5px) scale(1.06) rotate(6deg); }
+@keyframes kids-researcher-arrival {
+  0% { opacity: 0; transform: translate(-20px, 8px) scale(.7) rotate(-18deg); }
+  25% { opacity: 1; transform: translate(6px, -3px) scale(1.12) rotate(12deg); }
+  45% { transform: translate(-6px, 0) scale(1.08) rotate(-12deg); }
+  65% { transform: translate(3px, -2px) scale(1.04) rotate(6deg); }
   85%, 100% { opacity: 1; transform: none; }
 }
 @keyframes kids-star-arrival {

@@ -86,9 +86,9 @@ export const PROFESSOR_INTERJECTIONS = [
   },
   {
     "id": "call-minis",
-    "label": "Glühwürmchen aufrufen",
+    "label": "Forscher aufrufen",
     "category": "Gruppenaufrufe",
-    "text": "Glühwürmchen, jetzt seid ihr dran! Die anderen Teams feuern euch an!"
+    "text": "Forscher, jetzt seid ihr dran! Die anderen Teams feuern euch an!"
   },
   {
     "id": "call-mittis",
