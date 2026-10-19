@@ -13,25 +13,17 @@ Fragenpool und ein gemeinsamer Superbluff. Für Glühwürmchen gibt es animierte
 lokal erzeugte Klangbilder; Eltern und andere Gruppen machen Geräusche und Pantomime.
 
 - Drei feste Teppich-Felder: **1 = gelb, 2 = türkis, 3 = rosa**, 30 Sekunden nach dem Vorlesen.
-  Jede Frage hat dauerhaft dieselbe Antwort auf derselben Nummer – auch nach Neustart oder in der Kurzshow.
+  Jede Frage hat dauerhaft dieselbe Antwort auf derselben Nummer – auch nach einem Neustart.
   Die richtigen Antworten sind auf die drei Felder verteilt (in den neun regulären Fragen je dreimal).
   Andere Gruppen bleiben in ihren Bereichen. Eltern dürfen Glühwürmchen begleiten. Keine Kinderkonten oder Einzelwertung.
 - Nach Stopp prüfen Helfer die Antwortfelder. **Zurück in die Gruppen → Alle sind zurück**
   zeigt Professor Bluff groß und animiert; erst danach wird die Wertung freigeschaltet. Nur das gemeinsame Resultat wird erfasst.
 - Kinderteam: Mehrheit richtig = 10 Punkte; sonst mindestens ein Kind richtig = 5; keiner richtig = 0. Maximal 30 je Altersgruppe.
-  Professor: +7 je gewerteter regulärer Aufgabe (in der Kurzshow +6). Keine heimliche Anpassung der Wertung.
+  Professor: +7 je gewerteter regulärer Aufgabe. Keine heimliche Anpassung der Wertung.
 - Superbluff: Kinder erhalten 20 / 10 / 0 Punkte (Mehrheit / mindestens ein Kind / niemand richtig).
   Professor erhält im Finale keine neuen Punkte. So lässt sich ein Rückstand von weniger als 20 Punkten noch aufholen. Endstand erst nach
   dem Finale. Die Spielleitung kann auch jederzeit früher mit dem erreichten Punktestand abschließen.
   Der Abschluss feiert alle Kinder mit Jesu Einladung (Markus 10,14).
-- **Kurzshow · 15 Minuten** hat in der Vorbereitung einen eigenen Startknopf: Begrüßung, ein Kapitel
-  (je eine Aufgabe für Glühwürmchen, Leuchtsterne und Fackelträger), Superbluff und Abschluss. 20 statt
-  30 Sekunden. Die Kinder bleiben sitzen und zeigen 1, 2 oder 3 Finger; nach dem Stopp wird sofort gewertet,
-  ohne die Bildschirme „Zurück in die Gruppen“ und „Alle sind zurück“. Punkte und Professor wie in der
-  vollen Show, nur bekommt Professor Bluff +6 statt +7 je Aufgabe (Kinder bis 50, Professor 18). „Bedienung“ und das Smartphone zeigen einen Zeitplan ab
-  „Mission starten“ (Aufgaben bis 2:30, 5:00, 7:30, Superbluff bis 11:30, Abschluss bis 13:30; plus
-  1:30 Begrüßung) und melden, ob ihr im Plan liegt. Fernbedienung, Sicherung und „Show fortsetzen“
-  funktionieren auch hier.
 - **Direkt ins Finale** springt jederzeit sofort zum Superbluff: am Beamer oben über „Finale“
   oder im Bedienmenü, auf dem Smartphone direkt unter dem Punktestand. Gewertete Aufgaben
   bleiben erhalten; übersprungene Aufgaben zählen für beide Seiten nicht. Laufender Ton,

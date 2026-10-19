@@ -15,9 +15,8 @@ import { enableKidsSound, KIDS_SUSPENSE_MS, playKidsCue, playKidsScene, playProf
 import { clearKidsShow, loadKidsShow, saveKidsShow } from '../lib/kids-saved';
 import { checkKidsInternet, prepareKidsShow } from '../lib/kids-ready';
 import { KidsResume, KidsTechCheck, KidsTechStatus } from '../components/KidsPrepare';
-import { KidsTimePlan } from '../components/KidsTimePlan';
 import { BluffClaim, BluffPin, KidsCheers } from '../components/KidsBluff';
-import { createKidsGame, kidsAnswerMs, kidsCanJumpToFinal, kidsCanSkipCountdown, kidsCanScore, kidsOvertook, kidsPrimaryAction, kidsResultPoints, updateKidsGame, type KidsAction, type KidsGame } from '../lib/kids';
+import { createKidsGame, KIDS_ANSWER_MS, kidsCanJumpToFinal, kidsCanSkipCountdown, kidsCanScore, kidsOvertook, kidsPrimaryAction, kidsResultPoints, updateKidsGame, type KidsAction, type KidsGame } from '../lib/kids';
 import { navigate } from '../lib/router';
 import './kids.css';
 import './kids-show-theme.css';
@@ -93,8 +92,7 @@ export function KidsPage() {
     const before = lastPhase.current; lastPhase.current = game?.phase ?? null;
     if (!game) return;
     if (before === 'moving' && game.phase === 'locked') cue('gong');
-    // Die Kurzshow wertet direkt nach dem Stopp, ohne Rückweg.
-    if ((before !== 'judging' && before !== 'locked') || game.phase !== 'revealed') return;
+    if (before !== 'judging' || game.phase !== 'revealed') return;
     const overtook = kidsOvertook(game);
     if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) { if (overtook) cue('overtake'); return; }
     setSuspense(game.index);
@@ -135,8 +133,8 @@ export function KidsPage() {
   const toggleSound = async () => { if (sound === 'on') { setSound('off'); return; } try { await enableKidsSound(); setSound('on'); } catch { setFullscreenError('Klang hier nicht verfügbar. Die Gruppen können die Geräusche selbst machen.'); } };
   const exit = () => { void remote.disconnect(); clearKidsShow(); setSaved(null); setShowExit(false); setShowPair(false); setShowFinish(false); setToolsOpen(false); setPresentation(true); setGame(null); };
   const enableVoice = async () => { await enableKidsSound(); setSound('on'); };
-  const startShow = (short = false, withRemote = false) => {
-    const next = createKidsGame(Math.random, { short });
+  const startShow = (withRemote = false) => {
+    const next = createKidsGame(Math.random);
     setSaved(null); setGame(next); setPresentation(true);
     void enableVoice().catch(() => setSound('off'));
     if (withRemote) { setShowPair(true); void remote.connect(next, false); }
@@ -160,8 +158,8 @@ export function KidsPage() {
   const suspenseIndex = revealed && suspense === game?.index ? suspense : -1;
   const lastSeconds = game?.phase === 'moving' && seconds <= 5 && seconds > 0;
   const chapter = game ? Math.min(2, Math.floor(game.index / 3)) : 0;
-  const displayPhase = !game ? '' : finished ? 'Unsere gemeinsame Bluff-Jagd' : game.phase === 'welcome' ? 'Willkommen!' : game.index === 9 ? 'Das große Finale' : game.phase === 'chapter' ? `Kapitel ${chapter + 1} von ${game.short ? 1 : 3}` : game.phase === 'revealed' ? 'Auflösung' : `${game.short ? 'Kurzshow' : `Kapitel ${chapter + 1}`} · Frage ${game.index % 3 + 1}`;
-  const status = !game ? '' : game.phase === 'reading' ? 'Erst zuhören. Dann geht’s los!' : game.phase === 'moving' ? (lastSeconds ? 'Zählt laut mit!' : game.short ? '1, 2 oder 3? Zeigt es mit den Fingern!' : '1, 2 oder 3? Ab in euer Feld!') : game.phase === 'paused' ? 'Kurze Pause. Bleibt, wo ihr seid!' : game.phase === 'locked' ? (game.short ? 'Stopp! Finger oben lassen.' : 'Stopp! Helfer prüfen die Felder.') : game.phase === 'returning' ? 'Alle zurück zu eurer Gruppe!' : game.phase === 'judging' ? 'Jetzt wird’s spannend …' : `Richtig ist Feld ${round!.correctIndex + 1}!`;
+  const displayPhase = !game ? '' : finished ? 'Unsere gemeinsame Bluff-Jagd' : game.phase === 'welcome' ? 'Willkommen!' : game.index === 9 ? 'Das große Finale' : game.phase === 'chapter' ? `Kapitel ${chapter + 1} von 3` : game.phase === 'revealed' ? 'Auflösung' : `Kapitel ${chapter + 1} · Frage ${game.index % 3 + 1}`;
+  const status = !game ? '' : game.phase === 'reading' ? 'Erst zuhören. Dann geht’s los!' : game.phase === 'moving' ? (lastSeconds ? 'Zählt laut mit!' : '1, 2 oder 3? Ab in euer Feld!') : game.phase === 'paused' ? 'Kurze Pause. Bleibt, wo ihr seid!' : game.phase === 'locked' ? 'Stopp! Helfer prüfen die Felder.' : game.phase === 'returning' ? 'Alle zurück zu eurer Gruppe!' : game.phase === 'judging' ? 'Jetzt wird’s spannend …' : `Richtig ist Feld ${round!.correctIndex + 1}!`;
   return <KidsVoiceProvider game={game} enabled={sound==='on'} enable={enableVoice} act={act} busy={remote.busy} onError={setFullscreenError}><main class={`kids-page kids-show${game ? ' is-playing' : ''}${presentation && game ? ' is-projecting' : ''}${fullscreen ? ' is-fullscreen' : ''}`} ref={root} tabIndex={-1}>
     <header class={`kids-topbar${game ? ' kids-playing-bar' : ''}`}>
       {game ? <><KidsLogo compact/><span class="kids-round-counter">{displayPhase}</span>{!finished && <ShowScoreboard game={game} hiddenIndex={suspenseIndex}/>}<div class="kids-top-actions">{kidsCanJumpToFinal(game) && <button type="button" class="kids-tool kids-final-toggle" aria-label="Direkt ins Finale" disabled={remote.busy || (remote.active && !!remote.error)} onClick={()=>act('jump-final')}>🏁 <span>Finale</span></button>}{!finished && <button type="button" class="kids-tool kids-end-toggle" aria-label="Spiel mit Punktestand abschließen" onClick={()=>{setToolsOpen(false);setShowFinish(true);}}>⚑ <span>Abschluss</span></button>}<button class="kids-tool kids-mouse-toggle" type="button" aria-label={presentation ? 'Maussteuerung einblenden' : 'Maussteuerung ausblenden'} aria-pressed={!presentation} onClick={() => { setPresentation(!presentation); setToolsOpen(false); }}>↗ <span>Maus</span></button>{canFullscreen && <button type="button" class="kids-tool kids-fullscreen-toggle" onClick={toggleFullscreen} aria-label={fullscreen ? 'Vollbild ausschalten' : 'Vollbild einschalten'}>⛶ <span>{fullscreen ? 'Fenster' : 'Vollbild'}</span></button>}<button type="button" class="kids-tool kids-menu-toggle" aria-label="Bedienung" aria-expanded={toolsOpen} aria-controls="kids-operator-tools" onClick={() => setToolsOpen(!toolsOpen)}>☰ <span>Bedienung</span></button></div></> : <><a href="/" class="kids-back" onClick={e => { e.preventDefault(); navigate('/'); }}>← Bible Bluff</a><span class="kids-top-title">GEMEINSAM GEGEN PROFESSOR BLUFF</span>{canFullscreen && <button type="button" class="kids-tool" onClick={toggleFullscreen}>⛶ Vollbild</button>}</>}
@@ -174,7 +172,6 @@ export function KidsPage() {
       <button type="button" class="kids-tool" onClick={toggleSound}>{sound === 'on' ? 'Klang ausschalten' : 'Klang einschalten'}</button>
       {canFullscreen && <button type="button" class="kids-tool" onClick={toggleFullscreen}>{fullscreen ? 'Vollbild aus' : 'Vollbild einschalten'}</button>}
       <button type="button" class="kids-tool" onClick={() => { setToolsOpen(false); if(finished) setShowExit(true); else setShowFinish(true); }}>{finished ? 'Zur Vorbereitung' : 'Spiel abschließen'}</button>
-      <KidsTimePlan game={game}/>
       <KidsTechStatus/>
       <p>→ / Leertaste: weiter · P: Pause<br/>H: Mausknöpfe · Wertung: 1 / 2 / 0</p><button type="button" class="kids-tool" onClick={() => setToolsOpen(false)}>Menü schließen</button>
     </aside>}
@@ -189,11 +186,10 @@ export function KidsPage() {
         <li><b>Alle zurück, dann auflösen</b><span>Helfer prüfen die Felder. Alle kehren zurück. Die Spielleitung trägt nur das gemeinsame Ergebnis ein.</span></li>
       </ol><div class="kids-scoring-rule"><b>10</b> Mehrheit richtig · <b>5</b> mindestens ein Kind richtig<br/><b>0</b> keiner richtig<br/>Professor Bluff: +7 je Runde · Finale: Team 20 / 10 / 0 · Professor +0</div>
       <button type="button" class={`kids-button${saved && !remote.active ? '' : ' kids-primary'}`} onClick={() => startShow()}>{saved && !remote.active ? 'Neue Show vorbereiten' : 'Show vorbereiten'} <span>→</span></button>
-      <button type="button" class="kids-button kids-short-start" onClick={() => startShow(true)}><span><b>⏱ Kurzshow · 15 Minuten</b><small>1 Kapitel + Superbluff · 20 Sekunden · Abstimmen mit Fingern am Platz</small></span><span aria-hidden="true">→</span></button>
-      <button type="button" class="kids-button kids-setup-remote" disabled={remote.busy} onClick={() => startShow(false, true)}>Smartphone-Fernbedienung einrichten</button>
-      <p class="kids-setup-note">Die Kinder sehen nur die Show. Die Helfer steuern per Fernbedienung.<br/><b>Am Computer: H</b> blendet die Mausbedienung ein oder aus. → / Leertaste: weiter · P: Pause.<br/>Für die Kurzshow: vorbereiten, dann H → Bedienung → Smartphone verbinden.</p>
+      <button type="button" class="kids-button kids-setup-remote" disabled={remote.busy} onClick={() => startShow(true)}>Smartphone-Fernbedienung einrichten</button>
+      <p class="kids-setup-note">Die Kinder sehen nur die Show. Die Helfer steuern per Fernbedienung.<br/><b>Am Computer: H</b> blendet die Mausbedienung ein oder aus. → / Leertaste: weiter · P: Pause.</p>
       <KidsTechCheck checked={checked} testing={testing} sound={sound} onCheck={() => { void checkTech(); }} fullscreen={canFullscreen ? fullscreen : null} onFullscreen={() => { void toggleFullscreen(); }}/>
-      <details class="kids-organizer"><summary>Helferplan & Ablauf</summary><p>Moderation, Beamer-Bedienung und Gruppenhelfer einplanen. Genug Platz für die aktive Gruppe und begleitende Eltern lassen. Elternkarten 1–3 und ein Kissen für die Final-Pantomime bereitlegen.</p><p>Begrüßung 5 Min. · 3 Kapitel je 9 Min. · Showeinlagen 6 Min. · Finale 7 Min. Alle Punkte sind fest geregelt. Gewertet werden nur abgeschlossene Aufgaben. Über „Abschluss“ könnt ihr jederzeit den Endbildschirm zeigen.</p><p><b>Kurzshow (15 Min.):</b> Begrüßung 1:30 · danach je Aufgabe 2:30 (Glühwürmchen, Leuchtsterne, Fackelträger) · Superbluff 4 Min. · Abschluss 2 Min. Die Kinder bleiben sitzen und zeigen 1, 2 oder 3 Finger; nach dem Stopp wird sofort gewertet. Professor Bluff bekommt hier +6 je regulärer Aufgabe und +0 im Finale: Kinder bis 50, Professor 18. Den Zeitplan zeigen „Bedienung“ und das Smartphone.</p></details></div>
+      <details class="kids-organizer"><summary>Helferplan & Ablauf</summary><p>Moderation, Beamer-Bedienung und Gruppenhelfer einplanen. Genug Platz für die aktive Gruppe und begleitende Eltern lassen. Elternkarten 1–3 und ein Kissen für die Final-Pantomime bereitlegen.</p><p>Begrüßung 5 Min. · 3 Kapitel je 9 Min. · Showeinlagen 6 Min. · Finale 7 Min. Alle Punkte sind fest geregelt. Gewertet werden nur abgeschlossene Aufgaben. Über „Abschluss“ könnt ihr jederzeit den Endbildschirm zeigen.</p></details></div>
     </section> : <>
       {finished ? <KidsFinish game={game}><Celebration variant={3}/></KidsFinish> : game.phase==='scene' ? <KidsScene key={`${game.index}-${game.cueSeq}`} game={game} act={act} sound={sound==='on'} toggleSound={()=>{void toggleSound();}} disabled={remote.busy} primaryRef={primary}/> : <>
       {game.phase==='returning' || game.phase==='judging' ? <KidsRegroup game={game} act={act} disabled={remote.busy} primaryRef={primary}/> : revealed ? <KidsReveal key={`${game.index}-${game.results[game.index]}`} game={game} act={act} disabled={remote.busy} primaryRef={primary} suspense={suspenseIndex >= 0}>{suspenseIndex < 0 && kidsResultPoints(game.results[game.index], game.index)>0 && <Celebration variant={game.index}/>}</KidsReveal> : interlude ? <KidsInterlude game={game} chapter={chapter} act={act} disabled={remote.busy} primaryRef={primary}/> : round && <section class={`kids-stage kids-show-stage is-${game.phase}`} aria-labelledby="kids-question">
@@ -201,14 +197,14 @@ export function KidsPage() {
           <div class="kids-active-group"><KidsGroupName group={round.question.group}/><span>{round.question.group === 'all' ? 'Alle Kinder' : `sind dran! · ${KIDS_GROUPS[round.question.group].ages}`}</span></div>
 
           <h1 id="kids-question">{round.question.prompt}</h1>
-          <div class="kids-status" role="status"><strong>{status}</strong>{game.phase === 'locked' ? <span>{game.short ? 'Helfer zählen. Gleich kommt die Auflösung!' : 'Noch nicht auflösen. Gleich geht’s zurück.'}</span> : round.question.group !== 'all' && (game.phase === 'moving' || game.phase === 'paused') ? <KidsCheers active={round.question.group}/> : null}</div>
+          <div class="kids-status" role="status"><strong>{status}</strong>{game.phase === 'locked' ? <span>Noch nicht auflösen. Gleich geht’s zurück.</span> : round.question.group !== 'all' && (game.phase === 'moving' || game.phase === 'paused') ? <KidsCheers active={round.question.group}/> : null}</div>
         </div>
         <aside class="kids-question-host" aria-label="Professor Bluffs Behauptung"><BluffClaim text={professorSays(game)}/><ProfessorBluff key={`${game.phase}:${game.index}`} mood={professorMood(game)} motion={professorMotion(game)}/></aside>
         <ol class="kids-answers has-pictures" aria-label="Antworten und Spielfelder">{round.answers.map((answer,i)=><li key={`${game.index}-${i}`} class={`kids-answer kids-field-${i+1}${answer===round.question.bluff.answer ? ' is-bluff-pick' : ''}`}><span class="kids-number">{i+1}</span><StoryPicture motif={kidsAnswerPicture(round.question,answer)}/><span class="kids-answer-text">{answer}</span>{answer===round.question.bluff.answer && <BluffPin/>}</li>)}</ol>
         <div class="kids-bottom">
-          <KidsStageClock side="left" seconds={seconds} progress={game.remainingMs / kidsAnswerMs(game)} locked={game.phase==='locked'} urgent={game.phase==='moving' && seconds<=5}/>
+          <KidsStageClock side="left" seconds={seconds} progress={game.remainingMs / KIDS_ANSWER_MS} locked={game.phase==='locked'} urgent={game.phase==='moving' && seconds<=5}/>
           <div class="kids-operator-actions">{game.phase==='reading' && <div class="kids-extra-controls"><KidsQuestionVoiceButton/><KidsAnswersVoiceButton/>{round.question.scene && <button type="button" class="kids-tool" disabled={remote.busy} onClick={()=>act('scene')}>Szene abspielen</button>}</div>}<ShowControls game={game} act={act} disabled={remote.busy} primaryRef={primary}/></div>
-          <KidsStageClock side="right" seconds={seconds} progress={game.remainingMs / kidsAnswerMs(game)} locked={game.phase==='locked'} urgent={game.phase==='moving' && seconds<=5}/>
+          <KidsStageClock side="right" seconds={seconds} progress={game.remainingMs / KIDS_ANSWER_MS} locked={game.phase==='locked'} urgent={game.phase==='moving' && seconds<=5}/>
         </div>
       </section>}
     </>}

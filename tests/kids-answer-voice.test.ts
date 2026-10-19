@@ -25,16 +25,14 @@ describe('Antwortmöglichkeiten vorlesen', () => {
     }
   });
   it('übersteht Speichern und Wiederverbinden, startet nach Neuladen aber nicht von selbst', () => {
-    for(const short of [false,true]) {
-      const game={...createKidsGame(()=>.5,{short}),phase:'reading' as const};
-      const spoken=updateKidsGame(game,'read-answers',0);
-      const restored=unpackKidsGame(packKidsGame(spoken,100),200)!;
-      expect(restored.voiceKind).toBe('answers');
-      expect(professorAnswerVoiceKeys(restored)).toEqual(professorAnswerVoiceKeys(game));
-      expect(kidsResumeGame(restored,200).voicePlaying).toBe(false);
-      expect(updateKidsGame(spoken,'read-answers',1).voiceSeq).toBe(2);
-      expect(updateKidsGame(spoken,'stop-speech',1).voicePlaying).toBe(false);
-    }
+    const game={...createKidsGame(()=>.5),phase:'reading' as const};
+    const spoken=updateKidsGame(game,'read-answers',0);
+    const restored=unpackKidsGame(packKidsGame(spoken,100),200)!;
+    expect(restored.voiceKind).toBe('answers');
+    expect(professorAnswerVoiceKeys(restored)).toEqual(professorAnswerVoiceKeys(game));
+    expect(kidsResumeGame(restored,200).voicePlaying).toBe(false);
+    expect(updateKidsGame(spoken,'read-answers',1).voiceSeq).toBe(2);
+    expect(updateKidsGame(spoken,'stop-speech',1).voicePlaying).toBe(false);
     const base=createKidsGame();
     for(const phase of ['welcome','chapter','scene','moving','paused','locked','returning','judging','revealed','finished'] as const) {
       const game={...base,phase};

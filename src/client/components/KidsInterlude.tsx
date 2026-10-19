@@ -30,7 +30,7 @@ export function KidsInterlude({ game, chapter, act, disabled, primaryRef }: {
       <span class="kids-professor-signature">Professor Bluff <KidsVoiceButton/></span>
     </div>
     <div class="kids-show-story">
-      <p class="kids-eyebrow">{welcome ? 'WILLKOMMEN, BIBLEBLUFF-DETEKTIVE!' : finale ? 'ALLE TEAMS WERDEN GEBRAUCHT' : game.short ? 'KURZSHOW · EIN KAPITEL FÜR ALLE' : `KAPITEL ${chapter + 1}`}</p>
+      <p class="kids-eyebrow">{welcome ? 'WILLKOMMEN, BIBLEBLUFF-DETEKTIVE!' : finale ? 'ALLE TEAMS WERDEN GEBRAUCHT' : `KAPITEL ${chapter + 1}`}</p>
       <h1>{welcome ? 'Zusammen knacken wir jeden Bluff!' : finale ? 'Knackt den Superbluff!' : KIDS_CHAPTERS[chapter]}</h1>
       {finale ? <>
         <div class="kids-final-groups"><KidsGroupName group="minis"/><KidsGroupName group="mittis"/><KidsGroupName group="maxis"/><strong>Alle gemeinsam</strong></div>
@@ -41,8 +41,8 @@ export function KidsInterlude({ game, chapter, act, disabled, primaryRef }: {
       </> : <>
         {!welcome && <ChapterPicture/>}
         <div class="kids-team-badges">{(['minis','mittis','maxis'] as const).map(g=><div key={g}><b><KidsGroupName group={g}/></b><span class="kids-group-ages">{KIDS_GROUPS[g].ages}</span></div>)}</div>
-        <p>{welcome ? game.short ? <>Zeigt eure Antwort mit 1, 2 oder 3 Fingern.<br/>Alle gehören zu EINEM Team!</> : <>Wir sammeln alle für EIN Team.<br/><span class="kids-welcome-promise">Niemand scheidet aus. Alle gehören dazu!</span></> : chapter === 0 ? 'Eure erste Spur wartet auf alle drei Gruppen!' : chapter === 1 ? 'Zusammen findet ihr die nächste Spur!' : 'Jeder Beitrag zählt. Gemeinsam geht die Punktejagd weiter!'}</p>
-        {!welcome && !game.short && <ol class="kids-chapter-progress" aria-label="Kapitelfortschritt">{[0,1,2].map(i=><li key={i} aria-current={i === chapter ? 'step' : undefined} class={i <= chapter ? 'is-reached' : ''}>{i + 1}</li>)}</ol>}
+        <p>{welcome ? <>Wir sammeln alle für EIN Team.<br/><span class="kids-welcome-promise">Niemand scheidet aus. Alle gehören dazu!</span></> : chapter === 0 ? 'Eure erste Spur wartet auf alle drei Gruppen!' : chapter === 1 ? 'Zusammen findet ihr die nächste Spur!' : 'Jeder Beitrag zählt. Gemeinsam geht die Punktejagd weiter!'}</p>
+        {!welcome && <ol class="kids-chapter-progress" aria-label="Kapitelfortschritt">{[0,1,2].map(i=><li key={i} aria-current={i === chapter ? 'step' : undefined} class={i <= chapter ? 'is-reached' : ''}>{i + 1}</li>)}</ol>}
       </>}
       <ShowControls game={game} act={act} disabled={disabled} primaryRef={primaryRef}/>
     </div>

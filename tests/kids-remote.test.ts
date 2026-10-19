@@ -31,33 +31,29 @@ function setup(store: KidsRemoteStore = new MemoryKidsRemoteStore()) {
 
 describe('Kids-Fernbedienung', () => {
   it('überspringt den Countdown nur mit Bedienungszugang und synchronisiert Stopp statt einer vorzeitigen Wertung', async () => {
-    for (const short of [false, true]) {
-      const t = setup();
-      let game = createKidsGame(Math.random, { short });
-      game = updateKidsGame(updateKidsGame(game, 'next', t.clock.now), 'next', t.clock.now);
-      game = updateKidsGame(updateKidsGame(game, 'start', t.clock.now), 'interjection:signal-countdown', t.clock.now);
-      const made = await t.create(game), path = `/api/kids-remotes/${made.id}`;
-      expect((await t.call('POST', path + '/action', { action: 'skip-countdown', version: 1 })).status).toBe(401);
-      const stopped = await t.call('POST', path + '/action', { action: 'skip-countdown', version: 1 }, made.remoteToken);
-      expect(stopped.status).toBe(200);
-      expect(stopped.body.game).toMatchObject({ phase: 'locked', remainingMs: 0, deadline: null, voicePlaying: false, voiceCue: null });
-      expect(kidsScores(stopped.body.game)).toEqual(kidsScores(game));
-      expect((await t.call('POST', path + '/action', { action: 'skip-countdown', version: 1 }, made.ownerToken)).status).toBe(409);
-      t.reboot();
-      const display = await t.call('GET', path, undefined, made.ownerToken);
-      expect(display.body.game).toEqual(stopped.body.game);
-      let version = 2;
-      if (!short) {
-        expect((await t.call('POST', path + '/action', { action: 'correct', version }, made.remoteToken)).status).toBe(409);
-        for (const action of ['return', 'ready']) {
-          expect((await t.call('POST', path + '/action', { action, version: version++ }, made.ownerToken)).status).toBe(200);
-        }
-      }
-      const scored = await t.call('POST', path + '/action', { action: 'correct', version }, made.remoteToken);
-      expect(scored.status).toBe(200);
-      expect(scored.body.game.phase).toBe('revealed');
-      expect(kidsScores(scored.body.game)).toMatchObject({ team: 10, professor: short ? 6 : 7, playedRounds: 1 });
+    const t = setup();
+    let game = createKidsGame();
+    game = updateKidsGame(updateKidsGame(game, 'next', t.clock.now), 'next', t.clock.now);
+    game = updateKidsGame(updateKidsGame(game, 'start', t.clock.now), 'interjection:signal-countdown', t.clock.now);
+    const made = await t.create(game), path = `/api/kids-remotes/${made.id}`;
+    expect((await t.call('POST', path + '/action', { action: 'skip-countdown', version: 1 })).status).toBe(401);
+    const stopped = await t.call('POST', path + '/action', { action: 'skip-countdown', version: 1 }, made.remoteToken);
+    expect(stopped.status).toBe(200);
+    expect(stopped.body.game).toMatchObject({ phase: 'locked', remainingMs: 0, deadline: null, voicePlaying: false, voiceCue: null });
+    expect(kidsScores(stopped.body.game)).toEqual(kidsScores(game));
+    expect((await t.call('POST', path + '/action', { action: 'skip-countdown', version: 1 }, made.ownerToken)).status).toBe(409);
+    t.reboot();
+    const display = await t.call('GET', path, undefined, made.ownerToken);
+    expect(display.body.game).toEqual(stopped.body.game);
+    let version = 2;
+    expect((await t.call('POST', path + '/action', { action: 'correct', version }, made.remoteToken)).status).toBe(409);
+    for (const action of ['return', 'ready']) {
+      expect((await t.call('POST', path + '/action', { action, version: version++ }, made.ownerToken)).status).toBe(200);
     }
+    const scored = await t.call('POST', path + '/action', { action: 'correct', version }, made.remoteToken);
+    expect(scored.status).toBe(200);
+    expect(scored.body.game.phase).toBe('revealed');
+    expect(kidsScores(scored.body.game)).toMatchObject({ team: 10, professor: 7, playedRounds: 1 });
   });
   it('springt mit erhaltenen Punkten ins Finale, stellt übersprungene Aufgaben wieder her und wertet das Finale genau einmal', async () => {
     const t=setup(), base=reading();
