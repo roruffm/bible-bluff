@@ -5,7 +5,7 @@ import { Cheek, Cloud, Eye, Face, Flower, Frown, Happy, Hull, Kid, Manger, Smile
 
 /** Neben den Antwortbildern: die Bühne vor dem Superbluff (verrät keine der drei Geschichten),
  * die Bilder der drei Gruppen (wie ihr Symbol) und je ein Bild für die drei Kapitel. */
-export type KidsPictureMotif = StoryMotif | 'stage' | 'firefly' | 'star' | 'torch' | 'clue' | 'map' | 'flag';
+export type KidsPictureMotif = StoryMotif | 'stage' | 'magnifier' | 'star' | 'torch' | 'clue' | 'map' | 'flag';
 
 const Coin = ({ x, y, r = 16 }: { x: number; y: number; r?: number }) => <>
   <circle cx={x} cy={y} r={r} fill="#ffd24a"/><circle cx={x} cy={y} r={r * .66} fill="none" stroke="#e0a72a" stroke-width="2.5"/>
@@ -256,23 +256,16 @@ const PICTURES: Record<KidsPictureMotif, Picture> = {
     <Kid x={54} y={66} s={.8} robe="#8cbcf2" hood="#8cbcf2"/><Kid x={166} y={66} s={.8} robe="#c99467" beard="#8a5a3c"/>
     <Manger x={110} y={100} s={.85}/>
   </> },
-  firefly: { art: () => <>
-    <Sky fill="#34437a"/>
-    {[[22, 22], [58, 14], [150, 30], [204, 44], [34, 58], [176, 62]].map(([x, y]) => <Star key={x} x={x} y={y}/>)}
-    <path d="M188 14a13 13 0 1 0 12 20 10 10 0 1 1-12-20z" fill="#fff3b8" stroke-width="2.5"/>
-    <path d="M0 112q55-12 110-4t110-4V140H0z" fill="#5e8f6b"/>
-    <path d="M22 112l-3-10m9 10 2-12m162 8-2-10m8 12 3-9" fill="none" stroke="#86bd7f" stroke-width="3"/>
-    <circle cx="110" cy="70" r="42" fill="#fff0a3" stroke="none" opacity=".22"/>
-    <g transform="translate(110 70)">
-      <ellipse cx="-20" cy="-12" rx="19" ry="11" fill="#e8fbff" stroke="#176a67" stroke-width="2.5" transform="rotate(-28 -20 -12)"/>
-      <ellipse cx="20" cy="-12" rx="19" ry="11" fill="#e8fbff" stroke="#176a67" stroke-width="2.5" transform="rotate(28 20 -12)"/>
-      <ellipse cx="0" cy="18" rx="15" ry="14" fill="#fff0a3"/><ellipse cx="0" cy="21" rx="8" ry="7" fill="#ffe27a" stroke="none"/>
-      <ellipse cx="0" cy="0" rx="16" ry="14" fill="#a6e1db"/>
-      <circle cx="0" cy="-20" r="16" fill="#a6e1db"/>
-      <path d="M-6 -34q-6-9-12-11m24 11q6-9 12-11" fill="none" stroke-width="2.5"/><circle cx="-18" cy="-46" r="3.5" fill="#ffe27a" stroke-width="2"/><circle cx="18" cy="-46" r="3.5" fill="#ffe27a" stroke-width="2"/>
-      <Face x={0} y={-21} s={.6}/>
-    </g>
-    {[[52, 78], [66, 100], [160, 62], [176, 94], [146, 102]].map(([x, y]) => <circle key={x} cx={x} cy={y} r="3" fill="#fff0a3" stroke="none"/>)}
+  magnifier: { scene: 'meadow', art: () => <>
+    <path d="M36 124q16-28 38-18t34-22" fill="none" stroke="#c99467" stroke-width="3" stroke-dasharray="3 8"/>
+    <path d="m135 88 35 35" fill="none" stroke="#12324a" stroke-width="23"/>
+    <path d="m135 88 35 35" fill="none" stroke="#d8a34e" stroke-width="15"/>
+    <circle cx="104" cy="58" r="43" fill="#fff0a3" stroke="none"/>
+    <circle cx="104" cy="58" r="34" fill="#a6e1db" stroke-width="5"/>
+    <path d="M80 49a25 25 0 0 1 17-15" fill="none" stroke="#fffdf6" stroke-width="6"/>
+    <Face x={104} y={60} s={.9}/>
+    <Flower x={184} y={104}/><Flower x={38} y={106} fill="#ffd96a"/>
+    <Spark x={48} y={40} r={8}/><Spark x={166} y={30} r={7}/>
   </> },
   star: { art: () => <>
     <Sky fill="#4a5a96"/>

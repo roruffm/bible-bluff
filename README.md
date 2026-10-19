@@ -5,17 +5,17 @@
 ## BibleBluff Kids – Die große Bluff-Jagd
 
 Über das Kids-Logo oben links auf der Startseite oder direkt unter `/kids` erreichbar.
-Die ca. 45-minütige Beamer-Show ersetzt das bisherige kurze Kids-Spiel. Glühwürmchen (3–5),
+Die ca. 45-minütige Beamer-Show ersetzt das bisherige kurze Kids-Spiel. Forscher (3–5),
 Leuchtsterne (6–8) und Fackelträger (9–11) spielen gemeinsam gegen den liebenswerten Professor Bluff.
-Die Namen erscheinen immer mit ihrem festen Symbol: Glühwürmchen, Stern und Fackel.
+Die Namen erscheinen immer mit ihrem festen Symbol: Lupe, Stern und Fackel.
 Pro Kapitel kommt jede Altersgruppe einmal dran: neun Aufgaben aus dem bestehenden
-Fragenpool und ein gemeinsamer Superbluff. Für Glühwürmchen gibt es animierte Bilder und kurze,
+Fragenpool und ein gemeinsamer Superbluff. Für Forscher gibt es animierte Bilder und kurze,
 lokal erzeugte Klangbilder; Eltern und andere Gruppen machen Geräusche und Pantomime.
 
 - Drei feste Teppich-Felder: **1 = gelb, 2 = türkis, 3 = rosa**, 30 Sekunden nach dem Vorlesen.
   Jede Frage hat dauerhaft dieselbe Antwort auf derselben Nummer – auch nach einem Neustart.
   Die richtigen Antworten sind auf die drei Felder verteilt (in den neun regulären Fragen je dreimal).
-  Andere Gruppen bleiben in ihren Bereichen. Eltern dürfen Glühwürmchen begleiten. Keine Kinderkonten oder Einzelwertung.
+  Andere Gruppen bleiben in ihren Bereichen. Eltern dürfen Forscher begleiten. Keine Kinderkonten oder Einzelwertung.
 - Nach Stopp prüfen Helfer die Antwortfelder. **Zurück in die Gruppen → Alle sind zurück**
   zeigt Professor Bluff groß und animiert; erst danach wird die Wertung freigeschaltet. Nur das gemeinsame Resultat wird erfasst.
 - Kinderteam: Mehrheit richtig = 10 Punkte; sonst mindestens ein Kind richtig = 5; keiner richtig = 0. Maximal 30 je Altersgruppe.
@@ -40,7 +40,7 @@ lokal erzeugte Klangbilder; Eltern und andere Gruppen machen Geräusche und Pant
   gesprochene Feld auf, sobald die Aufnahme tatsächlich startet. Stoppen, ein anderes Audio und
   Phasenwechsel nehmen das Licht zurück; Farben und Positionen der Teppich-Felder bleiben fest.
   Nach dem Trommelwirbel fliegen frisch gewonnene Kinderpunkte vom Gruppensymbol zum gemeinsamen
-  Zähler. Neue Gruppenaufgaben begrüßen Glühwürmchen mit Flattern, Leuchtsterne mit einer Drehung
+  Zähler. Neue Gruppenaufgaben begrüßen Forscher mit einer suchenden Lupe, Leuchtsterne mit einer Drehung
   und Fackelträger mit einem kleinen Hüpfer. Alle Effekte lassen sich sofort durch Weitergehen
   beenden. Neuladen und Wertungskorrekturen wiederholen keine Feier; reduzierte Bewegung zeigt
   das Antwortlicht statisch und verzichtet auf Auftritte und Punkteflug.
@@ -52,7 +52,7 @@ lokal erzeugte Klangbilder; Eltern und andere Gruppen machen Geräusche und Pant
   Punkterennen ist größer; zieht das Kinderteam an Professor Bluff vorbei, zeigt es „Überholt!“
   (mit Klang).
 - **Mitmach-Gesten:** Während eine Gruppe läuft, zeigt der Beamer den anderen ihre feste Geste:
-  ✨ Glühwürmchen funkeln, 🥁 Leuchtsterne trommeln, 🤞 Fackelträger drücken die Daumen.
+  🔎 Forscher suchen Spuren, 🥁 Leuchtsterne trommeln, 🤞 Fackelträger drücken die Daumen.
 - Professor mit spielstandsabhängigen Kommentaren. Jede Auflösung hat eine eigene Showbühne:
   bei 5 oder 10 Punkten erschrickt er mit einem neuen Spruch, bei 0 Punkten macht er Mut.
   Die richtige Antwort und die Erklärung bleiben dabei sichtbar. Die Animation wartet auf

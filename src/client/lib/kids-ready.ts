@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'preact/hooks';
-import { PROFESSOR_VOICE_KEYS } from '../../shared/professor-voice';
+import { PROFESSOR_VOICE_KEYS, professorVoiceUrl } from '../../shared/professor-voice';
 import { preloadProfessorVoices } from './kids-sound';
 import { KIDS_INTRO_URL } from '../../shared/kids-intro';
 
@@ -62,7 +62,7 @@ async function copyShow() {
     for (const [, href] of css.matchAll(/url\(\s*["']?([^"')]+\.woff2)["']?\s*\)/g)) add(href, new URL(sheet, location.origin).href);
   }
   const cache = await caches.open(KIDS_OFFLINE_CACHE);
-  const files = [...assets, KIDS_INTRO_URL, ...PROFESSOR_VOICE_KEYS.map((key) => `/professor-bluff/${key}.mp3`)];
+  const files = [...assets, KIDS_INTRO_URL, ...PROFESSOR_VOICE_KEYS.map(professorVoiceUrl)];
   await cache.addAll(files);
   await cache.put('/kids', page);
   // Alte Fassungen früherer Veröffentlichungen fliegen raus.

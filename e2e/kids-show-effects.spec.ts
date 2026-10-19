@@ -20,7 +20,7 @@ async function judging(page: Page) {
 test('Kids: Gruppenauftritt, Punkteflug nach dem Trommelwirbel und kein Wiederholen nach Neuladen', async ({page}) => {
   await begin(page);
   await expect(page.locator('.kids-active-group')).toHaveClass(/is-mascot-entering/);
-  await expect(page.locator('.kids-active-group .kids-group-symbol')).toHaveCSS('animation-name','kids-firefly-arrival');
+  await expect(page.locator('.kids-active-group .kids-group-symbol')).toHaveCSS('animation-name','kids-researcher-arrival');
   await judging(page);
   await page.getByRole('button',{name:'Mehrheit richtig · +10',exact:true}).click();
   await expect(page.locator('.kids-suspense')).toBeVisible();

@@ -1,15 +1,22 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { createKidsGame, kidsScores, updateKidsGame, type KidsGame } from '../src/shared/kids-game';
-import { professorVoiceKey } from '../src/shared/professor-voice';
+import { professorVoiceKey, professorVoiceUrl } from '../src/shared/professor-voice';
 import { kidsRoundReaction } from '../src/client/lib/kids-reactions';
 import { PROFESSOR_INTERJECTIONS } from '../src/shared/professor-interjections';
 
 describe('Professor-Aufnahmen', () => {
+  it('verwendet für den stabilen Aufruf der jüngsten Gruppe die neue Forscher-Aufnahme', () => {
+    const clip = PROFESSOR_INTERJECTIONS.find(clip => clip.id === 'call-minis')!;
+    expect(clip.label).toBe('Forscher aufrufen');
+    expect(clip.text).toBe('Forscher, jetzt seid ihr dran! Die anderen Teams feuern euch an!');
+    expect(professorVoiceUrl('interjection-call-minis')).toBe('/professor-bluff/interjection-call-forscher.mp3');
+    expect(professorVoiceUrl('interjection-call-mittis')).toBe('/professor-bluff/interjection-call-mittis.mp3');
+  });
   it('liefert zu jedem freien Zwischendurch-Spruch eine echte MP3-Aufnahme', () => {
     expect(new Set(PROFESSOR_INTERJECTIONS.map(clip => clip.id)).size).toBe(PROFESSOR_INTERJECTIONS.length);
     for (const clip of PROFESSOR_INTERJECTIONS) {
-      const bytes=readFileSync(new URL(`../src/client/public/professor-bluff/interjection-${clip.id}.mp3`,import.meta.url));
+      const bytes=readFileSync(new URL(`../src/client/public${professorVoiceUrl(`interjection-${clip.id}`)}`,import.meta.url));
       expect(bytes.length).toBeGreaterThan(1500);
       expect(bytes.subarray(0,3).toString()==='ID3' || bytes[0]===255).toBe(true);
     }
@@ -20,7 +27,7 @@ describe('Professor-Aufnahmen', () => {
       const game={...base,index,phase:'reading' as const}, next=updateKidsGame(game,'read-question',100);
       expect(next).toMatchObject({phase:'reading',remainingMs:30000,deadline:null,voiceKind:'question',voiceCue:`reading:${index}`});
       const key=professorVoiceKey(next,'question');expect(key).toBe(`question-${index}`);
-      expect(readFileSync(new URL(`../src/client/public/professor-bluff/${key}.mp3`,import.meta.url)).length).toBeGreaterThan(1500);
+      expect(readFileSync(new URL(`../src/client/public${professorVoiceUrl(key!)}`,import.meta.url)).length).toBeGreaterThan(1500);
       expect(kidsScores(next)).toEqual(kidsScores(game));
     }
     for(const phase of ['welcome','moving','revealed','finished'] as const) expect(updateKidsGame({...base,phase},'read-question',0).voiceSeq).toBeUndefined();
@@ -47,7 +54,7 @@ describe('Professor-Aufnahmen', () => {
         expect(key).toBe(`reveal-${state.index}`);
         expect(kidsRoundReaction(state).quote).toBe(state.rounds[state.index].question.revealQuote);
       }
-      const bytes=readFileSync(new URL(`../src/client/public/professor-bluff/${key}.mp3`,import.meta.url));
+      const bytes=readFileSync(new URL(`../src/client/public${professorVoiceUrl(key!)}`,import.meta.url));
       expect(bytes.length).toBeGreaterThan(1500);expect(bytes.subarray(0,3).toString()==='ID3' || bytes[0]===255).toBe(true);
       expect(['comfort-4','comfort-9']).not.toContain(key);
     }

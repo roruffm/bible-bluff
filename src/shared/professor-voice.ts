@@ -6,6 +6,12 @@ const series = (name: string, count: number) => Array.from({ length: count }, (_
 // Diese Aufgaben verwenden auch die Feldnummern aus den hochgeladenen Antwortaufnahmen.
 const uploadedAnswerRounds = [0, 2, 3, 4, 5, 6, 8, 9];
 
+/** Neue Mediendatei bei gleichem Aufrufschlüssel: Auch vorhandene Shows bekommen den aktuellen Namen. */
+export function professorVoiceUrl(key: string): string {
+  const file = key === 'interjection-call-minis' ? 'interjection-call-forscher' : key;
+  return `/professor-bluff/${file}.mp3`;
+}
+
 /** Alle Aufnahmen, die am Beamer erklingen können. „Show vorbereiten“ lädt sie vollständig vorab. */
 export const PROFESSOR_VOICE_KEYS: readonly string[] = [...new Set([
   'welcome', 'intro', 'chapter2', 'chapter3', 'superbluff-finale20', 'win', 'lose',

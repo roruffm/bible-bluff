@@ -2,7 +2,7 @@ import { existsSync, readdirSync } from 'node:fs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createKidsGame, kidsResumeGame, kidsScores, updateKidsGame, type KidsAction, type KidsGame } from '../src/shared/kids-game';
 import { packKidsGame, unpackKidsGame } from '../src/shared/kids-remote';
-import { PROFESSOR_VOICE_KEYS, professorVoiceKey } from '../src/shared/professor-voice';
+import { PROFESSOR_VOICE_KEYS, professorVoiceKey, professorVoiceUrl } from '../src/shared/professor-voice';
 import { clearKidsShow, KIDS_SAVE_TTL, loadKidsShow, saveKidsShow } from '../src/client/lib/kids-saved';
 
 function play(game: KidsGame, steps: [KidsAction, number][]): KidsGame {
@@ -95,7 +95,7 @@ describe('Kids: Sicherung auf dem Gerät', () => {
 describe('Kids: Aufnahmen zum Vorladen', () => {
   it('kennt jede Aufnahme, die am Beamer erklingen kann, und jede davon liegt als MP3 bereit', () => {
     const files = new Set(readdirSync(new URL('../src/client/public/professor-bluff/', import.meta.url)));
-    for (const key of PROFESSOR_VOICE_KEYS) expect(files.has(`${key}.mp3`), key).toBe(true);
+    for (const key of PROFESSOR_VOICE_KEYS) expect(files.has(professorVoiceUrl(key).split('/').pop()!), key).toBe(true);
     expect(new Set(PROFESSOR_VOICE_KEYS).size).toBe(PROFESSOR_VOICE_KEYS.length);
     const game = createKidsGame(), states: KidsGame[] = [game, { ...game, phase: 'finished' }, { ...game, index: 9, phase: 'superbluff' }];
     for (let index = 0; index < 10; index++) {

@@ -1,5 +1,5 @@
 import { KIDS_SCENE_MS, type KidsSceneMotif } from '../../shared/kids-scenes';
-import { PROFESSOR_VOICE_KEYS } from '../../shared/professor-voice';
+import { PROFESSOR_VOICE_KEYS, professorVoiceUrl } from '../../shared/professor-voice';
 let context: AudioContext | null = null;
 export async function enableKidsSound() {
   context ??= new AudioContext();
@@ -13,7 +13,7 @@ const professorBuffers = new Map<string, Promise<AudioBuffer>>();
 function professorRecording(key: string): Promise<ArrayBuffer> {
   let bytes = professorRecordings.get(key);
   if (!bytes) {
-    bytes = fetch(`/professor-bluff/${key}.mp3`).then(response => {
+    bytes = fetch(professorVoiceUrl(key)).then(response => {
       if (!response.ok) throw new Error('Diese Professor-Aufnahme konnte nicht geladen werden.');
       return response.arrayBuffer();
     });

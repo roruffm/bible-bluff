@@ -14,7 +14,8 @@ Erzeugungs-Flow: `pzQFLU40bOmd4qQ8g2Qa`, Sprachknoten: `eFQyjvneV16Xs8aFrFnU`.
 Die drei Gruppenaufrufe wurden anschließend durch die vom Nutzer bereitgestellten
 Snorre-Aufnahmen vom 16.10.2026 (13:07:34, 13:08:20 und 13:08:45) ersetzt.
 Die Dateien wurden unverändert übernommen und anhand ihres gesprochenen Gruppennamens
-Glühwürmchen, Leuchtsterne beziehungsweise Fackelträger zugeordnet.
+den damaligen Gruppennamen zugeordnet. Der Aufruf der jüngsten Gruppe wurde am
+19.10.2026 für die Umbenennung in „Forscher“ ersetzt (siehe unten).
 
 Auch der gemeinsame Finalaufruf (`interjection-call-all.mp3`) und der Abschlussgedanke
 über Jesus (`interjection-closing-jesus.mp3`) verwenden die unveränderten Nutzer-Aufnahmen
@@ -82,7 +83,7 @@ Zielverzeichnis: `src/client/public/professor-bluff/`.
 | Dateiname | Gesprochener Text | Zuordnung |
 | --- | --- | --- |
 | `interjection-regroup-ready.mp3` | Alle sind zurück! Bleibt bei eurer Gruppe. Gleich kommt die Auflösung! | Zwischensequenz vor der Wertung |
-| `interjection-call-minis.mp3` | Glühwürmchen, jetzt seid ihr dran! Die anderen Teams feuern euch an! | Kapitelstart und Vorlesen der Glühwürmchen-Aufgabe |
+| `interjection-call-forscher.mp3` | Forscher, jetzt seid ihr dran! Die anderen Teams feuern euch an! | Kapitelstart und Vorlesen der Forscher-Aufgabe |
 | `interjection-call-mittis.mp3` | Leuchtsterne, jetzt seid ihr dran! Die anderen Teams feuern euch an! | Vorlesen der Leuchtsterne-Aufgabe |
 | `interjection-call-maxis.mp3` | Fackelträger, jetzt seid ihr dran! Die anderen Teams feuern euch an! | Vorlesen der Fackelträger-Aufgabe |
 | `interjection-call-all.mp3` | Jetzt sind alle Teams gemeinsam dran! Zusammen knackt ihr meinen Superbluff! | Finalankündigung und Finalfrage |
@@ -227,3 +228,30 @@ bleiben erhalten, vier Millisekunden Fades schützen die Schnittgrenzen.
 
 Alle neuen Clips sind für das Vorladen und die Offline-Kopie registriert.
 Die Stopp-Ansage bleibt im bisherigen Bedienablauf erreichbar.
+
+
+### Forscher statt Glühwürmchen (19.10.2026)
+
+Die jüngste Gruppe (3–5 Jahre) heißt „Forscher“ und verwendet eine freundliche Lupe.
+Name und Symbol gelten für Vorbereitung, Beamer, Helfertexte, Smartphone, Desktop,
+Gruppenaufruf, Punkteflug, Anfeuer-Geste und Abschluss. Der interne Gruppenschlüssel
+`minis` bleibt für vorhandene Spielstände und Fernbedienungen bestehen.
+
+Der Aufruf lautet „Forscher, jetzt seid ihr dran! Die anderen Teams feuern euch an!“.
+`interjection-call-forscher.mp3` ist die unveränderte Nutzer-Aufnahme vom 19.10.2026
+(18:10:45). Der stabile Aufrufschlüssel `interjection-call-minis` verweist für Wiedergabe
+und Offline-Vorbereitung auf die neue Mediendatei, damit keine alte Aufnahme aus dem
+Browser-Cache erklingt. Die Zuordnung beider gelieferten Aufnahmen wurde mit einer
+Transkription geprüft.
+
+Das Erklärvideo `so-spielt-ihr-mit-forscher.mp4` verwendet den vollständigen Satz
+„Forscher, das sind alle drei, vier oder fünf Jahre alten Kinder.“ aus der Nutzer-Aufnahme
+von 18:13:52. Sprechtempo und Lautstärke bleiben erhalten. Das Gruppenbild bleibt dafür
+0,8 Sekunden länger stehen; die neue Gesamtlaufzeit beträgt 53,146 Sekunden. Die übrige
+Original-Tonspur und die Professor-Animation bleiben erhalten. Bilder, Beschriftung
+und Untertitel verwenden die Lupe und den neuen Namen, auch in den Übergängen.
+
+| Nutzer-Aufnahme | Verwendung | SHA-256 der Originaldatei |
+| --- | --- | --- |
+| 18:10:45 | Gruppenaufruf | `06dc5988507b8028a1ec6df8eeb50735ec09704b98981101d533b338452f9fad` |
+| 18:13:52 | Gruppenvorstellung im Erklärvideo | `f507de82101f44216fa1f819e451120a0d2e69ad3305ceebb7af5b896f80d295` |

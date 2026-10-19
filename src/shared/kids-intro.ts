@@ -1,5 +1,5 @@
-export const KIDS_INTRO_URL = '/kids-video/so-spielt-ihr-mit.mp4';
-export const KIDS_INTRO_DURATION_MS = 52_346;
+export const KIDS_INTRO_URL = '/kids-video/so-spielt-ihr-mit-forscher.mp4';
+export const KIDS_INTRO_DURATION_MS = 53_146;
 export interface KidsIntroVideo {
   playing: boolean;
   positionMs: number;

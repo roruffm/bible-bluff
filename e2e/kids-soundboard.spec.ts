@@ -51,9 +51,9 @@ test('Smartphone: Wertung nach Weitergehen korrigieren, freie Ansagen und Ende s
   await phoneContext.close();
 });
 
-test('Smartphone: Gruppenaufruf, vorgemerkter Countdown, Pause und Jesus-Abschluss erklingen am Beamer', async ({ page, browser, request }) => {
+test('Smartphone: Forscher-Aufruf, vorgemerkter Countdown, Pause und Jesus-Abschluss erklingen am Beamer', async ({ page, browser, request }) => {
   const game=createKidsGame();
-  game.phase='reading'; game.index=1; game.results[0]='correct';
+  game.phase='reading';
   const response=await request.post('/api/kids-remotes',{data:{easy:false,game:packKidsGame(game,Date.now())}});
   expect(response.status()).toBe(201);
   const remote=await response.json();
@@ -83,9 +83,11 @@ test('Smartphone: Gruppenaufruf, vorgemerkter Countdown, Pause und Jesus-Abschlu
   phone.on('request',r=>{if(r.url().includes('/professor-bluff/'))phoneAudio.push(r.url());});
   const observed=()=>page.evaluate(()=>(window as unknown as {phaseVoiceAudio:{starts:{delay:number;offset:number}[];stops:number}}).phaseVoiceAudio);
   await phone.goto(`/kids/steuerung#id=${remote.id}&key=${remote.remoteToken}`);
-  await phone.getByRole('button',{name:'Leuchtsterne aufrufen am Beamer abspielen',exact:true}).click();
+  await expect(phone.locator('[data-group="minis"]').first()).toContainText('Forscher');
+  await expect(phone.locator('body')).not.toContainText('Glühwürmchen');
+  await phone.getByRole('button',{name:'Forscher aufrufen am Beamer abspielen',exact:true}).click();
   await expect.poll(async()=>(await observed()).starts.length).toBe(1);
-  expect((await professorAudio(page)).played.at(-1)).toBe('interjection-call-mittis');
+  expect((await professorAudio(page)).played.at(-1)).toBe('interjection-call-forscher');
   await phone.getByRole('button',{name:'30 Sekunden starten',exact:true}).click();
   await expect.poll(async()=>(await observed()).starts.length).toBe(2);
   expect((await professorAudio(page)).played.at(-1)).toBe('interjection-signal-go');

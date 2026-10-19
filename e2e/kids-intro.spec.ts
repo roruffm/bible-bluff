@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { showKidsOperator } from './kids-operator';
 
-// Chrome bringt die H.264/AAC-Codecs der unveränderten Originalaufnahme mit.
+// Chrome bringt die H.264/AAC-Codecs des Erklärvideos mit.
 test.use({ channel: 'chrome', launchOptions: process.env.KIDS_TEST_CHROME_PATH ? { executablePath: process.env.KIDS_TEST_CHROME_PATH } : {}, viewport: { width: 1280, height: 800 }, isMobile: false });
 
 test('Erklärvideo: Smartphone steuert nur den Beamer; Pause, Ende und Spielstart bleiben getrennt', async ({ page, browser }) => {
