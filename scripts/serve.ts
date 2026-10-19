@@ -28,6 +28,7 @@ const TYPES: Record<string, string> = {
   '.woff2': 'font/woff2',
   '.woff': 'font/woff',
   '.mp3': 'audio/mpeg',
+  '.mp4': 'video/mp4',
   '.txt': 'text/plain; charset=utf-8',
 };
 

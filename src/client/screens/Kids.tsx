@@ -24,6 +24,7 @@ import './kids-show-theme.css';
 import '../components/professor-bluff.css';
 import { professorMotion } from '../lib/professor-motion';
 import { KidsInterlude } from '../components/KidsInterlude';
+import { KidsIntroVideo, unlockKidsIntroVideo } from '../components/KidsIntroVideo';
 
 function Celebration({ variant }: { variant: number }) {
   return <div class={`kids-celebration kids-party-${variant % 4}`} aria-hidden="true">{Array.from({ length: 42 }, (_, i) => <i key={i} style={{ '--x': `${(i * 37 + 11) % 100}%`, '--delay': `${(i % 9) * 70}ms`, '--turn': `${i * 29}deg`, '--c': ['#ffd362', '#72d8c7', '#fba2af', '#95baf7'][i % 4] }}>{['✦','★','●'][variant % 3]}</i>)}</div>;
@@ -121,7 +122,7 @@ export function KidsPage() {
       const tag = (e.target as HTMLElement)?.tagName;
       if (['INPUT', 'SELECT', 'TEXTAREA'].includes(tag)) return;
       if (e.code === 'KeyH') { e.preventDefault(); setPresentation(v => !v); setToolsOpen(false); return; }
-      if (toolsOpen) return;
+      if (toolsOpen || game.introVideo) return;
       if (e.code === 'Space' && ['BUTTON', 'A', 'SUMMARY'].includes(tag)) return;
       const action = (e.code === 'Space' || e.code === 'ArrowRight') ? kidsPrimaryAction(game) : e.code === 'KeyP' ? (game.phase === 'moving' ? 'pause' : game.phase === 'paused' ? 'resume' : null) : kidsCanScore(game) ? ({ Digit1: 'correct', Digit2: 'participated', Digit0: 'none' } as const)[e.code as 'Digit1'|'Digit2'|'Digit0'] : null;
       if (action) { e.preventDefault(); act(action); }
@@ -133,7 +134,7 @@ export function KidsPage() {
   const toggleFullscreen = async () => { try { setFullscreenError(''); if (document.fullscreenElement) await document.exitFullscreen(); else await root.current?.requestFullscreen(); } catch { setFullscreenError('Nutze das Vollbild deines Browsers.'); } };
   const toggleSound = async () => { if (sound === 'on') { setSound('off'); return; } try { await enableKidsSound(); setSound('on'); } catch { setFullscreenError('Klang hier nicht verfügbar. Die Gruppen können die Geräusche selbst machen.'); } };
   const exit = () => { void remote.disconnect(); clearKidsShow(); setSaved(null); setShowExit(false); setShowPair(false); setShowFinish(false); setToolsOpen(false); setPresentation(true); setGame(null); };
-  const enableVoice = async () => { await enableKidsSound(); setSound('on'); };
+  const enableVoice = async () => { if (!game?.introVideo) unlockKidsIntroVideo(); await enableKidsSound(); setSound('on'); };
   const startShow = (withRemote = false) => {
     const next = createKidsGame(Math.random);
     setSaved(null); setGame(next); setPresentation(true);
@@ -162,6 +163,7 @@ export function KidsPage() {
   const displayPhase = !game ? '' : finished ? 'Unsere gemeinsame Bluff-Jagd' : game.phase === 'welcome' ? 'Willkommen!' : game.index === 9 ? 'Das große Finale' : game.phase === 'chapter' ? `Kapitel ${chapter + 1} von 3` : game.phase === 'revealed' ? 'Auflösung' : `Kapitel ${chapter + 1} · Frage ${game.index % 3 + 1}`;
   const status = !game ? '' : game.phase === 'reading' ? 'Erst zuhören. Dann geht’s los!' : game.phase === 'moving' ? (lastSeconds ? 'Zählt laut mit!' : '1, 2 oder 3? Ab in euer Feld!') : game.phase === 'paused' ? 'Kurze Pause. Bleibt, wo ihr seid!' : game.phase === 'locked' ? 'Stopp! Helfer prüfen die Felder.' : game.phase === 'returning' ? 'Alle zurück zu eurer Gruppe!' : game.phase === 'judging' ? 'Jetzt wird’s spannend …' : `Richtig ist Feld ${round!.correctIndex + 1}!`;
   return <KidsVoiceProvider game={game} enabled={sound==='on'} enable={enableVoice} act={act} busy={remote.busy} onError={setFullscreenError}><main class={`kids-page kids-show${game ? ' is-playing' : ''}${presentation && game ? ' is-projecting' : ''}${fullscreen ? ' is-fullscreen' : ''}`} ref={root} tabIndex={-1}>
+    <KidsIntroVideo game={game} act={act} onError={setFullscreenError}/>
     <header class={`kids-topbar${game ? ' kids-playing-bar' : ''}`}>
       {game ? <><KidsLogo compact/><div class="kids-round-line"><span class="kids-round-counter">{displayPhase}</span>{!finished && game.phase !== 'welcome' && <KidsTrail game={game}/>}</div>{!finished && <ShowScoreboard game={game} hiddenIndex={suspenseIndex}/>}<div class="kids-top-actions">{kidsCanJumpToFinal(game) && <button type="button" class="kids-tool kids-final-toggle" aria-label="Direkt ins Finale" disabled={remote.busy || (remote.active && !!remote.error)} onClick={()=>act('jump-final')}>🏁 <span>Finale</span></button>}{!finished && <button type="button" class="kids-tool kids-end-toggle" aria-label="Spiel mit Punktestand abschließen" onClick={()=>{setToolsOpen(false);setShowFinish(true);}}>⚑ <span>Abschluss</span></button>}<button class="kids-tool kids-mouse-toggle" type="button" aria-label={presentation ? 'Maussteuerung einblenden' : 'Maussteuerung ausblenden'} aria-pressed={!presentation} onClick={() => { setPresentation(!presentation); setToolsOpen(false); }}>↗ <span>Maus</span></button>{canFullscreen && <button type="button" class="kids-tool kids-fullscreen-toggle" onClick={toggleFullscreen} aria-label={fullscreen ? 'Vollbild ausschalten' : 'Vollbild einschalten'}>⛶ <span>{fullscreen ? 'Fenster' : 'Vollbild'}</span></button>}<button type="button" class="kids-tool kids-menu-toggle" aria-label="Bedienung" aria-expanded={toolsOpen} aria-controls="kids-operator-tools" onClick={() => setToolsOpen(!toolsOpen)}>☰ <span>Bedienung</span></button></div></> : <><a href="/" class="kids-back" onClick={e => { e.preventDefault(); navigate('/'); }}>← Bible Bluff</a><span class="kids-top-title">GEMEINSAM GEGEN PROFESSOR BLUFF</span>{canFullscreen && <button type="button" class="kids-tool" onClick={toggleFullscreen}>⛶ Vollbild</button>}</>}
     </header>

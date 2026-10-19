@@ -32,6 +32,7 @@ async function request<T>(method: string, path: string, data?: unknown, token?: 
     if (json.game && typeof json.serverNow === 'number') {
       const shift = (sent + Date.now()) / 2 - json.serverNow;
       if (json.game.deadline !== null) json.game.deadline += shift;
+      if (typeof json.game.introVideo?.startedAt === 'number') json.game.introVideo.startedAt += shift;
     }
     return json as T;
   } catch (err) {

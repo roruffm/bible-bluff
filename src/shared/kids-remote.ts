@@ -2,6 +2,7 @@ import { KIDS_ANSWER_MS, type KidsGame, type KidsAction, type KidsPhase, type Ki
 import { KIDS_SCENE_MS } from './kids-scenes';
 import { KIDS_SHOW_QUESTIONS } from './kids-show-questions';
 import { professorInterjection } from './professor-interjections';
+import { kidsIntroPosition, KIDS_INTRO_DURATION_MS, type KidsIntroVideo } from './kids-intro';
 
 export type KidsRemoteAction = Exclude<KidsAction, 'tick'>;
 export interface KidsRemoteView {
@@ -29,6 +30,7 @@ export function packKidsGame(game: KidsGame, now: number) {
     voiceCue: game.voiceCue ?? null,
     voiceKind: game.voiceKind ?? 'quote',
     voiceClip: game.voiceClip ?? null,
+    introVideo: game.introVideo ? { ...game.introVideo, positionMs: kidsIntroPosition(game.introVideo, now), startedAt: undefined } : undefined,
     sceneRemainingMs: game.phase === 'scene' ? Math.min(KIDS_SCENE_MS, Math.max(0, (game.deadline ?? now) - now)) : undefined,
   };
 }
@@ -69,6 +71,13 @@ function unpack(value: unknown, now: number): KidsGame {
   if (!Number.isSafeInteger(game.cueSeq) || Number(game.cueSeq) < 0 || Number(game.cueSeq) > 1000) return invalid();
   const voiceSeq = game.voiceSeq ?? 0, voicePlaying = game.voicePlaying ?? false, voiceCue = game.voiceCue ?? null, voiceKind = game.voiceKind ?? 'quote';
   const voiceClip = game.voiceClip ?? null;
+  let introVideo: KidsIntroVideo | undefined;
+  if (game.introVideo !== undefined) {
+    if (phase !== 'welcome' || !game.introVideo || typeof game.introVideo !== 'object') return invalid();
+    const video = game.introVideo as Record<string, unknown>;
+    if (typeof video.playing !== 'boolean' || typeof video.positionMs !== 'number' || !Number.isFinite(video.positionMs) || video.positionMs < 0 || video.positionMs > KIDS_INTRO_DURATION_MS || !Number.isSafeInteger(video.sequence) || Number(video.sequence) < 1 || Number(video.sequence) > 1_000_000) return invalid();
+    introVideo = { playing: video.playing, positionMs: video.positionMs, startedAt: video.playing ? now : null, sequence: Number(video.sequence) };
+  }
   if (!Number.isSafeInteger(voiceSeq) || Number(voiceSeq) < 0 || Number(voiceSeq) > 1000000 || typeof voicePlaying !== 'boolean' || !['quote','question','answers','interjection'].includes(voiceKind as string)) return invalid();
   if ((voiceClip !== null && !professorInterjection(voiceClip)) || (voiceKind === 'interjection' && !professorInterjection(voiceClip))) return invalid();
   if (voiceCue !== null && (typeof voiceCue !== 'string' || !/^[a-z]+:[0-9]$/.test(voiceCue) || !PHASES.includes(voiceCue.split(':')[0] as KidsPhase))) return invalid();
@@ -80,5 +89,5 @@ function unpack(value: unknown, now: number): KidsGame {
   }
   if (game.remainingMs === 0 && (phase === 'moving' || phase === 'paused')) phase = 'locked';
   const remainingMs = ['welcome', 'chapter', 'superbluff', 'reading', 'scene'].includes(phase) ? KIDS_ANSWER_MS : ['locked', 'returning', 'judging', 'revealed', 'finished'].includes(phase) ? 0 : game.remainingMs;
-  return { rounds, index, phase, remainingMs, deadline: phase === 'scene' ? now + sceneRemainingMs : phase === 'moving' ? now + remainingMs : null, results: game.results as (KidsResult | null)[], cueSeq: Number(game.cueSeq), voiceSeq: Number(voiceSeq), voicePlaying, voiceCue: voiceCue as string|null, voiceKind:voiceKind as KidsGame['voiceKind'], voiceClip: voiceClip as KidsGame['voiceClip'] };
+  return { rounds, index, phase, remainingMs, deadline: phase === 'scene' ? now + sceneRemainingMs : phase === 'moving' ? now + remainingMs : null, results: game.results as (KidsResult | null)[], cueSeq: Number(game.cueSeq), voiceSeq: Number(voiceSeq), voicePlaying, voiceCue: voiceCue as string|null, voiceKind:voiceKind as KidsGame['voiceKind'], voiceClip: voiceClip as KidsGame['voiceClip'], ...(introVideo ? { introVideo } : {}) };
 }

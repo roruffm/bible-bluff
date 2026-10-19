@@ -1,6 +1,7 @@
 import { KIDS_SHOW_QUESTIONS, type KidsShowQuestion, type KidsGroup } from './kids-show-questions';
 import { KIDS_SCENE_MS } from './kids-scenes';
 import { professorInterjectionForRound, type ProfessorInterjectionId } from './professor-interjections';
+import { kidsIntroPosition, type KidsIntroVideo } from './kids-intro';
 
 export const KIDS_SECONDS = 30;
 /** Antwortzeit je Aufgabe in Millisekunden. */
@@ -19,8 +20,10 @@ export interface KidsGame {
   rounds: KidsRound[]; index: number; phase: KidsPhase; remainingMs: number; deadline: number | null;
   results: (KidsResult | null)[]; cueSeq: number;
   voiceSeq?: number; voicePlaying?: boolean; voiceCue?: string|null; voiceKind?: 'quote'|'question'|'answers'|'interjection'; voiceClip?: ProfessorInterjectionId|null;
+  /** Nur in der Begrüßung der Show mit Antwortfeldern. Der Ton läuft ausschließlich am Beamer. */
+  introVideo?: KidsIntroVideo;
 }
-export type KidsAction = 'start' | 'pause' | 'resume' | 'skip-countdown' | 'back' | 'tick' | 'return' | 'ready' | 'correct' | 'participated' | 'none' | 'next' | 'scene' | 'end-scene' | 'finish' | 'jump-final' | 'speak' | 'stop-speech' | 'read-question' | 'read-answers' | 'correct-last' | 'participated-last' | 'none-last' | `interjection:${ProfessorInterjectionId}`;
+export type KidsAction = 'play-intro' | 'pause-intro' | 'restart-intro' | 'stop-intro' | 'start' | 'pause' | 'resume' | 'skip-countdown' | 'back' | 'tick' | 'return' | 'ready' | 'correct' | 'participated' | 'none' | 'next' | 'scene' | 'end-scene' | 'finish' | 'jump-final' | 'speak' | 'stop-speech' | 'read-question' | 'read-answers' | 'correct-last' | 'participated-last' | 'none-last' | `interjection:${ProfessorInterjectionId}`;
 
 export function kidsCanJumpToFinal(game: KidsGame): boolean {
   const final = game.rounds.length - 1;
@@ -121,6 +124,22 @@ export function kidsOvertook(game: KidsGame): boolean {
 /** Zeit und Punkte sind geräteunabhängig; doppelte oder unpassende Schritte ändern nichts. */
 export function updateKidsGame(game: KidsGame, action: KidsAction, now: number): KidsGame {
   const phase = game.phase;
+  if (['play-intro', 'pause-intro', 'restart-intro', 'stop-intro'].includes(action)) {
+    if (phase !== 'welcome') return game;
+    const video = game.introVideo;
+    if (action === 'stop-intro') return video ? { ...game, introVideo: undefined } : game;
+    if (action === 'pause-intro' && (!video || !video.playing)) return game;
+    if (action === 'play-intro' && video?.playing) return game;
+    return { ...game, voiceSeq: (game.voiceSeq ?? 0) + 1, voicePlaying: false, voiceCue: null,
+      introVideo: { playing: action !== 'pause-intro', positionMs: action === 'restart-intro' || !video ? 0 : kidsIntroPosition(video, now),
+        startedAt: action === 'pause-intro' ? null : now, sequence: (video?.sequence ?? 0) + 1 } };
+  }
+  // Erst das Video beenden; weder Tastatur noch Zusatzaudio dürfen die Erklärung unterbrechen.
+  if (game.introVideo) {
+    if (action === 'back') return { ...game, introVideo: undefined };
+    if (action === 'finish' || action === 'jump-final') return updateKidsGame({ ...game, introVideo: undefined }, action, now);
+    return game;
+  }
   if (action === 'back') return kidsPreviousStep(game) ?? game;
   if (action === 'skip-countdown') {
     if (!kidsCanSkipCountdown(game)) return game;
@@ -179,7 +198,8 @@ export function updateKidsGame(game: KidsGame, action: KidsAction, now: number):
 /** Nach dem Neuladen wartet die Show auf die Spielleitung: Der Countdown steht, eine Szene ist vorbei, der Professor schweigt. */
 export function kidsResumeGame(game: KidsGame, now: number): KidsGame {
   const waiting = game.phase === 'moving' ? updateKidsGame(game, 'pause', now) : game.phase === 'scene' ? { ...game, phase: 'reading' as const, deadline: null } : game;
-  return { ...waiting, voicePlaying: false, voiceCue: null };
+  return { ...waiting, voicePlaying: false, voiceCue: null,
+    ...(game.introVideo ? { introVideo: { ...game.introVideo, playing: false, positionMs: kidsIntroPosition(game.introVideo, now), startedAt: null } } : {}) };
 }
 export function kidsPrimaryAction(game: Pick<KidsGame, 'phase'>): Exclude<KidsAction, 'tick'> | null {
   return ({ welcome: 'next', chapter: 'next', superbluff: 'next', reading: 'start', scene: 'end-scene', paused: 'resume', locked: 'return', returning: 'ready', revealed: 'next' } as Partial<Record<KidsPhase, Exclude<KidsAction, 'tick'>>>)[game.phase] ?? null;
