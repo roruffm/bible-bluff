@@ -36,6 +36,14 @@ lokal erzeugte Klangbilder; Eltern und andere Gruppen machen Geräusche und Pant
   bekommen nacheinander den Stempel „BLUFF!“ (Professor Bluffs Tipp zuletzt), dann leuchtet die
   Wahrheit. Erst danach erscheinen Punkte, Konfetti und Professor-Reaktion. „Weiter“ bleibt
   erreichbar. Kein Trommelwirbel nach Neuladen, bei Korrekturen oder bei „Bewegung reduzieren“.
+- **Antwortlicht, Punkteflug und Gruppenauftritte:** Beim manuellen Vorlesen leuchtet genau das gerade
+  gesprochene Feld auf, sobald die Aufnahme tatsächlich startet. Stoppen, ein anderes Audio und
+  Phasenwechsel nehmen das Licht zurück; Farben und Positionen der Teppich-Felder bleiben fest.
+  Nach dem Trommelwirbel fliegen frisch gewonnene Kinderpunkte vom Gruppensymbol zum gemeinsamen
+  Zähler. Neue Gruppenaufgaben begrüßen Glühwürmchen mit Flattern, Leuchtsterne mit einer Drehung
+  und Fackelträger mit einem kleinen Hüpfer. Alle Effekte lassen sich sofort durch Weitergehen
+  beenden. Neuladen und Wertungskorrekturen wiederholen keine Feier; reduzierte Bewegung zeigt
+  das Antwortlicht statisch und verzichtet auf Auftritte und Punkteflug.
 - **Countdown zum Mitzählen:** In den letzten fünf Sekunden erscheint eine große Zahl und
   „Zählt laut mit!“. Mit Klang ticken die Sekunden, bei null ertönt ein Gong. Der Klang wird
   auch beim ersten Start der 30 Sekunden am Beamer eingeschaltet.

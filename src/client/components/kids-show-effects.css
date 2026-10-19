@@ -1,0 +1,77 @@
+/* Die Feldfarben und Positionen bleiben fest. Das Licht folgt ausschließlich dem gesprochenen Feld. */
+.kids-show .kids-show-stage .kids-answers .kids-answer {
+  transition: transform .22s ease, box-shadow .22s ease;
+  transform-origin: center;
+}
+.kids-show .kids-show-stage .kids-answers .kids-answer.is-speaking {
+  z-index: 2;
+  transform: translateY(-3px) scale(1.025);
+  box-shadow: 0 9px 0 #082a3c, 0 0 0 5px #fffdf1, 0 0 0 8px #ffda68, 0 0 32px #ffda6870;
+}
+.kids-show .kids-show-stage .kids-answer.is-speaking .kids-number {
+  text-shadow: 0 0 14px #fff;
+  animation: kids-speaking-number .85s ease-in-out 2;
+}
+@keyframes kids-speaking-number { 50% { transform: scale(1.1); } }
+
+/* Nur beim Aufruf einer neuen Gruppe. Die Beschriftung bleibt während des Auftritts an ihrem Platz. */
+.kids-show .kids-show-stage .kids-active-group.is-mascot-entering .kids-group-symbol {
+  transform-origin: center;
+  animation: kids-firefly-arrival 2.2s ease-out both;
+  filter: drop-shadow(0 0 10px #ffda68a0);
+}
+.kids-show .is-group-mittis .kids-active-group.is-mascot-entering .kids-group-symbol { animation-name: kids-star-arrival; }
+.kids-show .is-group-maxis .kids-active-group.is-mascot-entering .kids-group-symbol { animation-name: kids-torch-arrival; }
+@keyframes kids-firefly-arrival {
+  0% { opacity: 0; transform: translate(-55px, 14px) scale(.65) rotate(-18deg); }
+  25% { opacity: 1; transform: translate(5px, -8px) scale(1.14) rotate(12deg); }
+  45% { transform: translate(-4px, 3px) scale(1.08) rotate(-10deg); }
+  65% { transform: translate(2px, -5px) scale(1.06) rotate(6deg); }
+  85%, 100% { opacity: 1; transform: none; }
+}
+@keyframes kids-star-arrival {
+  0% { opacity: 0; transform: scale(.4) rotate(-160deg); }
+  35% { opacity: 1; transform: scale(1.2) rotate(12deg); }
+  58% { transform: scale(1.08) rotate(-8deg); }
+  82%, 100% { opacity: 1; transform: none; }
+}
+@keyframes kids-torch-arrival {
+  0% { opacity: 0; transform: translateY(22px) scale(.65); }
+  25% { opacity: 1; transform: translateY(-13px) scale(1.12) rotate(-7deg); }
+  42% { transform: translateY(1px) scale(1.05) rotate(6deg); }
+  60% { transform: translateY(-7px) scale(1.06) rotate(-4deg); }
+  82%, 100% { opacity: 1; transform: none; }
+}
+
+/* Dekorativ und ohne Eingabefläche: Weiterklicken und Wertungskorrekturen bleiben sofort möglich. */
+.kids-points-flight { position: fixed; inset: 0; z-index: 12; pointer-events: none; }
+.kids-points-path { position: absolute; animation: kids-points-travel 1.75s cubic-bezier(.25,.65,.3,1) both; }
+.kids-points-token {
+  position: relative; display: flex; align-items: center; gap: 8px; padding: 8px 15px;
+  transform: translate(-50%, -50%); color: #102d43; background: #ffda68;
+  border: 3px solid #102d43; border-radius: 999px; box-shadow: 0 5px 0 #102d43, 0 0 22px #ffda6870;
+  white-space: nowrap; animation: kids-points-pop 1.75s ease both;
+}
+.kids-points-token b { font-size: clamp(32px, 3.6vw, 68px); font-weight: 900; line-height: 1; }
+.kids-points-token .kids-group-name { display: flex; }
+.kids-points-token .kids-group-name > span { display: none; }
+.kids-points-token .kids-group-name > .kids-group-symbol { width: clamp(32px, 3.2vw, 56px); height: auto; flex-basis: clamp(32px, 3.2vw, 56px); }
+.kids-points-spark { position: absolute; right: -17px; top: -15px; color: #fffdf1; font-size: 29px; text-shadow: 0 2px 0 #102d43; }
+.kids-show:has(.kids-points-flight:not(:empty)) .kids-score-team { animation: kids-score-arrival .45s 1.3s ease-out both; }
+@keyframes kids-points-travel {
+  0%, 28% { transform: translate(0, 0); }
+  55% { transform: translate(calc(var(--flight-x) * .45), calc(var(--flight-y) * .65 - 35px)); }
+  83%, 100% { transform: translate(var(--flight-x), var(--flight-y)); }
+}
+@keyframes kids-points-pop {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.5); }
+  15%, 30% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  80% { opacity: 1; transform: translate(-50%, -50%) scale(.65); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(.25); }
+}
+@keyframes kids-score-arrival { 45% { transform: scale(1.25); text-shadow: 0 0 12px #ffda68; } }
+@media (prefers-reduced-motion: reduce) {
+  .kids-show .kids-show-stage .kids-answers .kids-answer { transition: none; }
+  .kids-show .kids-show-stage .kids-answers .kids-answer.is-speaking { transform: none; }
+  .kids-points-flight { display: none; }
+}
