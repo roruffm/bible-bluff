@@ -26,13 +26,13 @@ describe('Die große Bluff-Jagd', () => {
     game.rounds.slice(0,9).forEach(r=>{positions[r.correctIndex]++; expect(r.answers[r.correctIndex]).toBe(r.question.answer);});
     expect(positions).toEqual([3,3,3]);
   });
-  it('behält Nummer, Farbe und Antwort bei jeder neuen Show und in der Kurzshow bei', () => {
+  it('behält Nummer, Farbe und Antwort bei jeder neuen Show bei', () => {
     // Index 0/1/2 entspricht dem gelben/türkisen/rosa Teppich.
     const expected = [1, 2, 0, 2, 0, 1, 0, 2, 1, 1];
     const reference = createKidsGame(() => 0);
     expect(reference.rounds.map(round => round.correctIndex)).toEqual(expected);
-    for (const short of [false, true]) for (const value of [0, .25, .5, .75, .999]) {
-      const game = createKidsGame(() => value, { short });
+    for (const value of [0, .25, .5, .75, .999]) {
+      const game = createKidsGame(() => value);
       expect(game.rounds.map(round => round.correctIndex)).toEqual(expected);
       expect(game.rounds.map(round => round.answers)).toEqual(reference.rounds.map(round => round.answers));
       for (const round of game.rounds) {

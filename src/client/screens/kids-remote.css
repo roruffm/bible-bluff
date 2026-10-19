@@ -123,7 +123,6 @@
   .is-desktop .kids-remote-more[open] > summary::before { transform: rotate(90deg); }
   .is-desktop .kids-remote-more > summary small { margin-left: auto; font-size: 12px; font-weight: 500; color: #547080; }
   .is-desktop .kids-remote-tools-content { padding: 0 12px 12px; gap: 12px; }
-  .is-desktop .kids-remote-tools-content > .kids-time-plan { margin: 0; }
   .is-desktop .kids-remote-function .kids-final-jump, .is-desktop .kids-remote-function .kids-remote-finish { background: #eef4f6; font-size: 14px; min-height: 42px; }
   .is-desktop .kids-phase-audio.is-compact .kids-audio-clip > p, .is-desktop .kids-quick-audio .kids-audio-clip > p { display: none; }
   .is-desktop .kids-phase-audio.is-compact .kids-soundboard-clips { margin-top: 14px; gap: 10px; }

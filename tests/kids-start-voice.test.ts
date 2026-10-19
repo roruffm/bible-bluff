@@ -4,8 +4,8 @@ import { packKidsGame, unpackKidsGame } from '../src/shared/kids-remote';
 
 describe('Kids: Startansage zum Countdown', () => {
   it('spricht beim Start der Antwortzeit automatisch, auch statt der vorgelesenen Frage', () => {
-    for (const short of [false, true]) for (const index of [0, 9]) {
-      const reading = updateKidsGame({ ...createKidsGame(Math.random, { short }), phase: 'reading', index, results: Array(10).fill(null).map((_, i) => i < index && (!short || i < 3) ? 'correct' : null) }, 'read-question', 1000);
+    for (const index of [0, 9]) {
+      const reading = updateKidsGame({ ...createKidsGame(), phase: 'reading', index, results: Array(10).fill(null).map((_, i) => i < index ? 'correct' : null) }, 'read-question', 1000);
       const started = updateKidsGame(reading, 'start', 2000);
       expect(started).toMatchObject({ phase: 'moving', voicePlaying: true, voiceKind: 'interjection', voiceClip: 'signal-go', voiceCue: `moving:${index}`, voiceSeq: reading.voiceSeq! + 1 });
       const restored = unpackKidsGame(packKidsGame(started, 2500), 2600)!;

@@ -60,7 +60,7 @@ lässt sie sich auch von Hand abspielen.
 Seit dem 17.10.2026 erhält das Kinderteam im Superbluff 20 / 10 / 0 Punkte.
 Professor Bluff erhält in dieser Runde keine neuen Punkte. Die regulären Aufgaben
 behalten 10 / 5 / 0. Beamer, Smartphone, Auflösung und Wertungskorrektur verwenden
-dieselbe Regel, auch in der Kurzshow und nach einem direkten Finalsprung.
+dieselbe Regel, auch nach einem direkten Finalsprung.
 
 Drei neue Aufnahmen verwenden die bestätigte Snorre-Stimme mit
 `eleven_multilingual_v2`. Die gesprochenen Texte wurden per Transkription geprüft,
