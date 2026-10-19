@@ -36,7 +36,7 @@ export function KidsInterlude({ game, chapter, act, disabled, primaryRef }: {
       {finale ? <>
         <div class="kids-final-groups"><KidsGroupName group="minis"/><KidsGroupName group="mittis"/><KidsGroupName group="maxis"/><strong>Alle gemeinsam</strong></div>
         <p>Jetzt sind alle drei Teams zusammen dran.</p>
-        <StoryPicture motif="boat"/>
+        <StoryPicture motif="stage"/>
         <p>Welche Geschichte spielen die Eltern?</p>
         <div class="kids-final-bonuses"><span>Professor Bluff <b>+0</b></span><span>Unser Team <b>bis zu +20</b></span></div>
       </> : <>
