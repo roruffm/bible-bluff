@@ -63,6 +63,25 @@ const server = http.createServer(async (req, res) => {
     const type = TYPES[extname(file)] ?? 'application/octet-stream';
     res.setHeader('content-type', type);
     res.setHeader('cache-control', file.includes('/assets/') ? 'public, max-age=31536000, immutable' : 'no-cache');
+    // Videoplayer laden und suchen mit Byte-Ranges, auch beim Neustart und Fortsetzen.
+    if (extname(file) === '.mp4') {
+      const size = statSync(file).size;
+      res.setHeader('accept-ranges', 'bytes');
+      const range = req.headers.range;
+      if (range) {
+        const match = /^bytes=(\d*)-(\d*)$/.exec(range);
+        const start = match?.[1] ? Number(match[1]) : match?.[2] ? Math.max(0, size - Number(match[2])) : NaN;
+        const end = match?.[1] && match[2] ? Math.min(size - 1, Number(match[2])) : size - 1;
+        if (!Number.isSafeInteger(start) || start < 0 || start >= size || !Number.isSafeInteger(end) || end < start) {
+          res.writeHead(416, { 'content-range': `bytes */${size}` }); return res.end();
+        }
+        res.writeHead(206, { 'content-range': `bytes ${start}-${end}/${size}`, 'content-length': end - start + 1 });
+        if (req.method === 'HEAD') return res.end();
+        return createReadStream(file, { start, end }).pipe(res);
+      }
+      res.setHeader('content-length', size);
+      if (req.method === 'HEAD') return res.end();
+    }
     createReadStream(file).pipe(res);
   } catch (err) {
     console.error(err);

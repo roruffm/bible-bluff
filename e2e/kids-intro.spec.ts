@@ -33,6 +33,8 @@ test('Erklärvideo: Smartphone steuert nur den Beamer; Pause, Ende und Spielstar
     // Dieselbe Fernbedienung auch am Desktop; keine zusätzliche Medienwiedergabe.
     await phone.setViewportSize({ width: 1440, height: 900 });
     await expect(phone.getByRole('button', { name: 'Video beenden', exact: false })).toBeVisible();
+    await film.evaluate((el: HTMLVideoElement) => { el.currentTime = 10; });
+    await expect.poll(() => film.evaluate((el: HTMLVideoElement) => el.currentTime)).toBeGreaterThan(9);
     await phone.getByRole('button', { name: 'Video von vorne', exact: false }).click();
     await expect.poll(() => film.evaluate((el: HTMLVideoElement) => el.currentTime)).toBeLessThan(4);
     // Das echte Ende des Films gibt die Begrüßung wieder frei.
@@ -47,7 +49,7 @@ test('Erklärvideo: Smartphone steuert nur den Beamer; Pause, Ende und Spielstar
 
 test('Erklärvideo: Mausbedienung kann wiederholen und abbrechen; die Kinder sehen keine Videoknöpfe', async ({ page }) => {
   await page.goto('/kids');
-  await page.getByRole('button', { name: 'Show vorbereiten', exact: true }).click();
+  await page.getByRole('button', { name: 'Show vorbereiten', exact: false }).click();
   await expect(page.getByRole('button', { name: 'Erklärvideo am Beamer abspielen', exact: false })).toBeHidden();
   await showKidsOperator(page);
   await page.getByRole('button', { name: 'Erklärvideo am Beamer abspielen', exact: false }).click();

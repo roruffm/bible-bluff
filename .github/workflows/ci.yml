@@ -20,6 +20,10 @@ jobs:
       - run: npm test
       - run: npm run build
       - run: npx playwright install --with-deps chromium chrome
-      - run: npm run test:e2e -- --max-failures=1
+      - name: Check Kids intro video playback
+        run: npm run test:e2e -- e2e/kids-intro.spec.ts --max-failures=1
+        env:
+          CI: 'true'
+      - run: npm run test:e2e -- --max-failures=1 --grep-invert 'Erklärvideo:'
         env:
           CI: 'true'
