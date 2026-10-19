@@ -132,7 +132,7 @@ export function updateKidsGame(game: KidsGame, action: KidsAction, now: number):
     if (action === 'play-intro' && video?.playing) return game;
     return { ...game, voiceSeq: (game.voiceSeq ?? 0) + 1, voicePlaying: false, voiceCue: null,
       introVideo: { playing: action !== 'pause-intro', positionMs: action === 'restart-intro' || !video ? 0 : kidsIntroPosition(video, now),
-        startedAt: action === 'pause-intro' ? null : now, sequence: (video?.sequence ?? 0) + 1 } };
+        startedAt: action === 'pause-intro' ? null : now, sequence: (video?.sequence ?? 0) + 1, fromStart: action === 'restart-intro' || !video } };
   }
   // Erst das Video beenden; weder Tastatur noch Zusatzaudio dürfen die Erklärung unterbrechen.
   if (game.introVideo) {

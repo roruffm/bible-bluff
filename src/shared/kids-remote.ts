@@ -76,7 +76,8 @@ function unpack(value: unknown, now: number): KidsGame {
     if (phase !== 'welcome' || !game.introVideo || typeof game.introVideo !== 'object') return invalid();
     const video = game.introVideo as Record<string, unknown>;
     if (typeof video.playing !== 'boolean' || typeof video.positionMs !== 'number' || !Number.isFinite(video.positionMs) || video.positionMs < 0 || video.positionMs > KIDS_INTRO_DURATION_MS || !Number.isSafeInteger(video.sequence) || Number(video.sequence) < 1 || Number(video.sequence) > 1_000_000) return invalid();
-    introVideo = { playing: video.playing, positionMs: video.positionMs, startedAt: video.playing ? now : null, sequence: Number(video.sequence) };
+    if (video.fromStart !== undefined && typeof video.fromStart !== 'boolean') return invalid();
+    introVideo = { playing: video.playing, positionMs: video.positionMs, startedAt: video.playing ? now : null, sequence: Number(video.sequence), fromStart: video.fromStart === true };
   }
   if (!Number.isSafeInteger(voiceSeq) || Number(voiceSeq) < 0 || Number(voiceSeq) > 1000000 || typeof voicePlaying !== 'boolean' || !['quote','question','answers','interjection'].includes(voiceKind as string)) return invalid();
   if ((voiceClip !== null && !professorInterjection(voiceClip)) || (voiceKind === 'interjection' && !professorInterjection(voiceClip))) return invalid();

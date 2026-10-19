@@ -51,7 +51,7 @@ export function KidsIntroVideo({ game, act, onError }: { game: KidsGame | null; 
       if (!active || !next) { element.pause(); return; }
       const position = kidsIntroPosition(next, Date.now());
       // Ein frischer Start soll trotz der kurzen Fernbedienungs-Laufzeit das ganze Intro zeigen.
-      element.currentTime = next.playing && position < 2500 ? 0 : position / 1000;
+      element.currentTime = next.playing && next.fromStart && position < 2500 ? 0 : position / 1000;
       if (next.playing) void element.play().catch(fail);
       else element.pause();
     };

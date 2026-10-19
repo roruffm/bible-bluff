@@ -14,8 +14,10 @@ describe('Erklärvideo am Spielbeginn', () => {
     game = updateKidsGame(game, 'pause-intro', 7000);
     expect(game.introVideo).toMatchObject({ playing: false, positionMs: 5000, startedAt: null });
     game = updateKidsGame(game, 'play-intro', 20_000);
+    expect(game.introVideo?.fromStart).toBe(false);
     expect(kidsIntroPosition(game.introVideo!, 21_000)).toBe(6000);
     game = updateKidsGame(game, 'restart-intro', 22_000);
+    expect(game.introVideo?.fromStart).toBe(true);
     expect(kidsIntroPosition(game.introVideo!, 22_000)).toBe(0);
     game = updateKidsGame(game, 'stop-intro', 23_000);
     expect(game.introVideo).toBeUndefined();
