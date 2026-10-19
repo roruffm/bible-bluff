@@ -3,8 +3,9 @@ import { useId } from 'preact/hooks';
 import type { StoryMotif } from '../../shared/kids-show-questions';
 import { Cheek, Cloud, Eye, Face, Flower, Frown, Happy, Hull, Kid, Manger, Smile, Spark, Star, Sun, type At } from './KidsCuteParts';
 
-/** Neben den Antwortbildern gibt es die Bühne vor dem Superbluff: Sie verrät keine der drei Geschichten. */
-export type KidsPictureMotif = StoryMotif | 'stage';
+/** Neben den Antwortbildern: die Bühne vor dem Superbluff (verrät keine der drei Geschichten),
+ * die Bilder der drei Gruppen (wie ihr Symbol) und je ein Bild für die drei Kapitel. */
+export type KidsPictureMotif = StoryMotif | 'stage' | 'firefly' | 'star' | 'torch' | 'clue' | 'map' | 'flag';
 
 const Coin = ({ x, y, r = 16 }: { x: number; y: number; r?: number }) => <>
   <circle cx={x} cy={y} r={r} fill="#ffd24a"/><circle cx={x} cy={y} r={r * .66} fill="none" stroke="#e0a72a" stroke-width="2.5"/>
@@ -254,6 +255,73 @@ const PICTURES: Record<KidsPictureMotif, Picture> = {
     <path d="M24 68 110 26l86 42" fill="none" stroke="#c98d55" stroke-width="10"/>
     <Kid x={54} y={66} s={.8} robe="#8cbcf2" hood="#8cbcf2"/><Kid x={166} y={66} s={.8} robe="#c99467" beard="#8a5a3c"/>
     <Manger x={110} y={100} s={.85}/>
+  </> },
+  firefly: { art: () => <>
+    <Sky fill="#34437a"/>
+    {[[22, 22], [58, 14], [150, 30], [204, 44], [34, 58], [176, 62]].map(([x, y]) => <Star key={x} x={x} y={y}/>)}
+    <path d="M188 14a13 13 0 1 0 12 20 10 10 0 1 1-12-20z" fill="#fff3b8" stroke-width="2.5"/>
+    <path d="M0 112q55-12 110-4t110-4V140H0z" fill="#5e8f6b"/>
+    <path d="M22 112l-3-10m9 10 2-12m162 8-2-10m8 12 3-9" fill="none" stroke="#86bd7f" stroke-width="3"/>
+    <circle cx="110" cy="70" r="42" fill="#fff0a3" stroke="none" opacity=".22"/>
+    <g transform="translate(110 70)">
+      <ellipse cx="-20" cy="-12" rx="19" ry="11" fill="#e8fbff" stroke="#176a67" stroke-width="2.5" transform="rotate(-28 -20 -12)"/>
+      <ellipse cx="20" cy="-12" rx="19" ry="11" fill="#e8fbff" stroke="#176a67" stroke-width="2.5" transform="rotate(28 20 -12)"/>
+      <ellipse cx="0" cy="18" rx="15" ry="14" fill="#fff0a3"/><ellipse cx="0" cy="21" rx="8" ry="7" fill="#ffe27a" stroke="none"/>
+      <ellipse cx="0" cy="0" rx="16" ry="14" fill="#a6e1db"/>
+      <circle cx="0" cy="-20" r="16" fill="#a6e1db"/>
+      <path d="M-6 -34q-6-9-12-11m24 11q6-9 12-11" fill="none" stroke-width="2.5"/><circle cx="-18" cy="-46" r="3.5" fill="#ffe27a" stroke-width="2"/><circle cx="18" cy="-46" r="3.5" fill="#ffe27a" stroke-width="2"/>
+      <Face x={0} y={-21} s={.6}/>
+    </g>
+    {[[52, 78], [66, 100], [160, 62], [176, 94], [146, 102]].map(([x, y]) => <circle key={x} cx={x} cy={y} r="3" fill="#fff0a3" stroke="none"/>)}
+  </> },
+  star: { art: () => <>
+    <Sky fill="#4a5a96"/>
+    {[[24, 26], [58, 70], [160, 18], [196, 66], [86, 16]].map(([x, y]) => <Star key={x} x={x} y={y}/>)}
+    <circle cx="110" cy="62" r="50" fill="#fff6c2" stroke="none" opacity=".2"/>
+    <path d={`M${Array.from({ length: 10 }, (_, i) => { const r = i % 2 ? 17 : 40, a = -Math.PI / 2 + i * Math.PI / 5; return `${110 + Math.cos(a) * r} ${62 + Math.sin(a) * r}`; }).join('L')}z`} fill="#ffd96a" stroke-width="4"/>
+    <Face x={110} y={64} s={.72}/>
+    {[[30, 128, 18], [62, 120, 22], [98, 124, 20], [134, 118, 24], [170, 124, 20], [200, 128, 18]].map(([x, y, r]) => <circle key={`o${x}`} cx={x} cy={y} r={r} fill="#fffdf6"/>)}
+    {[[30, 128, 18], [62, 120, 22], [98, 124, 20], [134, 118, 24], [170, 124, 20], [200, 128, 18]].map(([x, y, r]) => <circle key={`i${x}`} cx={x} cy={y} r={r} fill="#fffdf6" stroke="none"/>)}
+    <Spark x={40} y={44} r={8}/><Spark x={184} y={42} r={7}/><Spark x={170} y={92} r={6}/>
+  </> },
+  torch: { art: () => <>
+    <Sky fill="#574f8a"/>
+    {[[24, 22], [56, 46], [170, 16], [200, 52], [40, 80]].map(([x, y]) => <Star key={x} x={x} y={y}/>)}
+    <path d="M0 116l40-28 30 18 40-30 44 28 30-16 36 22V140H0z" fill="#46407a"/>
+    <circle cx="110" cy="50" r="44" fill="#ffb547" stroke="none" opacity=".22"/>
+    <path d="M101 76l5 58h8l5-58z" fill="#c99467"/>
+    <path d="M110 8q32 22 27 46-3 16-27 16t-27-16q-5-24 27-46z" fill="#ff9a4a"/>
+    <path d="M110 26q18 15 15 30-2 9-15 9t-15-9q-3-15 15-30z" fill="#ffd96a" stroke-width="2.5"/>
+    <Face x={110} y={50} s={.5}/>
+    <path d="M86 64h48l-7 16H93z" fill="#e0a72a"/><path d="M90 71h40" stroke="#c98d55" stroke-width="2.5"/>
+    <Spark x={74} y={30} r={6} fill="#ffe27a"/><Spark x={148} y={22} r={7} fill="#ffe27a"/><Spark x={156} y={58} r={5} fill="#ffe27a"/>
+  </> },
+  clue: { scene: 'meadow', art: () => <>
+    {[[26, 128, -20], [40, 122, -20], [58, 120, -30], [70, 112, -30], [88, 110, -40]].map(([x, y, a]) => <ellipse key={x} cx={x} cy={y} rx="4" ry="6.5" fill="#6f9a5e" stroke="none" transform={`rotate(${a} ${x} ${y})`}/>)}
+    <path d="M150 96l28 28" stroke-width="16"/><path d="M150 96l28 28" stroke="#c99467" stroke-width="9"/>
+    <circle cx="128" cy="70" r="36" fill="#ffd96a"/><circle cx="128" cy="70" r="26" fill="#d8f4ff"/>
+    <path d="M110 60q4-12 16-14" fill="none" stroke="#fff" stroke-width="4"/>
+    <Face x={128} y={72} s={.7}/>
+    <Spark x={80} y={34} r={8}/><Spark x={186} y={40} r={6}/><Spark x={180} y={92} r={5}/>
+  </> },
+  map: { scene: 'table', art: () => <>
+    <path d="M28 30q41-8 82 0t82 0v82q-41 8-82 0t-82 0z" fill="#fff1c9"/>
+    <path d="M83 26v86m54-84v86" stroke="#ead9b5" stroke-width="2.5"/>
+    <path d="M52 92q20-30 48-18t44-30 30-12" fill="none" stroke="#e65f78" stroke-width="3" stroke-dasharray="2 7"/>
+    <path d="M168 26l12 12m0-12-12 12" stroke="#e65f78" stroke-width="4"/>
+    <path d="M58 58v8" stroke="#c99467" stroke-width="3"/><circle cx="58" cy="52" r="8" fill="#9fdc8a" stroke-width="2.5"/>
+    <path d="M38 98h20v-10l-10-8-10 8z" fill="#ffe08f" stroke-width="2.5"/>
+    <circle cx="148" cy="62" r="9" fill="#e6d5fa" stroke-width="2.5"/><text x="148" y="67" text-anchor="middle" font-size="13" font-weight="900" fill="#7134aa" stroke="none">?</text>
+    <circle cx="184" cy="104" r="20" fill="#ffd96a"/><circle cx="184" cy="104" r="14" fill="#fffdf6" stroke-width="2.5"/>
+    <Face x={184} y={105} s={.42}/>
+  </> },
+  flag: { scene: 'sky', art: () => <>
+    <path d="M80 126V22" stroke-width="10"/><path d="M80 126V22" stroke="#c99467" stroke-width="5"/>
+    <path d="M82 28q20-8 40 0t40 0v50q-20-8-40 0t-40 0z" fill="#fffdf6"/>
+    <g fill="#12324a" stroke="none">{[[86, 31], [124, 31], [105, 53], [143, 53]].map(([x, y]) => <rect key={x} x={x} y={y} width="17" height="20" rx="2"/>)}</g>
+    <circle cx="80" cy="18" r="11" fill="#ffd96a"/><Face x={80} y={18} s={.38}/>
+    {[[40, 40, '#ff9fb4'], [184, 30, '#9fe0c8'], [190, 92, '#ffd96a'], [44, 96, '#8cbcf2'], [170, 110, '#ff9fb4']].map(([x, y, c]) => <rect key={`${x}`} x={Number(x) - 4} y={Number(y) - 3} width="8" height="6" rx="1.5" fill={String(c)} stroke-width="1.6" transform={`rotate(${Number(x) % 50} ${x} ${y})`}/>)}
+    <Spark x={130} y={98} r={7}/><Spark x={30} y={70} r={6}/>
   </> },
   stage: { art: () => <>
     <Sky fill="#4a4a86"/>

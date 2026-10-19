@@ -1,5 +1,6 @@
 import { KidsGroupName } from './KidsGroupName';
 import { ProfessorHead, StoryPicture } from './KidsShow';
+import { Face } from './KidsCuteParts';
 import type { KidsRound } from '../../shared/kids-game';
 import { KIDS_CHEERS, kidsAnswerPicture, type KidsGroup } from '../../shared/kids-show-questions';
 import './kids-bluff.css';
@@ -23,6 +24,17 @@ export function KidsCheers({ active }: { active: Exclude<KidsGroup, 'all'> }) {
   return <span class="kids-cheers">{(['minis', 'mittis', 'maxis'] as const).filter(group => group !== active).map(group =>
     <span key={group} class="kids-cheer" data-group={group}><span class="kids-cheer-icon" aria-hidden="true">{KIDS_CHEERS[group].icon}</span><KidsGroupName group={group}/> {KIDS_CHEERS[group].verb}</span>)}
   </span>;
+}
+
+const octagon = (r: number) => Array.from({ length: 8 }, (_, i) => { const a = (22.5 + i * 45) * Math.PI / 180; return `${60 + Math.cos(a) * r} ${58 + Math.sin(a) * r}`; }).join('L');
+/** Freundliches Stoppschild, sobald die Antwortzeit vorbei ist; links und rechts der Frage. */
+export function KidsStopSign({ side }: { side: 'left' | 'right' }) {
+  return <svg class={`kids-stop-sign is-${side}`} viewBox="0 0 120 150" aria-hidden="true"><g stroke="#12324a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M54 104h12v42H54z" fill="#b9c3cc"/>
+    <path d={`M${octagon(54)}z`} fill="#ff6b6b"/><path d={`M${octagon(46)}z`} fill="none" stroke="#fff" stroke-width="3"/>
+    <Face x={60} y={37} s={.7}/>
+    <text x="60" y="79" text-anchor="middle" font-size="21" font-weight="900" fill="#fff" stroke="none">STOPP</text>
+  </g></svg>;
 }
 
 /** Große Zahl zum lauten Mitzählen in den letzten fünf Sekunden. */
