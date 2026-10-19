@@ -6,6 +6,7 @@ import { useKidsRemote } from '../lib/kids-remote';
 import { KidsFinishDialog } from '../components/KidsFinish';
 import { KidsLogo } from '../components/KidsLogo';
 import { KidsPhaseAudio, KidsSoundboard } from '../components/KidsSoundboard';
+import { KidsIntroControls } from '../components/KidsIntroVideo';
 import { kidsClaimPhase, professorSays, ShowControls, StoryPicture } from '../components/KidsShow';
 import './kids.css';
 import './kids-remote.css';
@@ -63,7 +64,7 @@ export function KidsControlPage() {
           const next = event.key === 'ArrowRight' ? (index + 1) % tabs.length : event.key === 'ArrowLeft' ? (index + tabs.length - 1) % tabs.length : event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1 : null;
           if (next === null) return; event.preventDefault(); selectTab(tabs[next].id); document.getElementById(`kids-tab-${tabs[next].id}`)?.focus();
         }}>{item.label}</button>)}</nav>}
-        <button type="button" class="kids-remote-stop" disabled={disabled} onClick={() => { void remote.send('stop-speech'); }}>■ Professor-Audio stoppen</button>
+        <button type="button" class="kids-remote-stop" disabled={disabled || !!game.introVideo} onClick={() => { void remote.send('stop-speech'); }}>■ Professor-Audio stoppen</button>
       </div>
       <div class="kids-remote-dashboard">
         <div class="kids-remote-main">
@@ -71,14 +72,15 @@ export function KidsControlPage() {
           {desktop && <div class="kids-remote-column-title"><h2 id="kids-flow-title">Spiel steuern</h2></div>}
           {game.phase !== 'finished' && <div class="kids-remote-question"><span>{game.index === 9 ? 'SUPERBLUFF' : `Kapitel ${Math.floor(game.index / 3) + 1}: ${KIDS_CHAPTERS[Math.min(2, Math.floor(game.index / 3))]}`}</span><h2>{round.question.prompt}</h2>{desktop && renderAnswers(true)}{desktop && kidsClaimPhase(game.phase) && <div class="kids-audio-claim"><b>Professor-Tipp · selbst vorlesen</b><p>{professorSays(game)}</p></div>}{game.index === 9 && <p>Finale: Kinderteam 20 / 10 / 0 Punkte · Professor Bluff +0</p>}</div>}
           <section class="kids-remote-step" aria-labelledby="kids-next-step"><h2 id="kids-next-step">{!desktop && <span>1</span>} {desktop ? 'Nächster Schritt' : 'Jetzt steuern'}</h2><p>{direction}</p>
-            <div class="kids-remote-actions">{game.phase === 'finished' ? <div class="kids-remote-farewell"><h2>Gemeinsam seid ihr stark!</h2><p>{scores!.playedRounds} {scores!.playedRounds === 1 ? 'Aufgabe gewertet' : 'Aufgaben gewertet'}. Der Abschluss bleibt stehen.</p></div> : <ShowControls game={game} act={action => { void remote.send(action); }} disabled={disabled}/>}
+            <KidsIntroControls game={game} disabled={disabled} act={action => { void remote.send(action); }}/>
+            <div class="kids-remote-actions">{game.phase === 'finished' ? <div class="kids-remote-farewell"><h2>Gemeinsam seid ihr stark!</h2><p>{scores!.playedRounds} {scores!.playedRounds === 1 ? 'Aufgabe gewertet' : 'Aufgaben gewertet'}. Der Abschluss bleibt stehen.</p></div> : <ShowControls game={game} act={action => { void remote.send(action); }} disabled={disabled || !!game.introVideo}/>}
               {kidsCanSkipCountdown(game) && <button type="button" class="kids-tool kids-skip-countdown" aria-label="Countdown überspringen" disabled={disabled} onClick={() => { void remote.send('skip-countdown'); }}>{!desktop && '⏭ '}Countdown überspringen</button>}
               {back && <button type="button" class="kids-tool kids-remote-back" disabled={disabled} onClick={() => { void remote.send('back'); }}>← Zurück {backTargets[back.phase]}</button>}
             </div>
             {back && backNote && <p class="kids-remote-back-note">{backNote}</p>}
             {game.phase === 'revealed' && lastScored >= 0 && <button type="button" class="kids-remote-correct-link" onClick={() => selectTab('tools')}>Letzte Wertung ändern</button>}
           </section>
-          {!desktop && <KidsPhaseAudio game={game} disabled={disabled} send={remote.send}/>}
+          {!desktop && <KidsPhaseAudio game={game} disabled={disabled || !!game.introVideo} send={remote.send}/>}
           {game.phase !== 'finished' && <details class="kids-remote-direction kids-remote-guide" key={`${game.phase}:${game.index}`} open={!desktop && (game.phase === 'locked' || game.phase === 'judging')}><summary>{desktop ? 'Regiehinweis' : 'Antworten & Regiehinweis · nur für Helfer'}</summary>
             <p><KidsGroupText text={round.question.direction}/></p>
             {game.phase === 'welcome' && <p>Mehrheit richtig = 10, mindestens ein Kind richtig = 5, keiner richtig = 0. Professor +{KIDS_PROFESSOR_POINTS} je regulärer Aufgabe. Finale: Kinder 20 / 10 / 0, Professor +0. Niemand scheidet aus.</p>}
@@ -108,8 +110,8 @@ export function KidsControlPage() {
         </section>}
         </div>
         {(desktop || tab === 'audio') && <section key="audio" id="kids-panel-audio" class="kids-remote-panel kids-remote-audio" role={desktop ? 'region' : 'tabpanel'} aria-labelledby={desktop ? 'kids-audio-title' : 'kids-tab-audio'} tabIndex={desktop ? -1 : 0}>
-          {desktop && <><div class="kids-remote-column-title"><h2 id="kids-audio-title">Professor-Audios</h2></div><KidsPhaseAudio game={game} disabled={disabled} send={remote.send} compact/></>}
-          <KidsSoundboard game={game} disabled={disabled} send={remote.send} compact={desktop}/>
+          {desktop && <><div class="kids-remote-column-title"><h2 id="kids-audio-title">Professor-Audios</h2></div><KidsPhaseAudio game={game} disabled={disabled || !!game.introVideo} send={remote.send} compact/></>}
+          <KidsSoundboard game={game} disabled={disabled || !!game.introVideo} send={remote.send} compact={desktop}/>
         </section>}
       </div>
       {!desktop && scoreboard}

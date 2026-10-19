@@ -495,3 +495,9 @@ Die Leinwand zeigt bis zu zwölf Personen ohne lange Seitenstapel. Am Endstand w
 Ungesendete Bluff-Entwürfe liegen im `sessionStorage` des aktuellen Browser-Tabs, getrennt nach Raum, Person und stabiler Rundenkennung. Neuladen und Pausen erhalten sie. Erfolgreiche Abgabe, eine neue Frage und das Rundenende entfernen den alten Entwurf. Bereits vom Server bestätigte Texte werden auch nach einer verlorenen HTTP-Antwort als abgeschickt erkannt.
 
 Aktionen ohne eigenen Fehlerbereich zeigen bei Fehlern einen bleibenden Hinweis mit „Erneut versuchen“. Vor der Wiederholung wird der Serverstand abgefragt. Hat sich die Phase bereits geändert, wird die alte Aktion nicht erneut gesendet. Formulare und Leitungsmenü behalten ihre Rückmeldungen direkt am Eingabebereich.
+
+### Erklärvideo zu Beginn der Kids-Show
+
+Nach „Show vorbereiten“ zeigt die Fernbedienung im Bereich „Ablauf“ den lila Knopf „Erklärvideo am Beamer abspielen“. Auf dem Desktop steht er unter „Nächster Schritt“. Bild und Ton laufen nur am Beamer. Pause, Fortsetzen, Neustart und Beenden stehen derselben Spielleitung zur Verfügung. Nach dem Film erscheint wieder die Begrüßung; „Mission starten“ beginnt anschließend das Spiel. In der Mausbedienung (H) stehen dieselben Videoknöpfe. Während des Films warten die Spielschritte und die Professor-Audios.
+
+Die Vorbereitung nimmt die Videodatei in die Offline-Kopie auf; die Smartphone-Fernbedienung benötigt weiterhin Internet.

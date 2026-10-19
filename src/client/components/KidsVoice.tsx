@@ -27,7 +27,7 @@ export function KidsVoiceProvider({ game, enabled, enable, act, busy, onError, c
     const requested=previous.current !== null && sequence !== previous.current;
     previous.current=sequence;
     // Ein Seitenaufruf, Phasenwechsel oder erneutes Verbinden löst keine Sprache aus.
-    if (!requested || !game.voicePlaying || (!key && game.voiceKind !== 'answers') || game.voiceCue!==`${game.phase}:${game.index}`) return;
+    if (game.introVideo || !requested || !game.voicePlaying || (!key && game.voiceKind !== 'answers') || game.voiceCue!==`${game.phase}:${game.index}`) return;
     // Die automatische Startansage meldet keinen Fehler, wenn der Klang am Beamer bewusst aus ist.
     if (!enabled) { if (game.voiceClip !== 'signal-go') onError('Professor-Ton am Beamer unter „Bedienung → Klang einschalten“ aktivieren. Danach den Spruch erneut starten.'); return; }
     const controller=new AbortController(); playback.current=controller; setPlaying(game.voiceKind ?? 'quote');
