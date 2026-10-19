@@ -23,20 +23,31 @@ test('Antworten: Smartphone und Desktop lesen alle drei gemischten Felder am Bea
   const answers=await page.locator('.kids-answer-text').allTextContents();
   const q=KIDS_SHOW_QUESTIONS[0],canonical=[q.answer,...q.distractors];
   const expected=answers.flatMap((a,field)=>[`answer-number-0-${field}`,`answer-0-${canonical.indexOf(a)}`]);
+  await page.evaluate(() => {
+    const fields: string[] = [];
+    Object.assign(window, { spokenFields: fields });
+    new MutationObserver(() => {
+      const field = document.querySelector('.kids-answer.is-speaking .kids-number')?.textContent;
+      if (field && fields.at(-1) !== field) fields.push(field);
+    }).observe(document.querySelector('.kids-answers')!, { subtree:true, attributes:true });
+  });
   await remote.getByRole('button',{name:'Antworten vorlesen',exact:false}).click();
   await expect.poll(async()=>(await professorAudio(page)).played,{timeout:20000}).toEqual(expected);
+  await expect.poll(() => page.evaluate(() => (window as unknown as {spokenFields:string[]}).spokenFields)).toEqual(['1','2','3']);
   await expect(page.locator('.kids-clock-left')).toHaveAttribute('aria-label','30 Sekunden');
   await remote.setViewportSize({width:1440,height:900});
   await remote.getByRole('button',{name:'Antworten vorlesen',exact:false}).click();
   await expect.poll(async()=>(await professorAudio(page)).starts).toBeGreaterThanOrEqual(7);
   await remote.getByRole('button',{name:'Professor-Audio stoppen',exact:false}).click();
   await expect.poll(async()=>(await professorAudio(page)).stops).toBeGreaterThan(0);
+  await expect(page.locator('.kids-answer.is-speaking')).toHaveCount(0);
   const stopped=(await professorAudio(page)).starts;
   await page.waitForTimeout(1200);expect((await professorAudio(page)).starts).toBe(stopped);
   await remote.getByRole('button',{name:'Antworten vorlesen',exact:false}).click();
   await expect.poll(async()=>(await professorAudio(page)).starts).toBeGreaterThanOrEqual(stopped+1);
   await remote.getByRole('button',{name:'30 Sekunden starten',exact:true}).click();
   await expect.poll(async()=>(await professorAudio(page)).played.at(-1)).toBe('interjection-signal-go');
+  await expect(page.locator('.kids-answer.is-speaking')).toHaveCount(0);
   await expect(remote.getByRole('button',{name:'Antworten vorlesen',exact:false})).toHaveCount(0);
   expect(remoteAudio).toEqual([]);
   await context.close();
