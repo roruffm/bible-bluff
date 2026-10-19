@@ -4,18 +4,36 @@ import type { ComponentChildren } from 'preact';
 import { useLayoutEffect, useRef } from 'preact/hooks';
 import { kidsScores, type KidsGame } from '../../shared/kids-game';
 import { ProfessorBluff, professorSays } from './KidsShow';
+import { Face, Spark } from './KidsCuteParts';
+
+/** Aufkleber über dem Endstand: ein Pokal, wenn das Team vorne liegt, sonst ein Herz. Beides ist ein Lob. */
+function EndingSticker({ won }: { won:boolean }) {
+  return <svg class="kids-ending-sticker" viewBox="0 0 120 120" aria-hidden="true" data-sticker={won ? 'trophy' : 'heart'}><g stroke="#12324a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+    {won ? <>
+      <path d="M32 34q-20 0-20 16t24 18m52-34q20 0 20 16t-24 18" fill="none" stroke-width="11"/><path d="M32 34q-20 0-20 16t24 18m52-34q20 0 20 16t-24 18" fill="none" stroke="#ffd24a" stroke-width="5"/>
+      <path d="M52 76h16v12H52z" fill="#f0b83c"/><rect x="36" y="86" width="48" height="16" rx="6" fill="#e0a72a"/>
+      <path d="M30 20h60v22q0 34-30 34T30 42z" fill="#ffd96a"/><path d="M41 30q-1 18 8 30" fill="none" stroke="#fff6c2" stroke-width="4"/>
+      <Face x={60} y={44} s={.8}/>
+    </> : <>
+      <path d="M60 102Q14 74 14 46q0-22 22-22 15 0 24 15 9-15 24-15 22 0 22 22 0 28-46 56z" fill="#ff8ea8"/><path d="M28 44q0-10 10-12" fill="none" stroke="#ffd0dc" stroke-width="4"/>
+      <Face x={60} y={56} s={.85}/>
+    </>}
+    <Spark x={16} y={18} r={8}/><Spark x={106} y={22} r={7}/><Spark x={104} y={96} r={6}/>
+  </g></svg>;
+}
 
 export function KidsFinish({ game, children }: { game:KidsGame; children?:ComponentChildren }) {
   const s=kidsScores(game);
   return <section class="kids-ending" aria-labelledby="kids-ending-title">
-    <header><p class="kids-eyebrow">EURE GEMEINSAME BLUFF-JAGD</p><h1 id="kids-ending-title">Gemeinsam seid ihr stark!</h1><div class="kids-ending-groups" aria-label="Ein großer Applaus für alle drei Gruppen">{(['minis','mittis','maxis'] as const).map(group=><KidsGroupName key={group} group={group}/>)}</div></header>
-    <div class="kids-ending-host"><ProfessorBluff mood="kind" motion="bow"/><blockquote>{professorSays(game)}</blockquote><span class="kids-professor-signature">Professor Bluff <KidsVoiceButton/></span></div>
+    <header><h1 id="kids-ending-title">Gemeinsam seid ihr stark!</h1><div class="kids-ending-groups" aria-label="Ein großer Applaus für alle drei Gruppen">{(['minis','mittis','maxis'] as const).map(group=><KidsGroupName key={group} group={group}/>)}</div></header>
+    <div class="kids-ending-host"><blockquote>{professorSays(game)}</blockquote><ProfessorBluff mood="kind" motion="bow"/><span class="kids-professor-signature">Professor Bluff <KidsVoiceButton/></span></div>
     <div class="kids-ending-results" aria-label="Endpunktestand">
-      <div class="kids-ending-team"><span>UNSER TEAM</span><strong data-testid="team-score">{s.team}</strong><b>gemeinsam gesammelte Punkte</b></div>
-      <span class="kids-ending-colon" aria-hidden="true">:</span><div class="kids-ending-professor"><span>PROFESSOR BLUFF</span><strong data-testid="prof-score">{s.professor}</strong><b>Punkte</b></div>
+      <EndingSticker won={s.team > s.professor}/>
+      <div class="kids-ending-team"><span>UNSER TEAM</span><strong data-testid="team-score">{s.team}</strong></div>
+      <span class="kids-ending-colon" aria-hidden="true">:</span><div class="kids-ending-professor"><span>PROFESSOR BLUFF</span><strong data-testid="prof-score">{s.professor}</strong></div>
       <p class="kids-ending-count">{s.playedRounds === 0 ? 'Danke, dass ihr dabei seid!' : `${s.playedRounds} ${s.playedRounds === 1 ? 'Aufgabe gemeinsam gespielt' : 'Aufgaben gemeinsam gespielt'}`}</p>
     </div>
-    <footer><h2>Noch viel Spaß bei Hello King!</h2><p>Bei Jesus sind wir willkommen.</p><small>Jesus lädt die Kinder zu sich ein. · Markus 10,14</small><div class="kids-finale-seal"><span aria-hidden="true">♥</span> ALLE GEHÖREN DAZU <span aria-hidden="true">♥</span></div></footer>
+    <footer><p>Bei Jesus sind wir willkommen.</p><small>Jesus lädt die Kinder zu sich ein. · Markus 10,14</small><h2>Noch viel Spaß bei Hello King!</h2></footer>
     {children}
   </section>;
 }
