@@ -17,44 +17,92 @@
 .kids-cinema-controls .kids-button { font-size: clamp(15px,1.5vw,26px); padding: 10px 18px; }
 .is-projecting .kids-cinema-controls { display: none; }
 .is-projecting .kids-cinema footer { justify-content: center; }
-/* Jede Bewegung startet auch nach Neuladen an derselben Stelle der Szene. */
-.kids-cinema-art .scene-raindrop { animation: cinema-rain .85s linear infinite; animation-delay: var(--drop-delay); }
-.kids-cinema-art .scene-wave-lines { animation: cinema-wave 1.6s ease-in-out infinite alternate; }
-.scene-ark .scene-hammer-arm { transform-origin: 65px 100px; animation: cinema-hammer .6s ease-in-out infinite; }
-.scene-ark .scene-animal-board { animation: cinema-board 10s linear both; animation-delay: var(--scene-offset); }
-.scene-ark .scene-ark-ship { animation: cinema-ark 10s ease-in-out both; animation-delay: var(--scene-offset); transform-origin: 570px 390px; }
-.scene-ark .scene-onboard,.scene-ark .scene-ark-weather,.scene-ark .scene-animal-board { opacity: 0; }
-.scene-ark.beat-1 .scene-animal-board,.scene-ark.beat-2 .scene-onboard,.scene-ark.beat-2 .scene-ark-weather { opacity: 1; }
-.scene-ark.beat-1 .scene-builder,.scene-ark.beat-2 .scene-builder,.scene-ark.beat-2 .scene-gangplank { opacity: 0; }
-.scene-ark.beat-2 .scene-sun { opacity: .2; }
-.scene-manger .scene-guiding-star { animation: cinema-star 2s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
-.scene-manger .scene-parents { opacity: .35; transition: opacity .8s ease; }
-.scene-manger.beat-1 .scene-parents,.scene-manger.beat-2 .scene-parents { opacity: 1; }
-.scene-manger .scene-cradle { animation: cinema-cradle 2.6s ease-in-out infinite; transform-origin: 100px 110px; }
-.scene-manger .scene-sleep-marks { opacity: 0; }
-.scene-manger.beat-2 .scene-sleep-marks { opacity: 1; animation: cinema-sleep 2s ease-in-out infinite; }
-.scene-lion .scene-angel,.scene-lion .scene-peace-hearts { opacity: 0; transition: opacity .7s ease; }
-.scene-lion.beat-1 .scene-angel,.scene-lion.beat-2 .scene-angel,.scene-lion.beat-2 .scene-peace-hearts { opacity: 1; }
-.scene-lion .scene-lion-head { animation: cinema-lion 2s ease-in-out infinite; transform-origin: 88px 120px; }
-.scene-lion.beat-2 .scene-lion-rest { transform: translateY(15px) scaleY(.88); transform-origin: 88px 150px; transition: transform .8s ease; }
-.scene-lion.beat-2 .scene-lion-head { animation: none; transform: rotate(5deg); }
-.scene-boat .scene-boat-rock { animation: cinema-boat 10s ease-in-out both; animation-delay: var(--scene-offset); transform-origin: 530px 405px; }
-.scene-boat .scene-standing,.scene-boat .scene-calm-birds,.scene-boat .scene-sun { opacity: 0; }
-.scene-boat.beat-2 .scene-standing,.scene-boat.beat-2 .scene-calm-birds,.scene-boat.beat-2 .scene-sun { opacity: 1; }
-.scene-boat.beat-2 .scene-sleeper,.scene-boat.beat-2 .scene-rain { opacity: 0; }
-.scene-boat.beat-2 .scene-clouds { opacity: .3; transition: opacity 1s ease; }
-.scene-boat.beat-2 .scene-water { transform: scaleY(.7); transform-origin: 500px 500px; transition: transform 1s ease; }
-.scene-boat.beat-2 .scene-wave-lines { animation: none; }
-.scene-boat.beat-1 .scene-sleeper { filter: drop-shadow(0 0 7px #ffdf77); }
-@keyframes cinema-rain { to { transform: translate(-20px,45px); } }
-@keyframes cinema-wave { to { transform: translateX(30px); } }
-@keyframes cinema-hammer { 50% { transform: rotate(-24deg); } }
-@keyframes cinema-board { 0%,30% { transform: translate(0,0); } 65%,100% { transform: translate(340px,-94px); } }
-@keyframes cinema-ark { 0%,65%,100% { transform: rotate(0); } 75%,90% { transform: rotate(2deg) translateY(-5px); } 82%,96% { transform: rotate(-2deg); } }
-@keyframes cinema-star { 50% { transform: scale(1.1); opacity: .7; } }
-@keyframes cinema-cradle { 25% { transform: rotate(-3deg); } 75% { transform: rotate(3deg); } }
-@keyframes cinema-sleep { 50% { transform: translateY(-8px); opacity: .6; } }
-@keyframes cinema-lion { 50% { transform: rotate(-5deg); } }
-@keyframes cinema-boat { 0%,30%,60% { transform: rotate(-5deg) translateY(-8px); } 15%,45% { transform: rotate(5deg) translateY(6px); } 70%,100% { transform: rotate(0) translateY(0); } }
+/* Schritte blenden Figuren ein und aus; ohne Bewegung zeigt jeder Schritt sein fertiges Bild. */
+.kids-cinema-art .scene-only-0,.kids-cinema-art .scene-only-1,.kids-cinema-art .scene-from-1,.kids-cinema-art .scene-from-2,.kids-cinema-art .scene-before-2 { transition: opacity .6s ease; }
+.kids-cinema-art:not(.beat-0) .scene-only-0,.kids-cinema-art:not(.beat-1) .scene-only-1,.beat-0 .scene-from-1,.kids-cinema-art:not(.beat-2) .scene-from-2,.beat-2 .scene-before-2 { opacity: 0; }
+/* Auftritte zählen ab Szenenbeginn (--at), damit sie auch nach Neuladen an derselben Stelle stehen. */
+.kids-cinema-art .scene-enter { animation: .8s ease-out both; animation-delay: calc(var(--at) + var(--scene-offset, 0s)); transform-box: fill-box; }
+.kids-cinema-art .scene-pop { animation-name: scene-pop; transform-origin: 50% 100%; }
+.kids-cinema-art .scene-fade { animation-name: scene-fade; animation-duration: 1.2s; }
+.kids-cinema-art .scene-drop { animation-name: scene-drop; animation-duration: 1.2s; }
+.kids-cinema-art .scene-left { animation-name: scene-left; animation-duration: 1.1s; }
+.kids-cinema-art .scene-right { animation-name: scene-right; animation-duration: 1.1s; }
+.kids-cinema-art .blink { transform-box: fill-box; transform-origin: center; animation: scene-blink 3.4s infinite; }
+.kids-cinema-art .twinkle { transform-box: fill-box; transform-origin: center; animation: scene-twinkle 1.8s ease-in-out infinite; animation-delay: var(--d, 0s); }
+.kids-cinema-art .scene-float { animation: scene-float 2.2s ease-in infinite; animation-delay: var(--d); }
+.kids-cinema-art .scene-z { animation: scene-z 2.1s ease-in-out infinite; animation-delay: var(--d); }
+.kids-cinema-art .scene-raindrop { animation: scene-rain .8s linear infinite; animation-delay: var(--d); }
+.kids-cinema-art .scene-wave-line { animation: scene-drift 1.6s ease-in-out infinite alternate; }
+.kids-cinema-art .scene-sparkle > * { transform-box: fill-box; transform-origin: center; animation: scene-twinkle 1.4s ease-in-out infinite; }
+/* Arche: bauen, einsteigen, sicher im Regen schwimmen. */
+.scene-ark .scene-hammer-arm { transform-origin: 10px 32px; animation: scene-hammer .5s ease-in-out infinite; }
+.scene-ark .scene-knock { transform-box: fill-box; transform-origin: center; animation: scene-knock .5s ease-in-out infinite; }
+.scene-ark .scene-wave-arm { transform-origin: 12px 30px; animation: scene-wave .5s ease-in-out infinite alternate; }
+.scene-ark .scene-walker { animation: scene-walk 2.3s linear both; animation-delay: calc(var(--at) + var(--scene-offset, 0s)); }
+.scene-ark .scene-walker:nth-child(1) { transform: translate(230px,-98px); }
+.scene-ark .scene-walker:nth-child(2) { transform: translate(120px,-51px); }
+.scene-ark .scene-hop { animation: scene-hop .28s ease-in-out infinite alternate; }
+.scene-ark .scene-flood { animation: scene-flood 2.2s ease-out both; animation-delay: calc(6.5s + var(--scene-offset, 0s)); }
+.scene-ark .scene-ark-rise { animation: scene-rise 2.2s ease-out both; animation-delay: calc(6.5s + var(--scene-offset, 0s)); }
+.scene-ark.beat-2 .scene-ark-rise { transform: translateY(-62px); }
+.scene-ark.beat-2 .scene-ark-rock { transform-origin: 686px 400px; animation: scene-ark-rock 2.4s ease-in-out infinite; }
+/* Krippe: der Stern kommt, das Baby ist da und schläft. */
+.scene-manger .scene-star-fly { animation: scene-star-fly 2.4s cubic-bezier(.2,.8,.3,1) both; animation-delay: var(--scene-offset, 0s); }
+.scene-manger .scene-star-glow { transform-box: fill-box; transform-origin: center; animation: scene-glow 2s ease-in-out infinite; }
+.scene-manger .scene-trail { opacity: 0; transform-box: fill-box; transform-origin: center; animation: scene-burst 1s ease-out both; animation-delay: calc(var(--at) + var(--scene-offset, 0s)); }
+.scene-manger.beat-0 .scene-baby { opacity: 0; }
+.scene-manger .scene-baby { transform-box: fill-box; transform-origin: 50% 80%; animation: scene-pop .8s ease-out both; animation-delay: calc(3.3s + var(--scene-offset, 0s)); }
+.scene-manger .scene-burst { opacity: 0; transform-box: fill-box; transform-origin: center; animation: scene-burst 1.2s ease-out both; animation-delay: calc(3.2s + var(--scene-offset, 0s)); }
+.scene-manger .scene-breathe { transform-box: fill-box; transform-origin: 50% 100%; animation: scene-breathe 3s ease-in-out infinite; }
+.scene-manger.beat-2 .scene-cradle { transform-origin: 500px 470px; animation: scene-cradle 2.6s ease-in-out infinite; }
+/* Löwengrube: Brüllen, ein Engel kommt, die Löwen schlafen ein. */
+.scene-lion .scene-glow { transform-box: fill-box; transform-origin: center; opacity: .45; transform: scale(.75); transition: opacity 1s, transform 1s; }
+.scene-lion:not(.beat-0) .scene-glow { opacity: .95; transform: scale(1.1); }
+.scene-lion .scene-lion-head { transform-origin: 12px 6px; transition: transform .9s ease; }
+.scene-lion.beat-0 .scene-lion-head { animation: scene-roar-head .9s ease-in-out infinite; }
+.scene-lion.beat-1 .scene-lion-head { transform: rotate(-4deg); }
+.scene-lion.beat-2 .scene-lion-head { transform: translate(3px,8px) rotate(12deg); }
+.scene-lion .scene-roar { transform-box: fill-box; transform-origin: 0 50%; animation: scene-roar .45s ease-in-out infinite alternate; }
+.scene-lion .scene-lion-tail { transform-origin: -32px 6px; animation: scene-swish 1.2s ease-in-out infinite alternate; }
+.scene-lion.beat-2 .scene-lion-tail { animation-duration: 2.6s; }
+.scene-lion .scene-angel { animation: scene-bob 2.4s ease-in-out infinite; }
+.scene-lion .scene-wing { transform-box: fill-box; animation: scene-flap .5s ease-in-out infinite alternate; }
+.scene-lion .scene-wing-left { transform-origin: 100% 50%; }
+.scene-lion .scene-wing-right { transform-origin: 0 50%; }
+/* Sturm: das Boot schaukelt, Jesus schläft, steht auf und es wird still. */
+.scene-boat .scene-boat-rock { transform-origin: 500px 440px; animation: scene-boat 10s ease-in-out both; animation-delay: var(--scene-offset, 0s); }
+.scene-boat .scene-flash { animation: scene-flash 1.3s steps(1) infinite; }
+.scene-boat .scene-sleep-glow { transform-box: fill-box; transform-origin: center; animation: scene-glow 2s ease-in-out infinite; }
+@keyframes scene-pop { 0% { transform: scale(0); opacity: 0; } 60% { transform: scale(1.12); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+@keyframes scene-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes scene-drop { from { transform: translateY(-200px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes scene-left { from { transform: translateX(-60px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes scene-right { from { transform: translateX(60px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes scene-blink { 0%,93%,100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+@keyframes scene-twinkle { 50% { opacity: .35; transform: scale(.6); } }
+@keyframes scene-float { 0% { transform: translateY(10px); opacity: 0; } 25% { opacity: 1; } 100% { transform: translateY(-90px); opacity: 0; } }
+@keyframes scene-z { 0% { transform: translate(0,12px); opacity: 0; } 30% { opacity: 1; } 100% { transform: translate(18px,-40px); opacity: 0; } }
+@keyframes scene-rain { from { transform: translateY(-60px); } to { transform: translateY(380px); } }
+@keyframes scene-drift { to { transform: translateX(-60px); } }
+@keyframes scene-hammer { 0%,100% { transform: rotate(-35deg); } 50% { transform: rotate(16deg); } }
+@keyframes scene-knock { 0%,40% { opacity: 0; transform: scale(.5); } 55% { opacity: 1; transform: scale(1.15); } 85%,100% { opacity: 0; } }
+@keyframes scene-wave { from { transform: rotate(-12deg); } to { transform: rotate(18deg); } }
+@keyframes scene-walk { 0% { transform: translate(-440px,0); } 52% { transform: translate(0,0); } 90% { transform: translate(262px,-112px); opacity: 1; } 100% { transform: translate(280px,-120px); opacity: 0; } }
+@keyframes scene-hop { to { transform: translateY(-10px); } }
+@keyframes scene-flood { from { transform: translateY(170px); } to { transform: none; } }
+@keyframes scene-rise { from { transform: none; } to { transform: translateY(-62px); } }
+@keyframes scene-ark-rock { 25% { transform: rotate(-2.2deg); } 75% { transform: rotate(2.2deg); } }
+@keyframes scene-star-fly { from { transform: translate(-430px,70px) scale(.35) rotate(-160deg); } to { transform: none; } }
+@keyframes scene-glow { 50% { transform: scale(1.15); opacity: .65; } }
+@keyframes scene-burst { 0% { opacity: 0; transform: scale(.2); } 40% { opacity: 1; transform: scale(1.1); } 100% { opacity: 0; transform: scale(1.4); } }
+@keyframes scene-breathe { 50% { transform: scaleY(1.05); } }
+@keyframes scene-cradle { 25% { transform: rotate(-2.5deg); } 75% { transform: rotate(2.5deg); } }
+@keyframes scene-roar-head { 0%,100% { transform: rotate(0); } 50% { transform: rotate(-9deg) translateY(-1px); } }
+@keyframes scene-roar { from { opacity: .2; transform: scale(.7); } to { opacity: 1; transform: scale(1.1); } }
+@keyframes scene-swish { from { transform: rotate(-10deg); } to { transform: rotate(14deg); } }
+@keyframes scene-bob { 50% { transform: translateY(-8px); } }
+@keyframes scene-flap { to { transform: scaleY(.6); } }
+@keyframes scene-boat { 0%,16%,32%,48%,64% { transform: rotate(-6deg) translateY(-6px); } 8%,24%,40%,56% { transform: rotate(6deg) translateY(8px); } 72%,100% { transform: none; } }
+@keyframes scene-flash { 0%,62%,78% { opacity: 0; } 70%,86%,100% { opacity: 1; } }
 @media (max-width:759px) { .kids-cinema { height: calc(100dvh - 68px); min-height: 480px; padding: 16px 18px; gap: 12px; } .kids-cinema h1 { font-size: 26px; } .kids-cinema-caption { font-size: 21px; } .kids-cinema footer { flex-direction: column; } .kids-cinema footer > p { font-size: 14px; } .kids-cinema-controls .kids-tool { font-size: 12px; } }
-@media (prefers-reduced-motion:reduce) { .kids-cinema *, .kids-cinema *::before,.kids-cinema *::after { animation: none !important; transition: none !important; } .scene-ark.beat-1 .scene-animal-board { transform: translate(200px,-55px); } }
+@media (prefers-reduced-motion:reduce) { .kids-cinema *, .kids-cinema *::before,.kids-cinema *::after { animation: none !important; transition: none !important; } }

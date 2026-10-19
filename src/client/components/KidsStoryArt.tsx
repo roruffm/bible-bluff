@@ -1,24 +1,11 @@
 import type { ComponentChildren, JSX } from 'preact';
 import { useId } from 'preact/hooks';
 import type { StoryMotif } from '../../shared/kids-show-questions';
+import { Cheek, Cloud, Eye, Face, Flower, Frown, Happy, Hull, Kid, Manger, Smile, Spark, Star, Sun, type At } from './KidsCuteParts';
 
 /** Neben den Antwortbildern gibt es die Bühne vor dem Superbluff: Sie verrät keine der drei Geschichten. */
 export type KidsPictureMotif = StoryMotif | 'stage';
-interface At { x: number; y: number; s?: number }
 
-const Eye = ({ x, y, s = 1 }: At) => <><ellipse cx={x} cy={y} rx={4.6 * s} ry={5.6 * s} fill="#12324a" stroke="none"/><circle cx={x - 1.6 * s} cy={y - 2 * s} r={1.8 * s} fill="#fff" stroke="none"/></>;
-const Happy = ({ x, y, s = 1 }: At) => <path d={`M${x - 5 * s} ${y + s}q${5 * s} ${-6 * s} ${10 * s} 0`} fill="none" stroke-width={3 * s}/>;
-const Cheek = ({ x, y, s = 1 }: At) => <ellipse cx={x} cy={y} rx={6 * s} ry={3.6 * s} fill="#ff9fb4" stroke="none" opacity=".8"/>;
-const Smile = ({ x, y, s = 1 }: At) => <path d={`M${x - 5 * s} ${y}q${5 * s} ${5 * s} ${10 * s} 0`} fill="none" stroke-width={2.6 * s}/>;
-const Frown = ({ x, y, s = 1 }: At) => <path d={`M${x - 5 * s} ${y + 3 * s}q${5 * s} ${-5 * s} ${10 * s} 0`} fill="none" stroke-width={2.6 * s}/>;
-const Face = ({ x, y, s = 1 }: At) => <><Eye x={x - 9 * s} y={y} s={s}/><Eye x={x + 9 * s} y={y} s={s}/><Cheek x={x - 15 * s} y={y + 8 * s} s={s}/><Cheek x={x + 15 * s} y={y + 8 * s} s={s}/><Smile x={x} y={y + 8 * s} s={s}/></>;
-/** Vierzackiger Glitzerstern. */
-const Spark = ({ x, y, r = 7, fill = '#fff6c2' }: { x: number; y: number; r?: number; fill?: string }) =>
-  <path d={`M${x} ${y - r}q${r * .2} ${r * .8} ${r} ${r}q${-r * .8} ${r * .2} ${-r} ${r}q${-r * .2} ${-r * .8} ${-r} ${-r}q${r * .8} ${-r * .2} ${r} ${-r}z`} fill={fill} stroke="#e8b84a" stroke-width="2"/>;
-const Sun = ({ x, y, r = 18 }: { x: number; y: number; r?: number }) => <>
-  {Array.from({ length: 8 }, (_, i) => { const a = i * Math.PI / 4; return <path key={i} d={`M${x + Math.cos(a) * (r + 4)} ${y + Math.sin(a) * (r + 4)}L${x + Math.cos(a) * (r + 10)} ${y + Math.sin(a) * (r + 10)}`} stroke="#f0b83c"/>; })}
-  <circle cx={x} cy={y} r={r} fill="#ffd96a"/><Face x={x} y={y - r * .05} s={r / 30}/>
-</>;
 const Coin = ({ x, y, r = 16 }: { x: number; y: number; r?: number }) => <>
   <circle cx={x} cy={y} r={r} fill="#ffd24a"/><circle cx={x} cy={y} r={r * .66} fill="none" stroke="#e0a72a" stroke-width="2.5"/>
   <path d={`M${x - r * .35} ${y - r * .55}q${-r * .25} ${r * .3} 0 ${r * .6}`} fill="none" stroke="#fff6c2" stroke-width="3"/>
@@ -33,35 +20,11 @@ const Fish = ({ x, y, s = 1, fill = '#8fd3e6' }: At & { fill?: string }) => <>
   <path d={`M${x - 28 * s} ${y}l${-14 * s} ${-12 * s}v${24 * s}z`} fill={fill}/>
   <Eye x={x + 14 * s} y={y - 4 * s} s={.55 * s}/><Cheek x={x + 18 * s} y={y + 4 * s} s={.5 * s}/>
 </>;
-/** Kleine Figur mit großem Kopf; Bart oder Kopftuch nach Bedarf. */
-const Kid = ({ x, y, s = 1, robe = '#8cc4ee', hair = '#8a5a3c', beard, hood }: At & { robe?: string; hair?: string; beard?: string; hood?: string }) => <>
-  <path d={`M${x - 18 * s} ${y + 56 * s}q${-s} ${-30 * s} ${18 * s} ${-36 * s} ${19 * s} ${6 * s} ${18 * s} ${36 * s}z`} fill={robe}/>
-  <circle cx={x} cy={y} r={21 * s} fill="#ffdcc4"/>
-  {beard && <path d={`M${x - 19 * s} ${y + 2 * s}q${3 * s} ${26 * s} ${19 * s} ${26 * s}t${19 * s} ${-26 * s}q${-8 * s} ${9 * s} ${-19 * s} ${9 * s}t${-19 * s} ${-9 * s}z`} fill={beard}/>}
-  <path d={`M${x - 21 * s} ${y - s}q${s} ${-22 * s} ${21 * s} ${-22 * s}t${21 * s} ${22 * s}q${-8 * s} ${-10 * s} ${-21 * s} ${-10 * s}t${-21 * s} ${10 * s}z`} fill={hair}/>
-  {hood && <path d={`M${x - 25 * s} ${y + 14 * s}q${-4 * s} ${-40 * s} ${25 * s} ${-40 * s}t${25 * s} ${40 * s}`} fill="none" stroke={hood} stroke-width={9 * s}/>}
-  <Eye x={x - 8 * s} y={y + 3 * s} s={.7 * s}/><Eye x={x + 8 * s} y={y + 3 * s} s={.7 * s}/><Cheek x={x - 13 * s} y={y + 10 * s} s={.6 * s}/><Cheek x={x + 13 * s} y={y + 10 * s} s={.6 * s}/>
-  {!beard && <Smile x={x} y={y + 10 * s} s={.55 * s}/>}
-</>;
-/** Krippe mit schlafendem Baby. */
-const Manger = ({ x, y, s = 1 }: At) => <>
-  <path d={`M${x - 30 * s} ${y + 34 * s}l${-10 * s} ${14 * s}m${80 * s} ${-14 * s}l${10 * s} ${14 * s}`} stroke-width={4 * s}/>
-  <path d={`M${x - 44 * s} ${y + 4 * s}h${88 * s}l${-12 * s} ${32 * s}h${-64 * s}z`} fill="#d9a26a"/>
-  {Array.from({ length: 7 }, (_, i) => <path key={i} d={`M${x - 40 * s + i * 13 * s} ${y + 6 * s}l${4 * s} ${-12 * s}`} stroke="#e8b84a" stroke-width={3 * s}/>)}
-  <ellipse cx={x + 6 * s} cy={y} rx={30 * s} ry={13 * s} fill="#fff8e6"/><circle cx={x - 14 * s} cy={y - 4 * s} r={12 * s} fill="#ffe2cf"/>
-  <Happy x={x - 19 * s} y={y - 5 * s} s={.55 * s}/><Happy x={x - 9 * s} y={y - 5 * s} s={.55 * s}/><Cheek x={x - 22 * s} y={y + s} s={.5 * s}/><Cheek x={x - 6 * s} y={y + s} s={.5 * s}/>
-</>;
 const Calendar = ({ x, w, children }: { x: number; w: number; children: ComponentChildren }) => <>
   <rect x={x} y="22" width={w} height="106" rx="16" fill="#fffdf6"/><path d={`M${x} 46h${w}`} stroke="#e9d6a8"/>
   <path d={`M${x + w * .25} 14v18m${w * .5} -18v18`} stroke-width="7"/>{children}
 </>;
-const Hull = () => <><path d="M22 84q88 10 176 0-6 36-34 42H56q-28-6-34-42z" fill="#e0a26a"/><path d="M42 102q68 8 136 0" fill="none" stroke="#b97c48"/></>;
 const Waves = () => <path d="M8 130q14-10 28 0t28 0 28 0 28 0 28 0 28 0 28 0" fill="none" stroke="#45a6c8" stroke-width="4"/>;
-const Flower = ({ x, y, fill = '#ff9fb4' }: { x: number; y: number; fill?: string }) => <>
-  <path d={`M${x} ${y + 12}v-10`} stroke="#5ea86a" stroke-width="3"/>
-  {[0, 72, 144, 216, 288].map(a => <circle key={a} cx={x + Math.cos(a * Math.PI / 180) * 4.5} cy={y + Math.sin(a * Math.PI / 180) * 4.5} r="3.6" fill={fill} stroke-width="1.6"/>)}
-  <circle cx={x} cy={y} r="2.6" fill="#ffd96a" stroke-width="1.6"/>
-</>;
 /** Liegender Löwe für die Löwengrube, flip = -1 schaut nach links. */
 const Lion = ({ x, y, flip = 1 }: { x: number; y: number; flip?: number }) => <g transform={`translate(${x} ${y}) scale(${flip} 1)`}>
   <path d="M-4 18q-30 2-30-14 0-14 20-14h24z" fill="#f2c26c"/>
@@ -72,8 +35,6 @@ const Lion = ({ x, y, flip = 1 }: { x: number; y: number; flip?: number }) => <g
   <Happy x={7} y={-7} s={.55}/><Happy x={17} y={-7} s={.55}/><Cheek x={4} y={-1} s={.5}/><Cheek x={20} y={-1} s={.5}/>
   <path d="M10 -2h4l-2 2.5z" fill="#7a4a2a" stroke-width="1.6"/>
 </g>;
-const Cloud = ({ x, y }: { x: number; y: number }) => <path d={`M${x} ${y}q2-10 12-10 4-8 14-4 10-2 10 8 8 2 4 8h-36q-6-1-4-2z`} fill="#fff" stroke-width="2"/>;
-const Star = ({ x, y }: { x: number; y: number }) => <path d={`M${x} ${y - 4}l1.2 3 3 .2-2.3 2 .8 3-2.7-1.6-2.7 1.6.8-3-2.3-2 3-.2z`} fill="#ffe27a" stroke="none"/>;
 const Sky = ({ fill }: { fill: string }) => <rect width="220" height="140" fill={fill} stroke="none"/>;
 const Ground = ({ fill, y = 104 }: { fill: string; y?: number }) => <path d={`M0 ${y}q110-14 220 0V140H0z`} fill={fill}/>;
 
