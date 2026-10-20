@@ -1,6 +1,7 @@
 import { KidsGroupName } from './KidsGroupName';
 import { ProfessorHead, StoryPicture } from './KidsShow';
 import { Face } from './KidsCuteParts';
+import { KidsFieldShape } from './KidsField';
 import type { KidsRound } from '../../shared/kids-game';
 import { KIDS_CHEERS, kidsAnswerPicture, type KidsGroup } from '../../shared/kids-show-questions';
 import './kids-bluff.css';
@@ -42,7 +43,7 @@ export function KidsCountdown({ seconds }: { seconds: number }) {
   return <div class="kids-countdown" aria-hidden="true"><span key={seconds}>{seconds}</span></div>;
 }
 
-/** Trommelwirbel vor der Auflösung: Erst bekommen die falschen Felder ihren Bluff-Stempel, Professor Bluffs Tipp zuletzt. Dann leuchtet die Wahrheit. */
+/** Trommelwirbel vor der Auflösung: Erst drehen sich die falschen Felder auf ihre Bluff-Rückseite, Professor Bluffs Tipp zuletzt. Dann leuchtet die Wahrheit. */
 export function KidsSuspense({ round }: { round: KidsRound }) {
   const pick = (i: number) => round.answers[i] === round.question.bluff.answer ? 1 : 0;
   const wrong = [0, 1, 2].filter(i => i !== round.correctIndex).sort((a, b) => pick(a) - pick(b));
@@ -51,9 +52,10 @@ export function KidsSuspense({ round }: { round: KidsRound }) {
     <ol class="kids-suspense-cards" aria-hidden="true">{round.answers.map((answer, i) => {
       const truth = i === round.correctIndex;
       return <li key={i} class={`kids-suspense-card kids-field-${i + 1} ${truth ? 'is-truth' : 'is-bluff'}`} style={{ '--step': truth ? 2 : wrong.indexOf(i) }}>
-        <span class="kids-suspense-number">{i + 1}</span>
+        <span class="kids-suspense-number">{i + 1}<KidsFieldShape index={i}/></span>
         <StoryPicture motif={kidsAnswerPicture(round.question, answer)}/>
         <span class="kids-suspense-text">{answer}</span>
+        {!truth && <span class="kids-suspense-back"><span class="kids-suspense-back-face"><ProfessorHead/></span></span>}
         {truth ? <span class="kids-truth-mark">✓</span> : <span class="kids-bluff-stamp">BLUFF!</span>}
         {answer === round.question.bluff.answer && <BluffPin/>}
       </li>;

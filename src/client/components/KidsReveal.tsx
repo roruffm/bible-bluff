@@ -7,6 +7,7 @@ import { professorMotion } from '../lib/professor-motion';
 import { ProfessorBluff, ShowControls, StoryPicture } from './KidsShow';
 import { KidsSuspense } from './KidsBluff';
 import { Spark } from './KidsCuteParts';
+import { KidsFieldShape } from './KidsField';
 
 /** Aufgeschlagene Bibel für das Erklärkärtchen. */
 const BibleBook = () => <svg class="kids-discovery-book" viewBox="0 0 64 56" stroke="#12324a" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true">
@@ -25,7 +26,7 @@ export function KidsReveal({ game, act, disabled, primaryRef, suspense = false, 
     <div class="kids-reveal-result">
       <header><p class="kids-eyebrow">AUFGELÖST · <KidsGroupName group={round.question.group}/></p><h1 id="kids-reveal-title">Feld {round.correctIndex+1} ist richtig!</h1></header>
       <div class={`kids-answer kids-reveal-answer kids-field-${round.correctIndex+1} is-correct has-picture`}>
-        <span class="kids-number">{round.correctIndex+1}</span>
+        <span class="kids-number">{round.correctIndex+1}<KidsFieldShape index={round.correctIndex}/></span>
         <StoryPicture motif={round.question.pictures[0]}/>
         <span class="kids-answer-text">{round.question.answer}</span><span class="kids-correct-mark">✓ Entdeckt!</span>
       </div>

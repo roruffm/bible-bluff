@@ -3,6 +3,7 @@ import type { KidsGame } from '../../shared/kids-game';
 import { kidsPresentationMoment, type KidsPresentationMoment } from '../lib/kids-presentation';
 import { KIDS_SUSPENSE_MS } from '../lib/kids-sound';
 import { KidsGroupName } from './KidsGroupName';
+import { KidsMascot } from './KidsMascot';
 import './kids-show-effects.css';
 
 export function useKidsPresentationMoment(game: KidsGame | null): KidsPresentationMoment | null {
@@ -16,14 +17,20 @@ export function useKidsPresentationMoment(game: KidsGame | null): KidsPresentati
     if (!next || reduced.matches) return;
     const delay = next.kind === 'points' ? KIDS_SUSPENSE_MS : 0;
     const show = window.setTimeout(() => setMoment(next), delay);
-    const hide = window.setTimeout(() => setMoment(null), delay + (next.kind === 'group' ? 2200 : 1850));
+    const hide = window.setTimeout(() => setMoment(null), delay + (next.kind === 'group' ? 2200 : next.kind === 'sweep' ? 1300 : 1850));
     const cancel = () => { if (reduced.matches) { clearTimeout(show); clearTimeout(hide); setMoment(null); } };
     reduced.addEventListener('change', cancel);
     return () => { clearTimeout(show); clearTimeout(hide); reduced.removeEventListener('change', cancel); };
   }, [game?.phase, game?.index, game?.results[game?.index ?? 0]]);
   if (!game || moment?.index !== game.index) return null;
-  return moment.kind === 'group' ? game.phase === 'reading' ? moment : null :
-    game.phase === 'revealed' && game.results[game.index] === moment.result ? moment : null;
+  if (moment.kind === 'group') return game.phase === 'reading' ? moment : null;
+  if (moment.kind === 'sweep') return game.phase === 'chapter' || game.phase === 'superbluff' ? moment : null;
+  return game.phase === 'revealed' && game.results[game.index] === moment.result ? moment : null;
+}
+
+/** Licht in der Dunkelheit: Beim Kapitelstart fliegt die Leuchtlupe mit einem hellen Streifen einmal quer über die Bühne. */
+export function KidsLightSweep() {
+  return <div class="kids-light-sweep" aria-hidden="true"><div class="kids-light-runner"><span class="kids-light-beam"/><KidsMascot group="minis"/></div></div>;
 }
 
 /** Punkte starten am Gruppensymbol und landen an der tatsächlichen Position des gemeinsamen Zählers. */

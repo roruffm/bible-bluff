@@ -3,6 +3,7 @@ import { kidsResultPoints, type KidsAction, type KidsGame } from '../../shared/k
 import { ProfessorBluff, ShowControls } from './KidsShow';
 import { Kid, Spark } from './KidsCuteParts';
 import type { KidsGroup } from '../../shared/kids-show-questions';
+import { KIDS_FIELDS } from './KidsField';
 import { professorMotion } from '../lib/professor-motion';
 
 /** Gewänder in den Gruppenfarben; im Finale laufen alle drei Farben gemeinsam. */
@@ -13,7 +14,6 @@ const LOOKS = [
   { skin: '#c88a5c', hair: '#3d2a1e' }, { skin: '#ffe1cc', hair: '#c0703a' }, { skin: '#6b4027', hair: '#1f1611', curly: true },
   { skin: '#a8693f', hair: '#2b1d14', curly: true }, { skin: '#ffdcc4', hair: '#5a3a28' }, { skin: '#e8b48a', hair: '#2b1d14' },
 ];
-const FIELDS = ['#ffdc72', '#9cf1dc', '#f8a1ad'];
 
 /** Rückweg: Die aktive Gruppe läuft von den Feldern zu ihrem Platz. Danach stehen alle drei Gruppen beisammen. */
 function RegroupPicture({ returned, group }: { returned: boolean; group: KidsGroup }) {
@@ -27,7 +27,7 @@ function RegroupPicture({ returned, group }: { returned: boolean; group: KidsGro
       <g class="kids-regroup-check"><circle cx="260" cy="34" r="24" fill="#14795e" stroke="#fffdf1" stroke-width="4"/><path d="m248 34 8 8 16-18" fill="none" stroke="#fff" stroke-width="5"/></g>
       <Spark x={60} y={48} r={9}/><Spark x={462} y={42} r={8}/>
     </> : <>
-      {FIELDS.map((fill, i) => <g key={fill} transform={`rotate(${[-6, 4, -3][i]} ${37 + i * 44} 137)`}>
+      {KIDS_FIELDS.map(({ color: fill }, i) => <g key={fill} transform={`rotate(${[-6, 4, -3][i]} ${37 + i * 44} 137)`}>
         <path d={`M${37 + i * 44} 162v18`} stroke-width="4"/>
         <rect x={18 + i * 44} y="112" width="38" height="50" rx="10" fill={fill}/>
         <text x={37 + i * 44} y="148" text-anchor="middle" font-size="30" font-weight="900" fill="#12324a" stroke="none">{i + 1}</text>
