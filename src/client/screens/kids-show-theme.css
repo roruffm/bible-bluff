@@ -147,15 +147,15 @@
 @keyframes kids-clock-halo { 0% { transform: scale(1); opacity: .9; } 80%, 100% { transform: scale(1.45); opacity: 0; } }
 @keyframes kids-clock-halo-urgent { 0% { transform: scale(1); opacity: 1; } 80%, 100% { transform: scale(1.65); opacity: 0; } }
 .kids-show .kids-show-stage .kids-status { grid-column: 1; grid-row: 3; align-self: end; padding: 0; border: 0; box-shadow: none; background: none; display: flex; flex-wrap: wrap; justify-content: center; text-align: center; gap: 4px 12px; color: #335765; }
-.kids-show .kids-show-stage .kids-status strong { font-size: clamp(14px, min(1.4vw, 2.4vh), 27px); line-height: 1.25; }
-.kids-show .kids-show-stage .kids-status > span { font-size: clamp(12px, 1vw, 19px); }
-.kids-show .kids-status .kids-cheers { margin: 0; font-size: clamp(11px, 1vw, 19px); }
+.kids-show .kids-show-stage .kids-status strong { font-size: clamp(18px, min(1.6vw, 2.8vh), 32px); line-height: 1.25; }
+.kids-show .kids-show-stage .kids-status > span { font-size: clamp(14px, 1.15vw, 22px); }
+.kids-show .kids-status .kids-cheers { margin: 0; font-size: clamp(14px, min(1.15vw, 2vh), 22px); }
 .kids-show .kids-question-host { grid-column: 2; grid-row: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; min-width: 0; min-height: 0; }
 .kids-show .kids-question-host > .bluff-professor { flex: 1 1 0; width: 100%; height: 0; min-height: 0; max-width: 260px; }
 .kids-show .kids-question-host .kids-bluff-claim { width: 100%; min-width: 0; display: block; flex: 0 0 auto; border: 2px solid #082a3c; border-radius: 24px; padding: 13px 15px; background: var(--show-lilac); color: var(--show-ink); box-shadow: 0 4px 0 #082a3c; position: relative; text-align: center; }
 .kids-show .kids-question-host .kids-bluff-claim::after { content: ''; position: absolute; bottom: -9px; left: 47%; width: 16px; height: 16px; background: var(--show-lilac); border-right: 2px solid #082a3c; border-bottom: 2px solid #082a3c; transform: rotate(45deg); }
 .kids-show .kids-question-host .kids-bluff-claim-head, .kids-show .kids-question-host .kids-bluff-question { display: none; }
-.kids-show .kids-question-host .kids-bluff-claim small { font-size: clamp(9px, .8vw, 16px); line-height: 1.3; letter-spacing: .02em; color: #5e328d; }
+.kids-show .kids-question-host .kids-bluff-claim small { font-size: clamp(12px, .9vw, 17px); line-height: 1.3; letter-spacing: .02em; color: #5e328d; }
 .kids-show .kids-question-host .kids-bluff-claim p { font-size: clamp(15px, min(1.65vw, 2.5vh), 32px); line-height: 1.2; font-weight: 850; text-wrap: balance; }
 .kids-show .kids-show-stage .kids-answers { grid-column: 1 / -1; grid-row: 2; gap: var(--show-gap); }
 .kids-show .kids-show-stage .has-pictures .kids-answer { border: 3px solid #082a3c; border-radius: var(--show-radius); box-shadow: 0 9px 0 #082a3c; padding: 16px 18px; background: linear-gradient(145deg, var(--field-soft), var(--field)); color: var(--show-ink); min-width: 0; min-height: 0; }
@@ -190,9 +190,7 @@
 .kids-show .kids-show-story { justify-content: center; min-height: 0; gap: clamp(8px, 1.5vh, 20px); padding: clamp(16px, 2vw, 36px); border: 2px solid #082a3c; border-radius: var(--show-radius); background: var(--show-cream); color: var(--show-ink); box-shadow: 0 6px 0 #082a3c; }
 .kids-show .kids-show-story h1 { font-size: clamp(32px, min(4.1vw, 6.5vh), 88px); line-height: 1.1; }
 .kids-show .kids-show-story > p { font-size: clamp(17px, min(1.8vw, 3vh), 34px); }
-.kids-show .kids-show-story > .kids-eyebrow { font-size: clamp(10px, 1vw, 19px); color: #426270; letter-spacing: .09em; }
 .kids-show .is-welcome .kids-show-story { background: none; box-shadow: none; border-color: transparent; color: var(--show-cream); padding-inline: 0; }
-.kids-show .is-welcome .kids-show-story > .kids-eyebrow { color: #bce5e0; }
 /* Begrüßung: drei Gruppenkarten im Stil der Antwortkarten, das Gruppensymbol klebt in der Bildecke. */
 .kids-show .kids-show-story { container-type: inline-size; }
 .kids-show .is-welcome .kids-team-badges { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(10px, 1.4vw, 28px); }
@@ -231,18 +229,21 @@
 .kids-stop-sign { --tilt: -8deg; position: absolute; top: 50%; left: clamp(10px, 1.2vw, 24px); z-index: 1; width: var(--stop-size); height: auto; max-height: 86%; transform: translateY(-50%) rotate(var(--tilt)); filter: drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff) drop-shadow(0 6px 5px rgba(8, 42, 60, .3)); animation: kids-stop-pop .6s cubic-bezier(.3, 1.6, .5, 1) both; }
 .kids-stop-sign.is-right { --tilt: 8deg; left: auto; right: clamp(10px, 1.2vw, 24px); animation-delay: .12s; }
 @keyframes kids-stop-pop { from { transform: translateY(-50%) rotate(var(--tilt)) scale(0); } to { transform: translateY(-50%) rotate(var(--tilt)) scale(1); } }
-.kids-final-groups { display: flex; gap: 8px; align-items: center; justify-content: center; padding: 7px 18px; background: var(--show-mint); border-radius: 30px; font-size: clamp(16px, 1.7vw, 30px); order: -1; }
-.kids-final-groups .kids-group-name > span { display: none; }
-.kids-show .is-superbluff .kids-show-story > .kids-story-picture { height: min(22vh, 260px); width: min(400px, 70%); flex: 1 1 0; min-height: 70px; }
-.kids-show .kids-final-bonuses { gap: 10px; max-width: 580px; }
-.kids-show .kids-final-bonuses > span { padding: 8px 12px; font-size: clamp(12px, 1.25vw, 24px); }
-.kids-show .kids-final-bonuses b { display: inline; margin-left: .3em; font-size: 1.4em; }
+.kids-show .kids-final-bonuses > span, .kids-show .kids-reveal-points { filter: drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff) drop-shadow(0 6px 5px rgba(8, 42, 60, .3)); }
+/* Superbluff: großes Bühnenbild, die drei Gruppen als Schilder, die Punkte als bunte Aufkleber. */
+.kids-show .is-superbluff .kids-show-story > .kids-story-picture { flex: 1 1 0; width: 100%; max-width: 760px; height: 0; min-height: 90px; }
+.kids-show .kids-final-bonuses { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: clamp(14px, 2vw, 40px); width: auto; max-width: 100%; }
+.kids-show .kids-final-bonuses > span { flex: none; display: flex; align-items: baseline; gap: .4em; padding: .3em 1em; border: 3px solid #082a3c; border-radius: 999px; color: var(--show-ink); font-size: clamp(17px, min(1.5vw, 2.6vh), 30px); font-weight: 850; line-height: 1.2; }
+.kids-show .kids-final-bonuses > .is-team { background: linear-gradient(#ffe48a, #ffc94d); rotate: -3deg; }
+.kids-show .kids-final-bonuses > .is-professor { background: var(--show-lilac); rotate: 3deg; font-size: clamp(15px, min(1.2vw, 2.1vh), 24px); }
+.kids-show .kids-final-bonuses b { display: inline; margin: 0; font-size: 1.8em; font-weight: 900; line-height: 1; }
+.kids-show .kids-final-bonuses > .is-professor b { font-size: 1.4em; color: #6b3fa0; }
 /* Regrouping keeps the solution hidden until everyone is back. */
 .kids-show .kids-regroup { grid-template-columns: minmax(0, 3fr) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; align-items: stretch; background: transparent; }
 .kids-show .kids-regroup-content { grid-column: 1; grid-row: 1; justify-content: center; background: var(--show-cream); color: var(--show-ink); border: 2px solid #082a3c; border-radius: var(--show-radius); padding: 24px; box-shadow: 0 6px 0 #082a3c; }
-.kids-show .kids-regroup-content .kids-eyebrow { color: #215e5c; background: #bcf1df; padding: 8px 16px; border-radius: 30px; }
+.kids-show .kids-regroup-content .kids-eyebrow { color: #215e5c; background: #bcf1df; padding: .35em 1em; border: 2px solid #082a3c; border-radius: 30px; font-size: clamp(15px, min(1.4vw, 2.4vh), 28px); letter-spacing: .08em; }
 .kids-show .kids-regroup h1 { font-size: clamp(32px, min(4.3vw, 6.5vh), 88px); line-height: 1.15; }
-.kids-show .kids-regroup-picture { width: 100%; height: min(28vh, 330px); }
+.kids-show .kids-regroup-picture { flex: 0 1 auto; width: 100%; height: min(40vh, 440px); min-height: 70px; }
 .kids-show .kids-regroup-professor { grid-column: 2; grid-row: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 14px; min-height: 0; }
 .kids-show .kids-regroup-professor > .bluff-professor { width: 100%; max-width: 400px; height: min(42vh, 460px); }
 .kids-show .kids-regroup-bubble { order: -1; font-size: clamp(20px, 2.3vw, 42px); text-align: center; }
@@ -252,21 +253,29 @@
 .kids-show .kids-reveal-result { grid-template-rows: auto minmax(0, 1fr) auto auto; gap: 10px; }
 .kids-show .kids-reveal-result > header { color: var(--show-ink); background: var(--show-cream); border: 2px solid #082a3c; border-radius: var(--show-radius); padding: 12px 16px; }
 .kids-show .kids-reveal h1 { font-size: clamp(30px, min(4.1vw, 6.2vh), 88px); line-height: 1.25; }
-.kids-show .kids-reveal .kids-reveal-answer { border: 3px solid #082a3c; border-radius: var(--show-radius); box-shadow: 0 6px 0 #082a3c; background: #a9f2d9; color: var(--show-ink); }
+.kids-show .kids-reveal-result > header .kids-eyebrow { font-size: clamp(14px, min(1.3vw, 2.3vh), 26px); letter-spacing: .08em; }
+/* Die richtige Antwortkarte behält die Farbe ihres Feldes und leuchtet grün. */
+.kids-show .kids-reveal .kids-reveal-answer { border: 3px solid #082a3c; border-radius: var(--show-radius); box-shadow: 0 6px 0 #082a3c, 0 0 0 clamp(5px, .5vw, 9px) #5fd9a8, 0 0 34px rgba(95, 217, 168, .55); background: radial-gradient(ellipse 80% 55% at 50% 0%, rgba(255, 255, 255, .5), transparent 70%), linear-gradient(150deg, var(--field-soft), var(--field)); color: var(--show-ink); }
+.kids-show .kids-reveal-answer .kids-number { z-index: 2; top: clamp(8px, 1.2vh, 16px); left: clamp(8px, 1vw, 18px); width: 1.3em; height: 1.3em; font-size: clamp(30px, min(4.4vw, 7.4vh), 84px); border: 3px solid #082a3c; border-radius: 50%; background: var(--show-cream); rotate: -8deg; box-shadow: 0 5px 0 #082a3c, 0 0 0 5px color-mix(in srgb, var(--field) 55%, #fff); }
 .kids-show .kids-reveal-answer.has-picture { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; padding: 15px 25px; }
 .kids-show .kids-reveal-answer > .kids-story-picture { grid-row: 1 / 3; height: 100%; width: 90%; max-width: 520px; }
 .kids-show .kids-reveal-answer.has-picture .kids-answer-text { grid-column: 2; align-self: center; font-size: clamp(30px, min(4.1vw, 5.8vh), 88px); }
 .kids-show .kids-reveal-answer .kids-correct-mark { position: static; grid-column: 2; font-size: clamp(15px, 1.8vw, 32px); margin: 0; }
-.kids-show .kids-reveal-result .kids-discovery { background: #d5f6e8; color: var(--show-ink); border: 0; border-radius: 18px; padding: 12px 18px; }
-.kids-show .kids-reveal-result .kids-discovery p { font-size: clamp(17px, min(1.8vw, 2.8vh), 34px); }
-.kids-show .kids-reveal-result .kids-discovery small { font-size: clamp(11px, 1.1vw, 20px); }
-.kids-show .kids-reveal-points { justify-self: center; padding: 8px 22px; border-radius: 30px; background: var(--show-gold); color: var(--show-ink); border: 2px solid #082a3c; font-size: clamp(20px, min(2.3vw, 3.5vh), 42px); font-weight: 900; }
+/* Die Erklärung als Bibelkärtchen mit Buch, die Punkte als bunter Aufkleber. */
+.kids-show .kids-reveal-result .kids-discovery { justify-content: flex-start; gap: clamp(10px, 1.2vw, 24px); background: var(--show-cream); color: var(--show-ink); border: 3px solid #082a3c; border-radius: calc(var(--show-radius) * .8); box-shadow: 0 5px 0 #082a3c; padding: clamp(8px, 1.2vh, 18px) clamp(12px, 1.4vw, 26px); rotate: -.6deg; }
+.kids-show .kids-discovery-book { flex: none; width: clamp(48px, min(4.6vw, 8vh), 96px); height: auto; }
+.kids-show .kids-reveal-result .kids-discovery p { font-size: clamp(17px, min(1.8vw, 2.8vh), 34px); font-weight: 750; }
+.kids-show .kids-reveal-result .kids-discovery small { display: inline-block; margin-top: .45em; padding: .15em .7em; border-radius: 999px; background: #d5f6e8; color: #145c49; font-size: clamp(14px, min(1.3vw, 2.2vh), 26px); font-weight: 850; }
+.kids-show .kids-reveal-points { justify-self: center; padding: .25em 1em; border-radius: 999px; background: linear-gradient(#ffe48a, #ffc94d); color: var(--show-ink); border: 3px solid #082a3c; font-size: clamp(20px, min(2.3vw, 3.5vh), 42px); font-weight: 900; line-height: 1.25; rotate: -3deg; }
+.kids-show .reaction-kind .kids-reveal-points { background: var(--show-lilac); }
 .kids-show .kids-reaction-bubble { order: -1; background: var(--show-lilac); color: var(--show-ink); }
 .kids-show .kids-reaction-bubble::before { top: auto; bottom: -11px; background: var(--show-lilac); border: 0; border-right: 2px solid #12324a; border-bottom: 2px solid #12324a; }
 .kids-show .kids-reaction-art { margin-top: 12px; }
 .kids-show .kids-reaction-halo { background: none; box-shadow: none; }
 .kids-show .kids-reaction-symbols span { color: var(--show-gold); text-shadow: none; }
-.kids-show .kids-reveal-footer > p { color: var(--show-cream); }
+.kids-show .kids-reveal-footer > p { color: var(--show-cream); font-size: clamp(18px, min(1.6vw, 2.8vh), 32px); }
+/* Die Unterschrift wiederholt nur, wer spricht: In der Kinderansicht fällt sie weg, der Professor steht ja daneben. */
+.kids-show.is-projecting .kids-professor-signature { display: none; }
 .kids-show .kids-suspense-title { color: var(--show-cream); }
 .kids-show .kids-suspense-card { color: var(--show-ink); }
 /* Der Abschluss: ein gemeinsames Ergebnis, Jesu Einladung und der Übergang zu Hello King. */
@@ -288,7 +297,7 @@
 .kids-ending-results > div { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-width: 0; min-height: 0; padding: clamp(6px, 1.2vh, 16px) 8px; border-radius: calc(var(--show-radius) * .7); }
 .kids-ending-results > .kids-ending-team { background: #d9f6ec; }
 .kids-ending-results > .kids-ending-professor { background: #efe4fb; }
-.kids-ending-results > div > span { font-size: clamp(12px, min(1.3vw, 2.2vh), 26px); font-weight: 900; letter-spacing: .05em; }
+.kids-ending-results > div > span { font-size: clamp(14px, min(1.3vw, 2.2vh), 26px); font-weight: 900; letter-spacing: .05em; }
 .kids-ending-results strong { font-size: clamp(56px, min(9vw, 15vh), 190px); line-height: 1.25; font-weight: 900; font-variant-numeric: tabular-nums; }
 .kids-ending-team strong { color: #087a70; }
 .kids-ending-professor strong { color: #7134aa; }
@@ -302,11 +311,11 @@
 .kids-ending > footer::before { content: ''; grid-area: 1 / 1 / 3 / 2; justify-self: stretch; border: 3px solid #082a3c; border-radius: 999px; background: var(--show-cream); box-shadow: 0 5px 0 #082a3c; }
 .kids-show .kids-ending > footer > p { grid-area: 1 / 1; margin: 0; padding: clamp(6px, 1.2vh, 16px) clamp(30px, 3.4vw, 70px) 0; color: #087a70; font-size: clamp(21px, min(2.6vw, 4.2vh), 54px); font-weight: 900; line-height: 1.2; }
 .kids-ending > footer > p::before, .kids-ending > footer > p::after { content: '♥'; color: #ff8ea8; margin: 0 .4em; font-size: .8em; }
-.kids-ending > footer > small { grid-area: 2 / 1; padding: 0 clamp(30px, 3.4vw, 70px) clamp(6px, 1.2vh, 16px); color: var(--show-ink); font-size: clamp(12px, min(1.1vw, 2vh), 22px); font-weight: 750; }
+.kids-ending > footer > small { grid-area: 2 / 1; padding: 0 clamp(30px, 3.4vw, 70px) clamp(6px, 1.2vh, 16px); color: var(--show-ink); font-size: clamp(14px, min(1.2vw, 2.1vh), 24px); font-weight: 750; }
 .kids-show .kids-ending > footer > h2 { grid-area: 3 / 1; margin: clamp(8px, 1.6vh, 20px) 0 0; color: var(--show-gold); font-size: clamp(22px, min(2.8vw, 4.6vh), 58px); line-height: 1.15; text-shadow: 0 3px 0 #082a3c; }
 .kids-show .kids-cinema { color: var(--show-cream); background: transparent; }
 .kids-show .kids-cinema-caption { color: var(--show-ink); background: var(--show-cream); border-radius: 20px; }
-.kids-show .kids-cinema > header .kids-eyebrow { color: var(--show-mint); }
+.kids-show .kids-cinema > header .kids-eyebrow { color: var(--show-mint); font-size: clamp(14px, min(1.2vw, 2.1vh), 24px); }
 /* Touch devices and shallow windows scroll naturally; no text is hidden to make it fit. */
 @media (max-width: 1000px) {
   .kids-show .kids-playing-bar { grid-template-columns: 90px minmax(0, 1fr) minmax(240px, 38%); gap: 6px 10px; }
@@ -379,8 +388,7 @@
   .kids-show .is-chapter .kids-show-story > .kids-story-picture { width: 260px; height: 165px; flex: none; }
   .kids-show .kids-show-stage.is-locked .kids-show-question { padding-inline: 16px; }
   .kids-stop-sign { display: none; }
-  .kids-show .is-superbluff .kids-show-story > .kids-story-picture { height: 160px; flex: none; }
-  .kids-show .kids-final-groups { font-size: 16px; padding: 6px 10px; gap: 4px; }
+  .kids-show .is-superbluff .kids-show-story > .kids-story-picture { height: 170px; flex: none; }
   .kids-show .kids-regroup { display: flex; flex-direction: column; }
   .kids-show .kids-regroup-content { order: -1; padding: 20px 14px; }
   .kids-show .kids-regroup h1 { font-size: 30px; }
@@ -436,13 +444,26 @@
 .kids-show.is-projecting :is(.kids-top-actions, .kids-controls, .kids-voice-play, .kids-question-voice, .kids-extra-controls, .kids-cinema-controls, .kids-regroup-operator, .kids-control-hint, .kids-connection-note) { display: none !important; }
 .kids-show .kids-setup-remote { width: 100%; margin-top: 14px; font-size: 16px; white-space: normal; }
 
-/* Bühne: Detektiv-Muster, Bühnenlicht, Gruppenfarbe und Spur. Der Professor steht in der Kinderansicht unten zwischen den Uhren. */
+/* Bühne: Nachthimmel, Bühnenlicht, Gruppenfarbe und Spur. Der Professor steht in der Kinderansicht unten zwischen den Uhren. */
 .kids-show.is-playing {
+  isolation: isolate;
   background:
     radial-gradient(ellipse 50% 40% at 50% 26%, rgba(255, 218, 104, .16), transparent 72%),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cg fill='none' stroke='%23fffdf1' stroke-opacity='.07' stroke-width='4' stroke-linecap='round'%3E%3Cpath d='M30 40c0-12 10-20 21-20s20 8 20 18c0 13-18 14-18 27'/%3E%3Ccircle cx='53' cy='80' r='1.5'/%3E%3Ccircle cx='160' cy='150' r='16'/%3E%3Cpath d='M172 162l16 16'/%3E%3Cpath d='M150 40l4 9 10 1-8 6 3 10-9-6-9 6 3-10-8-6 10-1z' stroke-width='3'/%3E%3Cpath d='M40 170c0-8 7-13 14-13s13 5 13 12c0 8-12 9-12 17' stroke-width='3.5'/%3E%3C/g%3E%3C/svg%3E") 0 0 / 220px 220px,
-    radial-gradient(ellipse at 5% 95%, #12556a 0, transparent 65%), #12394f;
+    linear-gradient(#0c2a3d, #12394f 55%, #15465d);
 }
+/* Licht in der Dunkelheit: Mit jeder Aufgabe leuchten mehr Sterne, zum Finale dämmert es, am Ende ist Morgen. */
+.kids-sky { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+.kids-sky::before, .kids-sky::after { content: ''; position: absolute; inset: 0; }
+.kids-sky::before { background: linear-gradient(#174f70, #23668a 60%, #2f7896); opacity: calc(var(--sky) * .9); }
+.kids-sky::after { background: radial-gradient(ellipse 90% 55% at 50% 108%, rgba(255, 200, 122, .6), rgba(255, 158, 128, .22) 55%, transparent 78%); opacity: clamp(0, calc((var(--sky) - .5) * 2), 1); }
+.kids-sky.is-morning::before { opacity: 1; background: linear-gradient(#22658b, #3482a3 55%, #5ea6b6); }
+.kids-sky > svg { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; }
+.kids-sky.is-morning > svg { opacity: .6; }
+.kids-sky :is(circle, path) { fill: #fff3b8; opacity: 0; transform-box: fill-box; transform-origin: center; }
+.kids-sky path { filter: drop-shadow(0 0 6px rgba(255, 230, 140, .8)); }
+.kids-sky .is-lit { opacity: .8; animation: kids-star-in 1.4s ease-out both, kids-star-twinkle 3.6s ease-in-out calc(1.4s + var(--delay)) infinite; }
+@keyframes kids-star-in { 0% { opacity: 0; scale: 0; } 55% { opacity: 1; scale: 1.9; } 100% { opacity: .8; scale: 1; } }
+@keyframes kids-star-twinkle { 0%, 100% { opacity: .8; scale: 1; } 50% { opacity: .35; scale: .7; } }
 .kids-show .kids-show-stage { --group-tint: var(--show-mint); }
 .kids-show .kids-show-stage.is-group-mittis { --group-tint: var(--show-gold); }
 .kids-show .kids-show-stage.is-group-maxis { --group-tint: #f8a1ad; }
@@ -505,7 +526,7 @@
   }
   /* Die Frage nutzt die volle Breite; der Professor tritt zwischen den Uhren auf die Bühne. */
   .kids-show.is-projecting .kids-show-stage {
-    --kids-stage-professor: clamp(var(--kids-clock-size), 24vh - 20px, 260px);
+    --kids-stage-professor: clamp(var(--kids-clock-size), 28vh - 24px, 300px);
     grid-template-columns: var(--kids-clock-size) minmax(0, 1fr) var(--kids-clock-size);
     grid-template-rows: minmax(0, .92fr) minmax(0, 1.32fr) auto; padding-bottom: 14px;
   }
@@ -524,14 +545,14 @@
   .kids-show.is-projecting .kids-question-host .kids-bluff-claim {
     flex: 0 1 auto; width: auto; max-width: 980px; margin-bottom: min(3vh, 30px); text-align: left;
     padding: clamp(18px, 2.6vh, 28px) clamp(64px, 6vw, 100px) clamp(10px, 1.6vh, 18px) clamp(16px, 1.6vw, 28px);
-    border: 3px solid #102d43; border-radius: 30px; background: #f3eaff; box-shadow: 0 7px 0 #102d43; rotate: -1deg;
+    border: 3px solid #102d43; border-radius: 30px; background: #fffdf8; box-shadow: 0 7px 0 #102d43, 0 0 0 clamp(4px, .4vw, 7px) #d9c4f5; rotate: -1deg;
   }
-  .kids-show.is-projecting .kids-question-host .kids-bluff-claim::after { left: -11px; bottom: 26px; background: #f3eaff; border-width: 3px; transform: rotate(135deg); }
+  .kids-show.is-projecting .kids-question-host .kids-bluff-claim::after { left: -11px; bottom: 26px; background: #fffdf8; border-width: 3px; transform: rotate(135deg); }
   .kids-show.is-projecting .kids-question-host .kids-bluff-claim small {
     position: absolute; top: -.95em; left: 22px; padding: 3px 14px; border: 2.5px solid #102d43; border-radius: 999px;
-    background: #6b3fa0; color: #fff; font-size: clamp(11px, min(.8vw, 1.5vh), 15px); font-weight: 900; letter-spacing: .12em;
+    background: #6b3fa0; color: #fff; font-size: clamp(13px, min(1vw, 1.8vh), 19px); font-weight: 900; letter-spacing: .1em;
   }
-  .kids-show.is-projecting .kids-question-host .kids-bluff-claim p { color: #3a1f63; font-size: clamp(15px, min(1.7vw, 2.8vh), 32px); }
+  .kids-show.is-projecting .kids-question-host .kids-bluff-claim p { color: var(--show-ink); font-size: clamp(17px, min(1.9vw, 3.2vh), 38px); line-height: 1.2; }
   .kids-show.is-projecting .kids-question-host .kids-bluff-claim::before {
     content: '?'; position: absolute; top: 50%; right: clamp(12px, 1vw, 20px); width: clamp(38px, 3vw, 60px); aspect-ratio: 1;
     display: grid; place-items: center; translate: 0 -50%; rotate: 10deg;
@@ -552,6 +573,25 @@
   .kids-show .kids-show-stage.is-moving .has-pictures .kids-answer:nth-child(2), .kids-show .kids-show-stage.is-moving .has-pictures .kids-answer:nth-child(2)::after { animation-delay: .12s; }
   .kids-show .kids-show-stage.is-moving .has-pictures .kids-answer:nth-child(3), .kids-show .kids-show-stage.is-moving .has-pictures .kids-answer:nth-child(3)::after { animation-delay: .24s; }
 }
+/* Weiche Übergänge: Karten ploppen nacheinander herein, die richtige Antwort wächst aus der Richtung ihres Feldes. Nur Skalierung, nichts fliegt über den Rand. */
+@media (prefers-reduced-motion: no-preference) {
+  .kids-show .kids-show-stage.is-reading .has-pictures .kids-answer, .kids-show .kids-team-badges > div, .kids-show .kids-chapter-groups > *, .kids-show .kids-final-bonuses > span { animation: kids-card-pop .55s cubic-bezier(.3, 1.5, .5, 1) both; }
+  .kids-show :is(.kids-show-stage.is-reading .has-pictures .kids-answer, .kids-team-badges > div, .kids-chapter-groups > *, .kids-final-bonuses > span):nth-child(2) { animation-delay: .12s; }
+  .kids-show :is(.kids-show-stage.is-reading .has-pictures .kids-answer, .kids-team-badges > div, .kids-chapter-groups > *):nth-child(3) { animation-delay: .24s; }
+  .kids-show .kids-reveal .kids-reveal-answer { animation: kids-reveal-grow .7s cubic-bezier(.25, 1.3, .5, 1) both; }
+  .kids-show .kids-reveal-answer.kids-field-1 { transform-origin: 0% 50%; }
+  .kids-show .kids-reveal-answer.kids-field-2 { transform-origin: 80% 50%; }
+  .kids-show .kids-reveal-answer.kids-field-3 { transform-origin: 130% 50%; }
+  .kids-show .kids-reveal-result > :is(.kids-discovery, .kids-reveal-points) { animation: kids-card-pop .5s cubic-bezier(.3, 1.5, .5, 1) .45s both; }
+  .kids-show .kids-reveal-result > .kids-reveal-points { animation-delay: .6s; }
+}
+@media (max-width: 759px) and (prefers-reduced-motion: no-preference) {
+  .kids-show .kids-reveal-answer.kids-field-1 { transform-origin: 15% 50%; }
+  .kids-show .kids-reveal-answer.kids-field-2 { transform-origin: 50% 50%; }
+  .kids-show .kids-reveal-answer.kids-field-3 { transform-origin: 85% 50%; }
+}
+@keyframes kids-card-pop { from { opacity: 0; scale: .85; } to { opacity: 1; scale: 1; } }
+@keyframes kids-reveal-grow { from { opacity: 0; scale: .5; } 70% { opacity: 1; scale: 1.03; } to { opacity: 1; scale: 1; } }
 @keyframes kids-stage-bob { 0%, 100% { translate: 0 0; } 50% { translate: 0 -6px; } }
 @keyframes kids-trail-pulse {
   0%, 100% { box-shadow: 0 0 0 4px rgba(255, 218, 104, .3), 0 0 14px rgba(255, 218, 104, .55); }

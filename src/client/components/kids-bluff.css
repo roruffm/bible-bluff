@@ -32,12 +32,13 @@
 .kids-suspense { grid-row: 1; grid-column: 1 / -1; min-height: 0; min-width: 0; display: grid; grid-template-rows: auto minmax(0, 1fr); gap: clamp(10px, 2vh, 30px); }
 .kids-suspense-title { margin: 0; text-align: center; font-size: clamp(28px, min(3.8vw, 6vh), 90px); font-weight: 900; color: #7154a2; animation: kids-suspense-title .5s ease-in-out 5 alternate; }
 .kids-suspense-cards { list-style: none; margin: 0; padding: 0; min-height: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(12px, 2.5vw, 48px); }
-.kids-suspense-card { position: relative; min-height: 0; min-width: 0; display: flex; flex-direction: column; align-items: center; text-align: center; padding: clamp(10px, 1.6vh, 26px) 14px; border: 3px solid #12324a; border-radius: clamp(20px, 2vw, 38px); background: linear-gradient(155deg, var(--field-soft, #fff0c7), var(--field, #ffe29b)); box-shadow: 0 8px 0 #12324a; --at: calc(1.15s + var(--step) * .75s); }
+.kids-suspense-card { position: relative; min-height: 0; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(6px, 1.4vh, 20px); text-align: center; padding: clamp(10px, 1.6vh, 26px) 14px; border: 3px solid #12324a; border-radius: clamp(20px, 2vw, 38px); background: linear-gradient(155deg, var(--field-soft, #fff0c7), var(--field, #ffe29b)); box-shadow: 0 8px 0 #12324a; --at: calc(1.15s + var(--step) * .75s); }
 .kids-suspense-card.is-bluff { animation: kids-bluff-card .4s ease var(--at) both, kids-suspense-shake .18s ease-in-out 6 alternate; }
 .kids-suspense-card.is-bluff > :not(.kids-bluff-stamp, .kids-bluff-pin) { animation: kids-bluff-fade .4s ease var(--at) both; }
 .kids-suspense-card.is-truth { animation: kids-truth-card .6s ease var(--at) both, kids-suspense-shake .18s ease-in-out 6 alternate; }
-.kids-suspense-number { position: absolute; top: 8px; left: 12px; font-size: clamp(32px, 5.5vh, 90px); font-weight: 900; line-height: 1; background: #fffdf1; border: 2px solid #12324a; border-radius: 12px; padding: 2px 6px; }
-.kids-suspense-card > .kids-story-picture { flex: 1; min-height: 0; width: min(85%, 260px); margin: 12px auto 4px; }
+/* Runde Nummer wie auf den Antwortkarten; das Bild füllt die Karte. */
+.kids-suspense-number { position: absolute; top: clamp(8px, 1.2vh, 16px); left: clamp(8px, 1vw, 18px); z-index: 2; display: grid; place-items: center; width: 1.3em; height: 1.3em; font-size: clamp(30px, min(4.4vw, 7.4vh), 84px); font-weight: 900; line-height: 1; background: #fffdf1; border: 3px solid #12324a; border-radius: 50%; rotate: -8deg; box-shadow: 0 5px 0 #12324a, 0 0 0 5px color-mix(in srgb, var(--field, #ffe29b) 55%, #fff); }
+.kids-suspense-card > .kids-story-picture { flex: 0 1 auto; min-height: 0; width: 100%; max-width: 680px; height: auto; max-height: 100%; }
 .kids-suspense-text { font-size: clamp(21px, min(2.5vw, 3.8vh), 62px); font-weight: 800; line-height: 1.1; text-wrap: balance; }
 .kids-bluff-stamp { position: absolute; left: 50%; top: 45%; z-index: 4; translate: -50% -50%; rotate: -14deg; padding: .1em .45em; border: .12em solid #c2412d; border-radius: .25em; background: #fffdf8e8; color: #c2412d; font-size: clamp(30px, min(4.6vw, 7vh), 120px); font-weight: 900; letter-spacing: .04em; white-space: nowrap; animation: kids-stamp .35s cubic-bezier(.2, 1.6, .5, 1) var(--at) both; }
 .kids-truth-mark { position: absolute; top: -18px; right: -14px; z-index: 4; width: clamp(48px, 8vh, 120px); aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center; background: #176845; color: #fff; border: 4px solid #fff; font-size: clamp(26px, 4.5vh, 70px); font-weight: 900; animation: kids-stamp .45s cubic-bezier(.2, 1.6, .5, 1) var(--at) both; }
@@ -69,7 +70,7 @@
   .kids-bluff-claim-head { height: 44px; }
   .kids-suspense-cards { grid-template-columns: 1fr; gap: 12px; }
   .kids-suspense-card { display: grid; grid-template-columns: 44px 100px 1fr; align-items: center; min-height: 110px; text-align: left; }
-  .kids-suspense-number { position: static; font-size: 32px; }
+  .kids-suspense-number { position: static; font-size: 30px; box-shadow: 0 3px 0 #12324a; }
   .kids-suspense-card > .kids-story-picture { width: 100px; height: 90px; margin: 0; }
   .kids-suspense-text { font-size: 22px; }
   .kids-bluff-stamp { font-size: 30px; }

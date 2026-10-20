@@ -1,44 +1,51 @@
-/* Kompakte Smartphone-Bedienung; große Bildschirme erhalten darunter ein eigenes Pult. */
-.kids-remote-page { max-width: 640px; padding: 18px 16px max(28px, env(safe-area-inset-bottom)); background: #f1f5f5; color: #12324a; }
-.kids-remote-page > .kids-remote-header { display: flex; align-items: center; gap: 14px; text-align: left; margin: 0 0 14px; }
+/* Kompakte Smartphone-Bedienung; große Bildschirme erhalten darunter ein eigenes Pult.
+ * Gleicher Look wie am Beamer: kräftige Ränder, harte Schatten, Gruppen- und Feldfarben. */
+.kids-remote-page { --remote-ink: #12324a; max-width: 640px; padding: 18px 16px max(28px, env(safe-area-inset-bottom)); background: #eef4f2; color: var(--remote-ink); }
+.kids-remote-page > .kids-remote-header { display: flex; align-items: center; gap: 14px; text-align: left; margin: 0 0 14px; padding: 10px 14px; border: 2px solid #082a3c; border-radius: 20px; background: radial-gradient(ellipse at 5% 95%, #12556a 0, transparent 70%), #12394f; color: #fffdf1; box-shadow: 0 4px 0 #082a3c; }
 .kids-remote-header .kids-logo { width: 95px; height: auto; flex: 0 0 auto; }
 .kids-remote-page .kids-remote-header h1 { font-size: 24px; margin: 0 0 4px; line-height: 1.2; }
-.kids-remote-header p { font-size: 12px; color: #40596a; line-height: 1.4; }
+.kids-remote-header p { font-size: 12px; color: #bce5e0; line-height: 1.4; }
 .kids-remote-status { font-size: 12px; margin: 0 0 12px; padding: 8px 10px; }
 .kids-remote-toolbar { position: sticky; top: 0; z-index: 5; display: grid; gap: 9px; padding: 10px 0; background: #f1f5f5; border-bottom: 1px solid #c8d7dc; }
 .kids-remote-live { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 38px; }
-.kids-remote-live > span { font-weight: 850; font-size: 15px; min-width: 0; }
+.kids-remote-live { --group-tint: #e6d5fa; }
+.kids-remote-live.is-group-minis { --group-tint: #a5f3dc; }
+.kids-remote-live.is-group-mittis { --group-tint: #ffda68; }
+.kids-remote-live.is-group-maxis { --group-tint: #f8a1ad; }
+.kids-remote-live > span { display: inline-flex; align-items: center; min-width: 0; padding: 3px 14px 3px 6px; border: 2px solid var(--remote-ink); border-radius: 999px; background: var(--group-tint); box-shadow: 0 3px 0 var(--remote-ink); font-weight: 850; font-size: 15px; line-height: 1.3; }
 .kids-remote-live .kids-group-symbol { width: 26px; height: 26px; }
-.kids-remote-live > strong { flex: 0 0 auto; font-size: 14px; font-variant-numeric: tabular-nums; padding: 7px 10px; border-radius: 9px; background: #dce9ef; }
+.kids-remote-live > strong { flex: 0 0 auto; font-size: 14px; font-variant-numeric: tabular-nums; padding: 6px 12px; border: 2px solid var(--remote-ink); border-radius: 999px; background: #fffdf1; box-shadow: 0 3px 0 var(--remote-ink); }
 .kids-remote-live.is-moving > strong { background: #ffdf8c; }
 .kids-remote-live.is-locked > strong { background: #fbd2cd; color: #832e1f; }
-.kids-remote-tabs { display: grid; grid-template-columns: 1fr 1.35fr 1.2fr; gap: 4px; padding: 4px; border-radius: 13px; background: #dfe8ec; }
+.kids-remote-tabs { display: grid; grid-template-columns: 1fr 1.35fr 1.2fr; gap: 4px; padding: 4px; border: 2px solid var(--remote-ink); border-radius: 15px; background: #fffdf1; }
 .kids-remote-tabs button { min-width: 0; min-height: 45px; border: 0; border-radius: 9px; background: transparent; color: #344e60; font: inherit; font-weight: 800; font-size: 14px; padding: 9px 5px; cursor: pointer; }
 .kids-remote-tabs [aria-selected="true"] { background: #12394f; color: white; box-shadow: 0 2px 4px #12324a20; }
-.kids-remote-stop { justify-self: stretch; min-height: 44px; border: 1px solid #bccdd5; border-radius: 10px; color: #344e60; background: #fffdf8; font: inherit; font-size: 14px; font-weight: 750; cursor: pointer; }
+.kids-remote-stop { justify-self: stretch; min-height: 44px; border: 2px solid var(--remote-ink); border-radius: 12px; color: var(--remote-ink); background: #fffdf8; box-shadow: 0 3px 0 var(--remote-ink); font: inherit; font-size: 14px; font-weight: 800; cursor: pointer; }
 .kids-remote-page button:disabled { cursor: default; opacity: .5; }
 .kids-remote-page :is(button, input, select, summary):focus-visible { outline: 3px solid #7651a5; outline-offset: 3px; }
 .kids-remote-panel { display: grid; gap: 16px; margin-block: 16px 20px; min-width: 0; }
 .kids-remote-panel:focus { outline: none; }
-.kids-remote-question { border: 1px solid #c2d1d9; border-radius: 16px; padding: 16px; box-shadow: 0 2px 0 #d2dfe3; }
-.kids-remote-question > span { font-size: 12px; margin-bottom: 8px; color: #40596a; }
+.kids-remote-question { border: 2px solid var(--remote-ink); border-radius: 20px; padding: 16px; background: #fffdf1; box-shadow: 0 5px 0 var(--remote-ink); }
+.kids-remote-question > span { display: inline-block; font-size: 12px; margin-bottom: 10px; padding: 3px 10px; border-radius: 999px; background: #d5f6e8; color: #145c49; font-weight: 850; }
 .kids-remote-question h2 { font-size: 22px; line-height: 1.35; margin: 0; }
 .kids-remote-question > p { font-size: 13px; line-height: 1.5; margin: 12px 0 0; color: #40596a; }
-.kids-remote-step, .kids-remote-function, .kids-remote-page .kids-remote-direction { padding: 16px; margin: 0; border-radius: 16px; border: 1px solid #c9d9dd; background: #fffdf8; }
-.kids-remote-step { border-top: 4px solid #168579; }
+.kids-remote-step, .kids-remote-function, .kids-remote-page .kids-remote-direction { padding: 16px; margin: 0; border-radius: 20px; border: 2px solid #b9cdd3; background: #fffdf8; }
+.kids-remote-step { border-color: var(--remote-ink); background: #fffdf1; box-shadow: 0 5px 0 var(--remote-ink); }
 .kids-remote-page :is(.kids-remote-step, .kids-remote-function, .kids-remote-direction) > h2 { font-size: 19px; line-height: 1.35; margin: 0 0 8px; }
 .kids-remote-page :is(.kids-remote-step, .kids-phase-audio) > h2 > span { display: inline-grid; place-items: center; width: 25px; height: 25px; margin-right: 6px; border-radius: 50%; font-size: 14px; background: #12394f; color: #fff; }
 .kids-remote-step > p, .kids-remote-function > p { font-size: 14px; line-height: 1.5; color: #40596a; margin: 0 0 14px; }
 .kids-remote-page .kids-remote-actions { position: static; }
 .kids-remote-page .kids-remote-actions button { min-height: 56px; font-size: 18px; width: 100%; }
-.kids-remote-page .kids-controls .kids-button { font-size: 18px; padding: 15px 12px; }
-.kids-remote-page .kids-score-actions { background: transparent; gap: 10px; padding: 0; }
-.kids-remote-page .kids-score-actions .kids-tool { font-size: 16px; min-height: 48px; }
+/* Der nächste Schritt ist der größte Knopf auf der Seite. */
+.kids-remote-page .kids-remote-actions .kids-controls .kids-button { min-height: 72px; font-size: 21px; padding: 16px 12px; border-radius: 16px; text-wrap: balance; }
+.kids-remote-page .kids-remote-actions .kids-controls .kids-primary { background: linear-gradient(#ffe48a, #ffcf55); }
+.kids-remote-page .kids-score-actions { background: transparent; gap: 12px; padding: 0; }
+.kids-remote-page .kids-score-actions .kids-tool { font-size: 17px; min-height: 52px; }
 .kids-remote-page .kids-remote-actions .kids-skip-countdown { min-height: 44px; font-size: 14px; background: #fff2d2; }
 .kids-remote-page .kids-remote-actions .kids-remote-back { margin-top: 10px; min-height: 44px; font-size: 15px; background: #eef4f6; white-space: normal; }
 .kids-remote-back-note { margin: 6px 0 0; font-size: 13px; line-height: 1.4; color: #40596a; text-align: center; }
 .kids-remote-correct-link { padding: 10px 0 0; min-height: 44px; border: 0; background: transparent; color: #3e5463; font: inherit; font-size: 14px; text-decoration: underline; cursor: pointer; }
-.kids-remote-page .kids-phase-audio { background: #e8f3ef; border-color: #b7d6c9; }
+.kids-remote-page .kids-phase-audio { background: #e3f6ee; border-color: var(--remote-ink); box-shadow: 0 4px 0 var(--remote-ink); }
 .kids-remote-page .kids-phase-audio > p { margin: 0; font-size: 13px; color: #375e54; }
 .kids-remote-page .kids-soundboard-clips { gap: 12px; margin: 14px 0 0; }
 .kids-remote-page .kids-audio-clip { padding: 0; border: 0; }
@@ -55,16 +62,25 @@
 .kids-all-audio .kids-audio-count { font-size: 12px; color: #40596a; }
 .kids-remote-page .kids-remote-guide { background: #fff8e6; }
 .kids-remote-guide summary { min-height: 44px; align-content: center; }
-.kids-remote-page .kids-remote-answers { gap: 8px; margin: 16px 0 0; }
-.kids-remote-page .kids-remote-answers li { grid-template-columns: 22px 44px minmax(0,1fr); font-size: 15px; padding: 10px; }
-.kids-remote-page .kids-remote-answers .kids-story-picture { width: 44px; height: 40px; }
-.kids-remote-correct, .kids-remote-bluff { display: block; font-size: 12px; margin-top: 3px; }
-.kids-remote-correct { color: #176845; }
+/* Antworten wie die Karten am Beamer: Feldfarbe, runde Nummer, Bild. Die richtige leuchtet grün. */
+.kids-remote-page .kids-remote-answers { gap: 12px; margin: 16px 0 0; }
+.kids-remote-page .kids-remote-answers .kids-field-1 { --field: #ffdc72; --field-soft: #ffe79b; }
+.kids-remote-page .kids-remote-answers .kids-field-2 { --field: #9cf1dc; --field-soft: #c2fae9; }
+.kids-remote-page .kids-remote-answers .kids-field-3 { --field: #f8a1ad; --field-soft: #ffd0d4; }
+.kids-remote-page .kids-remote-answers li { grid-template-columns: 40px 78px minmax(0,1fr); gap: 10px; font-size: 16px; font-weight: 750; padding: 10px 12px; border: 2px solid var(--remote-ink); border-radius: 16px; background: linear-gradient(150deg, var(--field-soft), var(--field)); box-shadow: 0 4px 0 var(--remote-ink); }
+.kids-remote-page .kids-remote-answers li.is-correct { border-color: var(--remote-ink); box-shadow: 0 4px 0 var(--remote-ink), 0 0 0 4px #5fd9a8; }
+.kids-remote-page .kids-remote-answers:not(.is-compact) b { display: grid; place-items: center; width: 38px; height: 38px; border: 2px solid var(--remote-ink); border-radius: 50%; background: #fffdf1; font-size: 21px; rotate: -8deg; box-shadow: 0 3px 0 var(--remote-ink); }
+.kids-remote-page .kids-remote-answers .kids-story-picture { width: 78px; height: 52px; }
+.kids-remote-correct, .kids-remote-bluff { display: block; width: fit-content; font-size: 12px; margin-top: 4px; padding: 1px 8px; border-radius: 999px; font-weight: 850; }
+.kids-remote-correct { color: #fff; background: #176845; }
+.kids-remote-bluff { color: #fff; background: #6b3fa0; }
 .kids-remote-function .kids-button { width: 100%; min-height: 48px; margin-top: 12px; font-size: 16px; white-space: normal; }
 .kids-remote-function .kids-remote-finish { margin-top: 16px; }
 .kids-remote-page .kids-score-correction { background: #fff8e6; }
-.kids-remote-score { justify-content: center; align-items: baseline; flex-wrap: wrap; padding-top: 14px; border-top: 1px solid #c8d7dc; font-size: 12px; gap: 6px 16px; margin-bottom: 0; }
-.kids-remote-score b { font-size: 18px; }
+.kids-remote-score { justify-content: center; align-items: baseline; flex-wrap: wrap; padding: 6px 16px; border: 2px solid var(--remote-ink); border-radius: 999px; background: linear-gradient(100deg, #d5f7ef, #f5efff 60%, #e6d5fa); box-shadow: 0 3px 0 var(--remote-ink); font-size: 12px; font-weight: 800; gap: 6px 16px; margin: 4px 0 0; }
+.kids-remote-score b { font-size: 20px; font-weight: 900; }
+.kids-remote-score > span:first-child b { color: #087a70; }
+.kids-remote-score > span:last-child b { color: #7134aa; }
 .kids-remote-score > span { display: inline-flex; align-items: baseline; gap: 4px; }
 
 /* Auf dem Smartphone bleiben die drei Reiter erhalten. */
@@ -85,14 +101,14 @@
   .is-desktop > :is(.kids-remote-toolbar, .kids-remote-dashboard, .kids-remote-empty) { grid-column: 1 / -1; }
   .is-desktop .kids-remote-toolbar {
     grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 18px;
-    margin: 0 0 20px; padding: 10px 14px; border: 1px solid #c8d7dc; border-radius: 14px;
-    background: #f8fbfa; box-shadow: 0 3px 10px #12324a0c;
+    margin: 0 0 20px; padding: 10px 14px; border: 2px solid var(--remote-ink); border-radius: 18px;
+    background: #fffdf1; box-shadow: 0 4px 0 var(--remote-ink);
   }
   .is-desktop .kids-remote-live { justify-content: flex-start; gap: 16px; }
   .is-desktop .kids-remote-live > span { font-size: 16px; }
   .is-desktop .kids-remote-live > strong { font-size: 15px; }
   .is-desktop .kids-remote-live .kids-group-symbol { width: 28px; height: 28px; }
-  .is-desktop .kids-remote-score { gap: 16px; margin: 0; padding: 4px 12px; border: 1px solid #cadbd7; border-radius: 10px; background: #eaf2ee; font-size: 12px; }
+  .is-desktop .kids-remote-score { gap: 16px; margin: 0; padding: 4px 16px; font-size: 12px; }
   .is-desktop .kids-remote-score b { font-size: 23px; }
   .is-desktop .kids-remote-stop { min-height: 44px; padding: 10px 12px; }
   .is-desktop .kids-remote-dashboard { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 24px; align-items: start; }
@@ -100,11 +116,12 @@
   .is-desktop .kids-remote-panel { margin: 0; gap: 14px; align-content: start; }
   .kids-remote-column-title { padding: 0 2px 2px; }
   .kids-remote-column-title > h2 { margin: 0; font-size: 20px; line-height: 1.2; }
-  .is-desktop .kids-remote-question { padding: 18px; background: #fff; }
+  .is-desktop .kids-remote-question { padding: 18px; }
   .is-desktop .kids-remote-question h2 { font-size: 25px; }
   .is-desktop .kids-remote-answers.is-compact { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 16px; }
-  .is-desktop .kids-remote-answers.is-compact li { grid-template-columns: minmax(0, 1fr); align-content: start; align-items: start; padding: 10px 8px; gap: 6px; font-size: 14px; line-height: 1.35; border-width: 1.5px; border-radius: 10px; }
-  .is-desktop .kids-remote-answers.is-compact b { width: auto; font-size: 11px; text-align: left; color: #40596a; }
+  .is-desktop .kids-remote-answers.is-compact li { grid-template-columns: minmax(0, 1fr); align-content: start; align-items: start; justify-items: start; padding: 8px 10px 10px; gap: 6px; font-size: 15px; line-height: 1.35; border-radius: 14px; }
+  .is-desktop .kids-remote-answers.is-compact b { width: auto; font-size: 12px; text-align: left; color: var(--remote-ink); }
+  .is-desktop .kids-remote-answers.is-compact .kids-story-picture { justify-self: center; width: 100%; height: 62px; }
   .is-desktop .kids-remote-answers.is-compact small { font-size: 11px; }
   .is-desktop .kids-remote-question .kids-audio-claim { margin-top: 14px; font-size: 13px; }
   .is-desktop .kids-remote-question .kids-audio-claim > p { margin-top: 4px; }
