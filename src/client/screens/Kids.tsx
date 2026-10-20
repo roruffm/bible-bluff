@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { KidsGroupName } from '../components/KidsGroupName';
 import { KidsScene } from '../components/KidsScene';
 import { KidsTrail } from '../components/KidsTrail';
+import { KidsSky } from '../components/KidsSky';
 import { KidsAnswers } from '../components/KidsAnswers';
 import { KidsPointsFlight, useKidsPresentationMoment } from '../components/KidsShowEffects';
 import { KidsAnswersVoiceButton, KidsQuestionVoiceButton, KidsVoiceProvider } from '../components/KidsVoice';
@@ -166,6 +167,7 @@ export function KidsPage() {
   const displayPhase = !game ? '' : finished ? 'Unsere gemeinsame Bluff-Jagd' : game.phase === 'welcome' ? 'Willkommen!' : game.index === 9 ? 'Das große Finale' : game.phase === 'chapter' ? `Kapitel ${chapter + 1} von 3` : game.phase === 'revealed' ? 'Auflösung' : `Kapitel ${chapter + 1} · Frage ${game.index % 3 + 1}`;
   const status = !game ? '' : game.phase === 'reading' ? 'Erst zuhören. Dann geht’s los!' : game.phase === 'moving' ? (lastSeconds ? 'Zählt laut mit!' : '1, 2 oder 3? Ab in euer Feld!') : game.phase === 'paused' ? 'Kurze Pause. Bleibt, wo ihr seid!' : game.phase === 'locked' ? 'Stopp! Helfer prüfen die Felder.' : game.phase === 'returning' ? 'Alle zurück zu eurer Gruppe!' : game.phase === 'judging' ? 'Jetzt wird’s spannend …' : `Richtig ist Feld ${round!.correctIndex + 1}!`;
   return <KidsVoiceProvider game={game} enabled={sound==='on'} enable={enableVoice} act={act} busy={remote.busy} onError={setFullscreenError}><main class={`kids-page kids-show${game ? ' is-playing' : ''}${presentation && game ? ' is-projecting' : ''}${fullscreen ? ' is-fullscreen' : ''}`} ref={root} tabIndex={-1}>
+    {game && <KidsSky game={game}/>}
     {game && moment?.kind === 'points' && suspenseIndex < 0 && <KidsPointsFlight key={`${moment.index}-${moment.result}`} game={game} points={moment.points}/>}
     <KidsIntroVideo game={game} act={act} onError={setFullscreenError}/>
     {game?.introVideo && <div class="kids-intro-local-controls"><KidsIntroControls game={game} act={act} disabled={remote.busy}/></div>}

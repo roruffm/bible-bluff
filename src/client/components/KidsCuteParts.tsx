@@ -17,10 +17,16 @@ export const Sun = ({ x, y, r = 18, rays = [4, 10] }: { x: number; y: number; r?
   {Array.from({ length: 8 }, (_, i) => { const a = i * Math.PI / 4; return <path key={i} d={`M${x + Math.cos(a) * (r + rays[0])} ${y + Math.sin(a) * (r + rays[0])}L${x + Math.cos(a) * (r + rays[1])} ${y + Math.sin(a) * (r + rays[1])}`} stroke="#f0b83c"/>; })}
   <circle cx={x} cy={y} r={r} fill="#ffd96a"/><Face x={x} y={y - r * .05} s={r / 30}/>
 </>;
-/** Kleine Figur mit großem Kopf; Bart oder Kopftuch nach Bedarf, schlafend oder besorgt. */
-export const Kid = ({ x, y, s = 1, robe = '#8cc4ee', hair = '#8a5a3c', beard, hood, sleepy, worried }: At & { robe?: string; hair?: string; beard?: string; hood?: string; sleepy?: boolean; worried?: boolean }) => <>
+/** Kraushaar hinter dem Kopf: umrandete Locken, darüber dieselben ohne Rand, damit innen keine Linien stehen bleiben. */
+const CURLS = Array.from({ length: 7 }, (_, i) => Math.PI * (1 + i / 6));
+const Curls = ({ x, y, s, hair }: { x: number; y: number; s: number; hair: string }) => <>
+  {[true, false].map(outline => CURLS.map(a => <circle key={`${outline}${a}`} cx={x + Math.cos(a) * 19 * s} cy={y - 2 * s + Math.sin(a) * 19 * s} r={outline ? 8 * s : 8 * s - 1.5} fill={hair} stroke={outline ? undefined : 'none'}/>))}
+</>;
+/** Kleine Figur mit großem Kopf; Hautfarbe, Kraushaar, Bart oder Kopftuch nach Bedarf, schlafend oder besorgt. */
+export const Kid = ({ x, y, s = 1, robe = '#8cc4ee', hair = '#8a5a3c', skin = '#ffdcc4', curly, beard, hood, sleepy, worried }: At & { robe?: string; hair?: string; skin?: string; curly?: boolean; beard?: string; hood?: string; sleepy?: boolean; worried?: boolean }) => <>
   <path d={`M${x - 18 * s} ${y + 56 * s}q${-s} ${-30 * s} ${18 * s} ${-36 * s} ${19 * s} ${6 * s} ${18 * s} ${36 * s}z`} fill={robe}/>
-  <circle cx={x} cy={y} r={21 * s} fill="#ffdcc4"/>
+  {curly && <Curls x={x} y={y} s={s} hair={hair}/>}
+  <circle cx={x} cy={y} r={21 * s} fill={skin}/>
   {beard && <path d={`M${x - 19 * s} ${y + 2 * s}q${3 * s} ${26 * s} ${19 * s} ${26 * s}t${19 * s} ${-26 * s}q${-8 * s} ${9 * s} ${-19 * s} ${9 * s}t${-19 * s} ${-9 * s}z`} fill={beard}/>}
   <path d={`M${x - 21 * s} ${y - s}q${s} ${-22 * s} ${21 * s} ${-22 * s}t${21 * s} ${22 * s}q${-8 * s} ${-10 * s} ${-21 * s} ${-10 * s}t${-21 * s} ${10 * s}z`} fill={hair}/>
   {hood && <path d={`M${x - 25 * s} ${y + 14 * s}q${-4 * s} ${-40 * s} ${25 * s} ${-40 * s}t${25 * s} ${40 * s}`} fill="none" stroke={hood} stroke-width={9 * s}/>}

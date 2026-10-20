@@ -267,7 +267,6 @@
 .kids-show-host blockquote { font-size: clamp(18px,min(2.6vw,3.5vh),40px); line-height: 1.25; font-weight: 750; background: #fffdf8; border: 2px solid #12324a; border-radius: 20px; padding: 15px; box-shadow: 0 5px 0 #12324a; margin: 8px 0 10px; }
 .kids-show-host > span { font-size: 13px; font-weight: 800; color: #7154a2; }
 .kids-show-story { display: flex; flex-direction: column; gap: 14px; align-items: center; text-align: center; min-width: 0; position: relative; z-index: 2; }
-.kids-show-story .kids-eyebrow { margin: 0; font-size: clamp(10px,1.1vw,20px); }
 .kids-show-story h1 { font-size: clamp(29px,min(4vw,6.5vh),90px); font-weight: 900; line-height: 1.08; text-wrap: balance; }
 .kids-show-story > p { font-size: clamp(18px,min(2vw,3.3vh),38px); line-height: 1.25; }
 .kids-show-story .kids-controls { justify-content: center; }
@@ -372,8 +371,8 @@
 .kids-regroup-picture { width: min(100%,650px); height: clamp(80px,15vh,190px); flex: 0 0 auto; }
 .kids-regroup-walker { animation: kids-walk-home 5s ease-in-out infinite; animation-delay: var(--delay); opacity: 0; }
 .kids-regroup-arrow { animation: kids-guide-arrow 1.4s ease-in-out infinite; }
-.kids-regroup-friends { animation: kids-together .7s ease-out both; animation-delay: var(--delay); transform-origin: 260px 110px; }
-.kids-regroup-check { animation: kids-together .7s ease-out both; transform-origin: 260px 30px; }
+.kids-regroup-friends { animation: kids-together .7s ease-out both; animation-delay: var(--delay); transform-box: fill-box; transform-origin: 50% 100%; }
+.kids-regroup-check { animation: kids-together .7s ease-out both; transform-box: fill-box; transform-origin: center; }
 .kids-regroup-operator { width: 100%; max-width: 650px; }
 .kids-regroup-operator > p { font-size: clamp(11px,1.05vw,18px); color: #40596a; line-height: 1.25; margin-top: 10px; }
 .kids-regroup-operator .kids-controls { justify-content: center; padding-bottom: 5px; }
@@ -507,8 +506,8 @@
 .kids-show-stage .kids-answer > .kids-story-picture { width: min(85%,340px); }
 .kids-remote-answers li { display: grid; grid-template-columns: 24px 70px minmax(0,1fr); gap: 9px; }
 .kids-remote-answers .kids-story-picture { width: 70px; height: 58px; }
-.kids-remote-farewell { padding: 22px 18px; border-radius: 18px; border: 2px solid #b7d8c8; background: #e0f2e7; text-align: center; }
-.kids-remote-farewell h2 { font-size: 25px; color: #176845; margin-bottom: 12px; }
+.kids-remote-farewell { padding: 22px 18px; border-radius: 20px; border: 2px solid #12324a; background: #fffdf1; box-shadow: 0 5px 0 #12324a; text-align: center; }
+.kids-remote-farewell h2 { font-size: 25px; color: #087a70; margin-bottom: 12px; }
 .kids-remote-farewell p { font-size: 16px; line-height: 1.5; margin-top: 10px; }
 .kids-end-toggle { background: #fff0cf; }
 .kids-finish-dialog > div { width: min(480px,100%); max-width: 480px; max-height: calc(100dvh - 40px); overflow-y: auto; }

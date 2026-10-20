@@ -16,6 +16,7 @@ export function KidsInterlude({ game, chapter, act, disabled, primaryRef }: {
   disabled: boolean; primaryRef: RefObject<HTMLButtonElement>;
 }) {
   const welcome = game.phase === 'welcome', finale = game.phase === 'superbluff';
+  const groups = (['minis', 'mittis', 'maxis'] as const).map(g => <KidsGroupName key={g} group={g}/>);
   return <section class={`kids-show-interlude is-${game.phase}`}>
     <div class="kids-show-host">
       <blockquote>{professorSays(game)}</blockquote>
@@ -23,18 +24,16 @@ export function KidsInterlude({ game, chapter, act, disabled, primaryRef }: {
       <span class="kids-professor-signature">Professor Bluff <KidsVoiceButton/></span>
     </div>
     <div class="kids-show-story">
-      <p class="kids-eyebrow">{welcome ? 'WILLKOMMEN, BIBLEBLUFF-DETEKTIVE!' : finale ? 'ALLE TEAMS WERDEN GEBRAUCHT' : `KAPITEL ${chapter + 1}`}</p>
       <h1>{welcome ? 'Zusammen knacken wir jeden Bluff!' : finale ? 'Knackt den Superbluff!' : KIDS_CHAPTERS[chapter]}</h1>
       {finale ? <>
-        <div class="kids-final-groups"><KidsGroupName group="minis"/><KidsGroupName group="mittis"/><KidsGroupName group="maxis"/><strong>Alle gemeinsam</strong></div>
-        <p>Jetzt sind alle drei Teams zusammen dran.</p>
+        <div class="kids-chapter-groups">{groups}</div>
         <StoryPicture motif="stage"/>
         <p>Welche Geschichte spielen die Eltern?</p>
-        <div class="kids-final-bonuses"><span>Professor Bluff <b>+0</b></span><span>Unser Team <b>bis zu +20</b></span></div>
+        <div class="kids-final-bonuses"><span class="is-team">Unser Team <b>bis zu +20</b></span><span class="is-professor">Professor Bluff <b>+0</b></span></div>
       </> : <>
         {welcome ? <div class="kids-team-badges">{(['minis','mittis','maxis'] as const).map(g=><div key={g} class={`group-${g}`}><StoryPicture motif={KIDS_GROUPS[g].symbol}/><b><KidsGroupName group={g}/></b><span class="kids-group-ages">{KIDS_GROUPS[g].ages}</span></div>)}</div> : <>
           <StoryPicture motif={CHAPTER_PICTURES[chapter]}/>
-          <div class="kids-chapter-groups">{(['minis','mittis','maxis'] as const).map(g=><KidsGroupName key={g} group={g}/>)}</div>
+          <div class="kids-chapter-groups">{groups}</div>
         </>}
         <p>{welcome ? <>Wir sammeln alle für EIN Team.<br/><span class="kids-welcome-promise">Niemand scheidet aus. Alle gehören dazu!</span></> : chapter === 0 ? 'Eure erste Spur wartet auf alle drei Gruppen!' : chapter === 1 ? 'Zusammen findet ihr die nächste Spur!' : 'Jeder Beitrag zählt. Gemeinsam geht die Punktejagd weiter!'}</p>
         {!welcome && <ol class="kids-chapter-progress" aria-label="Kapitelfortschritt">{[0,1,2].map(i=><li key={i} aria-current={i === chapter ? 'step' : undefined} class={i <= chapter ? 'is-reached' : ''}>{i + 1}</li>)}</ol>}
