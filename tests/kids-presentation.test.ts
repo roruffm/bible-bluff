@@ -36,6 +36,22 @@ describe('Neue Auftritte auf der Kinderbühne', () => {
     }
   });
 
+  it('lässt die Leuchtlupe beim Kapitelstart und vor dem Superbluff einmal über die Bühne fliegen', () => {
+    const chapter = step(createKidsGame(), 'next');
+    expect(kidsPresentationMoment(createKidsGame(), chapter)).toEqual({kind:'sweep',index:0});
+    const third = {...step(chapter, 'next'), index: 2};
+    const nextChapter = step(step(judge(third), 'correct'), 'next');
+    expect(nextChapter.phase).toBe('chapter');
+    expect(kidsPresentationMoment(step(judge(third), 'correct'), nextChapter)).toEqual({kind:'sweep',index:3});
+    const last = {...step(chapter, 'next'), index: 8};
+    const revealedLast = step(judge(last), 'correct'), superbluff = step(revealedLast, 'next');
+    expect(superbluff.phase).toBe('superbluff');
+    expect(kidsPresentationMoment(revealedLast, superbluff)).toEqual({kind:'sweep',index:superbluff.index});
+    const reading = step(chapter, 'next');
+    expect(kidsPresentationMoment(reading, step(reading, 'back'))).toBeNull();
+    expect(kidsPresentationMoment(null, chapter)).toBeNull();
+  });
+
   it('startet nach Neuladen, Rückwärtsgehen und Fortsetzen keine nachträgliche Feier', () => {
     const reading = step(step(createKidsGame(), 'next'), 'next');
     const moving = step(reading, 'start'), paused = step(moving, 'pause');

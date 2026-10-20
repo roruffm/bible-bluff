@@ -4,6 +4,7 @@ export { ProfessorBluff, ProfessorHead } from './ProfessorBluff';
 export { StoryPicture } from './KidsStoryArt';
 export type { ProfessorMood } from './ProfessorBluff';
 import type { RefObject } from 'preact';
+import { KidsLightJar } from './KidsLightJar';
 import { kidsActionLabel, kidsCanScore, kidsOvertook, kidsPrimaryAction, kidsResultPoints, kidsScores, type KidsAction, type KidsGame } from '../../shared/kids-game';
 
 export function professorMood(game: KidsGame): ProfessorMood {
@@ -31,8 +32,8 @@ export function ShowScoreboard({ game, hiddenIndex = -1 }: { game: KidsGame; hid
   const s = kidsScores(game, hiddenIndex);
   const overtook = game.phase === 'revealed' && hiddenIndex !== game.index && kidsOvertook(game);
   return <section class="kids-scoreboard kids-compact-score" aria-label={`Gemeinsame Punktejagd: Kinderteam ${s.team}, Professor Bluff ${s.professor}`}>
-    <span class="kids-score-label">Unser Team</span><strong class="kids-score-team" data-testid="team-score">{s.team}</strong>
-    <span class="kids-score-colon" aria-hidden="true">:</span><strong class="kids-score-professor" data-testid="prof-score">{s.professor}</strong><span class="kids-score-label">Professor Bluff</span>
+    <KidsLightJar points={s.team} kind="team"/><span class="kids-score-label">Unser Team</span><strong class="kids-score-team" data-testid="team-score">{s.team}</strong>
+    <span class="kids-score-colon" aria-hidden="true">:</span><strong class="kids-score-professor" data-testid="prof-score">{s.professor}</strong><span class="kids-score-label">Professor Bluff</span><KidsLightJar points={s.professor} kind="professor"/>
     {overtook && <b class="kids-score-overtake">Überholt!</b>}
   </section>;
 }

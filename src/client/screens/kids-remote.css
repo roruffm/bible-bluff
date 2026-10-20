@@ -64,11 +64,10 @@
 .kids-remote-guide summary { min-height: 44px; align-content: center; }
 /* Antworten wie die Karten am Beamer: Feldfarbe, runde Nummer, Bild. Die richtige leuchtet grün. */
 .kids-remote-page .kids-remote-answers { gap: 12px; margin: 16px 0 0; }
-.kids-remote-page .kids-remote-answers .kids-field-1 { --field: #ffdc72; --field-soft: #ffe79b; }
-.kids-remote-page .kids-remote-answers .kids-field-2 { --field: #9cf1dc; --field-soft: #c2fae9; }
-.kids-remote-page .kids-remote-answers .kids-field-3 { --field: #f8a1ad; --field-soft: #ffd0d4; }
 .kids-remote-page .kids-remote-answers li { grid-template-columns: 40px 78px minmax(0,1fr); gap: 10px; font-size: 16px; font-weight: 750; padding: 10px 12px; border: 2px solid var(--remote-ink); border-radius: 16px; background: linear-gradient(150deg, var(--field-soft), var(--field)); box-shadow: 0 4px 0 var(--remote-ink); }
 .kids-remote-page .kids-remote-answers li.is-correct { border-color: var(--remote-ink); box-shadow: 0 4px 0 var(--remote-ink), 0 0 0 4px #5fd9a8; }
+.kids-remote-page .kids-remote-answers b { position: relative; }
+.kids-remote-page .kids-remote-answers.is-compact .kids-field-shape { position: static; display: inline-block; width: 15px; height: 15px; margin-left: 6px; vertical-align: -3px; padding: 2px; border-width: 1.5px; box-shadow: none; }
 .kids-remote-page .kids-remote-answers:not(.is-compact) b { display: grid; place-items: center; width: 38px; height: 38px; border: 2px solid var(--remote-ink); border-radius: 50%; background: #fffdf1; font-size: 21px; rotate: -8deg; box-shadow: 0 3px 0 var(--remote-ink); }
 .kids-remote-page .kids-remote-answers .kids-story-picture { width: 78px; height: 52px; }
 .kids-remote-correct, .kids-remote-bluff { display: block; width: fit-content; font-size: 12px; margin-top: 4px; padding: 1px 8px; border-radius: 999px; font-weight: 850; }

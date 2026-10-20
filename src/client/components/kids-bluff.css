@@ -31,16 +31,20 @@
 .kids-reveal.is-suspense > .kids-reveal-result, .kids-reveal.is-suspense > .kids-reaction { display: none; }
 .kids-suspense { grid-row: 1; grid-column: 1 / -1; min-height: 0; min-width: 0; display: grid; grid-template-rows: auto minmax(0, 1fr); gap: clamp(10px, 2vh, 30px); }
 .kids-suspense-title { margin: 0; text-align: center; font-size: clamp(28px, min(3.8vw, 6vh), 90px); font-weight: 900; color: #7154a2; animation: kids-suspense-title .5s ease-in-out 5 alternate; }
-.kids-suspense-cards { list-style: none; margin: 0; padding: 0; min-height: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(12px, 2.5vw, 48px); }
+.kids-suspense-cards { perspective: 1800px; list-style: none; margin: 0; padding: 0; min-height: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(12px, 2.5vw, 48px); }
 .kids-suspense-card { position: relative; min-height: 0; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(6px, 1.4vh, 20px); text-align: center; padding: clamp(10px, 1.6vh, 26px) 14px; border: 3px solid #12324a; border-radius: clamp(20px, 2vw, 38px); background: linear-gradient(155deg, var(--field-soft, #fff0c7), var(--field, #ffe29b)); box-shadow: 0 8px 0 #12324a; --at: calc(1.15s + var(--step) * .75s); }
-.kids-suspense-card.is-bluff { animation: kids-bluff-card .4s ease var(--at) both, kids-suspense-shake .18s ease-in-out 6 alternate; }
-.kids-suspense-card.is-bluff > :not(.kids-bluff-stamp, .kids-bluff-pin) { animation: kids-bluff-fade .4s ease var(--at) both; }
+/* Die Bluff-Karten drehen sich um: In der Mitte der Drehung erscheint die lila Rückseite mit dem Professor. */
+.kids-suspense-card.is-bluff { animation: kids-card-flip .7s ease-in-out var(--at) both, kids-suspense-shake .18s ease-in-out 6 alternate; }
+.kids-suspense-back { position: absolute; inset: -3px; z-index: 3; border: 3px solid #12324a; border-radius: inherit; background: repeating-linear-gradient(45deg, #6b3fa0 0 26px, #7b4db3 26px 52px); opacity: 0; animation: kids-back-show .7s linear var(--at) both; }
+.kids-suspense-back-face { position: absolute; left: 50%; top: 30%; height: 38%; aspect-ratio: 1; translate: -50% -50%; display: grid; place-items: center; overflow: hidden; border: 4px solid #12324a; border-radius: 50%; background: #fffdf1; box-shadow: 0 5px 0 #3a1f63; }
+.kids-suspense-back-face > svg { width: 82%; height: auto; }
 .kids-suspense-card.is-truth { animation: kids-truth-card .6s ease var(--at) both, kids-suspense-shake .18s ease-in-out 6 alternate; }
 /* Runde Nummer wie auf den Antwortkarten; das Bild füllt die Karte. */
 .kids-suspense-number { position: absolute; top: clamp(8px, 1.2vh, 16px); left: clamp(8px, 1vw, 18px); z-index: 2; display: grid; place-items: center; width: 1.3em; height: 1.3em; font-size: clamp(30px, min(4.4vw, 7.4vh), 84px); font-weight: 900; line-height: 1; background: #fffdf1; border: 3px solid #12324a; border-radius: 50%; rotate: -8deg; box-shadow: 0 5px 0 #12324a, 0 0 0 5px color-mix(in srgb, var(--field, #ffe29b) 55%, #fff); }
 .kids-suspense-card > .kids-story-picture { flex: 0 1 auto; min-height: 0; width: 100%; max-width: 680px; height: auto; max-height: 100%; }
 .kids-suspense-text { font-size: clamp(21px, min(2.5vw, 3.8vh), 62px); font-weight: 800; line-height: 1.1; text-wrap: balance; }
-.kids-bluff-stamp { position: absolute; left: 50%; top: 45%; z-index: 4; translate: -50% -50%; rotate: -14deg; padding: .1em .45em; border: .12em solid #c2412d; border-radius: .25em; background: #fffdf8e8; color: #c2412d; font-size: clamp(30px, min(4.6vw, 7vh), 120px); font-weight: 900; letter-spacing: .04em; white-space: nowrap; animation: kids-stamp .35s cubic-bezier(.2, 1.6, .5, 1) var(--at) both; }
+.kids-bluff-stamp { position: absolute; left: 50%; top: 66%; z-index: 4; translate: -50% -50%; rotate: -10deg; color: #fffdf1; font-size: clamp(34px, min(5vw, 8vh), 130px); font-weight: 900; letter-spacing: .04em; line-height: 1; white-space: nowrap; text-shadow: 0 .07em 0 #3a1f63; animation: kids-stamp .35s cubic-bezier(.2, 1.6, .5, 1) calc(var(--at) + .4s) both; }
+.kids-suspense-card .kids-bluff-pin { z-index: 5; }
 .kids-truth-mark { position: absolute; top: -18px; right: -14px; z-index: 4; width: clamp(48px, 8vh, 120px); aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center; background: #176845; color: #fff; border: 4px solid #fff; font-size: clamp(26px, 4.5vh, 70px); font-weight: 900; animation: kids-stamp .45s cubic-bezier(.2, 1.6, .5, 1) var(--at) both; }
 
 /* Gruppensymbole laden sich mit jeder Wertung auf */
@@ -70,10 +74,11 @@
   .kids-bluff-claim-head { height: 44px; }
   .kids-suspense-cards { grid-template-columns: 1fr; gap: 12px; }
   .kids-suspense-card { display: grid; grid-template-columns: 44px 100px 1fr; align-items: center; min-height: 110px; text-align: left; }
-  .kids-suspense-number { position: static; font-size: 30px; box-shadow: 0 3px 0 #12324a; }
+  .kids-suspense-number { position: relative; font-size: 30px; box-shadow: 0 3px 0 #12324a; }
   .kids-suspense-card > .kids-story-picture { width: 100px; height: 90px; margin: 0; }
   .kids-suspense-text { font-size: 22px; }
-  .kids-bluff-stamp { font-size: 30px; }
+  .kids-bluff-stamp { top: 50%; font-size: 34px; }
+  .kids-suspense-back-face { display: none; }
   .kids-truth-mark { width: 44px; top: -10px; right: -6px; font-size: 24px; }
   .kids-show .kids-scoreboard { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
   .kids-team-score > .kids-group-charges { flex-wrap: wrap; gap: 4px 8px; }
@@ -87,9 +92,10 @@
 @keyframes kids-count-pop { 0% { transform: scale(1.6); opacity: 0; } 18% { transform: scale(1); opacity: .9; } 100% { transform: scale(.94); opacity: .4; } }
 @keyframes kids-suspense-title { to { transform: scale(1.06); } }
 @keyframes kids-suspense-shake { 0% { transform: rotate(-1.4deg) translateY(0); } 100% { transform: rotate(1.4deg) translateY(-4px); } }
-@keyframes kids-bluff-card { to { background: #eef1f2; border-color: #8a9ca4; box-shadow: 0 8px 0 #8a9ca4; } }
-@keyframes kids-bluff-fade { to { opacity: .4; filter: grayscale(.8); } }
-@keyframes kids-truth-card { 0% { transform: scale(1); } 55% { transform: scale(1.08); } 100% { transform: scale(1.05); background: #cff2d8; border-color: #176845; box-shadow: 0 8px 0 #176845, 0 0 0 6px #fff, 0 0 46px #4fd18b; } }
+@keyframes kids-card-flip { 0% { rotate: y 0deg; } 50% { rotate: y 90deg; } 100% { rotate: y 0deg; } }
+@keyframes kids-back-show { 0%, 49% { opacity: 0; } 50%, 100% { opacity: 1; } }
+/* Die Wahrheit behält ihre Feldfarbe und leuchtet golden. */
+@keyframes kids-truth-card { 0% { transform: scale(1); } 55% { transform: scale(1.08); } 100% { transform: scale(1.05); box-shadow: 0 8px 0 #12324a, 0 0 0 8px #ffe48a, 0 0 70px 16px rgba(255, 218, 104, .8); } }
 @keyframes kids-stamp { 0% { opacity: 0; scale: 2.4; } 100% { opacity: 1; scale: 1; } }
 @keyframes kids-charge-pulse { 50% { transform: scale(calc(1.5 + var(--charge) * .3)); filter: drop-shadow(0 0 14px var(--glow)) brightness(1.2); } }
 @keyframes kids-overtake-hop { 50% { transform: translateY(-9px) scale(1.15); } }
