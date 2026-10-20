@@ -45,7 +45,7 @@ const SCENES = {
   storm: () => <><Sky fill="#b9c7de"/><path d="M0 98q27-12 55 0t55 0 55 0 55 0V140H0z" fill="#6fb6d6"/></>,
   under: () => <><Sky fill="#8fd3f0"/><g fill="none" stroke="#fff" stroke-width="2"><circle cx="40" cy="40" r="5"/><circle cx="52" cy="26" r="3.5"/><circle cx="186" cy="36" r="4.5"/></g><Ground fill="#f2dca8" y={112}/><path d="M24 126q-8-20 4-36m10 36q8-22-2-40m168 40q8-18-2-34" fill="none" stroke="#5ea86a" stroke-width="5"/></>,
   meadow: () => <><Sky fill="#d7f3ff"/><Cloud x={150} y={26}/><Ground fill="#a9e08f"/></>,
-  desert: () => <><Sky fill="#ffe9c2"/><circle cx="186" cy="30" r="13" fill="#ffd24a" stroke="none"/><path d="M0 110q50-24 110-6t110-10V140H0z" fill="#f2cf8a"/></>,
+  desert: () => <><Sky fill="#ffe9c2"/><circle cx="34" cy="30" r="13" fill="#ffd24a" stroke="none"/><path d="M0 110q50-24 110-6t110-10V140H0z" fill="#f2cf8a"/></>,
   night: () => <><Sky fill="#3f4f86"/>{[[24, 24], [50, 14], [178, 20], [200, 46], [150, 12], [70, 36]].map(([x, y]) => <Star key={x} x={x} y={y}/>)}<Ground fill="#c9b48e" y={110}/></>,
   table: () => <><Sky fill="#fff1dd"/><path d="M0 100h220V140H0z" fill="#ffd7df"/><path d="M0 100h220" stroke-width="3"/><path d="M30 100v40m40-40v40m40-40v40m40-40v40m40-40v40" stroke="#ff9fb4" stroke-width="6" opacity=".5"/></>,
   bed: () => <><Sky fill="#ece4ff"/><path d="M0 104h220V140H0z" fill="#d9b483"/></>,
@@ -182,15 +182,15 @@ const PICTURES: Record<KidsPictureMotif, Picture> = {
     <Flower x={160} y={30}/>
     <Flower x={40} y={120}/><Flower x={60} y={126} fill="#ffd96a"/><Flower x={196} y={116} fill="#b9a7f0"/>
   </> },
-  camel: { scene: 'desert', fit: 'translate(10.9 14.7) scale(.87)', art: () => <>
-    <Spark x={40} y={30}/>
-    <path d="M62 104v24m22-24v24m44-24v24m20-24v24" fill="none" stroke="#c99467" stroke-width="12"/>
-    <path d="M46 110q-6-34 18-44 6-28 28-16 10-24 30-6 16-14 28 6 10 14 2 60z" fill="#e0b47e"/>
-    <path d="M140 96q16-6 16-30V44h18v26q0 34-26 40z" fill="#e0b47e"/>
-    <ellipse cx="170" cy="40" rx="26" ry="20" fill="#e8bf8c"/><path d="M154 24l-3-9m15 7 2-9" fill="none" stroke-width="4"/>
-    <Eye x={162} y={37} s={.8}/><Eye x={178} y={37} s={.8}/><Cheek x={155} y={47} s={.8}/><Cheek x={186} y={47} s={.8}/><Smile x={170} y={49} s={.7}/>
-    <path d="M46 100q-14 2-14 16" fill="none" stroke-width="4"/>
-    <path d="M70 66q8-8 16 0m24-14q8-8 16 0" fill="none" stroke="#f3d3a6" stroke-width="4"/>
+  camel: { scene: 'desert', fit: 'translate(23.4 14.8) scale(.8)', art: () => <>
+    {[[46, '#d29a5a'], [62, '#e3ae6a'], [104, '#d29a5a'], [120, '#e3ae6a']].map(([x, fill]) => <rect key={x} x={x} y="104" width="14" height="40" rx="7" fill={fill as string}/>)}
+    <path d="M35 92q-9 4-11 14" fill="none" stroke-width="3"/><path d="M23 104q-7 2-6 10 1 6 6 6 6-1 6-8-1-7-6-8z" fill="#5a3a28"/>
+    <path d="M46 113C30 112 26 84 40 70 46 46 56 33 68 34 80 35 84 58 90 58 96 58 100 33 112 34 124 35 128 60 136 68 140 72 146 66 152 56L172 58C170 82 162 104 152 113z" fill="#e3ae6a"/>
+    <path d="M58 50q6-8 14-6m32 2q6-8 14-6M38 88q1-7 6-10" fill="none" stroke="#f8d7a0" stroke-width="4.5"/>
+    <circle cx="141" cy="30" r="8.5" fill="#e3ae6a"/><circle cx="191" cy="30" r="8.5" fill="#e3ae6a"/>
+    <path d="M156 24c-4-8 2-12 7-9 0-8 11-8 11-1 5-4 12 2 6 10z" fill="#e3ae6a"/>
+    <ellipse cx="166" cy="42" rx="25" ry="23" fill="#e8b672"/>
+    <Eye x={156} y={40}/><Eye x={176} y={40}/><Cheek x={147} y={51} s={.8}/><Cheek x={185} y={51} s={.8}/><Smile x={166} y={51} s={.7}/>
   </> },
   'five-breads-two-fish': { scene: 'table', fit: 'translate(3.4 -3.5) scale(1.011)', art: () => <>
     {[[36, 58], [76, 58], [116, 58], [56, 94], [96, 94]].map(([x, y]) => <Roll key={`${x}-${y}`} x={x} y={y} s={.8}/>)}
