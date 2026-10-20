@@ -256,16 +256,16 @@ const PICTURES: Record<KidsPictureMotif, Picture> = {
     <Kid x={54} y={66} s={.8} robe="#8cbcf2" hood="#8cbcf2"/><Kid x={166} y={66} s={.8} robe="#c99467" beard="#8a5a3c"/>
     <Manger x={110} y={100} s={.85}/>
   </> },
-  magnifier: { scene: 'meadow', art: () => <>
-    <path d="M36 124q16-28 38-18t34-22" fill="none" stroke="#c99467" stroke-width="3" stroke-dasharray="3 8"/>
-    <path d="m135 88 35 35" fill="none" stroke="#12324a" stroke-width="23"/>
-    <path d="m135 88 35 35" fill="none" stroke="#d8a34e" stroke-width="15"/>
-    <circle cx="104" cy="58" r="43" fill="#fff0a3" stroke="none"/>
-    <circle cx="104" cy="58" r="34" fill="#a6e1db" stroke-width="5"/>
-    <path d="M80 49a25 25 0 0 1 17-15" fill="none" stroke="#fffdf6" stroke-width="6"/>
-    <Face x={104} y={60} s={.9}/>
-    <Flower x={184} y={104}/><Flower x={38} y={106} fill="#ffd96a"/>
-    <Spark x={48} y={40} r={8}/><Spark x={166} y={30} r={7}/>
+  /** Forscher: Die Lupe mit Gesicht strahlt aus der Bildmitte, das ganze Bild leuchtet von ihr aus. */
+  magnifier: { art: () => <>
+    <Sky fill="#2f3a6b"/>
+    {Array.from({ length: 16 }, (_, i) => { const a = i * Math.PI / 8, b = a + Math.PI / 16; return <path key={i} d={`M110 58L${110 + Math.cos(a) * 200} ${58 + Math.sin(a) * 200}L${110 + Math.cos(b) * 200} ${58 + Math.sin(b) * 200}z`} fill="#43559a" stroke="none"/>; })}
+    {[[70, .12], [54, .16], [42, .22]].map(([r, o]) => <circle key={r} cx="110" cy="58" r={r} fill="#fff6c2" stroke="none" opacity={o}/>)}
+    <path d="M0 122q55-10 110-4t110-4V140H0z" fill="#3f5a4f"/>
+    <path d="m131 79 22 22" stroke-width="20"/><path d="m131 79 22 22" stroke="#d8a34e" stroke-width="12"/>
+    <circle cx="110" cy="58" r="33" fill="#ffd96a" stroke-width="4.5"/><circle cx="110" cy="58" r="26" fill="#fff6c2"/>
+    <Face x={110} y={60} s={.8}/>
+    <Spark x={40} y={30} r={7}/><Spark x={184} y={28} r={6}/>
   </> },
   star: { art: () => <>
     <Sky fill="#4a5a96"/>
