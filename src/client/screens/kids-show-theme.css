@@ -147,9 +147,9 @@
 @keyframes kids-clock-halo { 0% { transform: scale(1); opacity: .9; } 80%, 100% { transform: scale(1.45); opacity: 0; } }
 @keyframes kids-clock-halo-urgent { 0% { transform: scale(1); opacity: 1; } 80%, 100% { transform: scale(1.65); opacity: 0; } }
 .kids-show .kids-show-stage .kids-status { grid-column: 1; grid-row: 3; align-self: end; padding: 0; border: 0; box-shadow: none; background: none; display: flex; flex-wrap: wrap; justify-content: center; text-align: center; gap: 4px 12px; color: #335765; }
-.kids-show .kids-show-stage .kids-status strong { font-size: clamp(18px, min(1.6vw, 2.8vh), 32px); line-height: 1.25; }
-.kids-show .kids-show-stage .kids-status > span { font-size: clamp(14px, 1.15vw, 22px); }
-.kids-show .kids-status .kids-cheers { margin: 0; font-size: clamp(14px, min(1.15vw, 2vh), 22px); }
+.kids-show .kids-show-stage .kids-status strong { font-size: clamp(14px, min(1.6vw, 2.8vh), 32px); line-height: 1.25; }
+.kids-show .kids-show-stage .kids-status > span { font-size: clamp(12px, min(1.15vw, 2vh), 22px); }
+.kids-show .kids-status .kids-cheers { margin: 0; font-size: clamp(11px, min(1.15vw, 2vh), 22px); }
 .kids-show .kids-question-host { grid-column: 2; grid-row: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; min-width: 0; min-height: 0; }
 .kids-show .kids-question-host > .bluff-professor { flex: 1 1 0; width: 100%; height: 0; min-height: 0; max-width: 260px; }
 .kids-show .kids-question-host .kids-bluff-claim { width: 100%; min-width: 0; display: block; flex: 0 0 auto; border: 2px solid #082a3c; border-radius: 24px; padding: 13px 15px; background: var(--show-lilac); color: var(--show-ink); box-shadow: 0 4px 0 #082a3c; position: relative; text-align: center; }
@@ -401,7 +401,9 @@
   .kids-show .kids-reveal-result { gap: 14px; }
   .kids-show .kids-reveal h1 { font-size: 32px; }
   .kids-show .kids-reveal .kids-reveal-answer { min-height: 220px; padding: 18px 12px; }
-  .kids-show .kids-reveal-answer > .kids-story-picture { height: 160px; }
+  .kids-show .kids-reveal-answer.has-picture { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto; justify-items: center; gap: 8px; }
+  .kids-show .kids-reveal-answer > .kids-story-picture { grid-row: auto; height: 150px; }
+  .kids-show .kids-reveal-answer.has-picture :is(.kids-answer-text, .kids-correct-mark) { grid-column: 1; text-align: center; }
   .kids-show .kids-reveal-answer.has-picture .kids-answer-text { font-size: 30px; overflow-wrap: anywhere; }
   .kids-show .kids-reveal-answer .kids-number { font-size: 32px; }
   .kids-show .kids-reveal-result .kids-discovery p { font-size: 18px; }
@@ -526,7 +528,7 @@
   }
   /* Die Frage nutzt die volle Breite; der Professor tritt zwischen den Uhren auf die Bühne. */
   .kids-show.is-projecting .kids-show-stage {
-    --kids-stage-professor: clamp(var(--kids-clock-size), 28vh - 24px, 300px);
+    --kids-stage-professor: clamp(var(--kids-clock-size), 36vh - 92px, 300px);
     grid-template-columns: var(--kids-clock-size) minmax(0, 1fr) var(--kids-clock-size);
     grid-template-rows: minmax(0, .92fr) minmax(0, 1.32fr) auto; padding-bottom: 14px;
   }
@@ -552,7 +554,7 @@
     position: absolute; top: -.95em; left: 22px; padding: 3px 14px; border: 2.5px solid #102d43; border-radius: 999px;
     background: #6b3fa0; color: #fff; font-size: clamp(13px, min(1vw, 1.8vh), 19px); font-weight: 900; letter-spacing: .1em;
   }
-  .kids-show.is-projecting .kids-question-host .kids-bluff-claim p { color: var(--show-ink); font-size: clamp(17px, min(1.9vw, 3.2vh), 38px); line-height: 1.2; }
+  .kids-show.is-projecting .kids-question-host .kids-bluff-claim p { color: var(--show-ink); font-size: clamp(15px, min(1.9vw, 3.2vh), 38px); line-height: 1.2; }
   .kids-show.is-projecting .kids-question-host .kids-bluff-claim::before {
     content: '?'; position: absolute; top: 50%; right: clamp(12px, 1vw, 20px); width: clamp(38px, 3vw, 60px); aspect-ratio: 1;
     display: grid; place-items: center; translate: 0 -50%; rotate: 10deg;
