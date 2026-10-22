@@ -1,6 +1,7 @@
 import { showKidsOperator } from './kids-operator';
 import { expect, test, type Page } from '@playwright/test';
 import { professorAudio, trackProfessorAudio } from './professor-audio';
+import { KIDS_SCENE_VOICE_URLS } from '../src/shared/kids-scenes';
 
 test.use({ viewport: { width: 1280, height: 800 }, isMobile: false });
 test.beforeEach(async ({ page }) => { await page.emulateMedia({ reducedMotion: 'reduce' }); });
@@ -116,8 +117,12 @@ test.describe('mit Offline-Kopie', () => {
     await expect(check('Ton')).toHaveClass(/is-ok/);
     await expect.poll(async () => (await professorAudio(page)).played).toEqual(['interjection-listen']);
     await expect(check('Aufnahmen')).toHaveClass(/is-ok/);
-    await expect(check('Aufnahmen')).toContainText(/Alle \d+ Professor-Aufnahmen sind geladen\./);
+    await expect(check('Aufnahmen')).toContainText(/Alle \d+ Sprachaufnahmen sind geladen\./);
     await expect(check('Ohne Internet')).toHaveClass(/is-ok/, { timeout: 15000 });
+    expect(await page.evaluate(async urls => {
+      const cache = await caches.open('bb-kids-show');
+      return Promise.all(urls.map(async url => (await cache.match(url))?.ok === true));
+    }, KIDS_SCENE_VOICE_URLS)).toEqual([true, true, true]);
     await expect(check('Fernbedienung')).toHaveClass(/is-ok/);
     await expect(page.getByRole('button', { name: 'Erneut prüfen', exact: true })).toBeEnabled();
 

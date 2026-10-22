@@ -217,8 +217,8 @@ test('Kids: Vollbild und Professor-Reaktion bei null, fünf und zehn Punkten',as
 test('Kids: vier große Szenen mit Handlung, Klang, Wiederholung und separatem Antwort-Countdown',async({page})=>{
   await page.addInitScript(()=>{
     const state=window as unknown as {sceneAudioStarts:number};state.sceneAudioStarts=0;
-    const original=AudioContext.prototype.createOscillator;
-    AudioContext.prototype.createOscillator=function(){state.sceneAudioStarts++;return original.call(this);};
+    const start=AudioBufferSourceNode.prototype.start;
+    AudioBufferSourceNode.prototype.start=function(...args){if(this.buffer && this.buffer.duration>=9.9)state.sceneAudioStarts++;return start.apply(this,args);};
   });
   await page.emulateMedia({reducedMotion:'no-preference'});
   await page.goto('/kids');await begin(page);await page.clock.install();
@@ -230,6 +230,7 @@ test('Kids: vier große Szenen mit Handlung, Klang, Wiederholung und separatem A
       await page.getByRole('button',{name:'Szene abspielen',exact:true}).click();
       await expect(page.locator('.kids-cinema')).toHaveAttribute('data-scene',scene);
       await expect(page.locator('.kids-cinema-art')).toHaveClass(/beat-0/);
+      if(i===0) await expect.poll(()=>page.evaluate(()=>(window as unknown as {sceneAudioStarts:number}).sceneAudioStarts)).toBe(1);
       await expect(page.locator('.kids-answers')).toHaveCount(0);
       await expect(page.getByRole('button',{name:'30 Sekunden starten',exact:true})).toHaveCount(0);
       for(const viewport of [{width:800,height:600},{width:1024,height:768},{width:1280,height:720},{width:1920,height:1080},{width:2560,height:1440}]) {

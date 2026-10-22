@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'preact/hooks';
 import { PROFESSOR_VOICE_KEYS, professorVoiceUrl } from '../../shared/professor-voice';
-import { preloadProfessorVoices } from './kids-sound';
+import { preloadKidsSceneVoices, preloadProfessorVoices } from './kids-sound';
 import { KIDS_INTRO_URL } from '../../shared/kids-intro';
+import { KIDS_SCENE_VOICE_URLS } from '../../shared/kids-scenes';
 
 /** Muss zum Namen in public/kids-sw.js passen. */
 export const KIDS_OFFLINE_CACHE = 'bb-kids-show';
@@ -12,7 +13,8 @@ export interface KidsReadiness {
   internet: 'unknown' | 'checking' | 'online' | 'offline';
 }
 
-let state: KidsReadiness = { voices: { loaded: 0, total: PROFESSOR_VOICE_KEYS.length, done: false }, offline: 'idle', internet: 'unknown' };
+const voiceTotal = PROFESSOR_VOICE_KEYS.length + KIDS_SCENE_VOICE_URLS.length;
+let state: KidsReadiness = { voices: { loaded: 0, total: voiceTotal, done: false }, offline: 'idle', internet: 'unknown' };
 const listeners = new Set<(next: KidsReadiness) => void>();
 function update(patch: Partial<KidsReadiness>) { state = { ...state, ...patch }; for (const listener of listeners) listener(state); }
 
@@ -24,12 +26,20 @@ export function useKidsReadiness(): KidsReadiness {
 
 let voices: Promise<void> | null = null;
 let offline: Promise<void> | null = null;
-/** Lädt alle Professor-Aufnahmen und legt die Offline-Kopie an. Mehrfache Aufrufe laden nichts doppelt, nur Fehlendes erneut. */
+/** Lädt alle Sprachaufnahmen und legt die Offline-Kopie an. Mehrfache Aufrufe laden nichts doppelt, nur Fehlendes erneut. */
 export function prepareKidsShow(): void {
-  voices ??= preloadProfessorVoices((loaded, total) => update({ voices: { loaded, total, done: false } })).then((loaded) => {
-    update({ voices: { loaded, total: PROFESSOR_VOICE_KEYS.length, done: true } });
-    if (loaded < PROFESSOR_VOICE_KEYS.length) voices = null;
-  });
+  if (!voices) {
+    let professorLoaded = 0, sceneLoaded = 0;
+    const progress = () => update({ voices: { loaded: professorLoaded + sceneLoaded, total: voiceTotal, done: false } });
+    voices = Promise.all([
+      preloadProfessorVoices(loaded => { professorLoaded = loaded; progress(); }),
+      preloadKidsSceneVoices(loaded => { sceneLoaded = loaded; progress(); }),
+    ]).then(counts => {
+      const loaded = counts.reduce((sum, count) => sum + count, 0);
+      update({ voices: { loaded, total: voiceTotal, done: true } });
+      if (loaded < voiceTotal) voices = null;
+    });
+  }
   offline ??= copyShowForOffline().then((result) => { update({ offline: result }); if (result === 'failed') offline = null; });
 }
 
@@ -62,7 +72,7 @@ async function copyShow() {
     for (const [, href] of css.matchAll(/url\(\s*["']?([^"')]+\.woff2)["']?\s*\)/g)) add(href, new URL(sheet, location.origin).href);
   }
   const cache = await caches.open(KIDS_OFFLINE_CACHE);
-  const files = [...assets, KIDS_INTRO_URL, ...PROFESSOR_VOICE_KEYS.map(professorVoiceUrl)];
+  const files = [...assets, KIDS_INTRO_URL, ...PROFESSOR_VOICE_KEYS.map(professorVoiceUrl), ...KIDS_SCENE_VOICE_URLS];
   await cache.addAll(files);
   await cache.put('/kids', page);
   // Alte Fassungen früherer Veröffentlichungen fliegen raus.
