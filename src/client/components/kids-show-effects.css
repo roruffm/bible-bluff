@@ -21,7 +21,7 @@
 .kids-show .kids-active-group:has(> .kids-mascot-perch) > .kids-group-name > .kids-group-symbol { opacity: 0; }
 .kids-mascot-perch {
   --arrival-bank: 14deg;
-  position: absolute; left: calc(12px - var(--active-group-symbol) * .15); bottom: 25%;
+  position: absolute; left: calc(12px - var(--active-group-symbol) * .15); bottom: 0;
   width: calc(var(--active-group-symbol) * 1.3); aspect-ratio: 140 / 150;
   pointer-events: none;
 }

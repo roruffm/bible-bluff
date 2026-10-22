@@ -1,0 +1,68 @@
+/* Eigenständige Tänze im SVG: Die Flugbahn liegt auf dem äußeren Element und bleibt unverändert. */
+.kids-mascot { --mascot-beat: 2.4s; --mascot-arm-beat: .95s; }
+.kids-mascot.is-mittis { --mascot-beat: 2.8s; --mascot-arm-beat: 1.1s; }
+.kids-mascot.is-maxis { --mascot-beat: 2.6s; --mascot-arm-beat: .85s; }
+.kids-mascot-dance, .kids-mascot-arm, .kids-mascot-hand, .kids-mascot-foot, .kids-mascot-flame, .kids-mascot-flame-core { transform-box: view-box; }
+.kids-mascot-dance { transform-origin: 70px 132px; animation: kids-mascot-researcher-dance var(--mascot-beat) ease-in-out infinite; }
+.kids-mascot.is-mittis .kids-mascot-dance { animation-name: kids-mascot-star-dance; }
+.kids-mascot.is-maxis .kids-mascot-dance { animation-name: kids-mascot-torch-dance; }
+.kids-mascot-arm.is-left { animation: kids-mascot-wave-left var(--mascot-arm-beat) ease-in-out infinite; }
+.kids-mascot-arm.is-right { animation: kids-mascot-wave-right var(--mascot-arm-beat) ease-in-out infinite; animation-delay: -.28s; }
+.kids-mascot-hand { animation: kids-mascot-hand-wiggle .55s ease-in-out infinite alternate; }
+.kids-mascot-foot { animation: kids-mascot-kick .65s ease-in-out infinite alternate; }
+.kids-mascot-foot.is-right { animation-direction: alternate-reverse; animation-delay: -.15s; }
+.kids-mascot-face { animation: kids-mascot-face-bob 1.3s ease-in-out infinite; }
+.kids-mascot-face .blink { transform-box: fill-box; transform-origin: center; animation: kids-mascot-blink 4.1s linear infinite; }
+.kids-mascot.is-mittis .blink { animation-delay: -1.4s; }
+.kids-mascot.is-maxis .blink { animation-delay: -2.7s; }
+.kids-mascot-laugh { opacity: 0; animation: kids-mascot-laugh 4.8s linear infinite; }
+.kids-mascot.is-mittis .kids-mascot-laugh { animation-delay: -1.6s; }
+.kids-mascot.is-maxis .kids-mascot-laugh { animation-delay: -3.2s; }
+.kids-mascot-flame { transform-origin: 70px 88px; animation: kids-mascot-flame-dance .9s ease-in-out infinite alternate; }
+.kids-mascot-flame-core { transform-origin: 70px 76px; animation: kids-mascot-flame-glow .65s ease-in-out infinite alternate; }
+/* Während des Einflugs strampeln die Figuren; nach der Landung tanzen sie am festen Sitzplatz. */
+.kids-mascot-perch.is-flying .kids-mascot-dance { animation-name: kids-mascot-air-dance; animation-duration: .9s; }
+.kids-mascot-perch.is-flying .kids-mascot-arm { animation-duration: .5s; }
+.kids-mascot-perch.is-flying .kids-mascot-foot { animation-duration: .4s; }
+.kids-show .kids-active-group:has(> .kids-mascot-perch) .kids-group-symbol { width: calc(var(--active-group-symbol) * 1.45); flex-basis: calc(var(--active-group-symbol) * 1.45); }
+@keyframes kids-mascot-researcher-dance {
+  0%, 50%, 100% { transform: none; }
+  12% { transform: translateY(3px) rotate(-5deg) scale(1.04, .94); }
+  26% { transform: translate(-4px, -15px) rotate(-8deg) scale(.97, 1.04); }
+  38% { transform: translateY(3px) rotate(3deg) scale(1.04, .96); }
+  62% { transform: translateY(3px) rotate(5deg) scale(1.04, .94); }
+  76% { transform: translate(4px, -12px) rotate(8deg) scale(.97, 1.04); }
+  88% { transform: translateY(2px) rotate(-3deg) scale(1.03, .97); }
+}
+@keyframes kids-mascot-star-dance {
+  0%, 50%, 100% { transform: none; }
+  14% { transform: translate(-4px, -7px) rotate(-13deg) scale(.92, 1.04); }
+  28% { transform: translate(0, -18px) rotate(9deg) scale(1.04, .98); }
+  40% { transform: translate(4px, 2px) rotate(13deg) scale(1.05, .93); }
+  65% { transform: translate(4px, -9px) rotate(15deg) scale(.87, 1.04); }
+  80% { transform: translate(-3px, -15px) rotate(-12deg) scale(1.04, .98); }
+  91% { transform: translateY(3px) scale(1.06, .94); }
+}
+@keyframes kids-mascot-torch-dance {
+  0%, 50%, 100% { transform: none; }
+  16% { transform: translate(-3px, 3px) rotate(-9deg) scale(1.04, .94); }
+  32% { transform: translate(1px, -14px) rotate(5deg) scale(.96, 1.04); }
+  41% { transform: translateY(2px) scale(1.04, .96); }
+  66% { transform: translate(3px, 2px) rotate(10deg) scale(1.04, .94); }
+  82% { transform: translate(-1px, -11px) rotate(-6deg) scale(.96, 1.04); }
+  93% { transform: translateY(2px) scale(1.03, .97); }
+}
+@keyframes kids-mascot-wave-left { 0%, 100% { transform: rotate(-16deg); } 40% { transform: rotate(24deg); } 70% { transform: rotate(4deg); } }
+@keyframes kids-mascot-wave-right { 0%, 100% { transform: rotate(21deg); } 40% { transform: rotate(-23deg); } 70% { transform: rotate(-2deg); } }
+@keyframes kids-mascot-hand-wiggle { from { transform: rotate(-12deg); } to { transform: rotate(12deg); } }
+@keyframes kids-mascot-kick { from { transform: rotate(-16deg) translateY(-2px); } to { transform: rotate(18deg) translateY(2px); } }
+@keyframes kids-mascot-face-bob { 0%, 100% { transform: translate(-1px, 0); } 50% { transform: translate(1px, -2px); } }
+@keyframes kids-mascot-blink { 0%, 41%, 45%, 78%, 82%, 100% { transform: scaleY(1); } 43%, 80% { transform: scaleY(.07); } }
+@keyframes kids-mascot-laugh { 0%, 22%, 42%, 73%, 100% { opacity: 0; } 24%, 40%, 75%, 89% { opacity: 1; } 91% { opacity: 0; } }
+@keyframes kids-mascot-flame-dance { from { transform: rotate(-4deg) scale(.96, 1.04); } to { transform: rotate(4deg) scale(1.04, .97); } }
+@keyframes kids-mascot-flame-glow { from { transform: scale(.92, .96); } to { transform: scale(1.08, 1.04); } }
+@keyframes kids-mascot-air-dance { 0%, 100% { transform: rotate(-6deg) scale(.98, 1.02); } 50% { transform: rotate(7deg) scale(1.03, .97); } }
+@media (prefers-reduced-motion: reduce) {
+  .kids-mascot *, .kids-clock-cheer > .kids-mascot { animation: none !important; transform: none !important; }
+  .kids-mascot-laugh { opacity: 0; }
+}
