@@ -31,8 +31,8 @@ function MascotFoot({ side, torch = false }: { side: 'left' | 'right'; torch?: b
 }
 
 /** Die vorhandenen Gruppensymbole bleiben erkennbar; die Gelenke bewegen sich unabhängig voneinander. */
-export function KidsMascot({ group }: { group: Exclude<KidsGroup, 'all'> }) {
-  return <svg class={`kids-mascot is-${group}`} viewBox="0 0 140 150" aria-hidden="true">
+export function KidsMascot({ group, motion = 'quiet' }: { group: Exclude<KidsGroup, 'all'>; motion?: 'quiet' | 'greeting' | 'celebrating' | 'flying' }) {
+  return <svg class={`kids-mascot is-${group} is-${motion}`} viewBox="0 0 140 150" aria-hidden="true">
     <g class="kids-mascot-dance" stroke="#12324a" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
       <MascotFoot side="left" torch={group === 'maxis'}/><MascotFoot side="right" torch={group === 'maxis'}/>
       <MascotArm side="left" x={group === 'maxis' ? 46 : 36} y={group === 'maxis' ? 92 : 74} handX={group === 'maxis' ? 20 : 13} handY={group === 'maxis' ? 63 : 41}/>

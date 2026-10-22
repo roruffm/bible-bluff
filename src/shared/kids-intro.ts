@@ -1,4 +1,4 @@
-export const KIDS_INTRO_URL = '/kids-video/so-spielt-ihr-mit-2026-10-22.mp4';
+export const KIDS_INTRO_URL = '/kids-video/so-spielt-ihr-mit-2026-10-23.mp4';
 export const KIDS_INTRO_DURATION_MS = 53_233;
 export interface KidsIntroVideo {
   playing: boolean;

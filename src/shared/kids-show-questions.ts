@@ -47,3 +47,11 @@ export function kidsAnswerPicture(question: KidsShowQuestion, answer: string): S
   if (index < 0) throw new Error('Unbekannte Kids-Antwort');
   return question.pictures[index];
 }
+
+/** Einheiten trennen Zahlenantworten von Feldnummern. Die internen Schlüssel bleiben
+ * für gespeicherte Partien, Wertungen und vorhandene Aufnahmen unverändert. */
+export function kidsAnswerLabel(question: KidsShowQuestion, answer: string): string {
+  return question.sourceId === 'lt-jona' && /^\d+$/.test(answer)
+    ? `${answer} ${answer === '1' ? 'Tag' : 'Tage'}`
+    : answer;
+}

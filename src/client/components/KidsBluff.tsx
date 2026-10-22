@@ -3,7 +3,7 @@ import { ProfessorHead, StoryPicture } from './KidsShow';
 import { Face } from './KidsCuteParts';
 import { KidsFieldShape } from './KidsField';
 import type { KidsRound } from '../../shared/kids-game';
-import { KIDS_CHEERS, kidsAnswerPicture, type KidsGroup } from '../../shared/kids-show-questions';
+import { KIDS_CHEERS, kidsAnswerLabel, kidsAnswerPicture, type KidsGroup } from '../../shared/kids-show-questions';
 import './kids-bluff.css';
 
 /** Kleiner Professor-Kopf am Feld, auf das Professor Bluff tippt. Auch Kinder, die noch nicht lesen, sehen seinen Tipp. */
@@ -54,7 +54,7 @@ export function KidsSuspense({ round }: { round: KidsRound }) {
       return <li key={i} class={`kids-suspense-card kids-field-${i + 1} ${truth ? 'is-truth' : 'is-bluff'}`} style={{ '--step': truth ? 2 : wrong.indexOf(i) }}>
         <span class="kids-suspense-number">{i + 1}<KidsFieldShape index={i}/></span>
         <StoryPicture motif={kidsAnswerPicture(round.question, answer)}/>
-        <span class="kids-suspense-text">{answer}</span>
+        <span class="kids-suspense-text">{kidsAnswerLabel(round.question, answer)}</span>
         {!truth && <span class="kids-suspense-back"><span class="kids-suspense-back-face"><ProfessorHead/></span></span>}
         {truth ? <span class="kids-truth-mark">✓</span> : <span class="kids-bluff-stamp">BLUFF!</span>}
         {answer === round.question.bluff.answer && <BluffPin/>}
