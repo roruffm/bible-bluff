@@ -1,5 +1,13 @@
 export const KIDS_SCENE_MS = 10_000;
 export type KidsSceneMotif = 'ark' | 'manger' | 'lion' | 'boat';
+/** Die Emmy-Aufnahmen sind auf diese drei Texteinblendungen geschnitten. */
+export const KIDS_SCENE_BEATS = [0, 3000, 6500] as const;
+export const KIDS_SCENE_VOICES: Partial<Record<KidsSceneMotif, string>> = {
+  ark: '/audio/kids-scenes/ark-emmy-20261022.mp3',
+  manger: '/audio/kids-scenes/manger-emmy-20261022.mp3',
+  lion: '/audio/kids-scenes/lion-emmy-20261022.mp3',
+};
+export const KIDS_SCENE_VOICE_URLS = Object.values(KIDS_SCENE_VOICES);
 export const KIDS_SCENES: Record<KidsSceneMotif, { description:string; captions:readonly [string,string,string] }> = {
   ark: {
     description: 'Ein Mann baut ein großes Holzschiff. Tiere kommen an Bord. Im Regen sind alle sicher im Schiff.',
@@ -18,4 +26,4 @@ export const KIDS_SCENES: Record<KidsSceneMotif, { description:string; captions:
     captions: ['Wind und Wellen schaukeln das Boot.', 'Jemand schläft auf einem Kissen.', 'Eine Hand hebt sich. Der Sturm wird still.'],
   },
 };
-export function kidsSceneBeat(elapsedMs:number):0|1|2 { return elapsedMs < 3000 ? 0 : elapsedMs < 6500 ? 1 : 2; }
+export function kidsSceneBeat(elapsedMs:number):0|1|2 { return elapsedMs < KIDS_SCENE_BEATS[1] ? 0 : elapsedMs < KIDS_SCENE_BEATS[2] ? 1 : 2; }

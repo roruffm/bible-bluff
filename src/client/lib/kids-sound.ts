@@ -1,4 +1,4 @@
-import { KIDS_SCENE_MS, type KidsSceneMotif } from '../../shared/kids-scenes';
+import { KIDS_SCENE_MS, KIDS_SCENE_VOICES, KIDS_SCENE_VOICE_URLS, type KidsSceneMotif } from '../../shared/kids-scenes';
 import { PROFESSOR_VOICE_KEYS, professorVoiceUrl } from '../../shared/professor-voice';
 let context: AudioContext | null = null;
 export async function enableKidsSound() {
@@ -105,26 +105,63 @@ function synth(elapsedMs:number, build:(tone:Tone,noise:Noise)=>void, volume=.55
     window.setTimeout(()=>{for(const source of sources)source.disconnect();for(const node of nodes)node.disconnect();},100);
   };
 }
-/** Eigene zehnsekündige Geräuschkulissen, passend zu den drei sichtbaren Handlungsschritten. */
-export function playKidsScene(motif: KidsSceneMotif, elapsedMs=0):()=>void {
-  if (elapsedMs>=KIDS_SCENE_MS) return ()=>{};
-  return synth(elapsedMs,(tone,noise)=>{
-    if(motif==='ark') {
-      for(let i=0;i<5;i++){tone(165,.2+i*.52,.12,'triangle',.18,85);noise(.2+i*.52,.07,1400,.15);}
-      for(const at of [3.1,4.3,5.4]){tone(410,at,.32,'triangle',.08,270);tone(450,at+.22,.3,'triangle',.07,300);}
-      noise(6.5,3.5,1750,.17);
-    } else if(motif==='manger') {
-      [784,988,1175].forEach((f,i)=>tone(f,i*.45,1.2,'sine',.08));
-      [523,659,784,659,587,523].forEach((f,i)=>tone(f,3.2+i*.9,1.1,'sine',.075));
-    } else if(motif==='lion') {
-      for(const at of [.2,1.8,3.6]){tone(100,at,.85,'triangle',.13,66);noise(at,.7,210,.07);}
-      [659,784,988].forEach((f,i)=>tone(f,6.6+i*.6,1.3,'sine',.08));
-    } else {
+const sceneRecordings = new Map<string, Promise<ArrayBuffer>>();
+const sceneBuffers = new Map<string, Promise<AudioBuffer>>();
+function sceneRecording(url: string): Promise<ArrayBuffer> {
+  let bytes = sceneRecordings.get(url);
+  if (!bytes) {
+    bytes = fetch(url).then(response => {
+      if (!response.ok) throw new Error('Die Szenenaufnahme konnte nicht geladen werden. Bitte erneut abspielen.');
+      return response.arrayBuffer();
+    });
+    sceneRecordings.set(url, bytes);
+    const loading = bytes;
+    void loading.catch(() => { if (sceneRecordings.get(url) === loading) sceneRecordings.delete(url); });
+  }
+  return bytes;
+}
+/** Auch die Szenen bleiben nach der Vorbereitung ohne Internet hörbar. */
+export async function preloadKidsSceneVoices(onLoaded: (loaded: number, total: number) => void): Promise<number> {
+  let loaded = 0;
+  await Promise.all(KIDS_SCENE_VOICE_URLS.map(url => (sceneBuffers.has(url) ? Promise.resolve() : sceneRecording(url))
+    .then(() => onLoaded(++loaded, KIDS_SCENE_VOICE_URLS.length), () => {})));
+  return loaded;
+}
+/** Sprache und Bild teilen die Szenenfrist: Laden, Stummschalten und Fortsetzen verschieben keinen Satz. */
+export async function playKidsScene(motif: KidsSceneMotif, deadline: number, signal: AbortSignal): Promise<() => void> {
+  const noop = () => {};
+  if (signal.aborted || Date.now() >= deadline) return noop;
+  if (!context || context.state !== 'running') throw new Error('Szenen-Ton bitte am Beamer aktivieren.');
+  const ctx = context, url = KIDS_SCENE_VOICES[motif];
+  if (!url) {
+    // Das Boot im Finale behält seine Geräuschkulisse.
+    return synth(Math.max(0, KIDS_SCENE_MS - (deadline - Date.now())), (tone, noise) => {
       noise(0,6.5,650,.22);
       for(const at of [.3,1.6,3,4.5])noise(at,.8,1100,.15);
       tone(523,6.5,1.7,'sine',.09);tone(659,7,1.7,'sine',.08);tone(784,7.5,2,'sine',.07);
-    }
-  });
+    });
+  }
+  let buffer = sceneBuffers.get(url);
+  if (!buffer) {
+    buffer = sceneRecording(url).then(bytes => { sceneRecordings.delete(url); return ctx.decodeAudioData(bytes); });
+    sceneBuffers.set(url, buffer);
+    const decoding = buffer;
+    void decoding.catch(() => { if (sceneBuffers.get(url) === decoding) sceneBuffers.delete(url); });
+  }
+  const decoded = await buffer;
+  const offset = Math.max(0, (KIDS_SCENE_MS - (deadline - Date.now())) / 1000);
+  if (signal.aborted || offset >= KIDS_SCENE_MS / 1000 || offset >= decoded.duration) return noop;
+  if (ctx.state !== 'running') throw new Error('Szenen-Ton bitte am Beamer aktivieren.');
+  const source = ctx.createBufferSource();
+  source.buffer = decoded;
+  source.connect(ctx.destination);
+  let stopped = false;
+  const cleanup = () => { stopped = true; signal.removeEventListener('abort', stop); source.disconnect(); };
+  const stop = () => { if (stopped) return; try { source.stop(); } catch { /* Bereits beendet. */ } cleanup(); };
+  signal.addEventListener('abort', stop, { once: true });
+  source.onended = () => { if (!stopped) cleanup(); };
+  source.start(ctx.currentTime, offset, Math.min(decoded.duration - offset, (deadline - Date.now()) / 1000));
+  return stop;
 }
 
 /** Dauer des Trommelwirbels vor der Auflösung. Bild und Klang laufen im selben Takt. */

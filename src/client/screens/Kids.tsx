@@ -7,7 +7,6 @@ import { KidsSky } from '../components/KidsSky';
 import { KidsAnswers } from '../components/KidsAnswers';
 import { KidsBannerMascot, KidsLightSweep, KidsPointsFlight, useKidsPresentationMoment } from '../components/KidsShowEffects';
 import { KidsAnswersVoiceButton, KidsQuestionVoiceButton, KidsVoiceProvider } from '../components/KidsVoice';
-import { KIDS_SCENE_MS } from '../../shared/kids-scenes';
 import { KidsFinish, KidsFinishDialog } from '../components/KidsFinish';
 import { KidsReveal } from '../components/KidsReveal';
 import { KidsRegroup } from '../components/KidsRegroup';
@@ -112,9 +111,13 @@ export function KidsPage() {
     if (game?.phase !== 'scene' || sound !== 'on') return;
     const scene=game.rounds[game.index].question.scene;
     if (!scene) return;
-    let cancelled=false, stop=()=>{};
-    void enableKidsSound().then(()=>{ if(!cancelled) stop=playKidsScene(scene,KIDS_SCENE_MS-Math.max(0,(game.deadline??Date.now())-Date.now())); }).catch(()=>{ if(!cancelled) setSound('off'); });
-    return ()=>{ cancelled=true; stop(); };
+    const controller = new AbortController();
+    let stop=()=>{};
+    void enableKidsSound().then(async()=>{
+      if (!controller.signal.aborted) stop = await playKidsScene(scene, game.deadline ?? Date.now(), controller.signal);
+      if (controller.signal.aborted) stop();
+    }).catch(error=>{ if(!controller.signal.aborted) setFullscreenError(error instanceof Error ? error.message : 'Die Szenenaufnahme konnte nicht abgespielt werden.'); });
+    return ()=>{ controller.abort(); stop(); };
   }, [game?.phase, game?.cueSeq, sound]);
   useEffect(() => {
     if (!game || showExit || showPair || showFinish || toolsOpen) return;
