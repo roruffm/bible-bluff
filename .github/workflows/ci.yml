@@ -7,8 +7,8 @@ on:
 
 jobs:
   check:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -19,13 +19,18 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
-      - run: npx playwright install --with-deps chromium chrome
+      - name: Install Playwright Chromium
+        timeout-minutes: 4
+        run: npx playwright install chromium
+      # Das Runner-Image bringt Chrome mit H.264/AAC bereits mit.
+      - name: Check system Chrome
+        run: google-chrome --version
       - name: Check Kids intro video playback
         run: npm run test:e2e -- e2e/kids-intro.spec.ts --max-failures=1
         env:
           CI: 'true'
       - name: Check Kids visual consistency
-        run: npm run test:e2e -- e2e/kids-visual-consistency.spec.ts --max-failures=1
+        run: npm run test:e2e -- e2e/kids-visual-consistency.spec.ts e2e/professor-motion.spec.ts --max-failures=1
         env:
           CI: 'true'
       - run: npm run test:e2e -- --max-failures=1 --grep-invert 'Erklärvideo:'

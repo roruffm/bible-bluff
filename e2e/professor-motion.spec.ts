@@ -3,7 +3,7 @@ import { createKidsGame, type KidsPhase } from '../src/shared/kids-game';
 import { packKidsGame } from '../src/shared/kids-remote';
 
 test.use({ viewport: { width: 1280, height: 800 }, isMobile: false });
-test('Professor: große Bewegungen bleiben von Text und Bedienung getrennt und lassen sich reduzieren', async ({ page, request }) => {
+test('Professor: Auftritte bleiben von Text getrennt; Antwortwahl und Pause sind ruhig, Bewegung lässt sich reduzieren', async ({ page, request }) => {
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   await page.goto('/kids');
   const scenes: { phase: KidsPhase; index: number; result?: 'correct'|'none'; motion: string }[] = [
@@ -28,6 +28,7 @@ test('Professor: große Bewegungen bleiben von Text und Bedienung getrennt und l
     { phase: 'finished', index: 9, result: 'correct', motion: 'bow' },
   ];
   for (const scene of scenes) {
+    const quiet = scene.phase === 'moving' || scene.phase === 'paused';
     const game=createKidsGame(); game.phase=scene.phase; game.index=scene.index;
     if (scene.phase === 'moving') game.deadline=Date.now()+30000;
     game.results=game.results.map((_,index)=>index<scene.index ? 'correct' : index===scene.index ? scene.result??null : null);
@@ -53,14 +54,16 @@ test('Professor: große Bewegungen bleiben von Text und Bedienung getrennt und l
           overflow:document.documentElement.scrollWidth>innerWidth+1,
         };
       },time);
-      expect(frame.animations,scene.motion).toBeGreaterThan(0);
+      if (quiet) expect(frame.animations,scene.motion).toBe(0);
+      else expect(frame.animations,scene.motion).toBeGreaterThan(0);
       expect(frame.clipped,scene.motion).toBe(true);
       expect(frame.headInside,`${scene.motion} at ${time} ms`).toBe(true);
       expect(frame.overlap,scene.motion).toBe(false);
       expect(frame.overflow,scene.motion).toBe(false);
       transforms.push(frame.transforms);
     }
-    expect(new Set(transforms).size,scene.motion).toBeGreaterThan(1);
+    if (quiet) expect(new Set(transforms).size,scene.motion).toBe(1);
+    else expect(new Set(transforms).size,scene.motion).toBeGreaterThan(1);
     await page.emulateMedia({reducedMotion:'reduce'});
     // Die Medienumschaltung wird erst beim nächsten Style-Abgleich wirksam.
     // Pausierte Animationsobjekte aus den Stichproben sind kein Maß für sichtbare Bewegung.
