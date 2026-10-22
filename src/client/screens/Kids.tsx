@@ -95,8 +95,9 @@ export function KidsPage() {
   const seconds = game ? Math.ceil(game.remainingMs / 1000) : 30;
   // Die letzten fünf Sekunden ticken zum lauten Mitzählen.
   useEffect(() => { if (game?.phase === 'moving' && seconds >= 1 && seconds <= 5) cue(seconds === 1 ? 'last-tick' : 'tick'); }, [game?.phase, seconds]);
-  // Nur echte Übergänge erklingen: Neuladen oder Wiederverbinden lösen weder Gong noch Trommelwirbel aus.
-  useEffect(() => {
+  // Jeden Phasenwechsel vor dem nächsten Klick festhalten, auch wenn die ruhige Bühne keinen Animationsframe anfordert.
+  // Neuladen und Wiederverbinden lösen weder Gong noch Trommelwirbel aus.
+  useLayoutEffect(() => {
     const before = lastPhase.current; lastPhase.current = game?.phase ?? null;
     if (!game) return;
     if (before === 'moving' && game.phase === 'locked') cue('gong');

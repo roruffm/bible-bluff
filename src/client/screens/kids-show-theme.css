@@ -711,7 +711,7 @@
 .kids-show .kids-show-stage:is(.is-reading, .is-moving, .is-paused) .kids-clock-cheer > .kids-mascot,
 .kids-show .kids-show-stage:is(.is-reading, .is-moving, .is-paused) .kids-clock-cheer::before,
 .kids-show .kids-show-stage:is(.is-reading, .is-moving, .is-paused) .kids-clock-cheer::after,
-.kids-show .kids-show-stage:is(.is-reading, .is-moving, .is-paused) .kids-question-host > .bluff-professor { animation: none; }
+.kids-show .kids-show-stage:is(.is-reading, .is-moving, .is-paused) .kids-question-host > .bluff-professor { animation: none !important; }
 .kids-show .kids-show-stage:is(.is-moving, .is-paused) .kids-question-host .professor-character * { animation: none; }
 .kids-show:has(.kids-show-stage:is(.is-reading, .is-moving, .is-paused)) .kids-sky-stars .is-lit,
 .kids-show:has(.kids-show-stage:is(.is-reading, .is-moving, .is-paused)) .kids-trail > .is-now { animation: none; }
