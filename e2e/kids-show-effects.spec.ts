@@ -20,14 +20,19 @@ async function judging(page: Page) {
 async function expectMascotArrival(page: Page, group: 'minis' | 'mittis' | 'maxis') {
   const perch = page.locator(`.kids-active-group .kids-mascot-perch.is-${group}`);
   await expect(perch).toHaveClass(/is-flying/);
+  await expect(page.locator('.kids-mascot-star-trail')).toHaveCount(1);
+  await expect(page.locator('.kids-mascot-star-trail')).toHaveCSS('pointer-events', 'none');
+  await expect.poll(() => page.locator('.kids-mascot-star-trail').evaluate(el => {
+    const canvas = el as HTMLCanvasElement;
+    return canvas.getContext('2d')!.getImageData(0, 0, canvas.width, canvas.height).data.some((value, index) => index % 4 === 3 && value > 0);
+  }), {timeout: 2500}).toBe(true);
   const bounds = await perch.evaluate(el => {
     const sprite = el.querySelector('.kids-mascot-arrival')!;
-    const animation = sprite.getAnimations().find(a => (a as CSSAnimation).animationName === 'kids-mascot-fly-to-banner')!;
-    animation.pause();
-    animation.currentTime = 1050;
+    const animations = sprite.getAnimations();
+    for (const animation of animations) { animation.pause(); animation.currentTime = 1050; }
     const large = sprite.getBoundingClientRect().toJSON();
     const seat = el.getBoundingClientRect().toJSON();
-    animation.finish();
+    for (const animation of animations) animation.finish();
     const landed = sprite.getBoundingClientRect().toJSON();
     return { large, seat, landed, width: innerWidth, height: innerHeight };
   });
@@ -43,6 +48,7 @@ async function expectMascotArrival(page: Page, group: 'minis' | 'mittis' | 'maxi
   await expect(page.locator('.kids-active-group .kids-mascot')).toHaveCount(1);
   await expect(perch).toHaveCSS('pointer-events', 'none');
   await expect(perch).not.toHaveClass(/is-flying/, {timeout: 5000});
+  await expect(page.locator('.kids-mascot-star-trail')).toHaveCount(0);
   await expect(perch.locator('.kids-mascot')).toBeVisible();
 }
 
@@ -80,6 +86,7 @@ test('Kids: Reduzierte Bewegung zeigt die Wertung sofort und verzichtet auf Auft
   await begin(page);
   await expect(page.locator('.kids-active-group')).not.toHaveClass(/is-mascot-entering/);
   await expect(page.locator('.kids-mascot-perch.is-flying')).toHaveCount(0);
+  await expect(page.locator('.kids-mascot-star-trail')).toHaveCount(0);
   await expect(page.locator('.kids-active-group .kids-mascot')).toBeVisible();
   await judging(page);
   await page.getByRole('button',{name:'Mehrheit richtig · +10',exact:true}).click();
