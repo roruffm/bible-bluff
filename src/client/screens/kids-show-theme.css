@@ -678,6 +678,7 @@
 }
 .kids-show .kids-team-badges .kids-team-portrait { max-height: min(22vh, 300px); }
 .kids-show .kids-ending-groups { align-items: center; }
+.kids-ending-groups > .kids-ending-group { background: none; }
 .kids-ending-group { display: inline-flex; align-items: center; min-width: 0; gap: 4px; }
 .kids-ending-group > .kids-team-portrait {
   width: clamp(44px, min(5.8vw, 8.5vh), 100px); height: clamp(50px, min(6.5vw, 9.5vh), 110px);
