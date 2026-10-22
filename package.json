@@ -5,7 +5,9 @@
   "description": "Bible Bluff – ein Partyspiel für Handys: Bluffs erfinden, die Wahrheit finden, die Bibel entdecken.",
   "type": "module",
   "scripts": {
+    "predev": "node scripts/prepare-kids-intro.mjs",
     "dev": "vite",
+    "prebuild": "node scripts/prepare-kids-intro.mjs",
     "build": "vite build",
     "start": "tsx scripts/serve.ts",
     "dev:cf": "wrangler d1 migrations apply bible-bluff --local && wrangler dev",

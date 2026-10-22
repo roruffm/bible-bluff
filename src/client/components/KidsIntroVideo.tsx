@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'preact/hooks';
 import type { KidsAction, KidsGame } from '../../shared/kids-game';
-import { kidsIntroPosition, KIDS_INTRO_URL } from '../../shared/kids-intro';
+import { kidsIntroPosition, KIDS_INTRO_DURATION_MS, KIDS_INTRO_URL } from '../../shared/kids-intro';
 import './kids-intro-video.css';
 
 /** Im Klick auf „Show vorbereiten“ denselben Player für spätere Fernbedienung freigeben. */
@@ -19,7 +19,7 @@ export function KidsIntroControls({ game, disabled, act }: ControlsProps) {
   const video = game.introVideo;
   return <section class="kids-intro-controls" aria-label="Erklärvideo steuern">
     <h2>So spielt ihr mit</h2>
-    <p>Erklärvideo · 52 Sekunden · Bild und Ton am Beamer</p>
+    <p>Erklärvideo · {Math.round(KIDS_INTRO_DURATION_MS / 1000)} Sekunden · Bild und Ton am Beamer</p>
     <button type="button" class="kids-button kids-intro-play" disabled={disabled} onClick={() => { if (!video?.playing) unlockKidsIntroVideo(); act(video?.playing ? 'pause-intro' : 'play-intro'); }}>
       {video?.playing ? 'Ⅱ Erklärvideo pausieren' : video ? '▶ Erklärvideo fortsetzen' : '▶ Erklärvideo am Beamer abspielen'}
     </button>

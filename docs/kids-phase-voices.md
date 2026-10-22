@@ -244,12 +244,15 @@ und Offline-Vorbereitung auf die neue Mediendatei, damit keine alte Aufnahme aus
 Browser-Cache erklingt. Die Zuordnung beider gelieferten Aufnahmen wurde mit einer
 Transkription geprüft.
 
-Das Erklärvideo `so-spielt-ihr-mit-forscher.mp4` verwendet den vollständigen Satz
-„Forscher, das sind alle drei, vier oder fünf Jahre alten Kinder.“ aus der Nutzer-Aufnahme
-von 18:13:52. Sprechtempo und Lautstärke bleiben erhalten. Das Gruppenbild bleibt dafür
-0,8 Sekunden länger stehen; die neue Gesamtlaufzeit beträgt 53,146 Sekunden. Die übrige
-Original-Tonspur und die Professor-Animation bleiben erhalten. Bilder, Beschriftung
-und Untertitel verwenden die Lupe und den neuen Namen, auch in den Übergängen.
+Das Erklärvideo wurde am 22.10.2026 durch die unveränderte Nutzer-Datei
+`so-spielt-ihr-mit-leuchtlupe-3.mp4` ersetzt. Es wird unter
+`/kids-video/so-spielt-ihr-mit-2026-10-22.mp4` ausgeliefert, damit die ältere Fassung
+nicht aus dem Browser- oder Offline-Cache geladen wird. Die Laufzeit beträgt
+53,233 Sekunden; die vorhandene Beamer- und Fernbedienungssteuerung verwendet
+die neue Datei. SHA-256: `74ea410948c6d906a79fd93f5faa68c761dd61080c11fd223c4769c0c6a52e9f`.
+Die Quelldatei liegt wegen der Upload-Grenze in zwei Teilen unter `media/kids-video/`.
+`predev` und `prebuild` setzen sie mit Prüfsummenprüfung zur vollständigen MP4 zusammen.
+Die folgenden Aufnahmen dokumentieren die Umbenennung vom 19.10.2026:
 
 | Nutzer-Aufnahme | Verwendung | SHA-256 der Originaldatei |
 | --- | --- | --- |

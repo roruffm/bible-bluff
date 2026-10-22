@@ -6,3 +6,4 @@ test-results/
 playwright-report/
 *.log
 .DS_Store
+src/client/public/kids-video/so-spielt-ihr-mit-2026-10-22.mp4
