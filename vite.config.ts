@@ -52,5 +52,5 @@ export default defineConfig({
     target: 'es2020',
   },
   plugins: [preact(), apiDevPlugin()],
-  server: { host: true, port: 5173 },
+  server: { host: true, port: 5173, allowedHosts: ['terminal.local'] },
 });

@@ -5,7 +5,7 @@ import { KidsScene } from '../components/KidsScene';
 import { KidsTrail } from '../components/KidsTrail';
 import { KidsSky } from '../components/KidsSky';
 import { KidsAnswers } from '../components/KidsAnswers';
-import { KidsLightSweep, KidsPointsFlight, useKidsPresentationMoment } from '../components/KidsShowEffects';
+import { KidsBannerMascot, KidsLightSweep, KidsPointsFlight, useKidsPresentationMoment } from '../components/KidsShowEffects';
 import { KidsAnswersVoiceButton, KidsQuestionVoiceButton, KidsVoiceProvider } from '../components/KidsVoice';
 import { KIDS_SCENE_MS } from '../../shared/kids-scenes';
 import { KidsFinish, KidsFinishDialog } from '../components/KidsFinish';
@@ -209,7 +209,7 @@ export function KidsPage() {
       {finished ? <KidsFinish game={game}><Celebration variant={3}/></KidsFinish> : game.phase==='scene' ? <KidsScene key={`${game.index}-${game.cueSeq}`} game={game} act={act} sound={sound==='on'} toggleSound={()=>{void toggleSound();}} disabled={remote.busy} primaryRef={primary}/> : <>
       {game.phase==='returning' || game.phase==='judging' ? <KidsRegroup game={game} act={act} disabled={remote.busy} primaryRef={primary}/> : revealed ? <KidsReveal key={`${game.index}-${game.results[game.index]}`} game={game} act={act} disabled={remote.busy} primaryRef={primary} suspense={suspenseIndex >= 0}>{suspenseIndex < 0 && kidsResultPoints(game.results[game.index], game.index)>0 && <Celebration variant={game.index}/>}</KidsReveal> : interlude ? <KidsInterlude game={game} chapter={chapter} act={act} disabled={remote.busy} primaryRef={primary}/> : round && <section class={`kids-stage kids-show-stage is-${game.phase} is-group-${round.question.group}`} aria-labelledby="kids-question">
         <div class="kids-show-question">
-          <div class={`kids-active-group${moment?.kind === 'group' ? ' is-mascot-entering' : ''}`}><KidsGroupName group={round.question.group}/>{round.question.group !== 'all' && <KidsMascot group={round.question.group}/>}<span>{round.question.group === 'all' ? 'Alle Kinder' : `sind dran! · ${KIDS_GROUPS[round.question.group].ages}`}</span></div>
+          <div class={`kids-active-group${moment?.kind === 'group' ? ' is-mascot-entering' : ''}`}><KidsGroupName group={round.question.group}/>{round.question.group !== 'all' && <KidsBannerMascot key={game.index} group={round.question.group} entering={moment?.kind === 'group'}/>}<span>{round.question.group === 'all' ? 'Alle Kinder' : `sind dran! · ${KIDS_GROUPS[round.question.group].ages}`}</span></div>
 
           <h1 id="kids-question">{round.question.prompt}</h1>
           <div class="kids-status" role="status"><strong>{status}</strong>{round.question.group !== 'all' && (game.phase === 'moving' || game.phase === 'paused') && <KidsCheers active={round.question.group}/>}</div>

@@ -17,10 +17,39 @@ async function judging(page: Page) {
   await page.getByRole('button',{name:'Alle sind zurück',exact:true}).click();
 }
 
+async function expectMascotArrival(page: Page, group: 'minis' | 'mittis' | 'maxis') {
+  const perch = page.locator(`.kids-active-group .kids-mascot-perch.is-${group}`);
+  await expect(perch).toHaveClass(/is-flying/);
+  const bounds = await perch.evaluate(el => {
+    const sprite = el.querySelector('.kids-mascot-arrival')!;
+    const animation = sprite.getAnimations().find(a => (a as CSSAnimation).animationName === 'kids-mascot-fly-to-banner')!;
+    animation.pause();
+    animation.currentTime = 1050;
+    const large = sprite.getBoundingClientRect().toJSON();
+    const seat = el.getBoundingClientRect().toJSON();
+    animation.finish();
+    const landed = sprite.getBoundingClientRect().toJSON();
+    return { large, seat, landed, width: innerWidth, height: innerHeight };
+  });
+  // Echter großer Bühnenauftritt, vollständig im Bild, danach exakt am Banner statt als zweites Overlay.
+  expect(bounds.large.width).toBeGreaterThan(bounds.seat.width * 2);
+  expect(bounds.large.left).toBeGreaterThanOrEqual(0);
+  expect(bounds.large.right).toBeLessThanOrEqual(bounds.width);
+  expect(bounds.large.top).toBeGreaterThanOrEqual(0);
+  expect(bounds.large.bottom).toBeLessThanOrEqual(bounds.height);
+  expect(bounds.landed.x).toBeCloseTo(bounds.seat.x, 0);
+  expect(bounds.landed.y).toBeCloseTo(bounds.seat.y, 0);
+  expect(bounds.landed.width).toBeCloseTo(bounds.seat.width, 0);
+  await expect(page.locator('.kids-active-group .kids-mascot')).toHaveCount(1);
+  await expect(perch).toHaveCSS('pointer-events', 'none');
+  await expect(perch).not.toHaveClass(/is-flying/, {timeout: 5000});
+  await expect(perch.locator('.kids-mascot')).toBeVisible();
+}
+
 test('Kids: Gruppenauftritt, Punkteflug nach dem Trommelwirbel und kein Wiederholen nach Neuladen', async ({page}) => {
   await begin(page);
   await expect(page.locator('.kids-active-group')).toHaveClass(/is-mascot-entering/);
-  await expect(page.locator('.kids-active-group .kids-group-symbol')).toHaveCSS('animation-name','kids-researcher-arrival');
+  await expectMascotArrival(page, 'minis');
   await judging(page);
   await page.getByRole('button',{name:'Mehrheit richtig · +10',exact:true}).click();
   await expect(page.locator('.kids-suspense')).toBeVisible();
@@ -36,20 +65,22 @@ test('Kids: Gruppenauftritt, Punkteflug nach dem Trommelwirbel und kein Wiederho
   await expect(page.locator('.kids-points-flight')).toHaveCount(0);
   await page.getByRole('button',{name:'Nächste Aufgabe',exact:true}).click();
   await expect(page.locator('.kids-active-group')).toHaveClass(/is-mascot-entering/);
-  await expect(page.locator('.kids-active-group .kids-group-symbol')).toHaveCSS('animation-name','kids-star-arrival');
+  await expectMascotArrival(page, 'mittis');
   await judging(page);
   await page.getByRole('button',{name:'Keiner richtig · +0',exact:true}).click();
   await expect(page.locator('.kids-suspense')).toBeVisible();
   await expect(page.locator('.kids-suspense')).toHaveCount(0,{timeout:8000});
   await expect(page.locator('.kids-points-flight')).toHaveCount(0);
   await page.getByRole('button',{name:'Nächste Aufgabe',exact:true}).click();
-  await expect(page.locator('.kids-active-group .kids-group-symbol')).toHaveCSS('animation-name','kids-torch-arrival');
+  await expectMascotArrival(page, 'maxis');
 });
 
 test('Kids: Reduzierte Bewegung zeigt die Wertung sofort und verzichtet auf Auftritte und Punkteflug', async ({page}) => {
   await page.emulateMedia({reducedMotion:'reduce'});
   await begin(page);
   await expect(page.locator('.kids-active-group')).not.toHaveClass(/is-mascot-entering/);
+  await expect(page.locator('.kids-mascot-perch.is-flying')).toHaveCount(0);
+  await expect(page.locator('.kids-active-group .kids-mascot')).toBeVisible();
   await judging(page);
   await page.getByRole('button',{name:'Mehrheit richtig · +10',exact:true}).click();
   await expect(page.getByTestId('team-score')).toHaveText('10');
