@@ -1,3 +1,4 @@
+import { KidsTeamPortrait } from './KidsTeamPortrait';
 import { KidsGroupName } from './KidsGroupName';
 import { KidsVoiceButton } from './KidsVoice';
 import type { ComponentChildren } from 'preact';
@@ -25,7 +26,7 @@ function EndingSticker({ won }: { won:boolean }) {
 export function KidsFinish({ game, children }: { game:KidsGame; children?:ComponentChildren }) {
   const s=kidsScores(game);
   return <section class="kids-ending" aria-labelledby="kids-ending-title">
-    <header><h1 id="kids-ending-title">Gemeinsam seid ihr stark!</h1><div class="kids-ending-groups" aria-label="Ein großer Applaus für alle drei Gruppen">{(['minis','mittis','maxis'] as const).map(group=><KidsGroupName key={group} group={group}/>)}</div></header>
+    <header><h1 id="kids-ending-title">Gemeinsam seid ihr stark!</h1><div class="kids-ending-groups" aria-label="Ein großer Applaus für alle drei Gruppen">{(['minis','mittis','maxis'] as const).map(group=><div key={group} class={`kids-ending-group group-${group}`}><KidsTeamPortrait group={group} celebrating/><KidsGroupName group={group}/></div>)}</div></header>
     <div class="kids-ending-host"><blockquote>{professorSays(game)}</blockquote><ProfessorBluff mood="kind" motion="bow"/><span class="kids-professor-signature">Professor Bluff <KidsVoiceButton/></span></div>
     <div class="kids-ending-results" aria-label="Endpunktestand">
       <EndingSticker won={s.team > s.professor}/>

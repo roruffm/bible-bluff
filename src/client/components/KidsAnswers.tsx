@@ -1,5 +1,5 @@
 import type { KidsGame } from '../../shared/kids-game';
-import { kidsAnswerPicture } from '../../shared/kids-show-questions';
+import { kidsAnswerLabel, kidsAnswerPicture } from '../../shared/kids-show-questions';
 import { BluffPin } from './KidsBluff';
 import { StoryPicture } from './KidsStoryArt';
 import { KidsFieldShape } from './KidsField';
@@ -13,7 +13,7 @@ export function KidsAnswers({ game }: { game: KidsGame }) {
       class={`kids-answer kids-field-${i + 1}${answer === round.question.bluff.answer ? ' is-bluff-pick' : ''}${field === i ? ' is-speaking' : ''}`}
       aria-current={field === i ? 'true' : undefined}>
       <span class="kids-number">{i + 1}<KidsFieldShape index={i}/></span><StoryPicture motif={kidsAnswerPicture(round.question, answer)}/>
-      <span class="kids-answer-text">{answer}</span>{answer === round.question.bluff.answer && <BluffPin/>}
+      <span class="kids-answer-text">{kidsAnswerLabel(round.question, answer)}</span>{answer === round.question.bluff.answer && <BluffPin/>}
     </li>)}
   </ol>;
 }

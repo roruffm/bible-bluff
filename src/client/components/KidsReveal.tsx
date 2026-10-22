@@ -1,3 +1,4 @@
+import { kidsAnswerLabel } from '../../shared/kids-show-questions';
 import { KidsGroupName } from './KidsGroupName';
 import { KidsVoiceButton } from './KidsVoice';
 import type { ComponentChildren, RefObject } from 'preact';
@@ -28,7 +29,7 @@ export function KidsReveal({ game, act, disabled, primaryRef, suspense = false, 
       <div class={`kids-answer kids-reveal-answer kids-field-${round.correctIndex+1} is-correct has-picture`}>
         <span class="kids-number">{round.correctIndex+1}<KidsFieldShape index={round.correctIndex}/></span>
         <StoryPicture motif={round.question.pictures[0]}/>
-        <span class="kids-answer-text">{round.question.answer}</span><span class="kids-correct-mark">✓ Entdeckt!</span>
+        <span class="kids-answer-text">{kidsAnswerLabel(round.question, round.question.answer)}</span><span class="kids-correct-mark">✓ Entdeckt!</span>
       </div>
       <div class="kids-discovery"><BibleBook/><div><p>{round.question.explanation}</p><small>{round.question.ref}</small></div></div>
       <p class="kids-reveal-points">{reaction.caption}</p>

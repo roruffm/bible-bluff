@@ -59,7 +59,7 @@ export function KidsBannerMascot({ group, entering }: { group: Exclude<KidsGroup
   const stage = perch.current?.closest<HTMLElement>('.kids-show');
   return <span ref={perch} class={`kids-mascot-perch is-${group}${entering && route ? ' is-flying' : ''}`} style={route ?? undefined} aria-hidden="true">
     <span class="kids-mascot-seat-shadow"/>
-    <span class="kids-mascot-arrival"><KidsMascot group={group}/></span>
+    <span class="kids-mascot-arrival"><KidsMascot group={group} motion={entering ? 'flying' : 'quiet'}/></span>
     {entering && route && stage && createPortal(<KidsMascotStarTrail target={perch.current!} group={group}/>, stage)}
   </span>;
 }

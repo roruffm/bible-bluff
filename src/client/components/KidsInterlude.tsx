@@ -1,3 +1,4 @@
+import { KidsTeamPortrait } from './KidsTeamPortrait';
 import type { RefObject } from 'preact';
 import type { KidsAction, KidsGame } from '../../shared/kids-game';
 import { KIDS_CHAPTERS, KIDS_GROUPS } from '../../shared/kids-show-questions';
@@ -31,7 +32,7 @@ export function KidsInterlude({ game, chapter, act, disabled, primaryRef }: {
         <p>Welche Geschichte spielen die Eltern?</p>
         <div class="kids-final-bonuses"><span class="is-team">Unser Team <b>bis zu +20</b></span><span class="is-professor">Professor Bluff <b>+0</b></span></div>
       </> : <>
-        {welcome ? <div class="kids-team-badges">{(['minis','mittis','maxis'] as const).map(g=><div key={g} class={`group-${g}`}><StoryPicture motif={KIDS_GROUPS[g].symbol}/><b><KidsGroupName group={g}/></b><span class="kids-group-ages">{KIDS_GROUPS[g].ages}</span></div>)}</div> : <>
+        {welcome ? <div class="kids-team-badges">{(['minis','mittis','maxis'] as const).map(g=><div key={g} class={`group-${g}`}><KidsTeamPortrait group={g}/><b><KidsGroupName group={g}/></b><span class="kids-group-ages">{KIDS_GROUPS[g].ages}</span></div>)}</div> : <>
           <StoryPicture motif={CHAPTER_PICTURES[chapter]}/>
           <div class="kids-chapter-groups">{groups}</div>
         </>}

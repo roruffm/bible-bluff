@@ -1,3 +1,4 @@
+import { kidsAnswerLabel } from '../src/shared/kids-show-questions';
 import { readFileSync } from 'node:fs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createKidsGame, kidsResumeGame, kidsScores, updateKidsGame } from '../src/shared/kids-game';
@@ -6,6 +7,15 @@ import { professorAnswerVoiceKeys, PROFESSOR_VOICE_KEYS } from '../src/shared/pr
 
 const orders = [[0,1,2],[0,2,1],[1,0,2],[1,2,0],[2,0,1],[2,1,0]];
 describe('Antwortmöglichkeiten vorlesen', () => {
+  it('beschriftet Jonas Zahlen mit Tagen, ohne gespeicherte Antworten oder Aufnahmen umzuzuordnen', () => {
+    const game = { ...createKidsGame(), index: 1, phase: 'reading' as const };
+    game.results[0] = 'correct';
+    const restored = unpackKidsGame(packKidsGame(game, 100), 200)!;
+    expect(restored.rounds[1].answers.map(answer => kidsAnswerLabel(restored.rounds[1].question, answer))).toEqual(['1 Tag', '40 Tage', '3 Tage']);
+    expect(restored.rounds[1].answers).toEqual(game.rounds[1].answers);
+    expect(professorAnswerVoiceKeys(restored)).toEqual(professorAnswerVoiceKeys(game));
+    expect(updateKidsGame({ ...restored, phase: 'judging' }, 'correct', 300).results[1]).toBe('correct');
+  });
   it('liest alle zehn Fragen in jeder möglichen Feldreihenfolge einschließlich ihrer Nummern', () => {
     const base = createKidsGame();
     for (let index=0; index<10; index++) for (const order of orders) {

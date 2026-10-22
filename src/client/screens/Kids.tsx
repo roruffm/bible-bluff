@@ -1,3 +1,4 @@
+import { KidsTeamPortrait } from '../components/KidsTeamPortrait';
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { KidsGroupName } from '../components/KidsGroupName';
 import { KidsMascot } from '../components/KidsMascot';
@@ -94,8 +95,9 @@ export function KidsPage() {
   const seconds = game ? Math.ceil(game.remainingMs / 1000) : 30;
   // Die letzten fünf Sekunden ticken zum lauten Mitzählen.
   useEffect(() => { if (game?.phase === 'moving' && seconds >= 1 && seconds <= 5) cue(seconds === 1 ? 'last-tick' : 'tick'); }, [game?.phase, seconds]);
-  // Nur echte Übergänge erklingen: Neuladen oder Wiederverbinden lösen weder Gong noch Trommelwirbel aus.
-  useEffect(() => {
+  // Jeden Phasenwechsel vor dem nächsten Klick festhalten, auch wenn die ruhige Bühne keinen Animationsframe anfordert.
+  // Neuladen und Wiederverbinden lösen weder Gong noch Trommelwirbel aus.
+  useLayoutEffect(() => {
     const before = lastPhase.current; lastPhase.current = game?.phase ?? null;
     if (!game) return;
     if (before === 'moving' && game.phase === 'locked') cue('gong');
@@ -197,7 +199,7 @@ export function KidsPage() {
     {remote.error && !showPair && <p class="kids-connection-note" role="status">{remote.error}{remote.lost && game && <button type="button" class="kids-tool" onClick={() => { void remote.disconnect(); }}>Ohne Smartphone weiterspielen</button>}</p>}
     {remote.active && !remote.view && <div class="kids-exit"><div><h2>Show wiederherstellen …</h2><p>{remote.error || 'Die Fernbedienung wird wieder verbunden.'}</p><button type="button" class="kids-button" onClick={() => { void remote.disconnect(); }}>Zur Vorbereitung</button></div></div>}
     {!game ? <section class="kids-setup">
-      <div class="kids-intro"><KidsLogo/><p class="kids-eyebrow">DAS GEMEINSAME BIBELABENTEUER</p><h1>Die große<br/><em>Bluff-Jagd!</em></h1><p>Drei Detektivteams. Ein frecher Professor.<br/>Gemeinsam knackt ihr seine Bibelrätsel.</p><ProfessorBluff/><div class="kids-show-teams">{(['minis','mittis','maxis'] as const).map(g=><span key={g} class={`group-${g}`}><StoryPicture motif={KIDS_GROUPS[g].symbol}/><b><KidsGroupName group={g}/></b><small>{KIDS_GROUPS[g].ages}</small></span>)}</div></div>
+      <div class="kids-intro"><KidsLogo/><p class="kids-eyebrow">DAS GEMEINSAME BIBELABENTEUER</p><h1>Die große<br/><em>Bluff-Jagd!</em></h1><p>Drei Detektivteams. Ein frecher Professor.<br/>Gemeinsam knackt ihr seine Bibelrätsel.</p><ProfessorBluff/><div class="kids-show-teams">{(['minis','mittis','maxis'] as const).map(g=><span key={g} class={`group-${g}`}><KidsTeamPortrait group={g}/><b><KidsGroupName group={g}/></b><small>{KIDS_GROUPS[g].ages}</small></span>)}</div></div>
       <div class="kids-setup-card">{saved && !remote.active && <KidsResume saved={saved} onResume={resume} onDiscard={discard} resumeRef={resumeButton}/>}<p class="kids-eyebrow">FÜR DIE SPIELLEITUNG · CA. 45 MINUTEN</p><h2>Gemeinsam auf Punktejagd</h2><ol class="kids-rules">
         <li><b>Drei Felder vorbereiten</b><span>1, 2, 3 von links nach rechts markieren. Die aktive Altersgruppe wählt mit den Füßen. Andere bleiben bei ihrer Gruppe.</span></li>
         <li><b>Bis zu 9 Aufgaben + 1 Superbluff</b><span>Pro Kapitel spielen alle drei Gruppen. Erst vorlesen, dann 30 Sekunden starten. Eltern helfen bei Geräuschen und Pantomime. Ihr könnt die Show jederzeit mit Punktestand abschließen.</span></li>

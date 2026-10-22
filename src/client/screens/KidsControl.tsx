@@ -1,7 +1,7 @@
 import { KidsGroupName, KidsGroupText } from '../components/KidsGroupName';
 import { useEffect, useState } from 'preact/hooks';
 import { kidsCanJumpToFinal, kidsCanSkipCountdown, kidsLastScoredIndex, kidsPreviousStep, KIDS_PROFESSOR_POINTS, kidsResultPoints, kidsScores, updateKidsGame, type KidsGame, type KidsPhase } from '../../shared/kids-game';
-import { KIDS_CHAPTERS, kidsAnswerPicture } from '../../shared/kids-show-questions';
+import { KIDS_CHAPTERS, kidsAnswerLabel, kidsAnswerPicture } from '../../shared/kids-show-questions';
 import { useKidsRemote } from '../lib/kids-remote';
 import { KidsFinishDialog } from '../components/KidsFinish';
 import { KidsLogo } from '../components/KidsLogo';
@@ -54,7 +54,7 @@ export function KidsControlPage() {
     else window.scrollTo({ top: 0, behavior: 'instant' });
   };
   const scoreboard = scores && <div class="kids-remote-score" aria-label={`Punktestand: Kinderteam ${scores.team}, Professor Bluff ${scores.professor}`}><span>Kinderteam <b>{scores.team}</b></span><span>Professor Bluff <b>{scores.professor}</b></span></div>;
-  const renderAnswers = (compact = false) => round && <ol class={`kids-remote-answers${compact ? ' is-compact' : ''}`}>{round.answers.map((answer, i) => <li key={i} class={`kids-field-${i + 1}${i === round.correctIndex ? ' is-correct' : ''}`}><b>{compact ? `Feld ${i + 1}` : i + 1}<KidsFieldShape index={i}/></b><StoryPicture motif={kidsAnswerPicture(round.question, answer)}/><span>{answer}{i === round.correctIndex && <small class="kids-remote-correct">✓ Richtige Antwort</small>}{answer === round.question.bluff.answer && <small class="kids-remote-bluff">Professor-Tipp{!compact && ' (Bluff)'}</small>}</span></li>)}</ol>;
+  const renderAnswers = (compact = false) => round && <ol class={`kids-remote-answers${compact ? ' is-compact' : ''}`}>{round.answers.map((answer, i) => <li key={i} class={`kids-field-${i + 1}${i === round.correctIndex ? ' is-correct' : ''}`}><b>{compact ? `Feld ${i + 1}` : i + 1}<KidsFieldShape index={i}/></b><StoryPicture motif={kidsAnswerPicture(round.question, answer)}/><span>{kidsAnswerLabel(round.question, answer)}{i === round.correctIndex && <small class="kids-remote-correct">✓ Richtige Antwort</small>}{answer === round.question.bluff.answer && <small class="kids-remote-bluff">Professor-Tipp{!compact && ' (Bluff)'}</small>}</span></li>)}</ol>;
   return <main class={`kids-page kids-remote-page${desktop ? ' is-desktop' : ''}`}>
     <header class="kids-remote-header"><KidsLogo compact/><div><h1>Fernbedienung</h1><p>Nur für die Helfer · Ton am Beamer</p></div></header>
     <p class={`kids-remote-status${remote.error ? ' is-offline' : ''}`} role="status">{remote.error || (remote.view ? 'Mit der Beamer-Partie verbunden' : remote.active ? 'Verbindung wird aufgebaut …' : 'Scanne den QR-Code am Beamer.')}</p>

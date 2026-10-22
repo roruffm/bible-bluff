@@ -62,6 +62,13 @@
 @keyframes kids-mascot-flame-dance { from { transform: rotate(-4deg) scale(.96, 1.04); } to { transform: rotate(4deg) scale(1.04, .97); } }
 @keyframes kids-mascot-flame-glow { from { transform: scale(.92, .96); } to { transform: scale(1.08, 1.04); } }
 @keyframes kids-mascot-air-dance { 0%, 100% { transform: rotate(-6deg) scale(.98, 1.02); } 50% { transform: rotate(7deg) scale(1.03, .97); } }
+/* Bewegung erzählt einen Moment: Aufruf und Begrüßung sind kurz, die Antwortwahl bleibt ruhig. */
+.kids-mascot.is-quiet * { animation: none !important; }
+.kids-mascot.is-greeting * { animation-iteration-count: 2; animation-delay: 0s; animation-fill-mode: none; }
+.kids-mascot.is-greeting .kids-mascot-dance { animation-iteration-count: 1; }
+.kids-mascot.is-celebrating * { animation-iteration-count: 4; animation-delay: 0s; animation-fill-mode: none; }
+.kids-mascot.is-celebrating .kids-mascot-dance { animation-iteration-count: 2; }
+.kids-mascot:is(.is-greeting, .is-celebrating) .kids-mascot-laugh { animation-iteration-count: 1; }
 @media (prefers-reduced-motion: reduce) {
   .kids-mascot *, .kids-clock-cheer > .kids-mascot { animation: none !important; transform: none !important; }
   .kids-mascot-laugh { opacity: 0; }
