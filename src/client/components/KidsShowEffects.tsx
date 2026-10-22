@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import type { KidsGame } from '../../shared/kids-game';
-import { kidsPresentationMoment, type KidsPresentationMoment } from '../lib/kids-presentation';
+import { KIDS_GROUP_ARRIVAL_MS, kidsPresentationMoment, type KidsPresentationMoment } from '../lib/kids-presentation';
+import type { KidsGroup } from '../../shared/kids-show-questions';
 import { KIDS_SUSPENSE_MS } from '../lib/kids-sound';
 import { KidsGroupName } from './KidsGroupName';
 import { KidsMascot } from './KidsMascot';
@@ -17,7 +18,7 @@ export function useKidsPresentationMoment(game: KidsGame | null): KidsPresentati
     if (!next || reduced.matches) return;
     const delay = next.kind === 'points' ? KIDS_SUSPENSE_MS : 0;
     const show = window.setTimeout(() => setMoment(next), delay);
-    const hide = window.setTimeout(() => setMoment(null), delay + (next.kind === 'group' ? 2200 : next.kind === 'sweep' ? 1300 : 1850));
+    const hide = window.setTimeout(() => setMoment(null), delay + (next.kind === 'group' ? KIDS_GROUP_ARRIVAL_MS : next.kind === 'sweep' ? 1300 : 1850));
     const cancel = () => { if (reduced.matches) { clearTimeout(show); clearTimeout(hide); setMoment(null); } };
     reduced.addEventListener('change', cancel);
     return () => { clearTimeout(show); clearTimeout(hide); reduced.removeEventListener('change', cancel); };
@@ -26,6 +27,40 @@ export function useKidsPresentationMoment(game: KidsGame | null): KidsPresentati
   if (moment.kind === 'group') return game.phase === 'reading' ? moment : null;
   if (moment.kind === 'sweep') return game.phase === 'chapter' || game.phase === 'superbluff' ? moment : null;
   return game.phase === 'revealed' && game.results[game.index] === moment.result ? moment : null;
+}
+
+/** Dieselbe Figur fliegt groß über die Bühne und bleibt anschließend am tatsächlichen Bannerplatz sitzen. */
+export function KidsBannerMascot({ group, entering }: { group: Exclude<KidsGroup, 'all'>; entering: boolean }) {
+  const perch = useRef<HTMLSpanElement>(null);
+  const [route, setRoute] = useState<Record<string, string> | null>(null);
+  useLayoutEffect(() => {
+    setRoute(null);
+    if (!entering || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const target = perch.current?.getBoundingClientRect();
+    if (!target?.width || !target.height) return;
+    const x = target.x + target.width / 2, y = target.y + target.height / 2;
+    const width = window.innerWidth, height = window.innerHeight;
+    // Einheitlicher großer Auftritt, auch auf schmalen und flachen Bildschirmen vollständig sichtbar.
+    const scale = Math.min(3.4, width * .52 / target.width, height * .4 / target.height);
+    setRoute({
+      '--arrival-start-x': `${-target.width * scale - x}px`,
+      '--arrival-start-y': `${height * .6 - y}px`,
+      '--arrival-hero-x': `${width * .5 - x}px`,
+      '--arrival-hero-y': `${height * .46 - y}px`,
+      '--arrival-turn-x': `${width * .56 - x}px`,
+      '--arrival-turn-y': `${height * .28 - y}px`,
+      '--arrival-scale': String(scale),
+      '--arrival-duration': `${KIDS_GROUP_ARRIVAL_MS}ms`,
+    });
+    // Bei Vollbildwechsel/Rotation sofort sicher auf dem neu positionierten Banner landen.
+    const land = () => setRoute(null);
+    window.addEventListener('resize', land);
+    return () => window.removeEventListener('resize', land);
+  }, [entering, group]);
+  return <span ref={perch} class={`kids-mascot-perch is-${group}${entering && route ? ' is-flying' : ''}`} style={route ?? undefined} aria-hidden="true">
+    <span class="kids-mascot-seat-shadow"/>
+    <span class="kids-mascot-arrival"><KidsMascot group={group}/><span class="kids-mascot-flight-spark">✦</span></span>
+  </span>;
 }
 
 /** Licht in der Dunkelheit: Beim Kapitelstart fliegt die Leuchtlupe mit einem hellen Streifen einmal quer über die Bühne. */

@@ -1,5 +1,7 @@
 import { kidsResultPoints, type KidsGame, type KidsResult } from '../../shared/kids-game';
 
+export const KIDS_GROUP_ARRIVAL_MS = 2800;
+
 export type KidsPresentationMoment =
   | { kind: 'group'; index: number }
   | { kind: 'sweep'; index: number }

@@ -14,33 +14,63 @@
 }
 @keyframes kids-speaking-number { 50% { transform: scale(1.1); } }
 
-/* Nur beim Aufruf einer neuen Gruppe. Die Beschriftung bleibt während des Auftritts an ihrem Platz. */
-.kids-show .kids-show-stage .kids-active-group.is-mascot-entering .kids-group-symbol {
+/* Die Gruppe bleibt lesbar, während ihre große Figur von außerhalb der Bühne zum Banner fliegt. */
+.kids-show .kids-show-stage .kids-active-group.is-mascot-entering { z-index: 14; }
+.kids-show .kids-active-group:has(> .kids-mascot-perch) > .kids-group-name > .kids-group-symbol { opacity: 0; }
+.kids-mascot-perch {
+  --arrival-spin: -24deg; --arrival-wave: 10deg;
+  position: absolute; left: calc(12px - var(--active-group-symbol) * .15); bottom: 25%;
+  width: calc(var(--active-group-symbol) * 1.3); aspect-ratio: 140 / 150;
+  pointer-events: none;
+}
+.kids-mascot-perch.is-mittis { --arrival-spin: -210deg; --arrival-wave: 18deg; }
+.kids-mascot-perch.is-maxis { --arrival-spin: 24deg; --arrival-wave: -12deg; }
+.kids-mascot-arrival { position: absolute; inset: 0; display: block; transform-origin: 50% 90%; }
+.kids-mascot-arrival > .kids-mascot { width: 100%; height: 100%; }
+.kids-mascot-seat-shadow {
+  position: absolute; left: 22%; right: 14%; bottom: 3%; height: 9%; border-radius: 50%;
+  background: #082a3c40; filter: blur(2px);
+}
+.kids-mascot-flight-spark { display: none; }
+.kids-mascot-perch.is-flying .kids-mascot-arrival {
   transform-origin: center;
-  animation: kids-researcher-arrival 2.2s ease-out both;
-  filter: drop-shadow(0 0 10px #ffda68a0);
+  animation: kids-mascot-fly-to-banner var(--arrival-duration) ease-in-out both;
+  will-change: transform;
 }
-.kids-show .is-group-mittis .kids-active-group.is-mascot-entering .kids-group-symbol { animation-name: kids-star-arrival; }
-.kids-show .is-group-maxis .kids-active-group.is-mascot-entering .kids-group-symbol { animation-name: kids-torch-arrival; }
-@keyframes kids-researcher-arrival {
-  0% { opacity: 0; transform: translate(-20px, 8px) scale(.7) rotate(-18deg); }
-  25% { opacity: 1; transform: translate(6px, -3px) scale(1.12) rotate(12deg); }
-  45% { transform: translate(-6px, 0) scale(1.08) rotate(-12deg); }
-  65% { transform: translate(3px, -2px) scale(1.04) rotate(6deg); }
-  85%, 100% { opacity: 1; transform: none; }
+.kids-mascot-perch.is-flying .kids-mascot-flight-spark {
+  display: block; position: absolute; right: -12%; top: 12%; color: #fff6c2;
+  font-size: calc(var(--active-group-symbol) * .32); text-shadow: 0 2px 0 #12324a;
+  animation: kids-mascot-arrival-spark var(--arrival-duration) ease-out both;
 }
-@keyframes kids-star-arrival {
-  0% { opacity: 0; transform: scale(.4) rotate(-160deg); }
-  35% { opacity: 1; transform: scale(1.2) rotate(12deg); }
-  58% { transform: scale(1.08) rotate(-8deg); }
-  82%, 100% { opacity: 1; transform: none; }
+.kids-mascot-perch.is-flying .kids-mascot-seat-shadow { animation: kids-mascot-landing-shadow var(--arrival-duration) ease-out both; }
+@keyframes kids-mascot-fly-to-banner {
+  0% { opacity: 0; transform: translate(var(--arrival-start-x), var(--arrival-start-y)) scale(var(--arrival-scale)) rotate(var(--arrival-spin)); }
+  10% { opacity: 1; }
+  28% { transform: translate(var(--arrival-hero-x), var(--arrival-hero-y)) scale(var(--arrival-scale)) rotate(var(--arrival-wave)); }
+  43% { transform: translate(var(--arrival-hero-x), var(--arrival-hero-y)) scale(var(--arrival-scale)) rotate(-6deg); }
+  62% { transform: translate(var(--arrival-turn-x), var(--arrival-turn-y)) scale(calc(var(--arrival-scale) * .7)) rotate(12deg); }
+  82% { transform: translate(0, -20px) scale(1.12) rotate(-5deg); }
+  89% { transform: translate(0, 5px) scale(1.08, .88) rotate(3deg); }
+  95% { transform: translate(0, -7px) scale(.97, 1.04) rotate(-2deg); }
+  100% { opacity: 1; transform: none; }
 }
-@keyframes kids-torch-arrival {
-  0% { opacity: 0; transform: translateY(22px) scale(.65); }
-  25% { opacity: 1; transform: translateY(-13px) scale(1.12) rotate(-7deg); }
-  42% { transform: translateY(1px) scale(1.05) rotate(6deg); }
-  60% { transform: translateY(-7px) scale(1.06) rotate(-4deg); }
-  82%, 100% { opacity: 1; transform: none; }
+@keyframes kids-mascot-arrival-spark {
+  0%, 15% { opacity: 0; scale: .4; }
+  28%, 48% { opacity: 1; scale: 1; rotate: 30deg; }
+  78%, 100% { opacity: 0; scale: .4; rotate: 90deg; }
+}
+@keyframes kids-mascot-landing-shadow {
+  0%, 72% { opacity: 0; scale: .3; }
+  89% { opacity: 1; scale: 1.25; }
+  100% { opacity: 1; scale: 1; }
+}
+@media (max-width: 759px) {
+  .kids-show .kids-show-stage .kids-active-group:has(> .kids-mascot-perch) { position: relative; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .kids-mascot-perch.is-flying .kids-mascot-arrival { animation: none; transform: none; will-change: auto; }
+  .kids-mascot-perch.is-flying .kids-mascot-flight-spark { display: none; }
+  .kids-mascot-perch.is-flying .kids-mascot-seat-shadow { animation: none; }
 }
 
 /* Dekorativ und ohne Eingabefläche: Weiterklicken und Wertungskorrekturen bleiben sofort möglich. */
@@ -78,13 +108,8 @@
 
 /* Maskottchen: Im Gruppenschild winkt die Figur der aktiven Gruppe, in der Kinderansicht feuern die wartenden Gruppen an den Uhren an. */
 .kids-mascot { display: block; overflow: visible; pointer-events: none; filter: drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff) drop-shadow(0 6px 5px rgba(8, 42, 60, .3)); }
-.kids-active-group > .kids-mascot, .kids-clock-cheer { display: none; }
+.kids-clock-cheer { display: none; }
 @media (min-width: 760px) {
-  .kids-show .kids-active-group > .kids-mascot { display: block; position: absolute; top: 50%; left: calc(12px - var(--active-group-symbol) * .15); width: calc(var(--active-group-symbol) * 1.3); height: auto; translate: 0 -55%; rotate: -6deg; }
-  .kids-show .kids-active-group:has(> .kids-mascot) > .kids-group-name > .kids-group-symbol { opacity: 0; }
-  .kids-show .kids-show-stage .kids-active-group.is-mascot-entering > .kids-mascot { animation: kids-researcher-arrival 2.2s ease-out both; }
-  .kids-show .is-group-mittis .kids-active-group.is-mascot-entering > .kids-mascot { animation-name: kids-star-arrival; }
-  .kids-show .is-group-maxis .kids-active-group.is-mascot-entering > .kids-mascot { animation-name: kids-torch-arrival; }
   .kids-show.is-projecting .kids-clock-cheer { display: block; position: absolute; left: 50%; bottom: 100%; width: min(calc(var(--kids-clock-size) * .8), 10.5vh); translate: -50% 6%; }
   .kids-clock-cheer > .kids-mascot { width: 100%; height: auto; transform-origin: 50% 100%; animation: kids-cheer-hop .8s ease-in-out infinite alternate; }
   .kids-clock-right .kids-clock-cheer > .kids-mascot { animation-delay: .4s; }
