@@ -60,6 +60,8 @@
 .kids-audio-library > label { margin-top: 14px; }
 .kids-all-audio input { width: 100%; min-height: 48px; padding: 11px; border: 2px solid #a5bdc7; border-radius: 10px; background: white; color: #12324a; font: inherit; font-weight: 500; box-sizing: border-box; }
 .kids-all-audio .kids-audio-count { font-size: 12px; color: #40596a; }
+.kids-quick-audio { display: grid; gap: 12px; margin-top: 14px; }
+.kids-quick-audio .kids-audio-clip > p { margin: 8px 2px 0; }
 .kids-remote-page .kids-remote-guide { background: #fff8e6; }
 .kids-remote-guide summary { min-height: 44px; align-content: center; }
 /* Antworten wie die Karten am Beamer: Feldfarbe, runde Nummer, Bild. Die richtige leuchtet grün. */

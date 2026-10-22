@@ -1,6 +1,12 @@
 /** Kurze, jederzeit manuell abspielbare Ansagen in Professor Bluffs Snorre-Stimme. */
 export const PROFESSOR_INTERJECTIONS = [
   {
+    "id": "parents-help",
+    "label": "Eltern helfen",
+    "category": "Mitmachen",
+    "text": "Die Eltern dürfen ausnahmsweise helfen!"
+  },
+  {
     "id": "finale-parents",
     "label": "Eltern-Pantomime erklären",
     "category": "Ablauf",

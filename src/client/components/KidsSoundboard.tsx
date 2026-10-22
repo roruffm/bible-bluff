@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'preact/hooks';
-import { PROFESSOR_INTERJECTIONS, professorInterjection, professorInterjectionForRound } from '../../shared/professor-interjections';
+import { PROFESSOR_INTERJECTIONS, professorInterjection, professorInterjectionForRound, type ProfessorInterjectionId } from '../../shared/professor-interjections';
 import type { KidsGame } from '../../shared/kids-game';
 import type { KidsRemoteAction } from '../../shared/kids-remote';
 import { professorVoiceKey } from '../../shared/professor-voice';
@@ -53,12 +53,17 @@ export function KidsSoundboard({ game, disabled, send, compact = false }: Compac
   useEffect(() => { if (compact && query) setLibraryOpen(true); }, [compact]);
   const last = game.voiceKind === 'interjection' ? professorInterjection(game.voiceClip) : null;
   const term = query.trim().toLocaleLowerCase('de');
+  const isForscherRound = game.rounds[game.index].question.group === 'minis' && !['welcome', 'chapter', 'finished'].includes(game.phase);
+  // Diese Ansagen bleiben unabhängig von Suche, Kategorie und aufgeklappter Audiobibliothek griffbereit.
+  const pinnedAudio: readonly ProfessorInterjectionId[] = isForscherRound ? ['parents-help', 'walk'] : ['walk'];
+  const quickAudio = [...pinnedAudio, ...(compact ? QUICK_AUDIO : [])].filter(id => !(phaseAudio[game.phase] as readonly string[]).includes(id));
   const clips = PROFESSOR_INTERJECTIONS.filter(clip => professorInterjectionForRound(clip.id, game.index)?.id === clip.id)
+    .filter(clip => clip.id !== 'walk' && clip.id !== 'parents-help')
     .filter(clip => clip.id !== 'finale-parents' || game.index === 9)
     .filter(clip => term ? `${clip.label} ${clip.text} ${clip.category}`.toLocaleLowerCase('de').includes(term) : clip.category === category);
   return <section class={`kids-remote-direction kids-soundboard kids-all-audio${compact ? ' is-compact' : ''}`} aria-labelledby="kids-soundboard-title">
     <h2 id="kids-soundboard-title">{compact ? 'Für zwischendurch' : 'Zwischendurch-Sprüche'}</h2>{!compact && <p>Freie Ansagen für jede Situation. Alle Aufnahmen starten am Beamer.</p>}
-    {compact && <div class="kids-quick-audio">{QUICK_AUDIO.filter(id => !(phaseAudio[game.phase] as readonly string[]).includes(id)).map(id => <InterjectionButton key={id} clip={professorInterjection(id)!} game={game} disabled={disabled} send={send} compact/>)}</div>}
+    <div class="kids-quick-audio">{quickAudio.map(id => <InterjectionButton key={id} clip={professorInterjection(id)!} game={game} disabled={disabled} send={send} compact={compact}/>)}</div>
     <details class="kids-audio-library-toggle" open={!compact || libraryOpen} onToggle={event => { if (compact) setLibraryOpen(event.currentTarget.open); }}>
       <summary hidden={!compact}>Alle Zusatzaudios</summary>
       <div class="kids-audio-library">
