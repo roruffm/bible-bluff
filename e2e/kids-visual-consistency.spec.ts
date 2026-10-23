@@ -40,14 +40,24 @@ test('Kids: Jona-Einheiten bleiben bei Wiederherstellung, Fernbedienung und Aufl
   } finally { await context.close(); }
 });
 
-test('Kids: Maskottchen begrüßen und verabschieden alle Gruppen; die Antwortwahl bleibt ruhig und nur die letzten Sekunden pulsieren', async ({ page }) => {
+test('Kids: Maskottchen begrüßen durchgehend und verabschieden kurz; die Antwortwahl bleibt ruhig und nur die letzten Sekunden pulsieren', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   await page.goto('/kids');
   await expect(page.locator('.kids-show-teams .kids-mascot')).toHaveCount(3);
+  const allLoop = (mascots: Element[]) => mascots.map(el => {
+    const animations = el.getAnimations({ subtree: true });
+    return animations.length > 0 && animations.every(a => a.effect!.getTiming().iterations === Infinity);
+  });
+  await expect.poll(() => page.locator('.kids-show-teams .kids-mascot').evaluateAll(allLoop)).toEqual([true, true, true]);
   await page.getByRole('button', { name: 'Show vorbereiten', exact: false }).click();
   await showKidsOperator(page);
   await expect(page.locator('.kids-team-badges .kids-mascot')).toHaveCount(3);
-  expect(await page.locator('.kids-team-badges').evaluate(el => el.getAnimations({ subtree: true }).every(a => a.effect!.getTiming().iterations !== Infinity))).toBe(true);
+  await expect.poll(() => page.locator('.kids-team-badges .kids-mascot').evaluateAll(allLoop)).toEqual([true, true, true]);
+  await expect(page.locator('.is-welcome .professor-character .bluff-arm-right')).toHaveCSS('animation-iteration-count', 'infinite');
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await expect.poll(() => page.locator('.kids-team-badges .kids-mascot').evaluateAll(els => els.every(el => el.getAnimations({ subtree: true }).length === 0))).toBe(true);
+  await expect(page.locator('.is-welcome .professor-character .bluff-arm-right')).toHaveCSS('animation-name', 'none');
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
   await page.getByRole('button', { name: 'Mission starten', exact: true }).click();
   await page.getByRole('button', { name: 'Erste Aufgabe im Kapitel', exact: true }).click();
   await expect(page.locator('.kids-mascot-perch')).not.toHaveClass(/is-flying/, { timeout: 6000 });
