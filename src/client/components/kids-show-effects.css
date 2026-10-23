@@ -51,6 +51,11 @@
 }
 .kids-mascot-perch.is-flying .kids-mascot-seat-shadow { animation: kids-mascot-landing-shadow var(--arrival-duration) ease-out both; }
 .kids-mascot-perch.is-flying .kids-mascot-stunt { animation: kids-mascot-aerobatics var(--arrival-duration) cubic-bezier(.35, 0, .45, 1) both; will-change: transform; }
+/* Die gedrehte SVG-Fläche wird groß gezeichnet, damit der Bühnenauftritt scharfe Konturen behält. */
+.kids-mascot-perch.is-flying .kids-mascot-stunt > .kids-mascot {
+  width: 400%; height: 400%; transform: scale(.25); transform-origin: 0 0;
+  filter: drop-shadow(12px 0 0 #fff) drop-shadow(-12px 0 0 #fff) drop-shadow(0 12px 0 #fff) drop-shadow(0 -12px 0 #fff) drop-shadow(0 24px 20px rgba(8, 42, 60, .3));
+}
 .kids-mascot-perch.is-flying .kids-mascot-flight-aura { animation: kids-mascot-aura var(--arrival-duration) ease-in-out both; }
 .kids-mascot-perch.is-flying .kids-mascot-orbit { animation: kids-mascot-orbit var(--arrival-duration) linear both; }
 .kids-mascot-perch.is-flying .kids-mascot-orbit.is-second { inset: -4%; animation-name: kids-mascot-orbit-counter; border-color: #fff3be transparent; }
@@ -106,6 +111,7 @@
 @media (prefers-reduced-motion: reduce) {
   .kids-mascot-perch.is-flying .kids-mascot-arrival { animation: none; offset-path: none; transform: none; will-change: auto; }
   .kids-mascot-perch.is-flying .kids-mascot-stunt { animation: none; transform: none; filter: none; will-change: auto; }
+  .kids-mascot-perch.is-flying .kids-mascot-stunt > .kids-mascot { width: 100%; height: 100%; transform: none; filter: none; }
   .kids-mascot-flight-aura, .kids-mascot-orbit { display: none; }
   .kids-mascot-star-trail { display: none; }
   .kids-mascot-perch.is-flying .kids-mascot-seat-shadow { animation: none; }
