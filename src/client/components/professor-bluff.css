@@ -16,6 +16,7 @@
 .professor-showcase.motion-greet .bluff-performer { animation-name: professor-entrance; }
 .professor-showcase.motion-greet .bluff-arm-right { animation: professor-wave 2.8s ease-in-out 2; }
 .professor-showcase.motion-greet .bluff-head { animation: professor-kind-nod 2.8s ease-in-out 2; }
+.kids-show .kids-show-interlude.is-welcome .professor-showcase.motion-greet :is(.bluff-head, .bluff-arm-right, .bluff-eyes, .bluff-lens-shine) { animation-iteration-count: infinite; }
 .professor-showcase.motion-startle .bluff-performer { animation-name: professor-big-startle; }
 .professor-showcase.motion-startle .bluff-arm-left { animation: professor-startle-left 2.6s ease-out; }
 .professor-showcase.motion-startle .bluff-arm-right { animation: professor-startle-right 2.6s ease-out; }
