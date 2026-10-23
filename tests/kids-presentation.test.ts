@@ -23,7 +23,22 @@ describe('Neue Auftritte auf der Kinderbühne', () => {
       if (game.phase === 'reading') expect(kidsPresentationMoment(revealed, game)).toEqual({kind:'group',index:index+1});
     }
     expect(groups).toEqual(['minis','mittis','maxis','minis','mittis','maxis','minis','mittis','maxis']);
-    expect(kidsPresentationMoment(game, step(game, 'next'))).toBeNull();
+    expect(kidsPresentationMoment(game, step(game, 'next'))).toEqual({kind:'group',index:9});
+  });
+
+  it('begrüßt im Finale alle Gruppen sowohl nach neun Aufgaben als auch nach dem Finalsprung', () => {
+    const first = step(step(createKidsGame(), 'next'), 'next');
+    const last = {...first, index: 8};
+    const normalFinal = step(step(judge(last), 'correct'), 'next');
+    const jumpedFinal = step(first, 'jump-final');
+    for (const superbluff of [normalFinal, jumpedFinal]) {
+      const reading = step(superbluff, 'next');
+      expect(reading.rounds[reading.index].question.group).toBe('all');
+      expect(kidsPresentationMoment(superbluff, reading)).toEqual({kind:'group',index:9});
+      expect(kidsPresentationMoment(null, reading)).toBeNull();
+      expect(kidsPresentationMoment(reading, step(reading, 'read-answers'))).toBeNull();
+      expect(kidsPresentationMoment(step(reading, 'start'), reading)).toBeNull();
+    }
   });
 
   it('feiert ausschließlich frisch vergebene Kinderpunkte einschließlich der doppelten Finalpunkte', () => {

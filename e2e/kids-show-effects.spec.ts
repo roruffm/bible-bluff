@@ -100,4 +100,62 @@ test('Kids: Reduzierte Bewegung zeigt die Wertung sofort und verzichtet auf Auft
   await expect(page.getByTestId('team-score')).toHaveText('10');
   await expect(page.locator('.kids-points-flight')).toHaveCount(0);
   await expect(page.locator('.kids-suspense')).toHaveCount(0);
+  await page.getByRole('button',{name:'Direkt ins Finale',exact:true}).click();
+  await page.getByRole('button',{name:'Gemeinsam ins Finale',exact:true}).click();
+  await expect(page.locator('.kids-active-group .kids-mascot')).toHaveCount(3);
+  await expect(page.locator('.kids-active-group')).not.toHaveClass(/is-mascot-entering/);
+  await expect(page.locator('.kids-mascot-perch.is-flying, .kids-mascot-star-trail')).toHaveCount(0);
 });
+
+for (const viewport of [{width:1280,height:800}, {width:390,height:844}]) {
+  test(`Kids: Drei Maskottchen fliegen gemeinsam aufs Finalschild (${viewport.width}px)`, async ({page}) => {
+    await page.setViewportSize(viewport);
+    await begin(page);
+    await page.getByRole('button',{name:'Bedienung',exact:true}).click();
+    await page.getByRole('button',{name:'Zur Finalrunde springen',exact:false}).click();
+    await page.getByRole('button',{name:'Gemeinsam ins Finale',exact:true}).click();
+    const banner = page.locator('.kids-active-group.is-finale-team');
+    await expect(banner.locator('.kids-mascot-perch.is-flying')).toHaveCount(3);
+    await expect(banner.locator('.kids-mascot-orbit')).toHaveCount(6);
+    await expect(page.locator('.kids-mascot-star-trail')).toHaveCount(3);
+    const formation = await banner.evaluate(el => {
+      const perches = Array.from(el.querySelectorAll('.kids-mascot-perch'));
+      const animations = perches.flatMap(perch => perch.getAnimations({subtree:true}))
+        .filter(animation => animation.effect!.getTiming().iterations !== Infinity);
+      for (const animation of animations) { animation.pause(); animation.currentTime = 1050; }
+      const flight = perches.map(perch => ({
+        path: getComputedStyle(perch).getPropertyValue('--arrival-path'),
+        large: perch.querySelector('.kids-mascot-arrival')!.getBoundingClientRect().toJSON(),
+        seat: perch.getBoundingClientRect().toJSON(),
+      }));
+      for (const animation of animations) animation.finish();
+      return {flight, landed:perches.map(perch => perch.querySelector('.kids-mascot-arrival')!.getBoundingClientRect().toJSON()),
+        label:el.querySelector('.kids-group-name')!.getBoundingClientRect().toJSON(),
+        banner:el.getBoundingClientRect().toJSON(), width:innerWidth, height:innerHeight};
+    });
+    expect(new Set(formation.flight.map(mascot => mascot.path)).size).toBe(3);
+    formation.flight.forEach(({large,seat}, index) => {
+      expect(large.width).toBeGreaterThan(seat.width * 1.5);
+      expect(large.left).toBeGreaterThanOrEqual(0);
+      expect(large.right).toBeLessThanOrEqual(formation.width);
+      expect(large.top).toBeGreaterThanOrEqual(0);
+      expect(large.bottom).toBeLessThanOrEqual(formation.height);
+      expect(formation.landed[index].x).toBeCloseTo(seat.x, 0);
+      expect(formation.landed[index].y).toBeCloseTo(seat.y, 0);
+      expect(formation.landed[index].width).toBeCloseTo(seat.width, 0);
+      if (index) expect(seat.left).toBeGreaterThan(formation.flight[index - 1].seat.right);
+      expect(seat.right <= formation.label.left || seat.bottom <= formation.label.top).toBe(true);
+    });
+    expect(formation.banner.left).toBeGreaterThanOrEqual(0);
+    expect(formation.banner.right).toBeLessThanOrEqual(formation.width);
+    await expect(banner.locator('.kids-mascot-perch.is-flying')).toHaveCount(0, {timeout:5000});
+    await expect(page.locator('.kids-mascot-star-trail')).toHaveCount(0);
+    await expect(banner.locator('.kids-mascot')).toHaveCount(3);
+    await expect.poll(() => banner.locator('.kids-mascot').evaluateAll(figures =>
+      figures.every(figure => figure.getAnimations({subtree:true}).length === 0))).toBe(true);
+    await page.reload();
+    await page.getByRole('button',{name:'Show fortsetzen',exact:true}).click();
+    await expect(page.locator('.kids-active-group .kids-mascot')).toHaveCount(3);
+    await expect(page.locator('.kids-mascot-perch.is-flying, .kids-mascot-star-trail')).toHaveCount(0);
+  });
+}

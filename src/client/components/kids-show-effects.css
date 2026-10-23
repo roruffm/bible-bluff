@@ -29,6 +29,13 @@
 }
 .kids-mascot-perch.is-mittis { --arrival-bank: 22deg; --arrival-turn: -720deg; --arrival-glow: #ffda68; }
 .kids-mascot-perch.is-maxis { --arrival-bank: -17deg; --arrival-turn: -360deg; --arrival-glow: #f8a1ad; }
+/* Im Finale teilen sich alle drei einen reservierten Platz, ohne die Beschriftung zu überdecken. */
+.kids-show .kids-active-group.is-finale-team { display: grid; grid-template-columns: auto auto; gap: 0 .5em; }
+.kids-mascot-formation { grid-column: 1; grid-row: 1 / 3; display: flex; align-items: end; gap: 2px; width: calc(var(--active-group-symbol) * 2.7 + 4px); height: var(--active-group-symbol); }
+.kids-mascot-formation > .kids-mascot-perch { position: relative; left: auto; bottom: auto; flex: 0 0 auto; width: calc(var(--active-group-symbol) * .9); }
+.kids-show .kids-active-group.is-finale-team > .kids-group-name { grid-column: 2; grid-row: 1; align-self: end; justify-content: center; }
+.kids-show .kids-active-group.is-finale-team > .kids-group-name > .kids-group-symbol { display: none; }
+.kids-show .kids-active-group.is-finale-team > span:last-child { grid-column: 2; grid-row: 2; align-self: start; text-align: center; }
 .kids-mascot-arrival { position: absolute; inset: 0; display: block; transform-origin: 50% 90%; }
 .kids-mascot-stunt { position: absolute; inset: 0; display: block; transform-origin: 50% 55%; }
 .kids-mascot-stunt > .kids-mascot { width: 100%; height: 100%; }
@@ -107,6 +114,10 @@
 }
 @media (max-width: 759px) {
   .kids-show .kids-show-stage .kids-active-group:has(> .kids-mascot-perch) { position: relative; }
+  .kids-show .kids-active-group.is-finale-team { --active-group-symbol: 46px; grid-template-columns: minmax(0, 1fr); justify-items: center; gap: 4px; }
+  .kids-show .kids-active-group.is-finale-team > .kids-mascot-formation { grid-column: 1; grid-row: 1; }
+  .kids-show .kids-active-group.is-finale-team > .kids-group-name { grid-column: 1; grid-row: 2; }
+  .kids-show .kids-active-group.is-finale-team > span:last-child { grid-column: 1; grid-row: 3; }
 }
 @media (prefers-reduced-motion: reduce) {
   .kids-mascot-perch.is-flying .kids-mascot-arrival { animation: none; offset-path: none; transform: none; will-change: auto; }

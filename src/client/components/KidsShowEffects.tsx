@@ -31,7 +31,7 @@ export function useKidsPresentationMoment(game: KidsGame | null): KidsPresentati
 }
 
 /** Dieselbe Figur fliegt groß über die Bühne und bleibt anschließend am tatsächlichen Bannerplatz sitzen. */
-export function KidsBannerMascot({ group, entering }: { group: Exclude<KidsGroup, 'all'>; entering: boolean }) {
+export function KidsBannerMascot({ group, entering, formation = false }: { group: Exclude<KidsGroup, 'all'>; entering: boolean; formation?: boolean }) {
   const perch = useRef<HTMLSpanElement>(null);
   const [route, setRoute] = useState<Record<string, string> | null>(null);
   useLayoutEffect(() => {
@@ -42,10 +42,22 @@ export function KidsBannerMascot({ group, entering }: { group: Exclude<KidsGroup
     const x = target.x + target.width / 2, y = target.y + target.height / 2;
     const width = window.innerWidth, height = window.innerHeight;
     // Einheitlicher großer Auftritt, auch auf schmalen und flachen Bildschirmen vollständig sichtbar.
-    const scale = Math.min(3.4, width * .52 / target.width, height * .4 / target.height);
+    const scale = formation
+      ? Math.min(2.7, width * .25 / target.width, height * .3 / target.height)
+      : Math.min(3.4, width * .52 / target.width, height * .4 / target.height);
     const point = (px: number, py: number) => `${(px - x + target.width / 2).toFixed(2)} ${(py - y + target.height / 2).toFixed(2)}`;
     // Schwungvoller S-Bogen mit einer Schleife in der gut sichtbaren Bühnenmitte.
-    const path = `M ${point(-width * .28, height * .66)} C ${point(width * .05, height * .82)} ${point(width * .25, height * .26)} ${point(width * .47, height * .43)} C ${point(width * .69, height * .62)} ${point(width * .87, height * .48)} ${point(width * .73, height * .33)} C ${point(width * .57, height * .20)} ${point(width * .48, height * .48)} ${point(width * .66, height * .44)} S ${point(x + width * .14, y + height * .06)} ${point(x, y)}`;
+    let path = `M ${point(-width * .28, height * .66)} C ${point(width * .05, height * .82)} ${point(width * .25, height * .26)} ${point(width * .47, height * .43)} C ${point(width * .69, height * .62)} ${point(width * .87, height * .48)} ${point(width * .73, height * .33)} C ${point(width * .57, height * .20)} ${point(width * .48, height * .48)} ${point(width * .66, height * .44)} S ${point(x + width * .14, y + height * .06)} ${point(x, y)}`;
+    if (formation) {
+      // Links, unten und rechts starten; drei eigene Schleifen führen gleichzeitig auf dasselbe Schild.
+      const lane = group === 'minis' ? .23 : group === 'mittis' ? .5 : .77;
+      const direction = group === 'maxis' ? -1 : 1;
+      const p = (px: number, py: number) => point(width * px, height * py);
+      const start = group === 'minis' ? p(-.2, .58) : group === 'mittis' ? p(.5, 1.25) : p(1.2, .58);
+      const approach = group === 'mittis' ? `${p(.38, .95)} ${p(.35, .60)}`
+        : `${p(group === 'minis' ? .05 : .95, .74)} ${p(group === 'minis' ? .08 : .92, .32)}`;
+      path = `M ${start} C ${approach} ${p(lane, .47)} C ${p(lane + direction * .13, .63)} ${p(lane + direction * .18, .34)} ${p(lane + direction * .06, .30)} C ${p(lane - direction * .12, .23)} ${p(lane - direction * .14, .52)} ${p(lane, .49)} S ${point(x + direction * width * .06, y + height * .12)} ${point(x, y)}`;
+    }
     setRoute({
       '--arrival-path': `path('${path}')`,
       '--arrival-scale': String(scale),
@@ -55,7 +67,7 @@ export function KidsBannerMascot({ group, entering }: { group: Exclude<KidsGroup
     const land = () => setRoute(null);
     window.addEventListener('resize', land);
     return () => window.removeEventListener('resize', land);
-  }, [entering, group]);
+  }, [entering, group, formation]);
   const stage = perch.current?.closest<HTMLElement>('.kids-show');
   return <span ref={perch} class={`kids-mascot-perch is-${group}${entering && route ? ' is-flying' : ''}`} style={route ?? undefined} aria-hidden="true">
     <span class="kids-mascot-seat-shadow"/>

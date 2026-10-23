@@ -214,7 +214,12 @@ export function KidsPage() {
       {finished ? <KidsFinish game={game}><Celebration variant={3}/></KidsFinish> : game.phase==='scene' ? <KidsScene key={`${game.index}-${game.cueSeq}`} game={game} act={act} sound={sound==='on'} toggleSound={()=>{void toggleSound();}} disabled={remote.busy} primaryRef={primary}/> : <>
       {game.phase==='returning' || game.phase==='judging' ? <KidsRegroup game={game} act={act} disabled={remote.busy} primaryRef={primary}/> : revealed ? <KidsReveal key={`${game.index}-${game.results[game.index]}`} game={game} act={act} disabled={remote.busy} primaryRef={primary} suspense={suspenseIndex >= 0}>{suspenseIndex < 0 && kidsResultPoints(game.results[game.index], game.index)>0 && <Celebration variant={game.index}/>}</KidsReveal> : interlude ? <KidsInterlude game={game} chapter={chapter} act={act} disabled={remote.busy} primaryRef={primary}/> : round && <section class={`kids-stage kids-show-stage is-${game.phase} is-group-${round.question.group}`} aria-labelledby="kids-question">
         <div class="kids-show-question">
-          <div class={`kids-active-group${moment?.kind === 'group' ? ' is-mascot-entering' : ''}`}><KidsGroupName group={round.question.group}/>{round.question.group !== 'all' && <KidsBannerMascot key={game.index} group={round.question.group} entering={moment?.kind === 'group'}/>}<span>{round.question.group === 'all' ? 'Alle Kinder' : `sind dran! · ${KIDS_GROUPS[round.question.group].ages}`}</span></div>
+          <div class={`kids-active-group${round.question.group === 'all' ? ' is-finale-team' : ''}${moment?.kind === 'group' ? ' is-mascot-entering' : ''}`}>
+            {round.question.group === 'all' && <span class="kids-mascot-formation" aria-hidden="true">{(['minis','mittis','maxis'] as const).map(group => <KidsBannerMascot key={`${game.index}-${group}`} group={group} entering={moment?.kind === 'group'} formation/>)}</span>}
+            <KidsGroupName group={round.question.group}/>
+            {round.question.group !== 'all' && <KidsBannerMascot key={game.index} group={round.question.group} entering={moment?.kind === 'group'}/>}
+            <span>{round.question.group === 'all' ? 'Alle Kinder' : `sind dran! · ${KIDS_GROUPS[round.question.group].ages}`}</span>
+          </div>
 
           <h1 id="kids-question">{round.question.prompt}</h1>
           <div class="kids-status" role="status"><strong>{status}</strong>{round.question.group !== 'all' && (game.phase === 'moving' || game.phase === 'paused') && <KidsCheers active={round.question.group}/>}</div>
