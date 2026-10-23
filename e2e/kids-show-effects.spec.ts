@@ -111,7 +111,8 @@ for (const viewport of [{width:1280,height:800}, {width:390,height:844}]) {
   test(`Kids: Drei Maskottchen fliegen gemeinsam aufs Finalschild (${viewport.width}px)`, async ({page}) => {
     await page.setViewportSize(viewport);
     await begin(page);
-    await page.getByRole('button',{name:'Direkt ins Finale',exact:true}).click();
+    await page.getByRole('button',{name:'Bedienung',exact:true}).click();
+    await page.getByRole('button',{name:'Zur Finalrunde springen',exact:false}).click();
     await page.getByRole('button',{name:'Gemeinsam ins Finale',exact:true}).click();
     const banner = page.locator('.kids-active-group.is-finale-team');
     await expect(banner.locator('.kids-mascot-perch.is-flying')).toHaveCount(3);
@@ -150,6 +151,8 @@ for (const viewport of [{width:1280,height:800}, {width:390,height:844}]) {
     await expect(banner.locator('.kids-mascot-perch.is-flying')).toHaveCount(0, {timeout:5000});
     await expect(page.locator('.kids-mascot-star-trail')).toHaveCount(0);
     await expect(banner.locator('.kids-mascot')).toHaveCount(3);
+    await expect.poll(() => banner.locator('.kids-mascot').evaluateAll(figures =>
+      figures.every(figure => figure.getAnimations({subtree:true}).length === 0))).toBe(true);
     await page.reload();
     await page.getByRole('button',{name:'Show fortsetzen',exact:true}).click();
     await expect(page.locator('.kids-active-group .kids-mascot')).toHaveCount(3);
