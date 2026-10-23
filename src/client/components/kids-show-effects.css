@@ -21,14 +21,22 @@
 .kids-show .kids-active-group:has(> .kids-mascot-perch) > .kids-group-name > .kids-group-symbol { opacity: 0; }
 .kids-mascot-perch {
   --arrival-bank: 14deg;
+  --arrival-turn: 360deg;
+  --arrival-glow: #a5f3dc;
   position: absolute; left: calc(12px - var(--active-group-symbol) * .15); bottom: 0;
   width: calc(var(--active-group-symbol) * 1.3); aspect-ratio: 140 / 150;
   pointer-events: none;
 }
-.kids-mascot-perch.is-mittis { --arrival-bank: 22deg; }
-.kids-mascot-perch.is-maxis { --arrival-bank: 17deg; }
+.kids-mascot-perch.is-mittis { --arrival-bank: 22deg; --arrival-turn: -720deg; --arrival-glow: #ffda68; }
+.kids-mascot-perch.is-maxis { --arrival-bank: -17deg; --arrival-turn: -360deg; --arrival-glow: #f8a1ad; }
 .kids-mascot-arrival { position: absolute; inset: 0; display: block; transform-origin: 50% 90%; }
-.kids-mascot-arrival > .kids-mascot { width: 100%; height: 100%; }
+.kids-mascot-stunt { position: absolute; inset: 0; display: block; transform-origin: 50% 55%; }
+.kids-mascot-stunt > .kids-mascot { width: 100%; height: 100%; }
+.kids-mascot-flight-aura { position: absolute; inset: -22%; border-radius: 50%; background: radial-gradient(ellipse, var(--arrival-glow), transparent 68%); opacity: 0; pointer-events: none; }
+.kids-mascot-orbit { position: absolute; inset: -12%; border: 2px solid var(--arrival-glow); border-right-color: transparent; border-left-color: transparent; border-radius: 50%; box-shadow: 0 0 9px var(--arrival-glow), inset 0 0 7px var(--arrival-glow); opacity: 0; pointer-events: none; }
+.kids-mascot-orbit::before, .kids-mascot-orbit::after { content: '✦'; position: absolute; color: #fff9d7; font-size: 20px; line-height: 1; text-shadow: 0 0 8px var(--arrival-glow); }
+.kids-mascot-orbit::before { left: 45%; top: -12px; }
+.kids-mascot-orbit::after { right: 5%; bottom: 4%; font-size: 12px; }
 .kids-mascot-seat-shadow {
   position: absolute; left: 22%; right: 14%; bottom: 3%; height: 9%; border-radius: 50%;
   background: #082a3c40; filter: blur(2px);
@@ -42,10 +50,40 @@
   will-change: offset-distance, transform;
 }
 .kids-mascot-perch.is-flying .kids-mascot-seat-shadow { animation: kids-mascot-landing-shadow var(--arrival-duration) ease-out both; }
+.kids-mascot-perch.is-flying .kids-mascot-stunt { animation: kids-mascot-aerobatics var(--arrival-duration) cubic-bezier(.35, 0, .45, 1) both; will-change: transform; }
+.kids-mascot-perch.is-flying .kids-mascot-flight-aura { animation: kids-mascot-aura var(--arrival-duration) ease-in-out both; }
+.kids-mascot-perch.is-flying .kids-mascot-orbit { animation: kids-mascot-orbit var(--arrival-duration) linear both; }
+.kids-mascot-perch.is-flying .kids-mascot-orbit.is-second { inset: -4%; animation-name: kids-mascot-orbit-counter; border-color: #fff3be transparent; }
+@keyframes kids-mascot-aerobatics {
+  0%, 10% { transform: perspective(600px) rotateY(-30deg) rotateZ(-24deg) scale(.9); filter: drop-shadow(0 0 3px var(--arrival-glow)); }
+  22% { transform: perspective(600px) rotateY(18deg) rotateZ(-12deg) scale(1.04); filter: drop-shadow(0 0 10px var(--arrival-glow)); }
+  56% { transform: perspective(600px) rotateY(-22deg) rotateZ(calc(var(--arrival-turn) * .86)) scale(1); filter: drop-shadow(0 0 14px var(--arrival-glow)); }
+  74% { transform: perspective(600px) rotateY(10deg) rotateZ(var(--arrival-turn)) scale(1); filter: drop-shadow(0 0 7px var(--arrival-glow)); }
+  88% { transform: perspective(600px) rotateY(0deg) rotateZ(calc(var(--arrival-turn) + 10deg)) scale(1); filter: drop-shadow(0 0 3px var(--arrival-glow)); }
+  95% { transform: perspective(600px) rotateY(0deg) rotateZ(calc(var(--arrival-turn) - 4deg)) scale(1); filter: drop-shadow(0 0 0 transparent); }
+  100% { transform: perspective(600px) rotateY(0deg) rotateZ(var(--arrival-turn)) scale(1); filter: drop-shadow(0 0 0 transparent); }
+}
+@keyframes kids-mascot-aura {
+  0%, 100% { opacity: 0; transform: scale(.65); }
+  15%, 54% { opacity: .4; transform: scale(1.1); }
+  78% { opacity: .18; transform: scale(.9); }
+}
+@keyframes kids-mascot-orbit {
+  0%, 80%, 100% { opacity: 0; }
+  12%, 62% { opacity: .85; }
+  0% { transform: rotate(-30deg) rotateX(62deg) rotateZ(0deg); }
+  100% { transform: rotate(20deg) rotateX(62deg) rotateZ(540deg); }
+}
+@keyframes kids-mascot-orbit-counter {
+  0%, 80%, 100% { opacity: 0; }
+  18%, 62% { opacity: .7; }
+  0% { transform: rotate(50deg) rotateX(70deg) rotateZ(0deg); }
+  100% { transform: rotate(15deg) rotateX(70deg) rotateZ(-540deg); }
+}
 @keyframes kids-mascot-fly-to-banner {
   0% { opacity: 0; transform: scale(calc(var(--arrival-scale) * .78)) rotate(-16deg); }
   9% { opacity: 1; }
-  24% { transform: scale(var(--arrival-scale)) rotate(-8deg); }
+  24% { transform: scale(var(--arrival-scale)) rotate(-12deg); }
   40% { transform: scale(calc(var(--arrival-scale) * .96)) rotate(var(--arrival-bank)); }
   58% { transform: scale(calc(var(--arrival-scale) * .72)) rotate(-18deg); }
   76% { transform: scale(1.3) rotate(-10deg); }
@@ -67,6 +105,8 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .kids-mascot-perch.is-flying .kids-mascot-arrival { animation: none; offset-path: none; transform: none; will-change: auto; }
+  .kids-mascot-perch.is-flying .kids-mascot-stunt { animation: none; transform: none; filter: none; will-change: auto; }
+  .kids-mascot-flight-aura, .kids-mascot-orbit { display: none; }
   .kids-mascot-star-trail { display: none; }
   .kids-mascot-perch.is-flying .kids-mascot-seat-shadow { animation: none; }
 }
