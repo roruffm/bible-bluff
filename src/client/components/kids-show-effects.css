@@ -55,13 +55,13 @@
 .kids-mascot-perch.is-flying .kids-mascot-orbit { animation: kids-mascot-orbit var(--arrival-duration) linear both; }
 .kids-mascot-perch.is-flying .kids-mascot-orbit.is-second { inset: -4%; animation-name: kids-mascot-orbit-counter; border-color: #fff3be transparent; }
 @keyframes kids-mascot-aerobatics {
-  0%, 10% { transform: perspective(600px) rotateY(-30deg) rotateZ(-24deg) scale(.9); filter: drop-shadow(0 0 3px var(--arrival-glow)); }
-  22% { transform: perspective(600px) rotateY(18deg) rotateZ(-12deg) scale(1.04); filter: drop-shadow(0 0 10px var(--arrival-glow)); }
-  56% { transform: perspective(600px) rotateY(-22deg) rotateZ(calc(var(--arrival-turn) * .86)) scale(1); filter: drop-shadow(0 0 14px var(--arrival-glow)); }
-  74% { transform: perspective(600px) rotateY(10deg) rotateZ(var(--arrival-turn)) scale(1); filter: drop-shadow(0 0 7px var(--arrival-glow)); }
-  88% { transform: perspective(600px) rotateY(0deg) rotateZ(calc(var(--arrival-turn) + 10deg)) scale(1); filter: drop-shadow(0 0 3px var(--arrival-glow)); }
-  95% { transform: perspective(600px) rotateY(0deg) rotateZ(calc(var(--arrival-turn) - 4deg)) scale(1); filter: drop-shadow(0 0 0 transparent); }
-  100% { transform: perspective(600px) rotateY(0deg) rotateZ(var(--arrival-turn)) scale(1); filter: drop-shadow(0 0 0 transparent); }
+  0%, 10% { transform: perspective(600px) rotateY(-30deg) rotateZ(-24deg) scale(.9); }
+  22% { transform: perspective(600px) rotateY(18deg) rotateZ(-12deg) scale(1.04); }
+  56% { transform: perspective(600px) rotateY(-22deg) rotateZ(calc(var(--arrival-turn) * .86)) scale(1); }
+  74% { transform: perspective(600px) rotateY(10deg) rotateZ(var(--arrival-turn)) scale(1); }
+  88% { transform: perspective(600px) rotateY(0deg) rotateZ(calc(var(--arrival-turn) + 10deg)) scale(1); }
+  95% { transform: perspective(600px) rotateY(0deg) rotateZ(calc(var(--arrival-turn) - 4deg)) scale(1); }
+  100% { transform: perspective(600px) rotateY(0deg) rotateZ(var(--arrival-turn)) scale(1); }
 }
 @keyframes kids-mascot-aura {
   0%, 100% { opacity: 0; transform: scale(.65); }
