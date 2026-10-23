@@ -44,8 +44,8 @@ export function KidsBannerMascot({ group, entering }: { group: Exclude<KidsGroup
     // Einheitlicher großer Auftritt, auch auf schmalen und flachen Bildschirmen vollständig sichtbar.
     const scale = Math.min(3.4, width * .52 / target.width, height * .4 / target.height);
     const point = (px: number, py: number) => `${(px - x + target.width / 2).toFixed(2)} ${(py - y + target.height / 2).toFixed(2)}`;
-    // Gespiegelte Kontrollpunkte (S) verbinden die Bögen ohne Knick oder Zwischenstopp.
-    const path = `M ${point(-width * .28, height * .62)} C ${point(width * .07, height * .8)} ${point(width * .28, height * .25)} ${point(width * .49, height * .42)} S ${point(width * .85, height * .61)} ${point(width * .74, height * .32)} S ${point(x + width * .14, y - height * .03)} ${point(x, y)}`;
+    // Schwungvoller S-Bogen mit einer Schleife in der gut sichtbaren Bühnenmitte.
+    const path = `M ${point(-width * .28, height * .66)} C ${point(width * .05, height * .82)} ${point(width * .25, height * .26)} ${point(width * .47, height * .43)} C ${point(width * .69, height * .62)} ${point(width * .87, height * .48)} ${point(width * .73, height * .33)} C ${point(width * .57, height * .20)} ${point(width * .48, height * .48)} ${point(width * .66, height * .44)} S ${point(x + width * .14, y + height * .06)} ${point(x, y)}`;
     setRoute({
       '--arrival-path': `path('${path}')`,
       '--arrival-scale': String(scale),
@@ -59,7 +59,10 @@ export function KidsBannerMascot({ group, entering }: { group: Exclude<KidsGroup
   const stage = perch.current?.closest<HTMLElement>('.kids-show');
   return <span ref={perch} class={`kids-mascot-perch is-${group}${entering && route ? ' is-flying' : ''}`} style={route ?? undefined} aria-hidden="true">
     <span class="kids-mascot-seat-shadow"/>
-    <span class="kids-mascot-arrival"><KidsMascot group={group} motion={entering ? 'flying' : 'quiet'}/></span>
+    <span class="kids-mascot-arrival">
+      {entering && route && <><span class="kids-mascot-flight-aura"/><span class="kids-mascot-orbit is-first"/><span class="kids-mascot-orbit is-second"/></>}
+      <span class="kids-mascot-stunt"><KidsMascot group={group} motion={entering ? 'flying' : 'quiet'}/></span>
+    </span>
     {entering && route && stage && createPortal(<KidsMascotStarTrail target={perch.current!} group={group}/>, stage)}
   </span>;
 }
@@ -75,10 +78,12 @@ function KidsMascotStarTrail({ target, group }: { target: HTMLSpanElement; group
     const density = Math.min(window.devicePixelRatio || 1, 1.5);
     surface.width = Math.round(width * density); surface.height = Math.round(height * density);
     ctx.scale(density, density);
-    const colors = ['#fff9d7', '#ffe08a', group === 'minis' ? '#b3ffea' : group === 'mittis' ? '#fff1af' : '#ffc39b'];
+    const accent = group === 'minis' ? '#a5f3dc' : group === 'mittis' ? '#ffda68' : '#f8a1ad';
+    const colors = ['#fff9d7', '#ffe08a', accent];
     const stars: { x: number; y: number; vx: number; vy: number; born: number; life: number; size: number; angle: number; color: string }[] = [];
     const wake: { x: number; y: number; time: number }[] = [];
     let frame = 0, previous: { x: number; y: number; time: number; width: number } | null = null, lastSpawn = 0;
+    let landing: { x: number; y: number; time: number } | null = null;
     const start = performance.now();
     const draw = (now: number) => {
       ctx.clearRect(0, 0, width, height);
@@ -89,30 +94,52 @@ function KidsMascotStarTrail({ target, group }: { target: HTMLSpanElement; group
       const emissionEnd = start + KIDS_MASCOT_FLIGHT_MS * .85;
       if (previous && previous.time < emissionEnd && speed > .4) {
         // Zeitbasierte Abgabe hält den Schweif auch bei gedrosselter Bildrate dicht und begrenzt die Arbeit pro Bild.
-        for (let born = Math.max(lastSpawn + 20, now - 480, previous.time); born <= Math.min(now, emissionEnd); born += 20) {
+        for (let born = Math.max(lastSpawn + 18, now - 360, previous.time); born <= Math.min(now, emissionEnd); born += 18) {
           lastSpawn = born;
           const fraction = Math.max(0, Math.min(1, (born - previous.time) / dt));
           const bodyWidth = previous.width + (box.width - previous.width) * fraction;
           const tailX = previous.x + dx * fraction - nx * bodyWidth * .28;
           const tailY = previous.y + dy * fraction - ny * bodyWidth * .28;
           wake.push({ x: tailX, y: tailY, time: born });
-          for (let i = 0; i < 2; i++) {
+          for (let i = 0; i < 3; i++) {
             const spread = (Math.random() - .5) * bodyWidth * .23;
             stars.push({ x: tailX - ny * spread, y: tailY + nx * spread,
               vx: -dx / dt * .065 + (Math.random() - .5) * .025, vy: -dy / dt * .065 - .012,
-              born, life: 650 + Math.random() * 350, size: 4 + Math.random() * 8,
+              born, life: 650 + Math.random() * 350, size: 3 + Math.random() * (i === 0 ? 12 : 6),
               angle: Math.random() * Math.PI, color: colors[stars.length % colors.length] });
           }
+        }
+      }
+      // Ein einzelner Sternenkranz feiert die Landung und klingt vor der Antwortwahl aus.
+      if (!landing && now - start >= KIDS_MASCOT_FLIGHT_MS * .88) {
+        landing = { x, y, time: now };
+        for (let i = 0; i < 18; i++) {
+          const angle = i / 18 * Math.PI * 2, speed = .035 + (i % 3) * .012;
+          stars.push({ x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed - .012,
+            born: now, life: 550 + (i % 3) * 80, size: i % 3 === 0 ? 9 : 5,
+            angle, color: colors[i % colors.length] });
         }
       }
       previous = { x, y, time: now, width: box.width };
       while (wake.length && now - wake[0].time > 450) wake.shift();
       ctx.lineCap = 'round';
+      ctx.save(); ctx.globalCompositeOperation = 'lighter';
       for (let i = 1; i < wake.length; i++) {
-        ctx.globalAlpha = (1 - (now - wake[i].time) / 450) * .24;
-        ctx.strokeStyle = '#ffe3a0'; ctx.lineWidth = 2 + 3 * i / wake.length;
+        const fade = 1 - (now - wake[i].time) / 450;
+        ctx.globalAlpha = fade * .22;
+        ctx.strokeStyle = accent; ctx.lineWidth = 6 + 8 * i / wake.length;
+        ctx.shadowColor = accent; ctx.shadowBlur = 16;
         ctx.beginPath(); ctx.moveTo(wake[i - 1].x, wake[i - 1].y); ctx.lineTo(wake[i].x, wake[i].y); ctx.stroke();
+        ctx.globalAlpha = fade * .8; ctx.strokeStyle = '#fff9d7'; ctx.lineWidth = 1.5;
+        ctx.shadowBlur = 0; ctx.stroke();
       }
+      if (landing) {
+        const progress = Math.min(1, (now - landing.time) / 650);
+        ctx.globalAlpha = (1 - progress) ** 2 * .65; ctx.strokeStyle = accent;
+        ctx.lineWidth = 3 * (1 - progress); ctx.shadowColor = accent; ctx.shadowBlur = 12;
+        ctx.beginPath(); ctx.ellipse(landing.x, landing.y, 12 + progress * 62, 8 + progress * 38, 0, 0, Math.PI * 2); ctx.stroke();
+      }
+      ctx.restore();
       for (let i = stars.length - 1; i >= 0; i--) {
         const star = stars[i], age = now - star.born, life = age / star.life;
         if (life >= 1) { stars.splice(i, 1); continue; }

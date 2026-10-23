@@ -20,6 +20,8 @@ async function judging(page: Page) {
 async function expectMascotArrival(page: Page, group: 'minis' | 'mittis' | 'maxis') {
   const perch = page.locator(`.kids-active-group .kids-mascot-perch.is-${group}`);
   await expect(perch).toHaveClass(/is-flying/);
+  await expect(perch.locator('.kids-mascot-orbit')).toHaveCount(2);
+  await expect(perch.locator('.kids-mascot-stunt')).toHaveCSS('animation-name', 'kids-mascot-aerobatics');
   await expect(page.locator('.kids-mascot-star-trail')).toHaveCount(1);
   await expect(page.locator('.kids-mascot-star-trail')).toHaveCSS('pointer-events', 'none');
   await expect.poll(() => page.locator('.kids-mascot-star-trail').evaluate(el => {
@@ -28,13 +30,14 @@ async function expectMascotArrival(page: Page, group: 'minis' | 'mittis' | 'maxi
   }), {timeout: 2500}).toBe(true);
   const bounds = await perch.evaluate(el => {
     const sprite = el.querySelector('.kids-mascot-arrival')!;
-    const animations = sprite.getAnimations();
+    const animations = sprite.getAnimations({subtree:true}).filter(a => a.effect!.getTiming().iterations !== Infinity);
     for (const animation of animations) { animation.pause(); animation.currentTime = 1050; }
     const large = sprite.getBoundingClientRect().toJSON();
+    const figure = sprite.querySelector('.kids-mascot')!.getBoundingClientRect().toJSON();
     const seat = el.getBoundingClientRect().toJSON();
     for (const animation of animations) animation.finish();
     const landed = sprite.getBoundingClientRect().toJSON();
-    return { large, seat, landed, width: innerWidth, height: innerHeight };
+    return { large, figure, seat, landed, width: innerWidth, height: innerHeight };
   });
   // Echter großer Bühnenauftritt, vollständig im Bild, danach exakt am Banner statt als zweites Overlay.
   expect(bounds.large.width).toBeGreaterThan(bounds.seat.width * 2);
@@ -42,6 +45,10 @@ async function expectMascotArrival(page: Page, group: 'minis' | 'mittis' | 'maxi
   expect(bounds.large.right).toBeLessThanOrEqual(bounds.width);
   expect(bounds.large.top).toBeGreaterThanOrEqual(0);
   expect(bounds.large.bottom).toBeLessThanOrEqual(bounds.height);
+  expect(bounds.figure.left).toBeGreaterThanOrEqual(0);
+  expect(bounds.figure.right).toBeLessThanOrEqual(bounds.width);
+  expect(bounds.figure.top).toBeGreaterThanOrEqual(0);
+  expect(bounds.figure.bottom).toBeLessThanOrEqual(bounds.height);
   expect(bounds.landed.x).toBeCloseTo(bounds.seat.x, 0);
   expect(bounds.landed.y).toBeCloseTo(bounds.seat.y, 0);
   expect(bounds.landed.width).toBeCloseTo(bounds.seat.width, 0);
