@@ -6,6 +6,26 @@ const series = (name: string, count: number) => Array.from({ length: count }, (_
 // Diese Aufgaben verwenden auch die Feldnummern aus den hochgeladenen Antwortaufnahmen.
 const uploadedAnswerRounds = [0, 2, 3, 4, 5, 6, 8, 9];
 
+/** Aufnahme-Nummern bleiben bei ihrer Frage, auch wenn sich die Show-Reihenfolge ändert. */
+const questionRecordings: Readonly<Record<string, number>> = {
+  '1petr-arche': 0,
+  'lt-jona': 1,
+  'mt-muenze': 2,
+  'lt-krippe': 3,
+  'lt-taube': 4,
+  '2petr-eselin': 5,
+  'lt-loewengrube': 6,
+  'joh-junge': 7,
+  'joh-thomas': 8,
+  'mk-kissen': 9,
+};
+function questionRecording(game: KidsGame): number {
+  const id = game.rounds[game.index].question.sourceId;
+  const recording = questionRecordings[id];
+  if (recording === undefined) throw new Error(`Keine Professor-Aufnahmen für ${id}`);
+  return recording;
+}
+
 /** Neue Mediendatei bei gleichem Aufrufschlüssel: Auch vorhandene Shows bekommen den aktuellen Namen. */
 export function professorVoiceUrl(key: string): string {
   const file = key === 'interjection-call-minis' ? 'interjection-call-forscher' : key;
@@ -23,13 +43,13 @@ export const PROFESSOR_VOICE_KEYS: readonly string[] = [...new Set([
 
 /** Nur Aufnahmen, die zum aktuell sichtbaren Professor-Spruch passen. */
 export function professorVoiceKey(game: KidsGame, kind:'quote'|'question'='quote'): string | null {
-  if (kind==='question') return game.phase==='reading' ? `question-${game.index}` : null;
+  if (kind==='question') return game.phase==='reading' ? `question-${questionRecording(game)}` : null;
   // Während der Aufgabe zeigt der Beamer Professor Bluffs Behauptung. Dafür gibt es keine Aufnahme; die Spielleitung liest sie vor.
   if (['scene','returning','judging','reading','moving','paused','locked'].includes(game.phase)) return null;
   if (game.phase === 'welcome') return 'welcome';
   if (game.phase === 'superbluff') return 'superbluff-finale20';
   if (game.phase === 'finished') return kidsScores(game).team > kidsScores(game).professor ? 'win' : 'lose';
-  if (game.phase === 'revealed') return `reveal-${game.index}`;
+  if (game.phase === 'revealed') return `reveal-${questionRecording(game)}`;
   return game.index >= 6 ? 'chapter3' : game.index >= 3 ? 'chapter2' : 'intro';
 }
 
@@ -38,6 +58,7 @@ export function professorAnswerVoiceKeys(game: KidsGame): string[] {
   if (game.phase !== 'reading') return [];
   const { question, answers } = game.rounds[game.index];
   const original = [question.answer, ...question.distractors];
-  const numberPrefix = uploadedAnswerRounds.includes(game.index) ? `answer-number-${game.index}` : 'answer-number';
-  return answers.flatMap((answer, field) => [`${numberPrefix}-${field}`, `answer-${game.index}-${original.indexOf(answer)}`]);
+  const recording = questionRecording(game);
+  const numberPrefix = uploadedAnswerRounds.includes(recording) ? `answer-number-${recording}` : 'answer-number';
+  return answers.flatMap((answer, field) => [`${numberPrefix}-${field}`, `answer-${recording}-${original.indexOf(answer)}`]);
 }

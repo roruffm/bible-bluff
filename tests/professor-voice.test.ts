@@ -26,7 +26,7 @@ describe('Professor-Aufnahmen', () => {
     for(let index=0;index<10;index++){
       const game={...base,index,phase:'reading' as const}, next=updateKidsGame(game,'read-question',100);
       expect(next).toMatchObject({phase:'reading',remainingMs:30000,deadline:null,voiceKind:'question',voiceCue:`reading:${index}`});
-      const key=professorVoiceKey(next,'question');expect(key).toBe(`question-${index}`);
+      const key=professorVoiceKey(next,'question');expect(key).toBe(`question-${[0,4,2,3,1,5,6,7,8,9][index]}`);
       expect(readFileSync(new URL(`../src/client/public${professorVoiceUrl(key!)}`,import.meta.url)).length).toBeGreaterThan(1500);
       expect(kidsScores(next)).toEqual(kidsScores(game));
     }
@@ -51,7 +51,7 @@ describe('Professor-Aufnahmen', () => {
     for(const state of games){
       const key=professorVoiceKey(state);expect(key).not.toBeNull();
       if(state.phase==='revealed') {
-        expect(key).toBe(`reveal-${state.index}`);
+        expect(key).toBe(`reveal-${[0,4,2,3,1,5,6,7,8,9][state.index]}`);
         expect(kidsRoundReaction(state).quote).toBe(state.rounds[state.index].question.revealQuote);
       }
       const bytes=readFileSync(new URL(`../src/client/public${professorVoiceUrl(key!)}`,import.meta.url));

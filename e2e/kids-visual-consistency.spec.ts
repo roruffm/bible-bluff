@@ -8,7 +8,7 @@ test.use({ viewport: { width: 1440, height: 900 }, isMobile: false });
 test('Kids: Jona-Einheiten bleiben bei Wiederherstellung, Fernbedienung und Auflösung eindeutig; Feldfarben stimmen überein', async ({ page, browser, request }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   const game = createKidsGame();
-  game.index = 1; game.phase = 'reading'; game.results[0] = 'correct';
+  game.index = 4; game.phase = 'reading'; game.results.fill('none', 0, 4); game.results[0] = 'correct';
   const response = await request.post('/api/kids-remotes', { data: { easy: false, game: packKidsGame(game, Date.now()) } });
   expect(response.status()).toBe(201);
   const remote = await response.json();

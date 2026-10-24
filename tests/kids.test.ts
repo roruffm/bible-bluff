@@ -28,7 +28,7 @@ describe('Die große Bluff-Jagd', () => {
   });
   it('behält Nummer, Farbe und Antwort bei jeder neuen Show bei', () => {
     // Index 0/1/2 entspricht dem gelben/türkisen/rosa Teppich.
-    const expected = [1, 2, 0, 2, 0, 1, 0, 2, 1, 1];
+    const expected = [1, 0, 0, 2, 2, 1, 0, 2, 1, 1];
     const reference = createKidsGame(() => 0);
     expect(reference.rounds.map(round => round.correctIndex)).toEqual(expected);
     for (const value of [0, .25, .5, .75, .999]) {

@@ -3,18 +3,34 @@ import { readFileSync } from 'node:fs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createKidsGame, kidsResumeGame, kidsScores, updateKidsGame } from '../src/shared/kids-game';
 import { packKidsGame, unpackKidsGame } from '../src/shared/kids-remote';
-import { professorAnswerVoiceKeys, PROFESSOR_VOICE_KEYS } from '../src/shared/professor-voice';
+import { professorAnswerVoiceKeys, professorVoiceKey, PROFESSOR_VOICE_KEYS } from '../src/shared/professor-voice';
 
 const orders = [[0,1,2],[0,2,1],[1,0,2],[1,2,0],[2,0,1],[2,1,0]];
 describe('Antwortmöglichkeiten vorlesen', () => {
   it('beschriftet Jonas Zahlen mit Tagen, ohne gespeicherte Antworten oder Aufnahmen umzuzuordnen', () => {
-    const game = { ...createKidsGame(), index: 1, phase: 'reading' as const };
-    game.results[0] = 'correct';
+    const game = { ...createKidsGame(), index: 4, phase: 'reading' as const };
+    game.results.fill('correct', 0, 4);
     const restored = unpackKidsGame(packKidsGame(game, 100), 200)!;
-    expect(restored.rounds[1].answers.map(answer => kidsAnswerLabel(restored.rounds[1].question, answer))).toEqual(['1 Tag', '40 Tage', '3 Tage']);
-    expect(restored.rounds[1].answers).toEqual(game.rounds[1].answers);
+    expect(restored.rounds[4].answers.map(answer => kidsAnswerLabel(restored.rounds[4].question, answer))).toEqual(['1 Tag', '40 Tage', '3 Tage']);
+    expect(restored.rounds[4].answers).toEqual(game.rounds[4].answers);
     expect(professorAnswerVoiceKeys(restored)).toEqual(professorAnswerVoiceKeys(game));
-    expect(updateKidsGame({ ...restored, phase: 'judging' }, 'correct', 300).results[1]).toBe('correct');
+    expect(updateKidsGame({ ...restored, phase: 'judging' }, 'correct', 300).results[4]).toBe('correct');
+  });
+  it('tauscht Taube und Jona mitsamt Bildern, Antworten und allen zugehörigen Aufnahmen', () => {
+    const base = createKidsGame();
+    expect(base.rounds.map(round => round.question.sourceId)).toEqual(['1petr-arche', 'lt-taube', 'mt-muenze', 'lt-krippe', 'lt-jona', '2petr-eselin', 'lt-loewengrube', 'joh-junge', 'joh-thomas', 'mk-kissen']);
+    const dove = { ...base, index: 1, phase: 'reading' as const };
+    expect(dove.rounds[1].answers).toEqual(['Ein Olivenblatt', 'Eine Krone', 'Ein Brot']);
+    expect(dove.rounds[1].question.pictures).toEqual(['leaf', 'crown', 'bread']);
+    expect(professorVoiceKey(dove, 'question')).toBe('question-4');
+    expect(professorVoiceKey({ ...dove, phase: 'revealed' })).toBe('reveal-4');
+    expect(professorAnswerVoiceKeys(dove)).toEqual(['answer-number-4-0', 'answer-4-0', 'answer-number-4-1', 'answer-4-1', 'answer-number-4-2', 'answer-4-2']);
+    const jonah = { ...base, index: 4, phase: 'reading' as const };
+    expect(jonah.rounds[4].answers).toEqual(['1', '40', '3']);
+    expect(jonah.rounds[4].question.pictures).toEqual(['three-days', 'one-day', 'forty-days']);
+    expect(professorVoiceKey(jonah, 'question')).toBe('question-1');
+    expect(professorVoiceKey({ ...jonah, phase: 'revealed' })).toBe('reveal-1');
+    expect(professorAnswerVoiceKeys(jonah)).toEqual(['answer-number-0', 'answer-1-1', 'answer-number-1', 'answer-1-2', 'answer-number-2', 'answer-1-0']);
   });
   it('liest alle zehn Fragen in jeder möglichen Feldreihenfolge einschließlich ihrer Nummern', () => {
     const base = createKidsGame();
@@ -24,8 +40,9 @@ describe('Antwortmöglichkeiten vorlesen', () => {
       const spoken=updateKidsGame(game,'read-answers',100);
       expect(spoken).toMatchObject({voiceKind:'answers',voicePlaying:true,voiceCue:`reading:${index}`,remainingMs:30000,deadline:null,phase:'reading'});
       expect(kidsScores(spoken)).toEqual(kidsScores(game));
-      const numberPrefix = [0,2,3,4,5,6,8,9].includes(index) ? `answer-number-${index}` : 'answer-number';
-      expect(professorAnswerVoiceKeys(spoken)).toEqual(order.flatMap((answer,field)=>[`${numberPrefix}-${field}`,`answer-${index}-${answer}`]));
+      const recording = [0,4,2,3,1,5,6,7,8,9][index];
+      const numberPrefix = [0,2,3,4,5,6,8,9].includes(recording) ? `answer-number-${recording}` : 'answer-number';
+      expect(professorAnswerVoiceKeys(spoken)).toEqual(order.flatMap((answer,field)=>[`${numberPrefix}-${field}`,`answer-${recording}-${answer}`]));
       for(const key of professorAnswerVoiceKeys(spoken)) {
         expect(PROFESSOR_VOICE_KEYS).toContain(key);
         const bytes=readFileSync(new URL(`../src/client/public/professor-bluff/${key}.mp3`,import.meta.url));
