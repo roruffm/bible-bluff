@@ -1,10 +1,16 @@
 import { KIDS_SCENE_MS, KIDS_SCENE_VOICES, KIDS_SCENE_VOICE_URLS, type KidsSceneMotif } from '../../shared/kids-scenes';
 import { PROFESSOR_VOICE_KEYS, professorVoiceUrl } from '../../shared/professor-voice';
+import { kidsBackgroundMusic } from './kids-music';
 let context: AudioContext | null = null;
 export async function enableKidsSound() {
   context ??= new AudioContext();
   if (context.state === 'suspended') await context.resume();
   if (context.state !== 'running') throw new Error('Klang nicht verfügbar');
+}
+
+export async function playKidsMusic(volume: number): Promise<void> {
+  if (!context || context.state !== 'running') throw new Error('Für die Hintergrundmusik bitte den Klang am Beamer einschalten.');
+  await kidsBackgroundMusic.play(context, volume);
 }
 
 const professorRecordings = new Map<string, Promise<ArrayBuffer>>();
@@ -51,11 +57,15 @@ export async function playProfessorVoice(key: string, signal: AbortSignal, onEnd
   const source = ctx.createBufferSource();
   source.buffer = decoded;
   source.connect(ctx.destination);
-  const stop = () => { try { source.stop(); } catch { /* Bereits beendet. */ } };
+  const delay = untilEnd === null ? 0 : Math.max(0, untilEnd - 5);
+  const releaseMusic = kidsBackgroundMusic.duck(delay);
+  const stop = () => { releaseMusic(); try { source.stop(); } catch { /* Bereits beendet. */ } };
   signal.addEventListener('abort', stop, { once: true });
-  source.onended = () => { signal.removeEventListener('abort', stop); source.disconnect(); onEnded(); };
-  if (untilEnd === null) source.start();
-  else source.start(ctx.currentTime + Math.max(0, untilEnd - 5), Math.max(0, 5 - untilEnd));
+  source.onended = () => { releaseMusic(); signal.removeEventListener('abort', stop); source.disconnect(); onEnded(); };
+  try {
+    if (untilEnd === null) source.start();
+    else source.start(ctx.currentTime + delay, Math.max(0, 5 - untilEnd));
+  } catch (error) { releaseMusic(); signal.removeEventListener('abort', stop); source.disconnect(); throw error; }
   onStarted?.();
 }
 /** Gemeinsamer Abbruch für die ganze Folge, auch während noch eine Antwort lädt. */
@@ -155,12 +165,14 @@ export async function playKidsScene(motif: KidsSceneMotif, deadline: number, sig
   const source = ctx.createBufferSource();
   source.buffer = decoded;
   source.connect(ctx.destination);
+  const releaseMusic = kidsBackgroundMusic.duck();
   let stopped = false;
-  const cleanup = () => { stopped = true; signal.removeEventListener('abort', stop); source.disconnect(); };
+  const cleanup = () => { releaseMusic(); stopped = true; signal.removeEventListener('abort', stop); source.disconnect(); };
   const stop = () => { if (stopped) return; try { source.stop(); } catch { /* Bereits beendet. */ } cleanup(); };
   signal.addEventListener('abort', stop, { once: true });
   source.onended = () => { if (!stopped) cleanup(); };
-  source.start(ctx.currentTime, offset, Math.min(decoded.duration - offset, (deadline - Date.now()) / 1000));
+  try { source.start(ctx.currentTime, offset, Math.min(decoded.duration - offset, (deadline - Date.now()) / 1000)); }
+  catch (error) { cleanup(); throw error; }
   return stop;
 }
 

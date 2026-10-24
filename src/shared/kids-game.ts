@@ -2,6 +2,7 @@ import { KIDS_SHOW_QUESTIONS, type KidsShowQuestion, type KidsGroup } from './ki
 import { KIDS_SCENE_MS } from './kids-scenes';
 import { professorInterjectionForRound, type ProfessorInterjectionId } from './professor-interjections';
 import { kidsIntroPosition, type KidsIntroVideo } from './kids-intro';
+import { KIDS_DEFAULT_MUSIC, type KidsMusicAction, type KidsMusicSettings } from './kids-music';
 
 export const KIDS_SECONDS = 30;
 /** Antwortzeit je Aufgabe in Millisekunden. */
@@ -22,8 +23,9 @@ export interface KidsGame {
   voiceSeq?: number; voicePlaying?: boolean; voiceCue?: string|null; voiceKind?: 'quote'|'question'|'answers'|'interjection'; voiceClip?: ProfessorInterjectionId|null;
   /** Nur in der Begrüßung der Show mit Antwortfeldern. Der Ton läuft ausschließlich am Beamer. */
   introVideo?: KidsIntroVideo;
+  music?: KidsMusicSettings;
 }
-export type KidsAction = 'play-intro' | 'pause-intro' | 'restart-intro' | 'stop-intro' | 'start' | 'pause' | 'resume' | 'skip-countdown' | 'back' | 'tick' | 'return' | 'ready' | 'correct' | 'participated' | 'none' | 'next' | 'scene' | 'end-scene' | 'finish' | 'jump-final' | 'speak' | 'stop-speech' | 'read-question' | 'read-answers' | 'correct-last' | 'participated-last' | 'none-last' | `interjection:${ProfessorInterjectionId}`;
+export type KidsAction = KidsMusicAction | 'play-intro' | 'pause-intro' | 'restart-intro' | 'stop-intro' | 'start' | 'pause' | 'resume' | 'skip-countdown' | 'back' | 'tick' | 'return' | 'ready' | 'correct' | 'participated' | 'none' | 'next' | 'scene' | 'end-scene' | 'finish' | 'jump-final' | 'speak' | 'stop-speech' | 'read-question' | 'read-answers' | 'correct-last' | 'participated-last' | 'none-last' | `interjection:${ProfessorInterjectionId}`;
 
 export function kidsCanJumpToFinal(game: KidsGame): boolean {
   const final = game.rounds.length - 1;
@@ -124,6 +126,13 @@ export function kidsOvertook(game: KidsGame): boolean {
 /** Zeit und Punkte sind geräteunabhängig; doppelte oder unpassende Schritte ändern nichts. */
 export function updateKidsGame(game: KidsGame, action: KidsAction, now: number): KidsGame {
   const phase = game.phase;
+  // Lautstärke und Schalter verändern weder Timer noch laufende Sprache; auch während des Erklärvideos bedienbar.
+  if (['music-on', 'music-off', 'music-louder', 'music-quieter'].includes(action)) {
+    const music = game.music ?? KIDS_DEFAULT_MUSIC;
+    const next = { enabled: action === 'music-on' ? true : action === 'music-off' ? false : music.enabled,
+      volume: Math.max(0, Math.min(100, music.volume + (action === 'music-louder' ? 5 : action === 'music-quieter' ? -5 : 0))) };
+    return next.enabled === music.enabled && next.volume === music.volume ? game : { ...game, music: next };
+  }
   if (['play-intro', 'pause-intro', 'restart-intro', 'stop-intro'].includes(action)) {
     if (phase !== 'welcome') return game;
     const video = game.introVideo;

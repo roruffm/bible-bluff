@@ -30,6 +30,20 @@ function setup(store: KidsRemoteStore = new MemoryKidsRemoteStore()) {
 }
 
 describe('Kids-Fernbedienung', () => {
+  it('steuert die Hintergrundmusik am Beamer mit erhaltenem Timer, Sprache und gespeicherter Lautstärke', async () => {
+    const t = setup(), moving = updateKidsGame(reading(), 'start', t.clock.now);
+    const made = await t.create(moving), path = `/api/kids-remotes/${made.id}`;
+    expect((await t.call('POST', path + '/action', { action: 'music-off', version: 1 })).status).toBe(401);
+    let version = 1;
+    for (const action of ['music-off', 'music-louder', 'music-on', 'music-quieter']) {
+      const changed = await t.call('POST', path + '/action', { action, version: version++ }, made.remoteToken);
+      expect(changed.status).toBe(200);
+      expect(changed.body.game).toMatchObject({ phase: 'moving', deadline: moving.deadline, voicePlaying: true, voiceClip: 'signal-go' });
+    }
+    t.reboot();
+    const restored = await t.call('GET', path, undefined, made.ownerToken);
+    expect(restored.body.game.music).toEqual({ enabled: true, volume: 25 });
+  });
   it('überspringt den Countdown nur mit Bedienungszugang und synchronisiert Stopp statt einer vorzeitigen Wertung', async () => {
     const t = setup();
     let game = createKidsGame();

@@ -3,6 +3,7 @@ import { KIDS_SCENE_MS } from './kids-scenes';
 import { KIDS_SHOW_QUESTIONS } from './kids-show-questions';
 import { professorInterjection } from './professor-interjections';
 import { kidsIntroPosition, KIDS_INTRO_DURATION_MS, type KidsIntroVideo } from './kids-intro';
+import { KIDS_DEFAULT_MUSIC, type KidsMusicSettings } from './kids-music';
 
 export type KidsRemoteAction = Exclude<KidsAction, 'tick'>;
 export interface KidsRemoteView {
@@ -30,6 +31,7 @@ export function packKidsGame(game: KidsGame, now: number) {
     voiceCue: game.voiceCue ?? null,
     voiceKind: game.voiceKind ?? 'quote',
     voiceClip: game.voiceClip ?? null,
+    music: game.music ?? KIDS_DEFAULT_MUSIC,
     introVideo: game.introVideo ? { ...game.introVideo, positionMs: kidsIntroPosition(game.introVideo, now), startedAt: undefined } : undefined,
     sceneRemainingMs: game.phase === 'scene' ? Math.min(KIDS_SCENE_MS, Math.max(0, (game.deadline ?? now) - now)) : undefined,
   };
@@ -72,6 +74,13 @@ function unpack(value: unknown, now: number): KidsGame {
   const voiceSeq = game.voiceSeq ?? 0, voicePlaying = game.voicePlaying ?? false, voiceCue = game.voiceCue ?? null, voiceKind = game.voiceKind ?? 'quote';
   const voiceClip = game.voiceClip ?? null;
   let introVideo: KidsIntroVideo | undefined;
+  let music: KidsMusicSettings | undefined;
+  if (game.music !== undefined) {
+    if (!game.music || typeof game.music !== 'object') return invalid();
+    const settings = game.music as Record<string, unknown>;
+    if (typeof settings.enabled !== 'boolean' || !Number.isInteger(settings.volume) || Number(settings.volume) < 0 || Number(settings.volume) > 100) return invalid();
+    music = { enabled: settings.enabled, volume: Number(settings.volume) };
+  }
   if (game.introVideo !== undefined) {
     if (phase !== 'welcome' || !game.introVideo || typeof game.introVideo !== 'object') return invalid();
     const video = game.introVideo as Record<string, unknown>;
@@ -90,5 +99,5 @@ function unpack(value: unknown, now: number): KidsGame {
   }
   if (game.remainingMs === 0 && (phase === 'moving' || phase === 'paused')) phase = 'locked';
   const remainingMs = ['welcome', 'chapter', 'superbluff', 'reading', 'scene'].includes(phase) ? KIDS_ANSWER_MS : ['locked', 'returning', 'judging', 'revealed', 'finished'].includes(phase) ? 0 : game.remainingMs;
-  return { rounds, index, phase, remainingMs, deadline: phase === 'scene' ? now + sceneRemainingMs : phase === 'moving' ? now + remainingMs : null, results: game.results as (KidsResult | null)[], cueSeq: Number(game.cueSeq), voiceSeq: Number(voiceSeq), voicePlaying, voiceCue: voiceCue as string|null, voiceKind:voiceKind as KidsGame['voiceKind'], voiceClip: voiceClip as KidsGame['voiceClip'], ...(introVideo ? { introVideo } : {}) };
+  return { rounds, index, phase, remainingMs, deadline: phase === 'scene' ? now + sceneRemainingMs : phase === 'moving' ? now + remainingMs : null, results: game.results as (KidsResult | null)[], cueSeq: Number(game.cueSeq), voiceSeq: Number(voiceSeq), voicePlaying, voiceCue: voiceCue as string|null, voiceKind:voiceKind as KidsGame['voiceKind'], voiceClip: voiceClip as KidsGame['voiceClip'], ...(introVideo ? { introVideo } : {}), ...(music ? { music } : {}) };
 }
