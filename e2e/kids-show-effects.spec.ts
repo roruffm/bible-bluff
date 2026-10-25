@@ -27,7 +27,8 @@ async function expectMascotArrival(page: Page, group: 'minis' | 'mittis' | 'maxi
   await expect.poll(() => page.locator('.kids-mascot-star-trail').evaluate(el => {
     const canvas = el as HTMLCanvasElement;
     return canvas.getContext('2d')!.getImageData(0, 0, canvas.width, canvas.height).data.some((value, index) => index % 4 === 3 && value > 0);
-  }), {timeout: 2500}).toBe(true);
+  // Der Schweif wird zeitweise wieder gelöscht; dicht prüfen und auch den kurzen Landungskranz erfassen.
+  }), {timeout: 4000, intervals: [50]}).toBe(true);
   const bounds = await perch.evaluate(el => {
     const sprite = el.querySelector('.kids-mascot-arrival')!;
     const animations = sprite.getAnimations({subtree:true}).filter(a => a.effect!.getTiming().iterations !== Infinity);

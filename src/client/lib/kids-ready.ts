@@ -3,7 +3,8 @@ import { PROFESSOR_VOICE_KEYS, professorVoiceUrl } from '../../shared/professor-
 import { preloadKidsSceneVoices, preloadProfessorVoices } from './kids-sound';
 import { KIDS_INTRO_URL } from '../../shared/kids-intro';
 import { KIDS_SCENE_VOICE_URLS } from '../../shared/kids-scenes';
-import { KIDS_MUSIC_URL } from '../../shared/kids-music';
+import { KIDS_MUSIC_URLS } from '../../shared/kids-music';
+import { kidsBackgroundMusic } from './kids-music';
 
 /** Muss zum Namen in public/kids-sw.js passen. */
 export const KIDS_OFFLINE_CACHE = 'bb-kids-show';
@@ -29,6 +30,7 @@ let voices: Promise<void> | null = null;
 let offline: Promise<void> | null = null;
 /** Lädt alle Sprachaufnahmen und legt die Offline-Kopie an. Mehrfache Aufrufe laden nichts doppelt, nur Fehlendes erneut. */
 export function prepareKidsShow(): void {
+  void kidsBackgroundMusic.preload();
   if (!voices) {
     let professorLoaded = 0, sceneLoaded = 0;
     const progress = () => update({ voices: { loaded: professorLoaded + sceneLoaded, total: voiceTotal, done: false } });
@@ -73,7 +75,7 @@ async function copyShow() {
     for (const [, href] of css.matchAll(/url\(\s*["']?([^"')]+\.woff2)["']?\s*\)/g)) add(href, new URL(sheet, location.origin).href);
   }
   const cache = await caches.open(KIDS_OFFLINE_CACHE);
-  const files = [...assets, KIDS_INTRO_URL, KIDS_MUSIC_URL, ...PROFESSOR_VOICE_KEYS.map(professorVoiceUrl), ...KIDS_SCENE_VOICE_URLS];
+  const files = [...assets, KIDS_INTRO_URL, ...KIDS_MUSIC_URLS, ...PROFESSOR_VOICE_KEYS.map(professorVoiceUrl), ...KIDS_SCENE_VOICE_URLS];
   await cache.addAll(files);
   await cache.put('/kids', page);
   // Alte Fassungen früherer Veröffentlichungen fliegen raus.
