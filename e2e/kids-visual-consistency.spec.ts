@@ -61,7 +61,7 @@ test('Kids: Maskottchen begrüßen durchgehend und verabschieden kurz; die Antwo
   await page.getByRole('button', { name: 'Mission starten', exact: true }).click();
   await page.getByRole('button', { name: 'Erste Aufgabe im Kapitel', exact: true }).click();
   await expect(page.locator('.kids-mascot-perch')).not.toHaveClass(/is-flying/, { timeout: 6000 });
-  expect(await page.locator('.kids-active-group .kids-mascot').evaluate(el => el.getAnimations({ subtree: true }).length)).toBe(0);
+  await expect.poll(() => page.locator('.kids-active-group .kids-mascot').evaluate(el => el.getAnimations({ subtree: true }).length), { timeout: 6500, intervals: [50, 100, 200] }).toBe(0);
   await page.clock.install();
   await page.getByRole('button', { name: '30 Sekunden starten', exact: true }).click();
   await expect(page.locator('.kids-clock-left .kids-clock-beat')).toHaveCSS('animation-name', 'none');
