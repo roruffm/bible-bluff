@@ -1,6 +1,7 @@
 import { KIDS_SCENE_MS, KIDS_SCENE_VOICES, KIDS_SCENE_VOICE_URLS, type KidsSceneMotif } from '../../shared/kids-scenes';
 import { PROFESSOR_VOICE_KEYS, professorVoiceUrl } from '../../shared/professor-voice';
 import { kidsBackgroundMusic } from './kids-music';
+import type { KidsMusicStage } from '../../shared/kids-music';
 let context: AudioContext | null = null;
 export async function enableKidsSound() {
   context ??= new AudioContext();
@@ -8,9 +9,9 @@ export async function enableKidsSound() {
   if (context.state !== 'running') throw new Error('Klang nicht verfügbar');
 }
 
-export async function playKidsMusic(volume: number): Promise<void> {
+export async function playKidsMusic(volume: number, stage: KidsMusicStage = 'welcome', cue?: string, elapsedSeconds?: number): Promise<void> {
   if (!context || context.state !== 'running') throw new Error('Für die Hintergrundmusik bitte den Klang am Beamer einschalten.');
-  await kidsBackgroundMusic.play(context, volume);
+  await kidsBackgroundMusic.play(context, volume, stage, cue, elapsedSeconds);
 }
 
 const professorRecordings = new Map<string, Promise<ArrayBuffer>>();

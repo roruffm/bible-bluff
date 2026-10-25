@@ -609,3 +609,5 @@
 .kids-music-volume .kids-tool{min-width:44px;min-height:44px;font-size:1.25rem}
 .kids-music-volume output{min-width:4.5rem;text-align:center;font-weight:800;font-variant-numeric:tabular-nums}
 .kids-music-controls small{font-size:.8rem;line-height:1.4;text-align:center}
+
+.kids-music-stage{margin:0;font-size:.85rem;color:#635b71}

@@ -218,7 +218,7 @@ test('Kids: vier große Szenen mit Handlung, Klang, Wiederholung und separatem A
   await page.addInitScript(()=>{
     const state=window as unknown as {sceneAudioStarts:number};state.sceneAudioStarts=0;
     const start=AudioBufferSourceNode.prototype.start;
-    AudioBufferSourceNode.prototype.start=function(...args){if(this.buffer && this.buffer.duration>=9.9)state.sceneAudioStarts++;return start.apply(this,args);};
+    AudioBufferSourceNode.prototype.start=function(...args){if(!this.loop && this.buffer && this.buffer.duration>=9.9)state.sceneAudioStarts++;return start.apply(this,args);};
   });
   await page.emulateMedia({reducedMotion:'no-preference'});
   await page.goto('/kids');await begin(page);await page.clock.install();

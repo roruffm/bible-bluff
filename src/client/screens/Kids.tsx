@@ -1,5 +1,5 @@
 import { KidsMusicControls } from '../components/KidsMusicControls';
-import { KIDS_DEFAULT_MUSIC } from '../../shared/kids-music';
+import { KIDS_DEFAULT_MUSIC, kidsMusicStage } from '../../shared/kids-music';
 import { kidsBackgroundMusic } from '../lib/kids-music';
 import { KidsTeamPortrait } from '../components/KidsTeamPortrait';
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
@@ -75,15 +75,17 @@ export function KidsPage() {
   useLayoutEffect(() => { if (saved && !game && !remote.active) resumeButton.current?.focus(); }, [!!saved, !!game, remote.active]);
   useEffect(() => () => soundTest.current?.abort(), []);
   const music = game?.music ?? KIDS_DEFAULT_MUSIC;
-  const musicActive = !!game && sound === 'on' && music.enabled && game.phase !== 'paused' && !game.introVideo;
+  const musicStage = game ? kidsMusicStage(game) : null;
+  const musicCue = game && musicStage ? `${game.index}:${musicStage}` : '';
+  const musicActive = !!game && sound === 'on' && music.enabled && musicStage !== null;
   useEffect(() => {
     if (!musicActive) { kidsBackgroundMusic.pause(!game); return; }
     let cancelled = false;
-    void playKidsMusic(music.volume).catch(error => {
+    void playKidsMusic(music.volume, musicStage!, musicCue, musicStage === 'answer' ? (KIDS_ANSWER_MS - game!.remainingMs) / 1000 : undefined).catch(error => {
       if (!cancelled) setFullscreenError(error instanceof Error ? error.message : 'Hintergrundmusik nicht verfügbar.');
     });
     return () => { cancelled = true; };
-  }, [musicActive, music.volume, !!game]);
+  }, [musicActive, music.volume, !!game, musicStage, musicCue]);
   useEffect(() => () => kidsBackgroundMusic.pause(true), []);
   const act = (action: KidsAction) => {
     if (action === 'music-on' && sound !== 'on') void enableKidsSound().then(() => setSound('on')).catch(() => setSound('off'));

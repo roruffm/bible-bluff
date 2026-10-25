@@ -1,11 +1,14 @@
-import { KIDS_MUSIC_URL } from '../../shared/kids-music';
+import { KIDS_MUSIC_STAGES, KIDS_MUSIC_TRACKS, kidsMusicUrl, type KidsMusicStage } from '../../shared/kids-music';
 
-/** Ein Player am Beamer. Dieselbe Aufnahme läuft durch die Runden und bleibt bei Netzausfall im Speicher. */
+/** Ein Player am Beamer, mit einer Aufnahme je Spielphase und weichen Übergängen. */
 export class KidsBackgroundMusic {
   private context: AudioContext | null = null;
-  private buffer: Promise<AudioBuffer> | null = null;
+  private recordings = new Map<KidsMusicStage, Promise<ArrayBuffer>>();
+  private buffers = new Map<KidsMusicStage, Promise<AudioBuffer>>();
   private source: AudioBufferSourceNode | null = null;
   private gain: GainNode | null = null;
+  private cue: string | null = null;
+  private completedCue: string | null = null;
   private revision = 0;
   private offset = 0;
   private startedAt = 0;
@@ -19,56 +22,82 @@ export class KidsBackgroundMusic {
     param.cancelScheduledValues(at);
     param.setTargetAtTime(this.level(), at, this.speakers.size ? .025 : .25);
   }
-
-  async play(context: AudioContext, volume: number): Promise<void> {
+  private recording(stage: KidsMusicStage): Promise<ArrayBuffer> {
+    let recording = this.recordings.get(stage);
+    if (!recording) {
+      const loading = fetch(kidsMusicUrl(stage)).then(response => {
+        if (!response.ok) throw new Error('Hintergrundmusik konnte nicht geladen werden. Bitte erneut einschalten.');
+        return response.arrayBuffer();
+      });
+      this.recordings.set(stage, loading);
+      void loading.catch(() => { if (this.recordings.get(stage) === loading) this.recordings.delete(stage); });
+      recording = loading;
+    }
+    return recording;
+  }
+  /** Auch ein späterer Phasenwechsel braucht nach der Vorbereitung kein Internet. */
+  async preload(): Promise<number> {
+    const loaded = await Promise.all(KIDS_MUSIC_STAGES.map(stage => (this.buffers.has(stage) ? Promise.resolve() : this.recording(stage)).then(() => 1, () => 0)));
+    return loaded.reduce((sum, count) => sum + count, 0);
+  }
+  private stopSource(fadeSeconds: number) {
+    const source = this.source, gain = this.gain, context = this.context;
+    this.source = null; this.gain = null;
+    if (!source || !context) return;
+    const position = this.offset + context.currentTime - this.startedAt;
+    this.offset = source.loop ? position % source.buffer!.duration : Math.min(position, source.buffer!.duration);
+    gain!.gain.cancelScheduledValues(context.currentTime);
+    gain!.gain.setTargetAtTime(0, context.currentTime, fadeSeconds / 4);
+    try { source.stop(context.currentTime + fadeSeconds); } catch { source.disconnect(); gain!.disconnect(); }
+  }
+  async play(context: AudioContext, volume: number, stage: KidsMusicStage = 'welcome', cue = stage as string, elapsedSeconds?: number): Promise<void> {
     const revision = ++this.revision;
+    if (cue !== this.cue) {
+      this.stopSource(.35);
+      this.offset = 0; this.cue = cue; this.completedCue = null;
+    }
     this.context = context;
     this.volume = volume;
     this.adjust();
-    if (this.source) return;
-    if (!this.buffer) {
-      const loading = fetch(KIDS_MUSIC_URL).then(response => {
-        if (!response.ok) throw new Error('Hintergrundmusik konnte nicht geladen werden. Bitte erneut einschalten.');
-        return response.arrayBuffer();
-      }).then(bytes => context.decodeAudioData(bytes));
-      this.buffer = loading;
-      void loading.catch(() => { if (this.buffer === loading) this.buffer = null; });
+    // Lautstärkeänderungen und laufende Timer starten keine zweite Aufnahme.
+    if (this.source || this.completedCue === cue) return;
+    let loading = this.buffers.get(stage);
+    if (!loading) {
+      loading = this.recording(stage).then(bytes => { this.recordings.delete(stage); return context.decodeAudioData(bytes); });
+      this.buffers.set(stage, loading);
+      const decoding = loading;
+      void decoding.catch(() => { if (this.buffers.get(stage) === decoding) this.buffers.delete(stage); });
     }
-    const buffer = await this.buffer;
-    // Ausschalten, Verlassen oder ein neuer Auftrag während des Ladens darf keinen späten Start auslösen.
+    const buffer = await loading;
+    // Weitergehen, Ausschalten oder Verlassen während des Ladens darf keine alte Etappe nachträglich starten.
     if (revision !== this.revision) return;
     if (context.state !== 'running') throw new Error('Für die Hintergrundmusik bitte den Klang am Beamer einschalten.');
+    if (elapsedSeconds !== undefined) this.offset = Math.max(0, elapsedSeconds);
+    const loop = KIDS_MUSIC_TRACKS[stage].loop;
+    if (loop) this.offset %= buffer.duration;
+    else if (this.offset >= buffer.duration) { this.completedCue = cue; return; }
     const source = context.createBufferSource(), gain = context.createGain();
-    source.buffer = buffer;
-    source.loop = true;
+    source.buffer = buffer; source.loop = loop;
     gain.gain.value = 0;
-    source.connect(gain);
-    gain.connect(context.destination);
-    source.onended = () => { source.disconnect(); gain.disconnect(); };
-    this.offset %= buffer.duration;
+    source.connect(gain); gain.connect(context.destination);
+    source.onended = () => {
+      source.disconnect(); gain.disconnect();
+      if (this.source === source) {
+        this.source = null; this.gain = null;
+        if (!loop) this.completedCue = cue;
+      }
+    };
     try { source.start(context.currentTime, this.offset); }
     catch (error) { source.disconnect(); gain.disconnect(); throw error; }
-    this.source = source;
-    this.gain = gain;
-    this.startedAt = context.currentTime;
+    this.source = source; this.gain = gain; this.startedAt = context.currentTime;
     this.adjust();
   }
-
   pause(reset = false): void {
     this.revision++;
-    const source = this.source, gain = this.gain, context = this.context;
-    this.source = null;
-    this.gain = null;
-    if (source && context) {
-      this.offset = (this.offset + context.currentTime - this.startedAt) % source.buffer!.duration;
-      gain!.gain.cancelScheduledValues(context.currentTime);
-      gain!.gain.setTargetAtTime(0, context.currentTime, .015);
-      try { source.stop(context.currentTime + .08); } catch { source.disconnect(); gain!.disconnect(); }
-    }
-    if (reset) this.offset = 0;
+    this.stopSource(.08);
+    if (reset) { this.offset = 0; this.cue = null; this.completedCue = null; }
   }
-
-  /** Jede wirkliche Sprachausgabe hält die Musik leise; überlappende Ansagen geben sie erst gemeinsam frei. */
+  /** Überlappende Ansagen geben die Musik erst gemeinsam wieder frei. */
   duck(delaySeconds = 0): () => void {
     const key = Symbol();
     let released = false;
@@ -79,8 +108,7 @@ export class KidsBackgroundMusic {
       if (released) return;
       released = true;
       if (timer !== null) clearTimeout(timer);
-      this.speakers.delete(key);
-      this.adjust();
+      this.speakers.delete(key); this.adjust();
     };
   }
 }
