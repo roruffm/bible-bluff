@@ -62,14 +62,28 @@ test('Smartphone: Forscher-Aufruf, vorgemerkter Countdown, Pause und Jesus-Absch
     sessionStorage.setItem('bb:kids:display',JSON.stringify({id,token}));
     const observed={starts:[] as {delay:number;offset:number}[],stops:0};
     Object.assign(window,{phaseVoiceAudio:observed});
+    // Die URL identifiziert Sprache eindeutig, auch wenn der Musik-Ausklang keine Schleife ist.
+    const fetched=new WeakSet<ArrayBuffer>(),voices=new WeakSet<AudioBuffer>();
+    const arrayBuffer=Response.prototype.arrayBuffer;
+    Response.prototype.arrayBuffer=async function(){
+      const bytes=await arrayBuffer.call(this);
+      if(new URL(this.url,location.href).pathname.startsWith('/professor-bluff/'))fetched.add(bytes);
+      return bytes;
+    };
+    const decode=BaseAudioContext.prototype.decodeAudioData;
+    BaseAudioContext.prototype.decodeAudioData=function(this:BaseAudioContext,bytes:ArrayBuffer){
+      const voice=fetched.has(bytes);
+      return decode.call(this,bytes).then(buffer=>{if(voice)voices.add(buffer);return buffer;});
+    } as typeof decode;
     const create=AudioContext.prototype.createBufferSource;
     AudioContext.prototype.createBufferSource=function(){
       const context=this,source=create.call(this),start=source.start.bind(source),stop=source.stop.bind(source);
+      const voice=()=>!!source.buffer && voices.has(source.buffer);
       source.start=(...args)=>{
-        if(!source.loop && (source.buffer?.duration??0)>.9)observed.starts.push({delay:(args[0]??context.currentTime)-context.currentTime,offset:args[1]??0});
+        if(voice())observed.starts.push({delay:(args[0]??context.currentTime)-context.currentTime,offset:args[1]??0});
         return start(...args);
       };
-      source.stop=(...args)=>{if(!source.loop && (source.buffer?.duration??0)>.9)observed.stops++;return stop(...args);};
+      source.stop=(...args)=>{if(voice())observed.stops++;return stop(...args);};
       return source;
     };
   },{id:remote.id,token:remote.ownerToken});
