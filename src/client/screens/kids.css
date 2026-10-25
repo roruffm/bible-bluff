@@ -602,3 +602,10 @@
   .kids-check-row { grid-template-columns: 24px minmax(0, 1fr); row-gap: 2px; }
   .kids-check-row > span:last-child { grid-column: 2; }
 }
+.kids-music-controls{display:grid;gap:.65rem;padding:1rem;border:1px solid #dfd9ce;border-radius:1rem;background:#fffaf0;color:#342d48;min-width:0}
+.kids-music-controls h3{margin:0;font-size:1rem}
+.kids-music-controls>button{width:100%}
+.kids-music-volume{display:flex;align-items:center;justify-content:center;gap:.75rem}
+.kids-music-volume .kids-tool{min-width:44px;min-height:44px;font-size:1.25rem}
+.kids-music-volume output{min-width:4.5rem;text-align:center;font-weight:800;font-variant-numeric:tabular-nums}
+.kids-music-controls small{font-size:.8rem;line-height:1.4;text-align:center}

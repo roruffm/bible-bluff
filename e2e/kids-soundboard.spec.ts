@@ -66,10 +66,10 @@ test('Smartphone: Forscher-Aufruf, vorgemerkter Countdown, Pause und Jesus-Absch
     AudioContext.prototype.createBufferSource=function(){
       const context=this,source=create.call(this),start=source.start.bind(source),stop=source.stop.bind(source);
       source.start=(...args)=>{
-        if((source.buffer?.duration??0)>.9)observed.starts.push({delay:(args[0]??context.currentTime)-context.currentTime,offset:args[1]??0});
+        if(!source.loop && (source.buffer?.duration??0)>.9)observed.starts.push({delay:(args[0]??context.currentTime)-context.currentTime,offset:args[1]??0});
         return start(...args);
       };
-      source.stop=(...args)=>{if((source.buffer?.duration??0)>.9)observed.stops++;return stop(...args);};
+      source.stop=(...args)=>{if(!source.loop && (source.buffer?.duration??0)>.9)observed.stops++;return stop(...args);};
       return source;
     };
   },{id:remote.id,token:remote.ownerToken});

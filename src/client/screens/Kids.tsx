@@ -1,3 +1,6 @@
+import { KidsMusicControls } from '../components/KidsMusicControls';
+import { KIDS_DEFAULT_MUSIC } from '../../shared/kids-music';
+import { kidsBackgroundMusic } from '../lib/kids-music';
 import { KidsTeamPortrait } from '../components/KidsTeamPortrait';
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { KidsGroupName } from '../components/KidsGroupName';
@@ -16,7 +19,7 @@ import { QRCode } from '../components/QR';
 import { ProfessorBluff, professorMood, professorSays, ShowControls, ShowScoreboard, StoryPicture } from '../components/KidsShow';
 import { KIDS_GROUPS, type KidsGroup } from '../../shared/kids-show-questions';
 import { kidsControlUrl, useKidsRemote } from '../lib/kids-remote';
-import { enableKidsSound, KIDS_SUSPENSE_MS, playKidsCue, playKidsScene, playProfessorVoice, type KidsCue } from '../lib/kids-sound';
+import { enableKidsSound, playKidsMusic, KIDS_SUSPENSE_MS, playKidsCue, playKidsScene, playProfessorVoice, type KidsCue } from '../lib/kids-sound';
 import { clearKidsShow, loadKidsShow, saveKidsShow } from '../lib/kids-saved';
 import { checkKidsInternet, prepareKidsShow } from '../lib/kids-ready';
 import { KidsResume, KidsTechCheck, KidsTechStatus } from '../components/KidsPrepare';
@@ -71,7 +74,19 @@ export function KidsPage() {
   useEffect(() => { if (game) prepareKidsShow(); }, [!!game]);
   useLayoutEffect(() => { if (saved && !game && !remote.active) resumeButton.current?.focus(); }, [!!saved, !!game, remote.active]);
   useEffect(() => () => soundTest.current?.abort(), []);
+  const music = game?.music ?? KIDS_DEFAULT_MUSIC;
+  const musicActive = !!game && sound === 'on' && music.enabled && game.phase !== 'paused' && !game.introVideo;
+  useEffect(() => {
+    if (!musicActive) { kidsBackgroundMusic.pause(!game); return; }
+    let cancelled = false;
+    void playKidsMusic(music.volume).catch(error => {
+      if (!cancelled) setFullscreenError(error instanceof Error ? error.message : 'Hintergrundmusik nicht verfügbar.');
+    });
+    return () => { cancelled = true; };
+  }, [musicActive, music.volume, !!game]);
+  useEffect(() => () => kidsBackgroundMusic.pause(true), []);
   const act = (action: KidsAction) => {
+    if (action === 'music-on' && sound !== 'on') void enableKidsSound().then(() => setSound('on')).catch(() => setSound('off'));
     if ((action === 'scene' || action === 'start') && sound === 'unarmed') void enableKidsSound().then(()=>setSound('on')).catch(()=>setSound('off'));
     if (action !== 'tick' && remote.active) { void remote.send(action); return; }
     setGame((g) => g ? updateKidsGame(g, action, Date.now()) : g);
@@ -192,6 +207,7 @@ export function KidsPage() {
       <button type="button" class="kids-tool" onClick={toggleSound}>{sound === 'on' ? 'Klang ausschalten' : 'Klang einschalten'}</button>
       {canFullscreen && <button type="button" class="kids-tool" onClick={toggleFullscreen}>{fullscreen ? 'Vollbild aus' : 'Vollbild einschalten'}</button>}
       <button type="button" class="kids-tool" onClick={() => { setToolsOpen(false); if(finished) setShowExit(true); else setShowFinish(true); }}>{finished ? 'Zur Vorbereitung' : 'Spiel abschließen'}</button>
+      <KidsMusicControls game={game} act={act} disabled={remote.busy || (remote.active && !!remote.error)}/>
       <KidsTechStatus/>
       <p>→ / Leertaste: weiter · P: Pause<br/>H: Mausknöpfe · Wertung: 1 / 2 / 0</p><button type="button" class="kids-tool" onClick={() => setToolsOpen(false)}>Menü schließen</button>
     </aside>}

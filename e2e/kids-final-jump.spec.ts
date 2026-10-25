@@ -45,8 +45,8 @@ test('Kids: Smartphone beendet Sprache und offene Dialoge beim Finalsprung; beid
     const create=AudioContext.prototype.createBufferSource;
     AudioContext.prototype.createBufferSource=function(){
       const source=create.call(this),start=source.start.bind(source),stop=source.stop.bind(source);
-      source.start=(...args)=>{audio.starts++;return start(...args);};
-      source.stop=(...args)=>{audio.stops++;return stop(...args);};return source;
+      source.start=(...args)=>{if(!source.loop)audio.starts++;return start(...args);};
+      source.stop=(...args)=>{if(!source.loop)audio.stops++;return stop(...args);};return source;
     };
   },{id:remote.id,token:remote.ownerToken});
   await page.goto('/kids');

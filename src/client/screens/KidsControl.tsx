@@ -6,6 +6,7 @@ import { useKidsRemote } from '../lib/kids-remote';
 import { KidsFinishDialog } from '../components/KidsFinish';
 import { KidsLogo } from '../components/KidsLogo';
 import { KidsPhaseAudio, KidsSoundboard } from '../components/KidsSoundboard';
+import { KidsMusicControls } from '../components/KidsMusicControls';
 import { KidsIntroControls } from '../components/KidsIntroVideo';
 import { kidsClaimPhase, professorSays, ShowControls, StoryPicture } from '../components/KidsShow';
 import { KidsFieldShape } from '../components/KidsField';
@@ -112,6 +113,7 @@ export function KidsControlPage() {
         </div>
         {(desktop || tab === 'audio') && <section key="audio" id="kids-panel-audio" class="kids-remote-panel kids-remote-audio" role={desktop ? 'region' : 'tabpanel'} aria-labelledby={desktop ? 'kids-audio-title' : 'kids-tab-audio'} tabIndex={desktop ? -1 : 0}>
           {desktop && <><div class="kids-remote-column-title"><h2 id="kids-audio-title">Professor-Audios</h2></div><KidsPhaseAudio game={game} disabled={disabled || !!game.introVideo} send={remote.send} compact/></>}
+          <KidsMusicControls game={game} act={action => { void remote.send(action); }} disabled={disabled}/>
           <KidsSoundboard game={game} disabled={disabled || !!game.introVideo} send={remote.send} compact={desktop}/>
         </section>}
       </div>

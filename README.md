@@ -44,6 +44,7 @@ lokal erzeugte Klangbilder; Eltern und andere Gruppen machen Geräusche und Pant
   und Fackelträger mit einem kleinen Hüpfer. Alle Effekte lassen sich sofort durch Weitergehen
   beenden. Neuladen und Wertungskorrekturen wiederholen keine Feier; reduzierte Bewegung zeigt
   das Antwortlicht statisch und verzichtet auf Auftritte und Punkteflug.
+- **Hintergrundmusik:** Die zweiminütige Instrumentalaufnahme läuft nach „Show vorbereiten“ in Schleife am Beamer, mit 25 % Startlautstärke. Im Bedienmenü und auf der Fernbedienung unter „Zusatzaudios“ lassen sich Musik und Lautstärke separat steuern. Professor- und Szenenansagen senken die Musik automatisch ab; Erklärvideo, Spielpause und ausgeschalteter Klang pausieren sie. Einstellungen bleiben im Spielstand erhalten, die Aufnahme ist Teil der Offline-Kopie.
 - **Countdown zum Mitzählen:** In den letzten fünf Sekunden erscheint eine große Zahl und
   „Zählt laut mit!“. Mit Klang ticken die Sekunden, bei null ertönt ein Gong. Der Klang wird
   auch beim ersten Start der 30 Sekunden am Beamer eingeschaltet.

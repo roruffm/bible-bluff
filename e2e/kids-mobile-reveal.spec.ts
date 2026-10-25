@@ -17,8 +17,8 @@ test('Kids: mobile Auflösung trennt Professor und Kommentar und lässt den Spru
     const create = AudioContext.prototype.createBufferSource;
     AudioContext.prototype.createBufferSource = function () {
       const source = create.call(this), start = source.start.bind(source), stop = source.stop.bind(source);
-      // Nur Sprachaufnahmen zählen, nicht die kurzen erzeugten Showklänge (Ticken, Trommelwirbel).
-      const voice = () => (source.buffer?.duration ?? 0) > .9;
+      // Nur Sprachaufnahmen zählen; Musikschleife und erzeugte Showklänge bleiben außen vor.
+      const voice = () => !source.loop && (source.buffer?.duration ?? 0) > .9;
       source.start = (...args) => { if (voice()) audio.starts++; return start(...args); };
       source.stop = (...args) => { if (voice()) audio.stops++; return stop(...args); };
       return source;
