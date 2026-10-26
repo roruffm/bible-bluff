@@ -9,7 +9,7 @@ export async function enableKidsSound() {
   if (context.state !== 'running') throw new Error('Klang nicht verfügbar');
 }
 
-export async function playKidsMusic(volume: number, stage: KidsMusicStage = 'welcome', cue?: string, elapsedSeconds?: number): Promise<void> {
+export async function playKidsMusic(volume: number, stage: KidsMusicStage = 'round', cue?: string, elapsedSeconds?: number): Promise<void> {
   if (!context || context.state !== 'running') throw new Error('Für die Hintergrundmusik bitte den Klang am Beamer einschalten.');
   await kidsBackgroundMusic.play(context, volume, stage, cue, elapsedSeconds);
 }

@@ -37,14 +37,19 @@ export function KidsVoiceProvider({ game, enabled, enable, act, busy, onError, c
     // Die automatische Startansage meldet keinen Fehler, wenn der Klang am Beamer bewusst aus ist.
     if (!enabled) { if (game.voiceClip !== 'signal-go') onError('Professor-Ton am Beamer unter „Bedienung → Klang einschalten“ aktivieren. Danach den Spruch erneut starten.'); return; }
     const controller=new AbortController(); playback.current=controller; setPlaying(game.voiceKind ?? 'quote');
-    const ended=()=>{if(playback.current===controller){playback.current=null;setPlaying(null);setAnswerField(null);}};
+    const ended=()=>{if(playback.current===controller){playback.current=null;setPlaying(null);setAnswerField(null);
+      // Die Erklärungsmusik endet mit der tatsächlich abgespielten Eltern-Ansage.
+      if(game.voiceKind==='interjection' && game.voiceClip==='finale-parents')act('stop-speech');
+    }};
     const countdownDeadline=game.voiceKind==='interjection' && game.voiceClip==='signal-countdown' && game.phase==='moving' ? game.deadline ?? undefined : undefined;
     const started=(index:number)=>{if(playback.current===controller && !controller.signal.aborted)setAnswerField({field:Math.floor(index/2),sequence});};
     const clipEnded=()=>{if(playback.current===controller)setAnswerField(null);};
     const playbackPromise=game.voiceKind === 'answers' ? playProfessorVoiceSequence(professorAnswerVoiceKeys(game),controller.signal,ended,started,clipEnded) : playProfessorVoice(key!,controller.signal,ended,countdownDeadline);
     void playbackPromise.catch(error=>{
       if (playback.current!==controller) return;
-      playback.current=null;setPlaying(null);setAnswerField(null);onError(error instanceof Error ? error.message : 'Die Professor-Aufnahme konnte nicht abgespielt werden.');
+      playback.current=null;setPlaying(null);setAnswerField(null);
+      if(game.voiceKind==='interjection' && game.voiceClip==='finale-parents')act('stop-speech');
+      onError(error instanceof Error ? error.message : 'Die Professor-Aufnahme konnte nicht abgespielt werden.');
     });
     return () => { if(playback.current===controller) playback.current=null; controller.abort(); };
   },[game?.voiceSeq,game?.phase,game?.index,game?.voiceKind,game?.voiceClip,enabled]);

@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'preact/hooks';
 import type { KidsAction, KidsGame } from '../../shared/kids-game';
 import { kidsIntroPosition, KIDS_INTRO_DURATION_MS, KIDS_INTRO_URL } from '../../shared/kids-intro';
+import { kidsBackgroundMusic } from '../lib/kids-music';
 import './kids-intro-video.css';
 
 /** Im Klick auf „Show vorbereiten“ denselben Player für spätere Fernbedienung freigeben. */
@@ -37,6 +38,9 @@ export function KidsIntroVideo({ game, act, onError }: { game: KidsGame | null; 
   current.current = { game, act, onError };
   const video = game?.introVideo;
   const active = game?.phase === 'welcome' && !!video;
+  useEffect(() => {
+    if (active && video?.playing) return kidsBackgroundMusic.duck();
+  }, [active, video?.playing]);
   useEffect(() => {
     const element = player.current;
     if (!element) return;

@@ -1,29 +1,45 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { KidsBackgroundMusic } from '../src/client/lib/kids-music';
 import { createKidsGame, kidsResumeGame, kidsScores, updateKidsGame } from '../src/shared/kids-game';
-import { KIDS_DEFAULT_MUSIC, KIDS_MUSIC_TRACKS, KIDS_MUSIC_URLS, kidsMusicStage, kidsMusicUrl } from '../src/shared/kids-music';
+import { KIDS_DEFAULT_MUSIC, KIDS_MUSIC_TRACKS, KIDS_MUSIC_URLS, kidsMusicCue, kidsMusicStage, kidsMusicUrl } from '../src/shared/kids-music';
 import { packKidsGame, unpackKidsGame } from '../src/shared/kids-remote';
 import { existsSync, readFileSync } from 'node:fs';
 
-describe('Etappen aus Ready, Set, Solve', () => {
-  it('ordnet ruhige und lebhafte Ausschnitte den Spielphasen zu und hält Video und Spielpause frei', () => {
+describe('Fünf Musikstücke für die Show-Sequenzen', () => {
+  it('begleitet Runden und Vorlesen bis zum Countdown, hält Stopp und Wertung still und spielt Outro zur Verabschiedung', () => {
     const game = createKidsGame();
-    for (const [phase, expected] of Object.entries({ welcome: 'welcome', chapter: 'chapter', reading: 'question', scene: 'question', moving: 'answer', locked: 'suspense', returning: 'question', judging: 'suspense', revealed: 'reveal', superbluff: 'finale', finished: 'finish', paused: null })) {
-      expect(kidsMusicStage({ ...game, phase: phase as typeof game.phase })).toBe(expected);
+    for (const index of [0, 4, 9]) {
+      for (const [phase, expected] of Object.entries({ welcome: null, chapter: 'round', reading: 'round', scene: 'round', moving: 'countdown', locked: null, returning: null, judging: null, revealed: 'reveal', superbluff: 'round', finished: 'outro', paused: null })) {
+        expect(kidsMusicStage({ ...game, index, phase: phase as typeof game.phase })).toBe(expected);
+      }
     }
-    expect(kidsMusicStage({ ...game, index: 9, phase: 'reading' })).toBe('finale');
-    expect(kidsMusicStage({ ...game, index: 9, phase: 'moving' })).toBe('finale');
-    expect(kidsMusicStage(updateKidsGame(game, 'play-intro', 0))).toBeNull();
+    const reading = { ...game, phase: 'reading' as const };
+    expect(kidsMusicCue(reading, 'round')).toBe(kidsMusicCue(updateKidsGame(reading, 'read-question', 0), 'round'));
+    expect(kidsMusicCue(reading, 'round')).toBe(kidsMusicCue(updateKidsGame(reading, 'read-answers', 0), 'round'));
   });
-  it('liefert acht unterschiedliche MP3-Ausschnitte und ersetzt die alte Aufnahme vollständig', () => {
-    expect(new Set(KIDS_MUSIC_URLS).size).toBe(8);
+  it('spielt Erklärungsmusik zu Introvideo und Eltern-Erklärung einschließlich Pause, Neustart und natürlichem Sprachende', () => {
+    const game = createKidsGame();
+    const video = updateKidsGame(game, 'play-intro', 0);
+    expect(kidsMusicStage(video)).toBe('intro');
+    expect(kidsMusicStage(updateKidsGame(video, 'pause-intro', 100))).toBeNull();
+    expect(kidsMusicCue(updateKidsGame(video, 'restart-intro', 100), 'intro')).not.toBe(kidsMusicCue(video, 'intro'));
+    expect(kidsMusicStage(updateKidsGame(video, 'stop-intro', 100))).toBeNull();
+    const finale = updateKidsGame(game, 'jump-final', 0);
+    const parents = updateKidsGame(finale, 'interjection:finale-parents', 1);
+    expect(kidsMusicStage(parents)).toBe('intro');
+    expect(kidsMusicStage(updateKidsGame(parents, 'stop-speech', 2))).toBe('round');
+    expect(kidsMusicCue(updateKidsGame(parents, 'interjection:finale-parents', 2), 'intro')).not.toBe(kidsMusicCue(parents, 'intro'));
+    expect(kidsMusicStage(updateKidsGame(parents, 'next', 2))).toBe('round');
+  });
+  it('liefert genau die fünf Original-MP3s und wiederholt den Ausklang nicht', () => {
+    expect(new Set(KIDS_MUSIC_URLS).size).toBe(5);
     for (const url of KIDS_MUSIC_URLS) {
       const bytes = readFileSync(new URL(`../src/client/public${url}`, import.meta.url));
       expect(bytes.length).toBeGreaterThan(100_000);
       expect(bytes.subarray(0, 3).toString() === 'ID3' || bytes[0] === 255).toBe(true);
     }
-    expect(existsSync(new URL('../src/client/public/audio/kids-music/biblebluff-kids-background.mp3', import.meta.url))).toBe(false);
-    expect(KIDS_MUSIC_TRACKS.finish.loop).toBe(false);
+    expect(existsSync(new URL('../src/client/public/audio/kids-music/ready-set-solve-01-willkommen.mp3', import.meta.url))).toBe(false);
+    expect(KIDS_MUSIC_TRACKS.outro.loop).toBe(false);
   });
 });
 
@@ -86,7 +102,7 @@ describe('Hintergrundmusik am Beamer', () => {
   it('loopt, ändert Lautstärke ohne Neustart und setzt nach Pause ohne erneuten Download fort', async () => {
     const music = new KidsBackgroundMusic();
     await music.play(context, 25);
-    expect(fetch).toHaveBeenCalledWith(kidsMusicUrl('welcome'));
+    expect(fetch).toHaveBeenCalledWith(kidsMusicUrl('round'));
     expect(sources[0].loop).toBe(true);
     expect(level()).toBe(.25);
     await music.play(context, 35);
@@ -139,26 +155,26 @@ describe('Hintergrundmusik am Beamer', () => {
   it('wechselt Etappen mit Überblendung, ignoriert verspätete Downloads und wiederholt den Ausklang nicht', async () => {
     let resolve!: (response: Response) => void;
     vi.mocked(fetch).mockReturnValueOnce(new Promise<Response>(done => { resolve = done; }));
-    const music = new KidsBackgroundMusic(), welcome = music.play(context, 25, 'welcome', '0:welcome');
-    await music.play(context, 25, 'question', '0:question');
+    const music = new KidsBackgroundMusic(), welcome = music.play(context, 25, 'intro', 'video:1');
+    await music.play(context, 25, 'round', '0:round');
     resolve(new Response(new ArrayBuffer(8))); await welcome;
     expect(sources).toHaveLength(1);
-    await music.play(context, 25, 'answer', '0:answer', 12);
+    await music.play(context, 25, 'countdown', '0:countdown', 12);
     expect(sources[0].stop).toHaveBeenCalledWith(.35);
     expect(sources[1].start).toHaveBeenCalledWith(0, 12);
-    await music.play(context, 25, 'finish', '9:finish');
+    await music.play(context, 25, 'outro', '9:outro');
     expect(sources[2].loop).toBe(false);
     sources[2].onended!();
-    await music.play(context, 30, 'finish', '9:finish');
+    await music.play(context, 30, 'outro', '9:outro');
     expect(sources).toHaveLength(3);
   });
   it('lädt alle Etappen vor und kann nach Netzausfall in einen noch nicht gespielten Abschnitt wechseln', async () => {
     const music = new KidsBackgroundMusic();
-    expect(await music.preload()).toBe(8);
+    expect(await music.preload()).toBe(5);
     vi.mocked(fetch).mockRejectedValue(new Error('offline'));
-    await music.play(context, 25, 'welcome', '0:welcome');
-    await music.play(context, 25, 'finale', '9:finale');
-    expect(fetch).toHaveBeenCalledTimes(8);
+    await music.play(context, 25, 'intro', 'video:1');
+    await music.play(context, 25, 'round', '9:round');
+    expect(fetch).toHaveBeenCalledTimes(5);
     expect(sources).toHaveLength(2);
   });
 });

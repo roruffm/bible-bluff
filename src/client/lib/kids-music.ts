@@ -50,7 +50,7 @@ export class KidsBackgroundMusic {
     gain!.gain.setTargetAtTime(0, context.currentTime, fadeSeconds / 4);
     try { source.stop(context.currentTime + fadeSeconds); } catch { source.disconnect(); gain!.disconnect(); }
   }
-  async play(context: AudioContext, volume: number, stage: KidsMusicStage = 'welcome', cue = stage as string, elapsedSeconds?: number): Promise<void> {
+  async play(context: AudioContext, volume: number, stage: KidsMusicStage = 'round', cue = stage as string, elapsedSeconds?: number): Promise<void> {
     const revision = ++this.revision;
     if (cue !== this.cue) {
       this.stopSource(.35);
