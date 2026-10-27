@@ -6,10 +6,10 @@ import { packKidsGame, unpackKidsGame } from '../src/shared/kids-remote';
 import { existsSync, readFileSync } from 'node:fs';
 
 describe('Fünf Musikstücke für die Show-Sequenzen', () => {
-  it('begleitet Runden und Vorlesen bis zum Countdown, hält Stopp und Wertung still und spielt Outro zur Verabschiedung', () => {
+  it('begleitet Runden und Vorlesen bis zum Countdown, begleitet Stopp und Wertung mit Erklärungsmusik und spielt Outro zur Verabschiedung', () => {
     const game = createKidsGame();
     for (const index of [0, 4, 9]) {
-      for (const [phase, expected] of Object.entries({ welcome: null, chapter: 'round', reading: 'round', scene: 'round', moving: 'countdown', locked: null, returning: null, judging: null, revealed: 'reveal', superbluff: 'round', finished: 'outro', paused: null })) {
+      for (const [phase, expected] of Object.entries({ welcome: 'reveal', chapter: 'round', reading: 'round', scene: 'round', moving: 'countdown', locked: 'intro', returning: 'intro', judging: 'intro', revealed: 'reveal', superbluff: 'round', finished: 'outro', paused: null })) {
         expect(kidsMusicStage({ ...game, index, phase: phase as typeof game.phase })).toBe(expected);
       }
     }
@@ -23,13 +23,26 @@ describe('Fünf Musikstücke für die Show-Sequenzen', () => {
     expect(kidsMusicStage(video)).toBe('intro');
     expect(kidsMusicStage(updateKidsGame(video, 'pause-intro', 100))).toBeNull();
     expect(kidsMusicCue(updateKidsGame(video, 'restart-intro', 100), 'intro')).not.toBe(kidsMusicCue(video, 'intro'));
-    expect(kidsMusicStage(updateKidsGame(video, 'stop-intro', 100))).toBeNull();
+    expect(kidsMusicStage(updateKidsGame(video, 'stop-intro', 100))).toBe('reveal');
     const finale = updateKidsGame(game, 'jump-final', 0);
     const parents = updateKidsGame(finale, 'interjection:finale-parents', 1);
     expect(kidsMusicStage(parents)).toBe('intro');
     expect(kidsMusicStage(updateKidsGame(parents, 'stop-speech', 2))).toBe('round');
     expect(kidsMusicCue(updateKidsGame(parents, 'interjection:finale-parents', 2), 'intro')).not.toBe(kidsMusicCue(parents, 'intro'));
     expect(kidsMusicStage(updateKidsGame(parents, 'next', 2))).toBe('round');
+  });
+  it('verbindet Vorbereitung und Begrüßung ohne Neustart und hält die Erklärungsmusik von Stopp bis zur Auflösung durchgehend', () => {
+    const game = createKidsGame();
+    expect(kidsMusicStage(null)).toBe('reveal');
+    expect(kidsMusicCue(null, 'reveal')).toBe(kidsMusicCue(game, 'reveal'));
+    const locked = updateKidsGame({ ...game, phase: 'reading' }, 'skip-countdown', 0);
+    const returning = updateKidsGame(locked, 'return', 1);
+    const judging = updateKidsGame(returning, 'ready', 2);
+    for (const step of [locked, returning, judging, updateKidsGame(returning, 'interjection:return', 2)]) {
+      expect(kidsMusicStage(step)).toBe('intro');
+      expect(kidsMusicCue(step, 'intro')).toBe(kidsMusicCue(locked, 'intro'));
+    }
+    expect(kidsMusicStage(updateKidsGame(judging, 'correct', 3))).toBe('reveal');
   });
   it('liefert genau die fünf Original-MP3s und wiederholt den Ausklang nicht', () => {
     expect(new Set(KIDS_MUSIC_URLS).size).toBe(5);

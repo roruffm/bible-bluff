@@ -20,7 +20,7 @@ import { QRCode } from '../components/QR';
 import { ProfessorBluff, professorMood, professorSays, ShowControls, ShowScoreboard, StoryPicture } from '../components/KidsShow';
 import { KIDS_GROUPS, type KidsGroup } from '../../shared/kids-show-questions';
 import { kidsControlUrl, useKidsRemote } from '../lib/kids-remote';
-import { enableKidsSound, playKidsMusic, KIDS_SUSPENSE_MS, playKidsCue, playKidsScene, playProfessorVoice, type KidsCue } from '../lib/kids-sound';
+import { enableKidsSound, tryAutoplayKidsSound, playKidsMusic, KIDS_SUSPENSE_MS, playKidsCue, playKidsScene, playProfessorVoice, type KidsCue } from '../lib/kids-sound';
 import { clearKidsShow, loadKidsShow, saveKidsShow } from '../lib/kids-saved';
 import { checkKidsInternet, prepareKidsShow } from '../lib/kids-ready';
 import { KidsResume, KidsTechCheck, KidsTechStatus } from '../components/KidsPrepare';
@@ -75,14 +75,25 @@ export function KidsPage() {
   useEffect(() => { if (game) prepareKidsShow(); }, [!!game]);
   useLayoutEffect(() => { if (saved && !game && !remote.active) resumeButton.current?.focus(); }, [!!saved, !!game, remote.active]);
   useEffect(() => () => soundTest.current?.abort(), []);
-  const music = game?.music ?? KIDS_DEFAULT_MUSIC;
-  const musicStage = game ? kidsMusicStage(game) : null;
-  const musicCue = game && musicStage ? kidsMusicCue(game, musicStage) : '';
-  const musicActive = !!game && sound === 'on' && music.enabled && musicStage !== null;
+  // Wenn der Browser Autoplay zulässt, beginnt die Vorbereitung sofort mit Musik.
+  // Andernfalls gibt der erste Klick oder Tastendruck auf dieser Seite den Ton frei.
   useEffect(() => {
-    if (!musicActive) { kidsBackgroundMusic.pause(!game); return; }
+    if (game || sound !== 'unarmed') return;
+    try { if (tryAutoplayKidsSound()) setSound('on'); } catch { /* Der Musikknopf bleibt verfügbar. */ }
+  }, [!!game, sound]);
+  const unlockPreparationSound = (event: Event) => {
+    // Der Musikknopf übernimmt seine eigene Freigabe, damit ein Klick nicht zugleich ein- und ausschaltet.
+    if (event.target instanceof Element && event.target.closest('.kids-preparation-music')) return;
+    if (!game && sound === 'unarmed') void enableKidsSound().then(() => setSound('on')).catch(() => {});
+  };
+  const music = game?.music ?? KIDS_DEFAULT_MUSIC;
+  const musicStage = kidsMusicStage(game);
+  const musicCue = musicStage ? kidsMusicCue(game, musicStage) : '';
+  const musicActive = sound === 'on' && music.enabled && musicStage !== null;
+  useEffect(() => {
+    if (!musicActive) { kidsBackgroundMusic.pause(); return; }
     let cancelled = false;
-    void playKidsMusic(music.volume, musicStage!, musicCue, musicStage === 'countdown' ? (KIDS_ANSWER_MS - game!.remainingMs) / 1000 : game!.introVideo ? kidsIntroPosition(game!.introVideo, Date.now()) / 1000 : undefined).catch(error => {
+    void playKidsMusic(music.volume, musicStage!, musicCue, musicStage === 'countdown' ? (KIDS_ANSWER_MS - game!.remainingMs) / 1000 : game?.introVideo ? kidsIntroPosition(game.introVideo, Date.now()) / 1000 : undefined).catch(error => {
       if (!cancelled) setFullscreenError(error instanceof Error ? error.message : 'Hintergrundmusik nicht verfügbar.');
     });
     return () => { cancelled = true; };
@@ -193,7 +204,7 @@ export function KidsPage() {
   const cheering = round && round.question.group !== 'all' && (game?.phase === 'moving' || game?.phase === 'paused') ? (['minis', 'mittis', 'maxis'] as const).filter(group => group !== round.question.group) : [];
   const displayPhase = !game ? '' : finished ? 'Unsere gemeinsame Bluff-Jagd' : game.phase === 'welcome' ? 'Willkommen!' : game.index === 9 ? 'Das große Finale' : game.phase === 'chapter' ? `Kapitel ${chapter + 1} von 3` : game.phase === 'revealed' ? 'Auflösung' : `Kapitel ${chapter + 1} · Frage ${game.index % 3 + 1}`;
   const status = !game ? '' : game.phase === 'reading' ? 'Erst zuhören. Dann geht’s los!' : game.phase === 'moving' ? (lastSeconds ? 'Zählt laut mit!' : '1, 2 oder 3? Ab in euer Feld!') : game.phase === 'paused' ? 'Kurze Pause. Bleibt, wo ihr seid!' : game.phase === 'locked' ? 'Stopp! Helfer prüfen die Felder.' : game.phase === 'returning' ? 'Alle zurück zu eurer Gruppe!' : game.phase === 'judging' ? 'Jetzt wird’s spannend …' : `Richtig ist Feld ${round!.correctIndex + 1}!`;
-  return <KidsVoiceProvider game={game} enabled={sound==='on'} enable={enableVoice} act={act} busy={remote.busy} onError={setFullscreenError}><main class={`kids-page kids-show${game ? ' is-playing' : ''}${presentation && game ? ' is-projecting' : ''}${fullscreen ? ' is-fullscreen' : ''}`} ref={root} tabIndex={-1}>
+  return <KidsVoiceProvider game={game} enabled={sound==='on'} enable={enableVoice} act={act} busy={remote.busy} onError={setFullscreenError}><main class={`kids-page kids-show${game ? ' is-playing' : ''}${presentation && game ? ' is-projecting' : ''}${fullscreen ? ' is-fullscreen' : ''}`} ref={root} tabIndex={-1} onPointerDownCapture={unlockPreparationSound} onKeyDownCapture={unlockPreparationSound}>
     {game && <KidsSky game={game}/>}
     {game && moment?.kind === 'sweep' && <KidsLightSweep key={`${game.phase}-${moment.index}`}/>}
     {game && moment?.kind === 'points' && suspenseIndex < 0 && <KidsPointsFlight key={`${moment.index}-${moment.result}`} game={game} points={moment.points}/>}
@@ -226,6 +237,7 @@ export function KidsPage() {
       </ol><div class="kids-scoring-rule"><b>10</b> Mehrheit richtig · <b>5</b> mindestens ein Kind richtig<br/><b>0</b> keiner richtig<br/>Professor Bluff: +7 je Runde · Finale: Team 20 / 10 / 0 · Professor +0</div>
       <button type="button" class={`kids-button${saved && !remote.active ? '' : ' kids-primary'}`} onClick={() => startShow()}>{saved && !remote.active ? 'Neue Show vorbereiten' : 'Show vorbereiten'} <span>→</span></button>
       <button type="button" class="kids-button kids-setup-remote" disabled={remote.busy} onClick={() => startShow(true)}>Smartphone-Fernbedienung einrichten</button>
+      <button type="button" class="kids-tool kids-preparation-music" aria-pressed={sound === 'on'} onClick={() => { void toggleSound(); }}>{sound === 'on' ? '♫ Musik ausschalten' : '♫ Musik starten'}</button>
       <p class="kids-setup-note">Die Kinder sehen nur die Show. Die Helfer steuern per Fernbedienung.<br/><b>Am Computer: H</b> blendet die Mausbedienung ein oder aus. → / Leertaste: weiter · P: Pause.</p>
       <KidsTechCheck checked={checked} testing={testing} sound={sound} onCheck={() => { void checkTech(); }} fullscreen={canFullscreen ? fullscreen : null} onFullscreen={() => { void toggleFullscreen(); }}/>
       <details class="kids-organizer"><summary>Helferplan & Ablauf</summary><p>Moderation, Beamer-Bedienung und Gruppenhelfer einplanen. Genug Platz für die aktive Gruppe und begleitende Eltern lassen. Elternkarten 1–3 und ein Kissen für die Final-Pantomime bereitlegen.</p><p>Begrüßung 5 Min. · 3 Kapitel je 9 Min. · Showeinlagen 6 Min. · Finale 7 Min. Alle Punkte sind fest geregelt. Gewertet werden nur abgeschlossene Aufgaben. Über „Abschluss“ könnt ihr jederzeit den Endbildschirm zeigen.</p></details></div>

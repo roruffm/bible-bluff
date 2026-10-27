@@ -15,14 +15,16 @@ export const KIDS_MUSIC_URLS = KIDS_MUSIC_STAGES.map(kidsMusicUrl);
 
 type MusicGame = Pick<KidsGame, 'phase' | 'index' | 'introVideo' | 'voicePlaying' | 'voiceKind' | 'voiceClip' | 'voiceCue' | 'voiceSeq'>;
 
-/** Nur die Beamer-Seite spielt Musik. Nach „Stopp“ bleibt es bis zur Auflösung still. */
-export function kidsMusicStage(game: MusicGame): KidsMusicStage | null {
+/** Nur die Beamer-Seite spielt Musik, einschließlich Vorbereitung und Rückweg nach „Stopp“. */
+export function kidsMusicStage(game: MusicGame | null): KidsMusicStage | null {
+  if (!game) return 'reveal';
   if (game.introVideo) return game.introVideo.playing ? 'intro' : null;
   if (game.phase === 'paused') return null;
   if (game.phase === 'moving') return 'countdown';
   if (game.phase === 'finished') return 'outro';
   if (game.phase === 'revealed') return 'reveal';
-  if (['locked', 'returning', 'judging'].includes(game.phase)) return null;
+  if (['locked', 'returning', 'judging'].includes(game.phase)) return 'intro';
+  if (game.phase === 'welcome') return 'reveal';
   if (game.voicePlaying && game.voiceKind === 'interjection' && game.voiceClip === 'finale-parents'
       && game.voiceCue === `${game.phase}:${game.index}`) return 'intro';
   if (['chapter', 'superbluff', 'reading', 'scene'].includes(game.phase)) return 'round';
@@ -30,8 +32,13 @@ export function kidsMusicStage(game: MusicGame): KidsMusicStage | null {
 }
 
 /** Vorlesen startet die laufende Rundenmusik nicht neu; jede neue Erklärung beginnt von vorne. */
-export function kidsMusicCue(game: MusicGame, stage: KidsMusicStage): string {
-  if (stage === 'intro') return game.introVideo ? `video:${game.introVideo.sequence}` : `parents:${game.voiceSeq}`;
+export function kidsMusicCue(game: MusicGame | null, stage: KidsMusicStage): string {
+  if (!game || game.phase === 'welcome' && !game.introVideo) return `welcome:${stage}`;
+  if (stage === 'intro') {
+    if (game.introVideo) return `video:${game.introVideo.sequence}`;
+    if (['locked', 'returning', 'judging'].includes(game.phase)) return `${game.index}:after-stop`;
+    return `parents:${game.voiceSeq}`;
+  }
   return `${game.index}:${stage}`;
 }
 

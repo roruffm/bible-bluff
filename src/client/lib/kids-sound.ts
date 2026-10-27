@@ -3,6 +3,11 @@ import { PROFESSOR_VOICE_KEYS, professorVoiceUrl } from '../../shared/professor-
 import { kidsBackgroundMusic } from './kids-music';
 import type { KidsMusicStage } from '../../shared/kids-music';
 let context: AudioContext | null = null;
+/** Ohne Nutzergeste nur starten, wenn der Browser den Audiokontext bereits freigibt. */
+export function tryAutoplayKidsSound(): boolean {
+  context ??= new AudioContext();
+  return context.state === 'running';
+}
 export async function enableKidsSound() {
   context ??= new AudioContext();
   if (context.state === 'suspended') await context.resume();
