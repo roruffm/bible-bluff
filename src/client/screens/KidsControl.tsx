@@ -93,6 +93,7 @@ export function KidsControlPage() {
             <p><KidsGroupText text={round.question.direction}/></p>
             {game.phase === 'welcome' && <p>Mehrheit richtig = 10, mindestens ein Kind richtig = 5, keiner richtig = 0. Professor +{KIDS_PROFESSOR_POINTS} je regulärer Aufgabe. Finale: Kinder 20 / 10 / 0, Professor +0. Niemand scheidet aus.</p>}
             {!desktop && renderAnswers()}
+            {!desktop && kidsClaimPhase(game.phase) && <div class="kids-audio-claim"><b>Professor-Tipp · selbst vorlesen</b><p>{professorSays(game)}</p></div>}
           </details>}
         </section>}
         {(desktop || tab === 'tools') && <section key="tools" id="kids-panel-tools" class="kids-remote-panel kids-remote-tools" role={desktop ? 'region' : 'tabpanel'} aria-labelledby={desktop ? 'kids-functions-title' : 'kids-tab-tools'} tabIndex={desktop ? -1 : 0}>

@@ -7,7 +7,7 @@ export type KidsRegieStatus = 'open' | 'done' | 'skipped';
 export interface KidsRegieRound { index: number; steps: Partial<Record<KidsRegieId, KidsRegieStatus>>; selected?: KidsRegieId }
 export interface KidsRegieProgress { rounds: KidsRegieRound[] }
 export type KidsRegieAction = `regie:${'select' | 'skip' | 'do'}:${KidsRegieId}`;
-export interface KidsRegieStep { id: KidsRegieId; short: string; title: string; description: string; label: string; action?: KidsAction; audio?: boolean; scene?: boolean; optional?: boolean }
+export interface KidsRegieStep { id: KidsRegieId; short: string; title: string; description: string; label: string; action?: Exclude<KidsAction, 'tick'>; audio?: boolean; scene?: boolean; optional?: boolean }
 const CLOSING = ['locked', 'returning', 'judging', 'revealed'];
 
 export function kidsRegieAction(value: unknown): { kind: 'select' | 'skip' | 'do'; id: KidsRegieId } | null {

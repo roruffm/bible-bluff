@@ -49,7 +49,7 @@ export function KidsRegie({ game, disabled, send }: { game: KidsGame; disabled: 
       </div>
     </section>
     <p class="kids-regie-saved" aria-live="polite">{status.state === 'failed' ? 'Audio bleibt offen · Ton am Beamer prüfen.' : speaking && current.audio ? 'Häkchen nach vollständiger Wiedergabe.' : skipped > 0 ? '✓ Fortschritt gespeichert · ↷ übersprungene Schritte bleiben markiert' : '✓ Fortschritt gespeichert · jeder verfügbare Schritt direkt anwählbar'}</p>
-    <KidsMobileAudio game={game} disabled={locked} send={send} extrasOnly/>
+    <KidsMobileAudio game={game} disabled={locked} send={send} extrasOnly omitAction={game.phase === 'moving' ? 'interjection:signal-countdown' : game.phase === 'paused' ? 'interjection:signal-pause' : current.action}/>
     {back && <button type="button" class="kids-tool kids-regie-back" disabled={locked} onClick={() => invoke('back')}>← Zurück {backTargets[back.phase as keyof typeof backTargets]}</button>}
     {back && backNote && <p class="kids-regie-saved">{backNote}</p>}
   </div>;

@@ -8,7 +8,7 @@ import { professorSays } from './KidsShow';
 import './kids-mobile-audio.css';
 
 const FAVORITES_KEY = 'bb:kids:audio-favorites';
-type Props = { game: KidsGame; disabled: boolean; send: (action: KidsRemoteAction) => Promise<void>; sceneStep?: 'scene' | 'question'; onSceneStep?: (step: 'scene' | 'question') => void; extrasOnly?: boolean; children?: ComponentChildren };
+type Props = { game: KidsGame; disabled: boolean; send: (action: KidsRemoteAction) => Promise<void>; sceneStep?: 'scene' | 'question'; onSceneStep?: (step: 'scene' | 'question') => void; extrasOnly?: boolean; omitAction?: KidsRemoteAction; children?: ComponentChildren };
 
 function AudioChoice({ game, shortcut, disabled, send, favorites, toggleFavorite }: Pick<Props, 'game' | 'disabled' | 'send'> & {
   shortcut: KidsAudioShortcut; favorites: readonly ProfessorInterjectionId[]; toggleFavorite: (id: ProfessorInterjectionId) => void;
@@ -29,7 +29,7 @@ function AudioChoice({ game, shortcut, disabled, send, favorites, toggleFavorite
   </div>;
 }
 
-export function KidsMobileAudio({ game, disabled, send, sceneStep, onSceneStep, children, extrasOnly = false }: Props) {
+export function KidsMobileAudio({ game, disabled, send, sceneStep, onSceneStep, children, extrasOnly = false, omitAction }: Props) {
   const [favorites, setFavorites] = useState<ProfessorInterjectionId[]>(() => {
     try { return parseKidsAudioFavorites(localStorage.getItem(FAVORITES_KEY)); } catch { return []; }
   });
@@ -41,7 +41,7 @@ export function KidsMobileAudio({ game, disabled, send, sceneStep, onSceneStep, 
   };
   const choices = extrasOnly ? [] : kidsContextAudio(game, sceneStep ?? 'scene');
   const makeChoice = (shortcut: KidsAudioShortcut) => <AudioChoice key={`${game.index}:${game.phase}:${shortcut}`} game={game} shortcut={shortcut} disabled={disabled} send={send} favorites={favorites} toggleFavorite={toggleFavorite}/>;
-  const availableFavorites = favorites.map(id => professorInterjectionForRound(id, game.index)!).filter(clip => kidsAudioAvailable(game, clip.id) && !choices.includes(clip.id) && !choices.includes(kidsFavoriteId(clip.id)));
+  const availableFavorites = favorites.map(id => professorInterjectionForRound(id, game.index)!).filter(clip => kidsAudioAvailable(game, clip.id) && `interjection:${clip.id}` !== omitAction && !choices.includes(clip.id) && !choices.includes(kidsFavoriteId(clip.id)));
   const selected = KIDS_AUDIO_SITUATIONS.find(item => item.id === situation);
   const hasScene = game.phase === 'reading' && game.rounds[game.index].question.group === 'minis' && !!game.rounds[game.index].question.scene;
   return <div class="kids-mobile-audio">

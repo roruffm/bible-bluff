@@ -19,6 +19,7 @@ test('Smartphone-Regie: Wiedergabe, Stopp, Wiederherstellung und vollständiger 
   };
   await page.goto(`/kids/steuerung#id=${remote.id}&key=${remote.remoteToken}`);
   const step = (id: string) => page.locator(`[data-regie-step="${id}"]`);
+  await expect(page.locator('.kids-regie')).not.toContainText('Professor-Tipp');
   await runKidsRegie(page, 'call', 'Forscher aufrufen am Beamer abspielen');
   await expect(step('call')).toHaveAttribute('aria-label', 'Aufruf, offen');
   await acknowledge();
