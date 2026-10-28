@@ -1,4 +1,3 @@
-import { useEffect, useRef } from 'preact/hooks';
 import { kidsPreviousStep, type KidsGame } from '../../shared/kids-game';
 import type { KidsRemoteAction } from '../../shared/kids-remote';
 import { kidsAudioStatus } from '../../shared/kids-audio-controls';
@@ -11,9 +10,6 @@ import './kids-regie.css';
 export function KidsRegie({ game, disabled, send }: { game: KidsGame; disabled: boolean; send: (action: KidsRemoteAction) => Promise<void> }) {
   const steps = kidsRegieSteps(game), current = kidsRegieCurrent(game);
   const status = kidsAudioStatus(game), speaking = status.state === 'loading' || status.state === 'playing';
-  const previousAudio = useRef<KidsRegieId | null>(null);
-  useEffect(() => { previousAudio.current = null; }, [game.index]);
-  useEffect(() => { if (speaking && current.audio) previousAudio.current = current.id; }, [game.voiceSeq, speaking, current.id]);
   const invoke = (action: KidsRemoteAction) => { void send(action); };
   const act = (id: KidsRegieId) => invoke(`regie:do:${id}`);
   const done = steps.filter(s => kidsRegieStatus(game, s.id) === 'done').length;
@@ -27,12 +23,16 @@ export function KidsRegie({ game, disabled, send }: { game: KidsGame; disabled: 
   const mainAction = () => invoke(game.phase === 'scene' ? 'end-scene' : game.phase === 'moving' ? 'pause' : game.phase === 'paused' ? 'resume' : `regie:do:${current.id}`);
   const locked = disabled || !!game.introVideo;
   const mainDisabled = locked || current.audio && speaking && game.phase !== 'scene';
-  const repeat = previousAudio.current ?? [...steps].reverse().find(s => s.audio && kidsRegieStatus(game, s.id) === 'done' && kidsRegieCanUse(game, s.id))?.id;
+  const repeat: KidsRemoteAction | null = !(game.voiceSeq ?? 0) ? null
+    : game.voiceKind === 'interjection' && game.voiceClip ? `interjection:${game.voiceClip}`
+    : game.voiceKind === 'question' && game.phase === 'reading' ? 'read-question'
+    : game.voiceKind === 'answers' && game.phase === 'reading' ? 'read-answers'
+    : game.voiceKind === 'quote' && game.voiceCue === `${game.phase}:${game.index}` ? 'speak' : null;
   return <div class="kids-regie">
     <div class="kids-regie-round"><b>{game.index === 9 ? 'Gemeinsames Finale' : `Runde ${game.index + 1} von 10`}</b><span>{done}/{steps.length} erledigt{skipped > 0 && ` · ${skipped} übersprungen`}</span></div>
     <nav class={`kids-regie-steps${steps.length < 4 ? ' is-short' : ''}`} aria-label="Schritte dieser Runde">{steps.map((step, i) => {
       const state = kidsRegieStatus(game, step.id);
-      return <button key={step.id} type="button" class={`is-${state}`} data-regie-step={step.id} aria-current={current.id === step.id ? 'step' : undefined} aria-label={`${step.short}, ${state === 'done' ? 'erledigt' : state === 'skipped' ? 'übersprungen' : 'offen'}`} disabled={locked || !kidsRegieCanUse(game, step.id)} onClick={() => invoke(`regie:select:${step.id}`)}><span aria-hidden="true">{state === 'done' ? '✓' : state === 'skipped' ? '↷' : i + 1}</span>{step.short}</button>;
+      return <button key={step.id} type="button" class={`is-${state}`} data-regie-step={step.id} aria-current={current.id === step.id ? 'step' : undefined} aria-label={`${step.short}, ${state === 'done' ? 'erledigt' : state === 'skipped' ? 'übersprungen' : 'offen'}`} disabled={locked || !kidsRegieCanUse(game, step.id)} onClick={() => { if (current.id !== step.id) invoke(`regie:select:${step.id}`); }}><span aria-hidden="true">{state === 'done' ? '✓' : state === 'skipped' ? '↷' : i + 1}</span>{step.short}</button>;
     })}</nav>
     <KidsIntroControls game={game} disabled={disabled} act={invoke}/>
     <section class="kids-regie-action" aria-label="Nächste Aktion">
@@ -44,7 +44,7 @@ export function KidsRegie({ game, disabled, send }: { game: KidsGame; disabled: 
       {game.phase === 'moving' && <button type="button" class="kids-tool kids-regie-context" disabled={locked} aria-label="Countdown für letzte 5 Sekunden vormerken" onClick={() => invoke('interjection:signal-countdown')}>◷ Countdown für letzte 5 Sekunden vormerken</button>}
       {game.phase === 'paused' && <button type="button" class="kids-tool kids-regie-context" disabled={locked} aria-label="Pause · bleibt stehen am Beamer abspielen" onClick={() => invoke('interjection:signal-pause')}>▶ Pause · bleibt stehen</button>}
       <div class="kids-regie-smallactions">
-        {repeat && <button type="button" disabled={locked || !kidsRegieCanUse(game, repeat)} onClick={() => act(repeat)}>↶ Letzte Ansage</button>}
+        {repeat && <button type="button" disabled={locked || game.phase === 'scene'} onClick={() => invoke(repeat)}>↶ Letzte Ansage</button>}
         {current.optional && game.phase !== 'scene' && <button type="button" class="kids-regie-skip" aria-label={current.id === 'countdown' ? 'Countdown überspringen' : 'Überspringen ⏭'} disabled={locked} onClick={() => invoke(game.phase === 'moving' || game.phase === 'paused' ? 'skip-countdown' : `regie:skip:${current.id}`)}>{current.id === 'countdown' ? 'Countdown überspringen' : 'Überspringen'} ⏭</button>}
       </div>
     </section>

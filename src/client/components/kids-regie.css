@@ -20,7 +20,7 @@
 .kids-remote-page .kids-regie-main.is-scene { background: #b83d49; color: #fff; border-color: #872d36; box-shadow: 0 3px 0 #872d36; }
 .kids-remote-page .kids-regie-scene-next { width: 100%; min-height: 48px; margin-top: 12px; padding: 11px 8px; border-radius: 11px; font-size: 13px; white-space: normal; background: #b83d49; color: #fff; border-color: #872d36; box-shadow: 0 3px 0 #872d36; }
 .kids-regie-smallactions { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px 10px; margin-top: 8px; }
-.kids-regie-smallactions > button { min-height: 44px; padding: 8px 0; border: 0; background: transparent; box-shadow: none; color: #40596a; font: inherit; font-size: 12px; cursor: pointer; }
+.kids-remote-page .kids-regie-smallactions > button { min-height: 44px; padding: 8px 0; border: 0; background: transparent; box-shadow: none; color: #40596a; font: inherit; font-size: 12px; cursor: pointer; }
 .kids-regie-smallactions > .kids-regie-skip { margin-left: auto; }
 .kids-regie-saved { margin: 0; color: #40596a; font-size: 11px; line-height: 1.5; }
 .kids-remote-page .kids-regie-context { width: 100%; min-height: 44px; margin-top: 12px; font-size: 12px; padding: 9px; background: #f1eafb; white-space: normal; }

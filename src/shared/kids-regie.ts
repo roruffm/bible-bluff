@@ -142,10 +142,16 @@ export function kidsRegieAfterAction(before: KidsGame, after: KidsGame, action: 
   if (action === 'scene' && after.phase === 'scene') next = write(next, 'scene', 'open', 'scene');
   if (before.phase === 'scene' && action === 'tick' && after.phase === 'reading') next = write(next, 'scene', 'done');
   if (before.phase === 'scene' && action === 'end-scene') next = write(next, 'scene', 'skipped');
-  if (action === 'start' && after.phase === 'moving') next = write(next, 'countdown', 'done');
+  if (action === 'start' && after.phase === 'moving') {
+    for (const step of prep(before)) if (step.id !== 'countdown' && kidsRegieStatus(before, step.id) === 'open') next = write(next, step.id, 'skipped');
+    next = write(next, 'countdown', 'done');
+  }
   if (action === 'skip-countdown') next = write(next, 'countdown', 'skipped');
   if (action === 'return' && after.phase === 'returning') next = write(next, 'recall', 'open');
-  if (action === 'ready' && after.phase === 'judging') next = write(next, 'back', 'done');
+  if (action === 'ready' && after.phase === 'judging') {
+    if (kidsRegieStatus(before, 'recall') === 'open') next = write(next, 'recall', 'skipped');
+    next = write(next, 'back', 'done');
+  }
   if (['correct', 'participated', 'none'].includes(action) && after.phase === 'revealed') next = write(next, 'result', 'done');
   if (['correct-last', 'participated-last', 'none-last'].includes(action) && after.phase === 'revealed' && before.results[before.index] !== after.results[after.index]) next = write(next, 'announce', 'open', 'announce');
   if (action === 'back') {

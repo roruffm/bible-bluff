@@ -144,7 +144,9 @@ test('Kids: Smartphone synchronisiert Maus, Wertung, Neuladen und Netzabbruch',a
   await context.close();
 });
 test('Kids: alle Showfragen passen bei 800×600, 4:3, 720p, Full HD und 1440p',async({page})=>{
+  await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.addInitScript(()=>{Math.random=()=>0;}); await page.goto('/kids'); await begin(page); await page.clock.install();
+  await page.evaluate(() => document.fonts.ready);
   const viewports=[{width:800,height:600},{width:1024,height:768},{width:1280,height:720},{width:1920,height:1080},{width:2560,height:1440}];
   async function check() {
     const issues=await page.evaluate(()=>{
