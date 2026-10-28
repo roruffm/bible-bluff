@@ -18,7 +18,11 @@ export async function selectKidsRegie(page: Page, id: string) {
 export async function runKidsRegie(page: Page, id: string, desktopLabel: string) {
   const desktop = await waitForLayout(page);
   const regie = page.locator('.kids-regie');
-  if (desktop) { await page.getByRole('button', { name: desktopLabel, exact: true }).click(); return; }
+  if (desktop) {
+    const name = ['answers', 'question', 'welcome'].includes(id) ? `▶ ${desktopLabel}` : desktopLabel;
+    await page.getByRole('button', { name, exact: true }).click({ timeout: 15000 });
+    return;
+  }
   if (id === 'recall') {
     await expect(regie.locator('[data-regie-step="recall"]')).toBeEnabled();
     const check = regie.getByRole('button', { name: 'Helfer sind fertig', exact: true });
@@ -32,5 +36,5 @@ export async function runKidsRegie(page: Page, id: string, desktopLabel: string)
       await regie.getByRole('button', { name: 'Überspringen ⏭', exact: true }).click();
     }
   } else await selectKidsRegie(page, id);
-  await regie.locator('.kids-regie-main').click();
+  await regie.locator('.kids-regie-main').click({ timeout: 15000 });
 }

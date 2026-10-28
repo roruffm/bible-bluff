@@ -25,16 +25,16 @@ jobs:
       # Das Runner-Image bringt Chrome mit H.264/AAC bereits mit.
       - name: Check system Chrome
         run: google-chrome --version
+      - name: Check Kids remote audio controls
+        run: npm run test:e2e -- e2e/kids-answer-voice.spec.ts e2e/kids-finale-points.spec.ts e2e/kids-regie.spec.ts --max-failures=1
+        env:
+          CI: 'true'
       - name: Check Kids intro video playback
         run: npm run test:e2e -- e2e/kids-intro.spec.ts --max-failures=1
         env:
           CI: 'true'
       - name: Check Kids visual consistency
         run: npm run test:e2e -- e2e/kids-visual-consistency.spec.ts e2e/professor-motion.spec.ts e2e/kids-show-effects.spec.ts --max-failures=1
-        env:
-          CI: 'true'
-      - name: Check Kids remote audio controls
-        run: npm run test:e2e -- e2e/kids-answer-voice.spec.ts e2e/kids-finale-points.spec.ts e2e/kids-regie.spec.ts --max-failures=1
         env:
           CI: 'true'
       - run: npm run test:e2e -- --max-failures=5 --grep-invert 'Erklärvideo:'
