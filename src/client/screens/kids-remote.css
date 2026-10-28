@@ -54,6 +54,7 @@
 .kids-remote-page .kids-soundboard .kids-question-read { background: #70449b; color: #fff; border-color: #513171; box-shadow: 0 4px 0 #513171; }
 .kids-remote-page .kids-soundboard .kids-scene-play { background: #b83d49; color: #fff; border-color: #872d36; box-shadow: 0 4px 0 #872d36; }
 .kids-remote-page .kids-scene-play { margin-top: 14px; }
+.kids-remote-page .kids-scene-controls .kids-scene-play { margin-top: 0; }
 .kids-audio-claim { border-left: 3px solid #7651a5; padding: 10px 12px; background: #f1eafb; border-radius: 0 10px 10px 0; font-size: 13px; line-height: 1.5; }
 .kids-audio-claim > p { margin-top: 6px; }
 .kids-remote-page .kids-all-audio { background: #fffdf8; }

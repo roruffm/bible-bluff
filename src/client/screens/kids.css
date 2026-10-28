@@ -258,8 +258,10 @@
 .kids-operator-actions { display: flex; flex-direction: column; justify-content: center; gap: 7px; max-width: 390px; }
 .kids-show-stage .kids-controls { padding-bottom: 3px; }
 .kids-show-stage .kids-controls .kids-button { font-size: clamp(14px,1.3vw,24px); padding: 9px 14px; }
-.kids-extra-controls { display: flex; justify-content: flex-end; gap: 8px; }
+.kids-extra-controls { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
 .kids-extra-controls .kids-tool { padding: 5px 9px; font-size: 12px; }
+.kids-scene-controls { display: flex; flex-direction: column; gap: 10px; }
+.kids-show button.kids-scene-invite, .kids-remote-page .kids-soundboard button.kids-scene-invite { background: #70449b; color: #fff; border-color: #513171; box-shadow: 0 4px 0 #513171; }
 .kids-score-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .kids-show-stage .kids-score-actions .kids-button { padding: 8px; font-size: 13px; white-space: normal; }
 .kids-score-actions > .kids-tool { grid-column: 1 / -1; justify-self: center; font-size: 11px; border: 0; background: transparent; box-shadow: none; padding: 2px; }

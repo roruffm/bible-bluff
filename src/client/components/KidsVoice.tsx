@@ -5,7 +5,7 @@ import { professorAnswerVoiceKeys, professorVoiceKey } from '../../shared/profes
 import { professorInterjection } from '../../shared/professor-interjections';
 import { playProfessorVoice, playProfessorVoiceSequence } from '../lib/kids-sound';
 
-const VoiceContext = createContext<{ available:boolean; playing:'quote'|'question'|'answers'|null; answerField:number|null; questionAvailable:boolean; busy:boolean; play:()=>void; read:()=>void; readAnswers:()=>void; stop:()=>void } | null>(null);
+const VoiceContext = createContext<{ available:boolean; playing:'quote'|'question'|'answers'|null; answerField:number|null; questionAvailable:boolean; sceneInviteAvailable:boolean; busy:boolean; play:()=>void; read:()=>void; readAnswers:()=>void; inviteScene:()=>void; stop:()=>void } | null>(null);
 
 /** Lokale Rückmeldung der tatsächlich gestarteten Aufnahme, auch bei Smartphone-Bedienung. */
 export function useKidsSpokenAnswer(): number | null {
@@ -54,10 +54,11 @@ export function KidsVoiceProvider({ game, enabled, enable, act, busy, onError, c
     return () => { if(playback.current===controller) playback.current=null; controller.abort(); };
   },[game?.voiceSeq,game?.phase,game?.index,game?.voiceKind,game?.voiceClip,enabled]);
   useEffect(()=>()=>{currentCue.current=null;playback.current?.abort();},[]);
-  const request=(action:'speak'|'read-question'|'read-answers')=>{const cue=currentCue.current;onError('');setPreparing(true);void enable().then(()=>{if(cue!==null && currentCue.current===cue)act(action);}).catch(error=>onError(error instanceof Error ? error.message : 'Professor-Ton nicht verfügbar.')).finally(()=>setPreparing(false));};
+  const request=(action:'speak'|'read-question'|'read-answers'|'interjection:scene-invite')=>{const cue=currentCue.current;onError('');setPreparing(true);void enable().then(()=>{if(cue!==null && currentCue.current===cue)act(action);}).catch(error=>onError(error instanceof Error ? error.message : 'Professor-Ton nicht verfügbar.')).finally(()=>setPreparing(false));};
   const spokenField=game?.phase==='reading' && game.voicePlaying && game.voiceKind==='answers' && answerField && answerField.sequence===game.voiceSeq ? answerField.field : null;
-  return <VoiceContext.Provider value={{available:!!game && !!professorVoiceKey(game),questionAvailable:game?.phase==='reading',playing:playing==='interjection' ? null : playing,answerField:spokenField,busy:busy||preparing,
+  return <VoiceContext.Provider value={{available:!!game && !!professorVoiceKey(game),questionAvailable:game?.phase==='reading',sceneInviteAvailable:game?.phase==='reading' && game.rounds[game.index].question.group==='minis' && !!game.rounds[game.index].question.scene,playing:playing==='interjection' ? null : playing,answerField:spokenField,busy:busy||preparing,
     play:()=>request('speak'),read:()=>request('read-question'),readAnswers:()=>request('read-answers'),
+    inviteScene:()=>request('interjection:scene-invite'),
     stop:()=>{stop();act('stop-speech');},
   }}>{children}</VoiceContext.Provider>;
 }
@@ -82,4 +83,11 @@ export function KidsAnswersVoiceButton() {
   if(!voice?.questionAvailable)return null;
   const reading=voice.playing==='answers';
   return <button type="button" class="kids-tool kids-question-voice" title="Professor Bluff liest alle drei Antworten in der Reihenfolge der Felder vor" disabled={voice.busy} onClick={reading ? voice.stop : voice.readAnswers}>{reading ? '■ Antworten stoppen' : '▶ Antworten vorlesen'}</button>;
+}
+
+/** Manuelle Ansage direkt vor der Szene, ohne den Szenenablauf oder Countdown zu starten. */
+export function KidsSceneInviteVoiceButton() {
+  const voice=useContext(VoiceContext);
+  if(!voice?.sceneInviteAvailable)return null;
+  return <button type="button" class="kids-tool kids-scene-invite" disabled={voice.busy} onClick={voice.inviteScene}><span aria-hidden="true">▶</span> Seht euch die Szene an</button>;
 }

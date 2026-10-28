@@ -11,7 +11,7 @@ import { KidsTrail } from '../components/KidsTrail';
 import { KidsSky } from '../components/KidsSky';
 import { KidsAnswers } from '../components/KidsAnswers';
 import { KidsBannerMascot, KidsLightSweep, KidsPointsFlight, useKidsPresentationMoment } from '../components/KidsShowEffects';
-import { KidsAnswersVoiceButton, KidsQuestionVoiceButton, KidsVoiceProvider } from '../components/KidsVoice';
+import { KidsAnswersVoiceButton, KidsQuestionVoiceButton, KidsSceneInviteVoiceButton, KidsVoiceProvider } from '../components/KidsVoice';
 import { KidsFinish, KidsFinishDialog } from '../components/KidsFinish';
 import { KidsReveal } from '../components/KidsReveal';
 import { KidsRegroup } from '../components/KidsRegroup';
@@ -260,7 +260,7 @@ export function KidsPage() {
         <KidsAnswers game={game}/>
         <div class="kids-bottom">
           <KidsStageClock side="left" seconds={seconds} progress={game.remainingMs / KIDS_ANSWER_MS} locked={game.phase==='locked'} urgent={game.phase==='moving' && seconds<=5} cheer={cheering[0]}/>
-          <div class="kids-operator-actions">{game.phase==='reading' && <div class="kids-extra-controls"><KidsQuestionVoiceButton/><KidsAnswersVoiceButton/>{round.question.scene && <button type="button" class="kids-tool" disabled={remote.busy} onClick={()=>act('scene')}>Szene abspielen</button>}</div>}<ShowControls game={game} act={act} disabled={remote.busy} primaryRef={primary}/></div>
+          <div class="kids-operator-actions">{game.phase==='reading' && <div class="kids-extra-controls"><KidsQuestionVoiceButton/><KidsAnswersVoiceButton/>{round.question.scene && <div class="kids-scene-controls"><KidsSceneInviteVoiceButton/><button type="button" class="kids-tool" disabled={remote.busy} onClick={()=>act('scene')}>Szene abspielen</button></div>}</div>}<ShowControls game={game} act={act} disabled={remote.busy} primaryRef={primary}/></div>
           <KidsStageClock side="right" seconds={seconds} progress={game.remainingMs / KIDS_ANSWER_MS} locked={game.phase==='locked'} urgent={game.phase==='moving' && seconds<=5} cheer={cheering[1]}/>
         </div>
       </section>}

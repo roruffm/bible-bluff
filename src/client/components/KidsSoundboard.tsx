@@ -35,7 +35,10 @@ export function KidsPhaseAudio({ game, disabled, send, compact = false }: Compac
     <div class="kids-soundboard-clips">
       {groupCall && <InterjectionButton clip={groupCall} game={game} disabled={disabled} send={send} compact={compact}/>}
       {game.index === 9 && (game.phase === 'superbluff' || game.phase === 'reading') && <div class="kids-audio-clip"><button class="kids-button kids-question-read" type="button" disabled={disabled} onClick={() => { void send('interjection:finale-parents'); }}>▶ Eltern-Pantomime erklären</button></div>}
-      {game.phase === 'reading' && game.rounds[game.index].question.scene && <div class="kids-audio-clip"><button class="kids-button kids-scene-play" type="button" aria-label="Szene am Beamer abspielen" disabled={disabled} onClick={() => { void send('scene'); }}>▷ Szene am Beamer abspielen</button></div>}
+      {game.phase === 'reading' && game.rounds[game.index].question.scene && <div class="kids-audio-clip kids-scene-controls">
+        {game.rounds[game.index].question.group === 'minis' && <button class="kids-button kids-scene-invite" type="button" disabled={disabled} onClick={() => { void send('interjection:scene-invite'); }}><span aria-hidden="true">▶</span> Seht euch die Szene an</button>}
+        <button class="kids-button kids-scene-play" type="button" aria-label="Szene am Beamer abspielen" disabled={disabled} onClick={() => { void send('scene'); }}>▷ Szene am Beamer abspielen</button>
+      </div>}
       {game.phase === 'reading' && <div class="kids-audio-clip"><button class="kids-button kids-question-read" type="button" disabled={disabled} onClick={() => { void send('read-question'); }}>▶ Frage am Beamer vorlesen</button></div>}
       {game.phase === 'reading' && <div class="kids-audio-clip"><button class="kids-button kids-question-read" type="button" disabled={disabled} title="Alle drei Antworten in der Reihenfolge der Felder 1, 2, 3 am Beamer vorlesen" onClick={() => { void send('read-answers'); }}>▶ Antworten vorlesen</button></div>}
       {professorVoiceKey(game) && <div class="kids-audio-clip"><button type="button" class="kids-button" disabled={disabled} title={compact ? professorSays(game) : undefined} onClick={() => { void send('speak'); }}>▶ Spruch am Beamer abspielen</button><p>{professorSays(game)}</p></div>}
@@ -58,7 +61,7 @@ export function KidsSoundboard({ game, disabled, send, compact = false }: Compac
   const pinnedAudio: readonly ProfessorInterjectionId[] = isForscherRound ? ['parents-help', 'walk'] : ['walk'];
   const quickAudio = [...pinnedAudio, ...(compact ? QUICK_AUDIO : [])].filter(id => !(phaseAudio[game.phase] as readonly string[]).includes(id));
   const clips = PROFESSOR_INTERJECTIONS.filter(clip => professorInterjectionForRound(clip.id, game.index)?.id === clip.id)
-    .filter(clip => clip.id !== 'walk' && clip.id !== 'parents-help')
+    .filter(clip => clip.id !== 'walk' && clip.id !== 'parents-help' && clip.id !== 'scene-invite')
     .filter(clip => clip.id !== 'finale-parents' || game.index === 9)
     .filter(clip => term ? `${clip.label} ${clip.text} ${clip.category}`.toLocaleLowerCase('de').includes(term) : clip.category === category);
   return <section class={`kids-remote-direction kids-soundboard kids-all-audio${compact ? ' is-compact' : ''}`} aria-labelledby="kids-soundboard-title">

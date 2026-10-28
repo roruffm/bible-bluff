@@ -1,6 +1,12 @@
 /** Kurze, jederzeit manuell abspielbare Ansagen in Professor Bluffs Snorre-Stimme. */
 export const PROFESSOR_INTERJECTIONS = [
   {
+    "id": "scene-invite",
+    "label": "Seht euch die Szene an",
+    "category": "Ablauf",
+    "text": "Ansage vor der Forscher-Szene."
+  },
+  {
     "id": "parents-help",
     "label": "Eltern helfen",
     "category": "Mitmachen",
