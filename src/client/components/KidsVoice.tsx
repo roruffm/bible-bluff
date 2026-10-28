@@ -35,7 +35,7 @@ export function KidsVoiceProvider({ game, enabled, enable, act, busy, onError, c
     previous.current=sequence;
     // Ein Seitenaufruf, Phasenwechsel oder erneutes Verbinden löst keine Sprache aus.
     if (game.introVideo || !requested || !game.voicePlaying || (!key && game.voiceKind !== 'answers') || game.voiceCue!==`${game.phase}:${game.index}`) {
-      if (initial && game.voicePlaying && !game.introVideo) act(`voice-status:${sequence}:ended`);
+      if (initial && game.voicePlaying && !game.introVideo) act(`voice-status:${sequence}:failed`);
       return;
     }
     // Die automatische Startansage meldet keinen Fehler, wenn der Klang am Beamer bewusst aus ist.

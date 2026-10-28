@@ -30,6 +30,24 @@ function setup(store: KidsRemoteStore = new MemoryKidsRemoteStore()) {
 }
 
 describe('Kids-Fernbedienung', () => {
+  it('speichert Regieschritte gemeinsam mit der Partie und übernimmt Häkchen nur nach Beamer-Rückmeldung', async () => {
+    const t = setup(), made = await t.create(), path = `/api/kids-remotes/${made.id}`;
+    const selected = await t.call('POST', path + '/action', { action: 'regie:select:invite', version: 1 }, made.remoteToken);
+    expect(selected.body.game.regie?.rounds[0].selected).toBe('invite');
+    expect(selected.body.game.voicePlaying).toBe(false);
+    const requested = await t.call('POST', path + '/action', { action: 'regie:do:invite', version: 2 }, made.remoteToken);
+    const sequence = requested.body.game.voiceSeq!;
+    expect(requested.body.game.regie?.rounds[0].steps).toMatchObject({ call: 'skipped', invite: 'open' });
+    expect((await t.call('POST', path + '/action', { action: `voice-status:${sequence}:playing`, version: 3 }, made.ownerToken)).status).toBe(200);
+    const finished = await t.call('POST', path + '/action', { action: `voice-status:${sequence}:ended`, version: 4 }, made.ownerToken);
+    expect(finished.body.game.regie?.rounds[0].steps.invite).toBe('done');
+    t.reboot();
+    const restored = await t.call('GET', path, undefined, made.remoteToken);
+    expect(restored.body.game.regie).toEqual(finished.body.game.regie);
+    expect(restored.body.game.voicePlaying).toBe(false);
+    expect((await t.call('POST', path + '/action', { action: 'regie:do:result', version: 5 }, made.remoteToken)).status).toBe(409);
+    expect((await t.call('POST', path + '/action', { action: 'regie:do:professor', version: 5 }, made.remoteToken)).status).toBe(400);
+  });
   it('akzeptiert Wiedergabemeldungen nur vom Beamer und stoppt keine inzwischen neue Ansage', async () => {
     const t = setup(), made = await t.create(), path = `/api/kids-remotes/${made.id}/action`;
     const spoken = await t.call('POST', path, { action: 'interjection:cheer', version: 1 }, made.remoteToken);

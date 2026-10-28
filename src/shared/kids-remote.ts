@@ -1,3 +1,4 @@
+import { parseKidsRegie } from './kids-regie';
 import { KIDS_ANSWER_MS, kidsVoiceStatusAction, type KidsGame, type KidsAction, type KidsPhase, type KidsResult } from './kids-game';
 import { KIDS_SCENE_MS } from './kids-scenes';
 import { KIDS_SHOW_QUESTIONS } from './kids-show-questions';
@@ -32,6 +33,7 @@ export function packKidsGame(game: KidsGame, now: number) {
     voiceKind: game.voiceKind ?? 'quote',
     voiceClip: game.voiceClip ?? null,
     voiceStatus: game.voiceStatus,
+    regie: game.regie,
     music: game.music ?? KIDS_DEFAULT_MUSIC,
     introVideo: game.introVideo ? { ...game.introVideo, positionMs: kidsIntroPosition(game.introVideo, now), startedAt: undefined } : undefined,
     sceneRemainingMs: game.phase === 'scene' ? Math.min(KIDS_SCENE_MS, Math.max(0, (game.deadline ?? now) - now)) : undefined,
@@ -82,6 +84,7 @@ function unpack(value: unknown, now: number): KidsGame {
     voiceStatus = kidsVoiceStatusAction(`voice-status:${status.sequence}:${status.state}`) ?? undefined;
     if (!voiceStatus || voiceStatus.sequence > Number(voiceSeq)) return invalid();
   }
+  const regie = game.regie === undefined ? undefined : parseKidsRegie(game.regie) ?? invalid();
   let introVideo: KidsIntroVideo | undefined;
   let music: KidsMusicSettings | undefined;
   if (game.music !== undefined) {
@@ -108,5 +111,5 @@ function unpack(value: unknown, now: number): KidsGame {
   }
   if (game.remainingMs === 0 && (phase === 'moving' || phase === 'paused')) phase = 'locked';
   const remainingMs = ['welcome', 'chapter', 'superbluff', 'reading', 'scene'].includes(phase) ? KIDS_ANSWER_MS : ['locked', 'returning', 'judging', 'revealed', 'finished'].includes(phase) ? 0 : game.remainingMs;
-  return { rounds, index, phase, remainingMs, deadline: phase === 'scene' ? now + sceneRemainingMs : phase === 'moving' ? now + remainingMs : null, results: game.results as (KidsResult | null)[], cueSeq: Number(game.cueSeq), voiceSeq: Number(voiceSeq), voicePlaying, voiceCue: voiceCue as string|null, voiceKind:voiceKind as KidsGame['voiceKind'], voiceClip: voiceClip as KidsGame['voiceClip'], ...(voiceStatus ? { voiceStatus } : {}), ...(introVideo ? { introVideo } : {}), ...(music ? { music } : {}) };
+  return { rounds, index, phase, remainingMs, deadline: phase === 'scene' ? now + sceneRemainingMs : phase === 'moving' ? now + remainingMs : null, results: game.results as (KidsResult | null)[], cueSeq: Number(game.cueSeq), voiceSeq: Number(voiceSeq), voicePlaying, voiceCue: voiceCue as string|null, voiceKind:voiceKind as KidsGame['voiceKind'], voiceClip: voiceClip as KidsGame['voiceClip'], ...(regie ? { regie } : {}), ...(voiceStatus ? { voiceStatus } : {}), ...(introVideo ? { introVideo } : {}), ...(music ? { music } : {}) };
 }

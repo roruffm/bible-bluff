@@ -486,6 +486,11 @@
 
 /* Die Kinderbühne bleibt auch bei Hover, Tastaturfokus und auf kleinen Displays frei von Bedienung. H öffnet bewusst die Computerbedienung. */
 .kids-show.is-projecting :is(.kids-top-actions, .kids-controls, .kids-voice-play, .kids-question-voice, .kids-extra-controls, .kids-cinema-controls, .kids-regroup-operator, .kids-control-hint, .kids-connection-note) { display: none !important; }
+/* Bei niedrigen Beamern brauchen zweizeilige Antworten genug Platz für ihr Bild. */
+@media (min-width: 760px) and (max-height: 700px) {
+  .kids-show .kids-show-stage .has-pictures .kids-answer { padding-top: 8px; }
+  .kids-show .kids-show-stage .kids-answer > .kids-story-picture { margin-top: 6px; }
+}
 .kids-show .kids-setup-remote { width: 100%; margin-top: 14px; font-size: 16px; white-space: normal; }
 
 /* Bühne: Nachthimmel, Bühnenlicht, Gruppenfarbe und Spur. Der Professor steht in der Kinderansicht unten zwischen den Uhren. */

@@ -1,3 +1,4 @@
+import { runKidsRegie } from './kids-regie';
 import { showKidsOperator } from './kids-operator';
 import { expect, test } from '@playwright/test';
 import { createKidsGame } from '../src/shared/kids-game';
@@ -59,8 +60,8 @@ test('Smartphone überspringt den laufenden Countdown, stoppt vorgemerkte Sprach
     await expect(page.getByTestId('team-score')).toHaveText('0');
     await expect(page.locator('.kids-answer.is-correct')).toHaveCount(0);
     await expect(phone.getByRole('button', { name: 'Mehrheit richtig · +10', exact: true })).toHaveCount(0);
-    await phone.getByRole('button', { name: 'Zurück in die Gruppen', exact: true }).click();
-    await phone.getByRole('button', { name: 'Alle sind zurück', exact: true }).click();
+    await runKidsRegie(phone, 'recall', 'Zurück in die Gruppen');
+    await runKidsRegie(phone, 'back', 'Alle sind zurück');
     await phone.getByRole('button', { name: 'Mehrheit richtig · +10', exact: true }).click();
     await expect(page.getByTestId('team-score')).toHaveText('10');
   } finally { await context.close(); }

@@ -1,3 +1,4 @@
+import { runKidsRegie, selectKidsRegie } from './kids-regie';
 import { openKidsAudioSituation } from './kids-audio-menu';
 import { expect, test } from '@playwright/test';
 import { createKidsGame } from '../src/shared/kids-game';
@@ -32,12 +33,14 @@ test('Finale: Smartphone holt Rückstand auf, spielt passende Punkteansagen und 
   await expect(phone.getByRole('status').filter({ hasText: 'Aktuell:' })).toHaveText('Aktuell: 5 Punkte für das Kinderteam.');
   await expect(phone.getByRole('button', { name: 'Mehrheit richtig · 10 Punkte', exact: true })).toBeVisible();
   await phone.getByRole('tab', { name: 'Ablauf', exact: true }).click();
-  await phone.getByRole('button', { name: 'Spruch am Beamer abspielen', exact: false }).click();
+  await openKidsAudioSituation(phone, 'Spiel begleiten');
+  await phone.getByRole('button', { name: 'Spruch am Beamer abspielen', exact: true }).click();
   await expect.poll(async () => (await professorAudio(page)).played.at(-1)).toBe('superbluff-finale20');
-  await phone.getByRole('button', { name: 'Gemeinsam ins Finale', exact: true }).click();
+  await runKidsRegie(phone, 'chapter', 'Gemeinsam ins Finale');
+  await selectKidsRegie(phone, 'countdown');
   await phone.getByRole('button', { name: 'Countdown überspringen', exact: true }).click();
-  await phone.getByRole('button', { name: 'Zurück in die Gruppen', exact: true }).click();
-  await phone.getByRole('button', { name: 'Alle sind zurück', exact: true }).click();
+  await runKidsRegie(phone, 'recall', 'Zurück in die Gruppen');
+  await runKidsRegie(phone, 'back', 'Alle sind zurück');
   await expect(phone.getByRole('button', { name: 'Mindestens ein Kind richtig · +10', exact: true })).toBeVisible();
   await phone.getByRole('button', { name: 'Mehrheit richtig · +20', exact: true }).click();
   await expect(page.getByTestId('team-score')).toHaveText('65');
@@ -58,7 +61,7 @@ test('Finale: Smartphone holt Rückstand auf, spielt passende Punkteansagen und 
   }
   expect(await phone.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await phone.getByRole('tab', { name: 'Ablauf', exact: true }).click();
-  await phone.getByRole('button', { name: 'Zum Abschluss', exact: true }).click();
+  await runKidsRegie(phone, 'next', 'Zum Abschluss');
   await expect(page.getByRole('heading', { name: 'Gemeinsam seid ihr stark!', exact: true })).toBeVisible();
   await expect(page.locator('.kids-ending')).toContainText('Ihr habt meinen Bluff geknackt!');
   await page.reload(); await phone.reload();

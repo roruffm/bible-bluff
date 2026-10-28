@@ -1,3 +1,4 @@
+import { runKidsRegie, selectKidsRegie } from './kids-regie';
 import { expect, test } from '@playwright/test';
 import { createKidsGame } from '../src/shared/kids-game';
 import { packKidsGame } from '../src/shared/kids-remote';
@@ -28,11 +29,12 @@ test('Smartphone: Zurück nimmt zu schnelle Klicks zurück, auch Wertung und Auf
   await phone.getByRole('button',{name:'Mindestens ein Kind richtig · +5',exact:true}).click();
   await expect(page.getByTestId('team-score')).toHaveText('15');
 
-  await phone.getByRole('button',{name:'Nächste Aufgabe',exact:true}).click();
+  await runKidsRegie(phone, 'next', 'Nächste Aufgabe');
   await expect(page.getByRole('heading',{name:game.rounds[2].question.prompt,exact:true})).toBeVisible();
-  await phone.getByRole('button',{name:'30 Sekunden starten',exact:true}).click();
+  await runKidsRegie(phone, 'countdown', '30 Sekunden starten');
   await expect(phone.getByText('Der Countdown startet danach wieder von vorn.',{exact:true})).toBeVisible();
   await phone.getByRole('button',{name:'← Zurück zum Vorlesen',exact:true}).click();
+  await selectKidsRegie(phone, 'countdown');
   await expect(phone.getByRole('button',{name:'30 Sekunden starten',exact:true})).toBeVisible();
   await expect(page.locator('.kids-clock-left')).toHaveAttribute('aria-label','30 Sekunden');
   await phone.getByRole('button',{name:'← Zurück zur Auflösung',exact:true}).click();
