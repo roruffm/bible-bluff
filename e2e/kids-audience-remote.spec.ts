@@ -1,3 +1,4 @@
+import { openKidsAudioSituation } from './kids-audio-menu';
 import { expect, test, type Page } from '@playwright/test';
 import { professorAudio, trackProfessorAudio } from './professor-audio';
 
@@ -30,7 +31,7 @@ test('Kinderbühne bleibt in allen Spielphasen ohne sichtbare Bedienung; Fernbed
     await phone.getByRole('button', { name: 'Erste Aufgabe im Kapitel', exact: true }).click();
     await expect(page.locator('#kids-question')).toBeVisible();
     await audienceOnly(page);
-    await expect(phone.locator('.kids-audio-claim')).toContainText('selbst mit Professor-Stimme vorlesen');
+    await expect(phone.locator('.kids-audio-claim')).toContainText('Mit Professor-Stimme vorlesen:');
     await expect(phone.locator('.kids-audio-claim')).toContainText(await page.locator('.kids-bluff-claim p').innerText());
     await phone.getByRole('button', { name: 'Szene am Beamer abspielen', exact: false }).click();
     await expect(page.locator('.kids-cinema')).toBeVisible();
@@ -83,7 +84,7 @@ test('Kinderbühne bleibt in allen Spielphasen ohne sichtbare Bedienung; Fernbed
   } finally { await context.close(); }
 });
 
-test('Fernbedienung trennt Ablauf, durchsuchbare Audios und Funktionen ohne Überlagerung auf kleinen Displays', async ({ page, browser }) => {
+test('Fernbedienung zeigt wenige passende Audios, Situationen und Funktionen auf kleinen Displays', async ({ page, browser }) => {
   await page.goto('/kids');
   await page.getByRole('button', { name: 'Smartphone-Fernbedienung einrichten', exact: true }).click();
   const url = await page.getByRole('link', { name: 'Fernbedienung öffnen', exact: false }).getAttribute('href');
@@ -98,16 +99,16 @@ test('Fernbedienung trennt Ablauf, durchsuchbare Audios und Funktionen ohne Übe
       await phone.setViewportSize(viewport);
       expect(await phone.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
       const order = await phone.evaluate(() => ({ action: document.querySelector('.kids-remote-actions')!.getBoundingClientRect().bottom, audio: document.querySelector('.kids-phase-audio')!.getBoundingClientRect().top }));
-      expect(order.action).toBeLessThan(order.audio);
+      expect(order.audio).toBeLessThan(order.action);
     }
-    await phone.getByRole('tab', { name: 'Zusatzaudios', exact: true }).click();
-    await expect(phone.getByRole('button', { name: 'Mission starten', exact: true })).toHaveCount(0);
-    await phone.getByRole('searchbox', { name: 'Ansage suchen', exact: true }).fill('Jesus');
+    await expect(phone.getByRole('tab', { name: 'Zusatzaudios', exact: true })).toHaveCount(0);
+    await expect(phone.locator('.kids-phase-audio .kids-mobile-audio-play')).toHaveCount(2);
+    await openKidsAudioSituation(phone, 'Mut machen');
     await expect(phone.getByRole('button', { name: 'Bei Jesus sind wir willkommen am Beamer abspielen', exact: true })).toBeVisible();
-    await phone.getByRole('searchbox', { name: 'Ansage suchen', exact: true }).fill('xyz-keine-ansage');
-    await expect(phone.getByText('Keine Ansage gefunden.', { exact: false })).toBeVisible();
-    await phone.getByRole('combobox', { name: 'Art der Ansage', exact: true }).selectOption('Spannung');
-    await expect(phone.getByRole('searchbox', { name: 'Ansage suchen', exact: true })).toHaveValue('');
+    await phone.getByRole('button', { name: 'Applaus für alle als Favorit speichern', exact: true }).click();
+    await phone.reload();
+    await expect(phone.getByRole('region', { name: 'Deine Favoriten', exact: true })).toContainText('Applaus für alle');
+    await openKidsAudioSituation(phone, 'Spiel begleiten');
     await expect(phone.getByRole('button', { name: 'Richtig knifflig am Beamer abspielen', exact: true })).toBeVisible();
     await phone.getByRole('tab', { name: 'Funktionen', exact: true }).click();
     await expect(phone.getByRole('button', { name: 'Direkt ins Finale', exact: false })).toBeVisible();

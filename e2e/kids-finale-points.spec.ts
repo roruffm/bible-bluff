@@ -1,3 +1,4 @@
+import { openKidsAudioSituation } from './kids-audio-menu';
 import { expect, test } from '@playwright/test';
 import { createKidsGame } from '../src/shared/kids-game';
 import { packKidsGame } from '../src/shared/kids-remote';
@@ -44,10 +45,9 @@ test('Finale: Smartphone holt Rückstand auf, spielt passende Punkteansagen und 
   await expect(page.locator('.kids-reveal-points')).toHaveText('+20 für euer Team!');
   await phone.getByRole('button', { name: 'Finale: Mehrheit richtig +20 am Beamer abspielen', exact: true }).click();
   await expect.poll(async () => (await professorAudio(page)).played.at(-1)).toBe('interjection-result-final-correct');
-  await phone.getByRole('button', { name: 'Finale: Jemand richtig +10 am Beamer abspielen', exact: true }).click();
+  await openKidsAudioSituation(phone, 'Punkte verkünden');
+  await phone.locator('.kids-mobile-library').getByRole('button', { name: 'Finale: Jemand richtig +10 am Beamer abspielen', exact: true }).click();
   await expect.poll(async () => (await professorAudio(page)).played.at(-1)).toBe('interjection-result-final-participated');
-  await phone.getByRole('tab', { name: 'Zusatzaudios', exact: true }).click();
-  await phone.getByRole('combobox', { name: 'Art der Ansage' }).selectOption('Auflösung');
   await expect(phone.getByRole('button', { name: 'Mehrheit richtig +10 am Beamer abspielen', exact: true })).toHaveCount(0);
   await expect(phone.getByRole('button', { name: 'Jemand richtig +5 am Beamer abspielen', exact: true })).toHaveCount(0);
   await phone.getByRole('tab', { name: 'Funktionen', exact: true }).click();

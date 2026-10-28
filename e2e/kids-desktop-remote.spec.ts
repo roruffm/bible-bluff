@@ -1,3 +1,4 @@
+import { openKidsAudioSituation } from './kids-audio-menu';
 import { expect, test } from '@playwright/test';
 import { createKidsGame } from '../src/shared/kids-game';
 import { packKidsGame } from '../src/shared/kids-remote';
@@ -63,11 +64,11 @@ test('Fernbedienung: Desktop priorisiert Aufgabe und Audios, klappt Extras auf u
     await expect(control.getByRole('tab', { name: 'Ablauf', exact: true })).toHaveAttribute('aria-selected', 'true');
     await expect(control.getByRole('button', { name: 'Weiter geht’s', exact: true })).toBeVisible();
     await expect(control.getByRole('button', { name: 'Direkt ins Finale', exact: false })).toHaveCount(0);
-    await control.getByRole('tab', { name: 'Zusatzaudios', exact: true }).click();
-    await control.getByRole('searchbox', { name: 'Ansage suchen', exact: true }).fill('knifflig');
+    await openKidsAudioSituation(control, 'Spiel begleiten');
+    await expect(control.getByRole('button', { name: 'Richtig knifflig am Beamer abspielen', exact: true })).toBeVisible();
     await control.setViewportSize({ width: 1440, height: 900 });
     await expect(control.getByRole('region', { name: 'Spiel steuern', exact: true })).toBeVisible();
-    await expect(control.getByRole('searchbox', { name: 'Ansage suchen', exact: true })).toHaveValue('knifflig');
+    await expect(control.getByRole('searchbox', { name: 'Ansage suchen', exact: true })).toHaveCount(0);
     expect((await professorAudio(page)).starts).toBe(audioBeforeResize);
     await control.getByRole('button', { name: 'Countdown überspringen', exact: true }).click();
     await control.getByRole('button', { name: 'Zurück in die Gruppen', exact: true }).click();

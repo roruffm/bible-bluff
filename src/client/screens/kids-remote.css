@@ -1,6 +1,6 @@
 /* Kompakte Smartphone-Bedienung; große Bildschirme erhalten darunter ein eigenes Pult.
  * Gleicher Look wie am Beamer: kräftige Ränder, harte Schatten, Gruppen- und Feldfarben. */
-.kids-remote-page { --remote-ink: #12324a; max-width: 640px; padding: 18px 16px max(28px, env(safe-area-inset-bottom)); background: #eef4f2; color: var(--remote-ink); }
+.kids-remote-page { --remote-ink: #12324a; max-width: 640px; padding: 18px 16px max(28px, env(safe-area-inset-bottom)); background: #eef4f2; color: var(--remote-ink); overflow: visible; }
 .kids-remote-page > .kids-remote-header { display: flex; align-items: center; gap: 14px; text-align: left; margin: 0 0 14px; padding: 10px 14px; border: 2px solid #082a3c; border-radius: 20px; background: radial-gradient(ellipse at 5% 95%, #12556a 0, transparent 70%), #12394f; color: #fffdf1; box-shadow: 0 4px 0 #082a3c; }
 .kids-remote-header .kids-logo { width: 95px; height: auto; flex: 0 0 auto; }
 .kids-remote-page .kids-remote-header h1 { font-size: 24px; margin: 0 0 4px; line-height: 1.2; }
@@ -17,10 +17,18 @@
 .kids-remote-live > strong { flex: 0 0 auto; font-size: 14px; font-variant-numeric: tabular-nums; padding: 6px 12px; border: 2px solid var(--remote-ink); border-radius: 999px; background: #fffdf1; box-shadow: 0 3px 0 var(--remote-ink); }
 .kids-remote-live.is-moving > strong { background: #ffdf8c; }
 .kids-remote-live.is-locked > strong { background: #fbd2cd; color: #832e1f; }
-.kids-remote-tabs { display: grid; grid-template-columns: 1fr 1.35fr 1.2fr; gap: 4px; padding: 4px; border: 2px solid var(--remote-ink); border-radius: 15px; background: #fffdf1; }
+.kids-remote-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border: 2px solid var(--remote-ink); border-radius: 15px; background: #fffdf1; }
 .kids-remote-tabs button { min-width: 0; min-height: 45px; border: 0; border-radius: 9px; background: transparent; color: #344e60; font: inherit; font-weight: 800; font-size: 14px; padding: 9px 5px; cursor: pointer; }
 .kids-remote-tabs [aria-selected="true"] { background: #12394f; color: white; box-shadow: 0 2px 4px #12324a20; }
 .kids-remote-stop { justify-self: stretch; min-height: 44px; border: 2px solid var(--remote-ink); border-radius: 12px; color: var(--remote-ink); background: #fffdf8; box-shadow: 0 3px 0 var(--remote-ink); font: inherit; font-size: 14px; font-weight: 800; cursor: pointer; }
+.kids-remote-playback { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px; min-width: 0; }
+.kids-remote-playback > p { margin: 0; color: #40596a; font-size: 12px; line-height: 1.4; overflow-wrap: anywhere; }
+.kids-remote-playback .kids-remote-stop { padding: 8px 12px; }
+.kids-remote-playback.is-playing > p, .kids-remote-playback.is-scheduled > p { color: #145c49; font-weight: 750; }
+.kids-remote-playback.is-failed > p { color: #922e35; font-weight: 750; }
+.kids-remote-page:not(.is-desktop) .kids-remote-step > .kids-mobile-audio { margin-block: 16px 4px; }
+.kids-remote-page:not(.is-desktop) .kids-remote-step > .kids-mobile-audio .kids-phase-audio { box-shadow: none; border-width: 1px; padding: 12px; border-radius: 14px; }
+.kids-remote-page:not(.is-desktop) .kids-remote-step > .kids-mobile-audio .kids-phase-audio h2 { font-size: 17px; }
 .kids-remote-page button:disabled { cursor: default; opacity: .5; }
 .kids-remote-page :is(button, input, select, summary):focus-visible { outline: 3px solid #7651a5; outline-offset: 3px; }
 .kids-remote-panel { display: grid; gap: 16px; margin-block: 16px 20px; min-width: 0; }
@@ -89,6 +97,23 @@
 .kids-remote-main { display: contents; }
 .kids-remote-tools-content { display: grid; gap: 16px; }
 .kids-remote-more > summary[hidden], .kids-audio-library-toggle > summary[hidden] { display: none; }
+
+/* Auf dem Handy bleiben Ansagen und nächster Spielschritt dicht beieinander. */
+.kids-remote-page:not(.is-desktop) > .kids-remote-header { padding: 8px 12px; gap: 10px; margin-bottom: 8px; }
+.kids-remote-page:not(.is-desktop) .kids-remote-header .kids-logo { width: 64px; }
+.kids-remote-page:not(.is-desktop) .kids-remote-header h1 { font-size: 20px; }
+.kids-remote-page:not(.is-desktop) .kids-remote-header p { font-size: 10px; }
+.kids-remote-page:not(.is-desktop) > .kids-remote-status { padding: 5px 8px; margin-bottom: 4px; font-size: 10px; }
+.kids-remote-page:not(.is-desktop) .kids-remote-toolbar { gap: 6px; padding-block: 7px; }
+.kids-remote-page:not(.is-desktop) .kids-remote-tabs button { min-height: 38px; padding-block: 6px; }
+.kids-remote-page:not(.is-desktop) .kids-remote-question { padding: 12px; }
+.kids-remote-page:not(.is-desktop) .kids-remote-question h2 { font-size: 20px; line-height: 1.3; }
+.kids-remote-page:not(.is-desktop) .kids-remote-question > span { margin-bottom: 8px; }
+.kids-remote-page:not(.is-desktop) .kids-audio-claim { padding: 7px 10px; margin-top: 10px; }
+.kids-remote-page:not(.is-desktop) .kids-remote-step { padding: 12px; }
+.kids-remote-page:not(.is-desktop) .kids-remote-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.kids-remote-page:not(.is-desktop) .kids-remote-actions > :is(.kids-controls, .kids-remote-farewell) { grid-column: 1 / -1; }
+.kids-remote-page:not(.is-desktop) .kids-remote-actions > :is(.kids-skip-countdown, .kids-remote-back) { min-height: 44px; padding: 8px 5px; margin: 0; font-size: 12px; }
 
 /* Am Desktop stehen Aufgabe und Audios im Vordergrund. */
 @media (min-width: 1024px) {
@@ -167,5 +192,9 @@
   .kids-remote-live > span { font-size: 13px; }
 }
 @media (max-height: 500px) {
-  .kids-remote-page:not(.is-desktop) .kids-remote-toolbar { position: static; }
+  .kids-remote-page:not(.is-desktop) .kids-remote-toolbar { position: sticky; }
+}
+@media (max-height: 500px) and (min-width: 600px) and (max-width: 1023px) {
+  .kids-remote-page:not(.is-desktop) .kids-remote-toolbar { grid-template-columns: minmax(0, 1fr) minmax(0, .8fr); }
+  .kids-remote-page:not(.is-desktop) .kids-remote-playback { grid-column: 1 / -1; }
 }

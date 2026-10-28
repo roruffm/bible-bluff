@@ -100,6 +100,7 @@ export function KidsPage() {
   }, [musicActive, music.volume, !!game, musicStage, musicCue]);
   useEffect(() => () => kidsBackgroundMusic.pause(true), []);
   const act = (action: KidsAction) => {
+    if (action !== 'tick' && action.startsWith('voice-status:') && remote.active) { void remote.notifyPlayback(action); return; }
     if (action === 'music-on' && sound !== 'on') void enableKidsSound().then(() => setSound('on')).catch(() => setSound('off'));
     if ((action === 'scene' || action === 'start') && sound === 'unarmed') void enableKidsSound().then(()=>setSound('on')).catch(()=>setSound('off'));
     if (action !== 'tick' && remote.active) { void remote.send(action); return; }

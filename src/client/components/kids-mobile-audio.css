@@ -1,0 +1,25 @@
+.kids-mobile-audio { display: grid; gap: 14px; min-width: 0; }
+.kids-mobile-audio-choices { display: grid; gap: 12px; margin-top: 12px; }
+.kids-mobile-clip { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: stretch; gap: 6px; min-width: 0; }
+.kids-remote-page .kids-mobile-audio .kids-mobile-audio-play { min-width: 0; width: 100%; min-height: 48px; padding: 11px; font-size: 14px; }
+.kids-mobile-clip > :is(.kids-audio-star, .kids-audio-info) { width: 44px; min-height: 48px; padding: 0; border: 1px solid #a9bec4; border-radius: 11px; background: #fffdf8; color: #12324a; font: inherit; font-size: 23px; cursor: pointer; }
+.kids-mobile-clip .kids-audio-star[aria-pressed="true"] { color: #755000; background: #ffebb0; border-color: #bc8e22; }
+.kids-mobile-clip .kids-audio-info { font-size: 22px; }
+.kids-mobile-clip-text { grid-column: 1 / -1; padding: 10px 12px; margin: 0; border-radius: 10px; background: #fffdf8; color: #40596a; font-size: 14px; line-height: 1.5; overflow-wrap: anywhere; }
+.kids-audio-steps { display: grid; grid-template-columns: 1fr 1.5fr; gap: 4px; padding: 4px; margin-top: 12px; border: 1px solid #a9bec4; border-radius: 12px; background: #fffdf8; }
+.kids-audio-steps > button { border: 0; padding: 10px 4px; min-height: 44px; background: transparent; color: #40596a; border-radius: 8px; font: inherit; font-size: 14px; font-weight: 800; cursor: pointer; }
+.kids-audio-steps > button[aria-pressed="true"] { color: #fff; background: #12394f; }
+.kids-remote-page .kids-mobile-audio .kids-mobile-scene-play { width: 100%; margin-top: 12px; }
+.kids-remote-page .kids-mobile-audio .kids-mobile-clip .kids-mobile-audio-play { background: #70449b; color: #fff; border-color: #513171; box-shadow: 0 3px 0 #513171; }
+.kids-remote-page .kids-mobile-audio .kids-mobile-clip .kids-mobile-audio-play:disabled { background: #70449b; }
+.kids-mobile-favorites { padding: 14px; background: #fff7df; border: 1px solid #d9c792; border-radius: 16px; }
+.kids-mobile-favorites > h2 { font-size: 16px; margin: 0; }
+.kids-mobile-more { border: 2px solid #b9cdd3; border-radius: 16px; background: #fffdf8; }
+.kids-mobile-more > summary { min-height: 52px; padding: 14px; color: #12324a; font-weight: 800; cursor: pointer; }
+.kids-mobile-more > summary small { display: block; margin: 5px 0 0 16px; font-size: 12px; font-weight: 500; color: #547080; }
+.kids-mobile-library { padding: 0 12px 14px; }
+.kids-mobile-library h3 { font-size: 17px; margin: 12px 0 0; }
+.kids-audio-situations { display: grid; gap: 8px; }
+.kids-audio-situations > button { display: flex; justify-content: space-between; align-items: center; text-align: left; min-height: 52px; padding: 12px; border: 1px solid #a9bec4; background: #eef4f2; color: #12324a; border-radius: 11px; font: inherit; font-size: 15px; font-weight: 750; cursor: pointer; }
+.kids-audio-back { min-height: 44px; padding: 6px 0; color: #40596a; background: transparent; border: 0; font: inherit; font-size: 14px; text-decoration: underline; cursor: pointer; }
+.kids-audio-favorite-hint { margin: 14px 0 0; color: #547080; font-size: 12px; line-height: 1.5; }

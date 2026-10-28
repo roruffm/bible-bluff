@@ -72,6 +72,7 @@ test('Professor: Smartphone startet und stoppt am Beamer, Neuladen spielt nichts
   expect((await counts(page)).starts).toBe(0);
   await phone.getByRole('button',{name:'Erste Aufgabe im Kapitel',exact:true}).click();
   await expect(page.locator('#kids-question')).toBeVisible();
+  await phone.getByRole('button',{name:'Frage & Antworten',exact:true}).click();
   await phone.getByRole('button',{name:'Frage am Beamer vorlesen',exact:false}).click();
   await expect.poll(async()=>(await counts(page)).starts).toBe(1);
   expect((await counts(page)).played).toEqual(['question-0']);

@@ -1,3 +1,4 @@
+import { openKidsAudioSituation } from './kids-audio-menu';
 import { showKidsOperator } from './kids-operator';
 import { expect, test } from '@playwright/test';
 import { createKidsGame } from '../src/shared/kids-game';
@@ -27,12 +28,12 @@ test('Smartphone: Wertung nach Weitergehen korrigieren, freie Ansagen und Ende s
   await expect(page.getByRole('heading',{name:game.rounds[1].question.prompt,exact:true})).toBeVisible();
   await expect(phone.getByRole('status').filter({hasText:'Aktuell:'})).toHaveText('Aktuell: 10 Punkte für das Kinderteam.');
   await phone.getByRole('tab',{name:'Funktionen',exact:true}).click();
-  await phone.getByRole('tab',{name:'Zusatzaudios',exact:true}).click();
+  await openKidsAudioSituation(phone, 'Mut machen');
   await phone.getByRole('button',{name:'Freunde anfeuern am Beamer abspielen',exact:true}).click();
   const counts=()=>professorAudio(page);
   await expect.poll(async()=>(await counts()).starts).toBe(1);
   expect((await counts()).played.at(-1)).toBe('interjection-cheer');
-  await phone.getByRole('combobox',{name:'Art der Ansage'}).selectOption('Spannung');
+  await openKidsAudioSituation(phone, 'Spiel begleiten');
   await phone.getByRole('button',{name:'Richtig knifflig am Beamer abspielen',exact:true}).click();
   await expect.poll(async()=>(await counts()).starts).toBe(2);
   expect((await counts()).played.at(-1)).toBe('interjection-tricky');
@@ -40,7 +41,7 @@ test('Smartphone: Wertung nach Weitergehen korrigieren, freie Ansagen und Ende s
   await expect.poll(async()=>(await counts()).stops).toBeGreaterThanOrEqual(1);
   expect(phoneAudio).toEqual([]);
   expect(await phone.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
-  await phone.getByRole('tab',{name:'Zusatzaudios',exact:true}).click();
+  await phone.getByRole('tab',{name:'Ablauf',exact:true}).click();
   await phone.getByRole('tab', { name: 'Funktionen', exact: true }).click(); await phone.getByRole('button',{name:'Spiel abschließen',exact:true}).click();
   await phone.getByRole('button',{name:'Jetzt mit Punktestand abschließen',exact:true}).click();
   await phone.getByRole('tab',{name:'Funktionen',exact:true}).click();
@@ -149,11 +150,13 @@ test('Smartphone: Wertungsansagen stehen bei der Auflösung und erklingen am Bea
   const phone=await context.newPage();
   await phone.goto(`/kids/steuerung#id=${remote.id}&key=${remote.remoteToken}`);
   const phaseAudio=phone.getByRole('region',{name:'Audio zur aktuellen Spielphase'});
-  for(const label of ['Mehrheit richtig +10','Jemand richtig +5','Keiner richtig +0']) await expect(phaseAudio.getByRole('button',{name:`${label} am Beamer abspielen`,exact:true})).toBeVisible();
+  await expect(phaseAudio.getByRole('button',{name:'Jemand richtig +5 am Beamer abspielen',exact:true})).toBeVisible();
+  await expect(phaseAudio.getByRole('button',{name:'Mehrheit richtig +10 am Beamer abspielen',exact:true})).toHaveCount(0);
+  await openKidsAudioSituation(phone, 'Punkte verkünden');
   const counts=()=>professorAudio(page);
   for(const [label,clip] of [['Jemand richtig +5','interjection-result-participated'],['Mehrheit richtig +10','interjection-result-correct'],['Keiner richtig +0','interjection-result-none']] as const) {
     const before=(await counts()).starts;
-    await phaseAudio.getByRole('button',{name:`${label} am Beamer abspielen`,exact:true}).click();
+    await phone.locator('.kids-mobile-library').getByRole('button',{name:`${label} am Beamer abspielen`,exact:true}).click();
     await expect.poll(async()=>(await counts()).starts).toBe(before+1);
     expect((await counts()).played.at(-1)).toBe(clip);
   }

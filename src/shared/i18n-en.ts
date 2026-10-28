@@ -11,6 +11,7 @@ export const EN: Record<string, string> = {
   'Die Verbindung wurde beendet oder ist abgelaufen.': 'The connection was closed or has expired.',
   'Dieser Fernbedienungs-Link passt nicht.': 'This remote control link is not valid.',
   'Die Verbindung kann nur am Beamer beendet werden.': 'Only the projector can close this connection.',
+  'Wiedergabe-Rückmeldungen kommen ausschließlich vom Beamer.': 'Only the projector can report playback status.',
   'Der Spielstand hat sich geändert. Bitte noch einmal tippen.': 'The game has changed. Please tap again.',
   'Dieser Schritt ist jetzt noch nicht möglich.': 'This step is not available yet.',
   'Weitere Einstellungen': 'More settings',

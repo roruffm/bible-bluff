@@ -30,25 +30,28 @@ export function KidsVoiceProvider({ game, enabled, enable, act, busy, onError, c
     stop();
     if (!game) { previous.current=null; return; }
     const sequence=game.voiceSeq ?? 0;
+    const initial = previous.current === null;
     const requested=previous.current !== null && sequence !== previous.current;
     previous.current=sequence;
     // Ein Seitenaufruf, Phasenwechsel oder erneutes Verbinden löst keine Sprache aus.
-    if (game.introVideo || !requested || !game.voicePlaying || (!key && game.voiceKind !== 'answers') || game.voiceCue!==`${game.phase}:${game.index}`) return;
+    if (game.introVideo || !requested || !game.voicePlaying || (!key && game.voiceKind !== 'answers') || game.voiceCue!==`${game.phase}:${game.index}`) {
+      if (initial && game.voicePlaying && !game.introVideo) act(`voice-status:${sequence}:ended`);
+      return;
+    }
     // Die automatische Startansage meldet keinen Fehler, wenn der Klang am Beamer bewusst aus ist.
-    if (!enabled) { if (game.voiceClip !== 'signal-go') onError('Professor-Ton am Beamer unter „Bedienung → Klang einschalten“ aktivieren. Danach den Spruch erneut starten.'); return; }
+    if (!enabled) { act(`voice-status:${sequence}:failed`); if (game.voiceClip !== 'signal-go') onError('Professor-Ton am Beamer unter „Bedienung → Klang einschalten“ aktivieren. Danach den Spruch erneut starten.'); return; }
     const controller=new AbortController(); playback.current=controller; setPlaying(game.voiceKind ?? 'quote');
     const ended=()=>{if(playback.current===controller){playback.current=null;setPlaying(null);setAnswerField(null);
-      // Die Erklärungsmusik endet mit der tatsächlich abgespielten Eltern-Ansage.
-      if(game.voiceKind==='interjection' && game.voiceClip==='finale-parents')act('stop-speech');
+      act(`voice-status:${sequence}:ended`);
     }};
     const countdownDeadline=game.voiceKind==='interjection' && game.voiceClip==='signal-countdown' && game.phase==='moving' ? game.deadline ?? undefined : undefined;
-    const started=(index:number)=>{if(playback.current===controller && !controller.signal.aborted)setAnswerField({field:Math.floor(index/2),sequence});};
+    const started=(index:number)=>{if(playback.current===controller && !controller.signal.aborted){setAnswerField({field:Math.floor(index/2),sequence});if(index===0)act(`voice-status:${sequence}:playing`);}};
     const clipEnded=()=>{if(playback.current===controller)setAnswerField(null);};
-    const playbackPromise=game.voiceKind === 'answers' ? playProfessorVoiceSequence(professorAnswerVoiceKeys(game),controller.signal,ended,started,clipEnded) : playProfessorVoice(key!,controller.signal,ended,countdownDeadline);
+    const playbackPromise=game.voiceKind === 'answers' ? playProfessorVoiceSequence(professorAnswerVoiceKeys(game),controller.signal,ended,started,clipEnded) : playProfessorVoice(key!,controller.signal,ended,countdownDeadline,()=>{if(playback.current===controller && !controller.signal.aborted)act(`voice-status:${sequence}:playing`);});
     void playbackPromise.catch(error=>{
       if (playback.current!==controller) return;
       playback.current=null;setPlaying(null);setAnswerField(null);
-      if(game.voiceKind==='interjection' && game.voiceClip==='finale-parents')act('stop-speech');
+      act(`voice-status:${sequence}:failed`);
       onError(error instanceof Error ? error.message : 'Die Professor-Aufnahme konnte nicht abgespielt werden.');
     });
     return () => { if(playback.current===controller) playback.current=null; controller.abort(); };

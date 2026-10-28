@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
-import type { KidsGame } from '../../shared/kids-game';
+import { kidsVoiceStatusAction, type KidsGame } from '../../shared/kids-game';
 import { packKidsGame, type KidsCredentials, type KidsRemoteAction, type KidsRemoteCreated, type KidsRemoteView } from '../../shared/kids-remote';
 
 const KEYS = { display: 'bb:kids:display', control: 'bb:kids:control' };
@@ -53,6 +53,7 @@ export function useKidsRemote(mode: 'display' | 'control', onGame: (game: KidsGa
   const [fatal, setFatal] = useState(false);
   const [lost, setLost] = useState(false);
   const state = useRef({ credentials, view, epoch: 0, pending: false, onGame });
+  const playbackQueue = useRef(Promise.resolve());
   state.current.onGame = onGame;
   const save = (c: KidsCredentials | null) => {
     state.current.credentials = c; state.current.epoch++;
@@ -124,7 +125,16 @@ export function useKidsRemote(mode: 'display' | 'control', onGame: (game: KidsGa
       apply(next, epoch);
     } catch (err) {
       if (err instanceof RemoteError && err.status === 409) {
-        try { apply(await request<KidsRemoteView>('GET', `/api/kids-remotes/${c.id}`, undefined, c.token), epoch); } catch (refreshError) { fail(refreshError, epoch); }
+        try {
+          const refreshed = await request<KidsRemoteView>('GET', `/api/kids-remotes/${c.id}`, undefined, c.token);
+          apply(refreshed, epoch);
+          // Eine reine Wiedergabemeldung darf den gerade gedrückten Bedienknopf nicht verschlucken.
+          const before = current.game, after = refreshed.game;
+          if (state.current.epoch === epoch && before.phase === after.phase && before.index === after.index && before.voiceSeq === after.voiceSeq && before.cueSeq === after.cueSeq && JSON.stringify(before.voiceStatus) !== JSON.stringify(after.voiceStatus)) {
+            try { apply(await request<KidsRemoteView>('POST', `/api/kids-remotes/${c.id}/action`, { action, version: refreshed.version }, c.token), epoch); }
+            catch (retryError) { if (retryError instanceof RemoteError && retryError.status === 409) apply(await request<KidsRemoteView>('GET', `/api/kids-remotes/${c.id}`, undefined, c.token), epoch); else throw retryError; }
+          }
+        } catch (refreshError) { fail(refreshError, epoch); }
       } else fail(err, epoch);
     } finally { state.current.pending = false; setBusy(false); }
   };
@@ -133,6 +143,28 @@ export function useKidsRemote(mode: 'display' | 'control', onGame: (game: KidsGa
     save(null); state.current.view = null; setView(null); setError(''); setFatal(false); setLost(false);
     if (c && mode === 'display') try { await request('DELETE', `/api/kids-remotes/${c.id}`, undefined, c.token); } catch { /* der Link läuft auch ohne erneute Verbindung ab */ }
   };
+  /** Wiedergabemeldungen werden nacheinander und bei Versionskonflikten erneut übertragen.
+   * Sie sperren keine Bedienknöpfe und gelten ausschließlich für die laufende Aufnahme. */
+  const notifyPlayback = (action: KidsRemoteAction): Promise<void> => {
+    const playback = kidsVoiceStatusAction(action);
+    if (!playback || mode !== 'display') return Promise.resolve();
+    const originEpoch = state.current.epoch;
+    const notify = async () => {
+      for (let attempt = 0; attempt < 3; attempt++) {
+        const { credentials: c, view: current, epoch } = state.current;
+        if (!c || !current || epoch !== originEpoch || current.game.voiceSeq !== playback.sequence || !current.game.voicePlaying || current.game.voiceStatus?.sequence === playback.sequence && current.game.voiceStatus.state === playback.state) return;
+        try {
+          apply(await request<KidsRemoteView>('POST', `/api/kids-remotes/${c.id}/action`, { action, version: current.version }, c.token), epoch);
+          return;
+        } catch (error) {
+          if (!(error instanceof RemoteError) || error.status !== 409) return;
+          try { apply(await request<KidsRemoteView>('GET', `/api/kids-remotes/${c.id}`, undefined, c.token), epoch); } catch { return; }
+        }
+      }
+    };
+    playbackQueue.current = playbackQueue.current.then(notify, notify);
+    return playbackQueue.current;
+  };
   // lost: Der Server ist gerade nicht erreichbar (kein Fehler des Spielzugs).
-  return { active: !!credentials, credentials, view, error, busy, fatal, lost, restoring: !!credentials && !view && !error, connect, send, disconnect };
+  return { active: !!credentials, credentials, view, error, busy, fatal, lost, restoring: !!credentials && !view && !error, connect, send, notifyPlayback, disconnect };
 }

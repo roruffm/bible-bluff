@@ -31,6 +31,7 @@ test('Antworten: Smartphone und Desktop lesen alle drei gemischten Felder am Bea
       if (field && fields.at(-1) !== field) fields.push(field);
     }).observe(document.querySelector('.kids-answers')!, { subtree:true, attributes:true });
   });
+  await remote.getByRole('button',{name:'Frage & Antworten',exact:true}).click();
   await remote.getByRole('button',{name:'Antworten vorlesen',exact:false}).click();
   await expect.poll(async()=>(await professorAudio(page)).played,{timeout:20000}).toEqual(expected);
   await expect.poll(() => page.evaluate(() => (window as unknown as {spokenFields:string[]}).spokenFields)).toEqual(['1','2','3']);

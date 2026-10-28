@@ -30,6 +30,19 @@ function setup(store: KidsRemoteStore = new MemoryKidsRemoteStore()) {
 }
 
 describe('Kids-Fernbedienung', () => {
+  it('akzeptiert Wiedergabemeldungen nur vom Beamer und stoppt keine inzwischen neue Ansage', async () => {
+    const t = setup(), made = await t.create(), path = `/api/kids-remotes/${made.id}/action`;
+    const spoken = await t.call('POST', path, { action: 'interjection:cheer', version: 1 }, made.remoteToken);
+    const sequence = spoken.body.game.voiceSeq!;
+    expect((await t.call('POST', path, { action: `voice-status:${sequence}:playing`, version: 2 }, made.remoteToken)).status).toBe(403);
+    const playing = await t.call('POST', path, { action: `voice-status:${sequence}:playing`, version: 2 }, made.ownerToken);
+    expect(playing.body.game.voiceStatus).toEqual({ sequence, state: 'playing' });
+    const ended = await t.call('POST', path, { action: `voice-status:${sequence}:ended`, version: 3 }, made.ownerToken);
+    expect(ended.body.game.voicePlaying).toBe(false);
+    const next = await t.call('POST', path, { action: 'read-question', version: 4 }, made.remoteToken);
+    expect((await t.call('POST', path, { action: `voice-status:${sequence}:ended`, version: 5 }, made.ownerToken)).status).toBe(409);
+    expect(next.body.game.voicePlaying).toBe(true);
+  });
   it('steuert die Hintergrundmusik am Beamer mit erhaltenem Timer, Sprache und gespeicherter Lautstärke', async () => {
     const t = setup(), moving = updateKidsGame(reading(), 'start', t.clock.now);
     const made = await t.create(moving), path = `/api/kids-remotes/${made.id}`;

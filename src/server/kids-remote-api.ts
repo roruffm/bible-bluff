@@ -1,4 +1,4 @@
-import { updateKidsGame, type KidsGame } from '../shared/kids-game';
+import { kidsVoiceStatusAction, updateKidsGame, type KidsGame } from '../shared/kids-game';
 import { PROFESSOR_INTERJECTIONS } from '../shared/professor-interjections';
 import { packKidsGame, unpackKidsGame, type KidsRemoteAction, type KidsRemoteView } from '../shared/kids-remote';
 import { GameError } from './state';
@@ -64,7 +64,9 @@ export function createKidsRemoteApi(store: KidsRemoteStore, now: () => number) {
     if (parts.length === 4 && parts[3] === 'action' && request.method === 'POST') {
       const data = await body(request);
       const actionNow = now();
-      if (!ACTIONS.includes(data.action as KidsRemoteAction) || !Number.isInteger(data.version)) return badRequest();
+      const playback = kidsVoiceStatusAction(data.action);
+      if ((!ACTIONS.includes(data.action as KidsRemoteAction) && !playback) || !Number.isInteger(data.version)) return badRequest();
+      if (playback && !owner) throw new GameError('remote_denied', 'Wiedergabe-Rückmeldungen kommen ausschließlich vom Beamer.', 403);
       if (data.version !== rec.version) throw new GameError('remote_conflict', 'Der Spielstand hat sich geändert. Bitte noch einmal tippen.', 409);
       const current = updateKidsGame(rec.game, 'tick', actionNow);
       const next = updateKidsGame(current, data.action as KidsRemoteAction, actionNow);

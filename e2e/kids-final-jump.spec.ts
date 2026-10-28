@@ -1,3 +1,4 @@
+import { openKidsAudioSituation } from './kids-audio-menu';
 import { showKidsOperator } from './kids-operator';
 import { expect, test } from '@playwright/test';
 import { createKidsGame } from '../src/shared/kids-game';
@@ -56,7 +57,7 @@ test('Kids: Smartphone beendet Sprache und offene Dialoge beim Finalsprung; beid
   await page.getByRole('button',{name:'Menü schließen',exact:true}).click();
   const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,locale:'de-DE'}),phone=await context.newPage();
   await phone.goto(`/kids/steuerung#id=${remote.id}&key=${remote.remoteToken}`);
-  await phone.getByRole('tab',{name:'Zusatzaudios',exact:true}).click();
+  await openKidsAudioSituation(phone, 'Mut machen');
   await phone.getByRole('button',{name:'Mit Bewegung und Geräuschen helfen am Beamer abspielen',exact:true}).click();
   const counts=()=>page.evaluate(()=>(window as unknown as {finalJumpAudio:{starts:number;stops:number}}).finalJumpAudio);
   await expect.poll(async()=>(await counts()).starts).toBe(1);
