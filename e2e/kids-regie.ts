@@ -1,17 +1,24 @@
 import { expect, type Page } from '@playwright/test';
 
-export async function selectKidsRegie(page: Page, id: string) {
+async function waitForLayout(page: Page) {
   await page.locator('.kids-remote-dashboard').waitFor({ state: 'visible' });
+  const desktop = await page.evaluate(() => matchMedia('(min-width: 1024px)').matches);
+  if (desktop) await expect(page.locator('.kids-remote-page')).toHaveClass(/is-desktop/);
+  else await expect(page.locator('.kids-remote-page')).not.toHaveClass(/is-desktop/);
+  return desktop;
+}
+export async function selectKidsRegie(page: Page, id: string) {
+  if (await waitForLayout(page)) return;
   const regie = page.locator('.kids-regie');
-  if (!await regie.count()) return;
+  await expect(regie).toBeVisible();
   const step = regie.locator(`[data-regie-step="${id}"]`);
   await expect(step).toBeEnabled();
   await step.click();
 }
 export async function runKidsRegie(page: Page, id: string, desktopLabel: string) {
-  await page.locator('.kids-remote-dashboard').waitFor({ state: 'visible' });
+  const desktop = await waitForLayout(page);
   const regie = page.locator('.kids-regie');
-  if (!await regie.count()) { await page.getByRole('button', { name: desktopLabel, exact: true }).click(); return; }
+  if (desktop) { await page.getByRole('button', { name: desktopLabel, exact: true }).click(); return; }
   if (id === 'recall') {
     await expect(regie.locator('[data-regie-step="recall"]')).toBeEnabled();
     const check = regie.getByRole('button', { name: 'Helfer sind fertig', exact: true });

@@ -34,7 +34,7 @@ test('Finale: Smartphone holt Rückstand auf, spielt passende Punkteansagen und 
   await expect(phone.getByRole('button', { name: 'Mehrheit richtig · 10 Punkte', exact: true })).toBeVisible();
   await phone.getByRole('tab', { name: 'Ablauf', exact: true }).click();
   await openKidsAudioSituation(phone, 'Spiel begleiten');
-  await phone.getByRole('button', { name: 'Spruch am Beamer abspielen', exact: false }).click();
+  await phone.getByRole('button', { name: 'Spruch am Beamer abspielen', exact: true }).click();
   await expect.poll(async () => (await professorAudio(page)).played.at(-1)).toBe('superbluff-finale20');
   await runKidsRegie(phone, 'chapter', 'Gemeinsam ins Finale');
   await selectKidsRegie(phone, 'countdown');
