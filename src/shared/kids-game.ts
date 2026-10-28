@@ -2,6 +2,7 @@ import { KIDS_SHOW_QUESTIONS, type KidsShowQuestion, type KidsGroup } from './ki
 import { KIDS_SCENE_MS } from './kids-scenes';
 import { professorInterjectionForRound, type ProfessorInterjectionId } from './professor-interjections';
 import { kidsIntroPosition, type KidsIntroVideo } from './kids-intro';
+import { applyKidsRegieAction, kidsRegieAction, kidsRegieAfterAction, type KidsRegieAction, type KidsRegieProgress } from './kids-regie';
 import { KIDS_DEFAULT_MUSIC, type KidsMusicAction, type KidsMusicSettings } from './kids-music';
 
 export const KIDS_SECONDS = 30;
@@ -32,8 +33,9 @@ export interface KidsGame {
   /** Nur in der Begrüßung der Show mit Antwortfeldern. Der Ton läuft ausschließlich am Beamer. */
   introVideo?: KidsIntroVideo;
   music?: KidsMusicSettings;
+  regie?: KidsRegieProgress;
 }
-export type KidsAction = KidsMusicAction | KidsVoiceStatusAction | 'play-intro' | 'pause-intro' | 'restart-intro' | 'stop-intro' | 'start' | 'pause' | 'resume' | 'skip-countdown' | 'back' | 'tick' | 'return' | 'ready' | 'correct' | 'participated' | 'none' | 'next' | 'scene' | 'end-scene' | 'finish' | 'jump-final' | 'speak' | 'stop-speech' | 'read-question' | 'read-answers' | 'correct-last' | 'participated-last' | 'none-last' | `interjection:${ProfessorInterjectionId}`;
+export type KidsAction = KidsRegieAction | KidsMusicAction | KidsVoiceStatusAction | 'play-intro' | 'pause-intro' | 'restart-intro' | 'stop-intro' | 'start' | 'pause' | 'resume' | 'skip-countdown' | 'back' | 'tick' | 'return' | 'ready' | 'correct' | 'participated' | 'none' | 'next' | 'scene' | 'end-scene' | 'finish' | 'jump-final' | 'speak' | 'stop-speech' | 'read-question' | 'read-answers' | 'correct-last' | 'participated-last' | 'none-last' | `interjection:${ProfessorInterjectionId}`;
 
 export function kidsCanJumpToFinal(game: KidsGame): boolean {
   const final = game.rounds.length - 1;
@@ -133,6 +135,11 @@ export function kidsOvertook(game: KidsGame): boolean {
 }
 /** Zeit und Punkte sind geräteunabhängig; doppelte oder unpassende Schritte ändern nichts. */
 export function updateKidsGame(game: KidsGame, action: KidsAction, now: number): KidsGame {
+  if (kidsRegieAction(action)) return applyKidsRegieAction(game, action as KidsRegieAction, (state, command) => updateKidsGame(state, command, now));
+  const next = updateKidsGameCore(game, action, now);
+  return next === game ? game : kidsRegieAfterAction(game, next, action);
+}
+function updateKidsGameCore(game: KidsGame, action: KidsAction, now: number): KidsGame {
   const phase = game.phase;
   const playback = kidsVoiceStatusAction(action);
   if (playback) {

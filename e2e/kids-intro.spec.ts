@@ -1,3 +1,4 @@
+import { runKidsRegie } from './kids-regie';
 import { expect, test } from '@playwright/test';
 import { showKidsOperator } from './kids-operator';
 
@@ -41,7 +42,7 @@ test('Erklärvideo: Smartphone steuert nur den Beamer; Pause, Ende und Spielstar
     await film.evaluate((el: HTMLVideoElement) => { el.currentTime = el.duration - .2; });
     await expect(page.locator('.kids-intro-stage')).toBeHidden();
     await expect(phone.getByRole('button', { name: 'Mission starten', exact: true })).toBeEnabled();
-    await phone.getByRole('button', { name: 'Mission starten', exact: true }).click();
+    await runKidsRegie(phone, 'chapter', 'Mission starten');
     await expect(page.getByRole('heading', { name: 'Die erste Spur', exact: true })).toBeVisible();
     expect(phoneVideo).toEqual([]);
   } finally { await phoneContext.close(); }

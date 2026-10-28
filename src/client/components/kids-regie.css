@@ -1,0 +1,37 @@
+.kids-regie { display: grid; gap: 12px; min-width: 0; }
+.kids-regie-round { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 5px 12px; color: #40596a; font-size: 12px; }
+.kids-regie-round b { color: #12394f; }
+.kids-regie-round > span { font-size: 11px; }
+.kids-regie-steps { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 6px; }
+.kids-regie-steps.is-short { grid-template-columns: repeat(2,minmax(0,1fr)); }
+.kids-regie-steps button { display: flex; align-items: center; gap: 5px; min-width: 0; min-height: 44px; padding: 7px 6px; border: 1px solid #beced1; border-radius: 10px; background: #fffdf1; color: #12394f; font: inherit; font-size: 11px; font-weight: 750; cursor: pointer; }
+.kids-regie-steps button > span { display: grid; place-items: center; flex: 0 0 21px; height: 21px; border-radius: 50%; background: #eef4f5; }
+.kids-regie-steps button[aria-current="step"] { background: #12394f; border-color: #12394f; color: #fffdf1; }
+.kids-regie-steps button[aria-current="step"] > span { background: #ffe083; color: #12394f; }
+.kids-regie-steps button.is-done > span { background: #daf2e7; color: #176845; }
+.kids-regie-steps button.is-skipped:not([aria-current]) { color: #536976; }
+.kids-remote-page .kids-regie-steps button:disabled { opacity: .7; }
+.kids-regie-action { padding: 15px 13px 12px; border: 2px solid #12394f; border-radius: 17px; background: #fffdf1; box-shadow: 0 3px 0 #12394f30; }
+.kids-regie-action .kids-regie-eyebrow { margin: 0 0 8px; color: #536976; font-size: 11px; font-weight: 800; letter-spacing: .5px; text-transform: uppercase; }
+.kids-regie-action > h2 { margin: 0 0 5px; font-size: 21px; line-height: 1.25; letter-spacing: -.3px; }
+.kids-regie-action > .kids-regie-description { margin: 0 0 15px; color: #40596a; font-size: 13px; line-height: 1.5; }
+.kids-remote-page .kids-regie-main { width: 100%; min-width: 0; min-height: 76px; padding: 16px 12px; border-radius: 13px; background: linear-gradient(#ffe48a,#ffcf55); font-size: 19px; line-height: 1.35; text-wrap: balance; white-space: normal; }
+.kids-remote-page .kids-regie-main.is-audio { background: #70449b; color: #fff; border-color: #513171; box-shadow: 0 3px 0 #513171; }
+.kids-remote-page .kids-regie-main.is-scene { background: #b83d49; color: #fff; border-color: #872d36; box-shadow: 0 3px 0 #872d36; }
+.kids-remote-page .kids-regie-scene-next { width: 100%; min-height: 48px; margin-top: 12px; padding: 11px 8px; border-radius: 11px; font-size: 13px; white-space: normal; background: #b83d49; color: #fff; border-color: #872d36; box-shadow: 0 3px 0 #872d36; }
+.kids-regie-smallactions { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px 10px; margin-top: 8px; }
+.kids-regie-smallactions > button { min-height: 44px; padding: 8px 0; border: 0; background: transparent; box-shadow: none; color: #40596a; font: inherit; font-size: 12px; cursor: pointer; }
+.kids-regie-smallactions > .kids-regie-skip { margin-left: auto; }
+.kids-regie-saved { margin: 0; color: #40596a; font-size: 11px; line-height: 1.5; }
+.kids-remote-page .kids-regie-context { width: 100%; min-height: 44px; margin-top: 12px; font-size: 12px; padding: 9px; background: #f1eafb; white-space: normal; }
+.kids-remote-page .kids-regie-back { width: 100%; min-height: 44px; font-size: 12px; background: #eef4f5; }
+.kids-regie-action .kids-score-actions { display: grid; gap: 10px; padding: 0; background: transparent; }
+.kids-regie-action .kids-score-actions > button { width: 100%; min-height: 56px; white-space: normal; font-size: 16px; }
+.kids-remote-page:not(.is-desktop) .kids-remote-flow > .kids-regie { order: 0; }
+.kids-remote-page:not(.is-desktop) .kids-remote-flow > .kids-remote-question { order: 1; }
+.kids-remote-page:not(.is-desktop) .kids-remote-flow > .kids-remote-guide { order: 2; }
+.kids-remote-page:not(.is-desktop) .kids-remote-guide[open] { margin-bottom: 12px; }
+@media (max-width: 360px) {
+  .kids-regie-steps button { gap: 4px; padding-inline: 4px; }
+  .kids-regie-steps button > span { flex-basis: 19px; height: 19px; }
+}

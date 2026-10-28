@@ -10,7 +10,7 @@ import { KidsMusicControls } from '../components/KidsMusicControls';
 import { KidsIntroControls } from '../components/KidsIntroVideo';
 import { kidsClaimPhase, professorSays, ShowControls, StoryPicture } from '../components/KidsShow';
 import { KidsFieldShape } from '../components/KidsField';
-import { KidsMobileAudio } from '../components/KidsMobileAudio';
+import { KidsRegie } from '../components/KidsRegie';
 import { kidsAudioStatus } from '../../shared/kids-audio-controls';
 import './kids.css';
 import './kids-remote.css';
@@ -25,11 +25,8 @@ export function KidsControlPage() {
   const [showFinish, setShowFinish] = useState(false);
   const [tab, setTab] = useState<Tab>('flow');
   const [toolsOpen, setToolsOpen] = useState(false);
-  const [sceneSteps, setSceneSteps] = useState<Record<number, 'scene' | 'question'>>({});
   const [desktop, setDesktop] = useState(() => window.matchMedia(DESKTOP_QUERY).matches);
   const remote = useKidsRemote('control', setGame);
-  useEffect(() => { setSceneSteps({}); }, [remote.credentials?.id]);
-  useEffect(() => { if (game?.phase === 'scene') setSceneSteps(previous => ({ ...previous, [game.index]: 'question' })); }, [game?.phase, game?.index]);
   useEffect(() => {
     const query = window.matchMedia(DESKTOP_QUERY);
     const resize = () => setDesktop(query.matches);
@@ -45,13 +42,13 @@ export function KidsControlPage() {
   useEffect(() => { if (game?.phase === 'finished' || game?.phase === 'superbluff') { setShowFinish(false); setTab('flow'); setToolsOpen(false); } }, [game?.phase]);
   useEffect(() => { if (!desktop && tab === 'flow') window.scrollTo({ top: 0, behavior: 'instant' }); }, [game?.phase, game?.index, desktop]);
   const round = game?.rounds[game.index], scores = game ? kidsScores(game) : null;
-  const disabled = remote.busy || !!remote.error;
+  const disabled = remote.busy || !!remote.error || !remote.view;
   const audioStatus = game ? kidsAudioStatus(game) : null;
   const lastScored = game ? kidsLastScoredIndex(game) : -1;
   const back = game ? kidsPreviousStep(game) : null;
   const backNote = !game ? '' : game.phase === 'revealed' ? 'Die Wertung dieser Aufgabe wird zurückgenommen.' : ['moving', 'paused', 'locked'].includes(game.phase) ? 'Der Countdown startet danach wieder von vorn.' : '';
   const phaseLabel = !game ? '' : game.phase === 'moving' ? `${Math.ceil(game.remainingMs / 1000)} s` : ({ welcome: 'Begrüßung', chapter: 'Kapitelstart', superbluff: 'Superbluff', reading: 'Vorlesen', scene: 'Szene läuft', paused: 'Pause', locked: 'Stopp!', returning: 'Rückweg', judging: 'Wertung', revealed: 'Aufgelöst', finished: 'Geschafft!' } as const)[game.phase];
-  const direction = !game ? '' : game.phase === 'finished' ? 'Der Endpunktestand bleibt am Beamer sichtbar. Feiert alle Kinder!' : game.phase === 'scene' ? 'Die Szene läuft zehn Sekunden. Danach vorlesen und den Antwort-Countdown starten.' : game.phase === 'locked' ? 'Helfer prüfen die Felder. Danach alle Kinder zurückholen. Noch nicht auflösen.' : game.phase === 'returning' ? 'Erst weiterklicken, wenn alle Kinder wieder bei ihrer Gruppe sind.' : game.phase === 'judging' ? 'Das gemeldete Ergebnis wählen. Damit erscheint die Auflösung am Beamer.' : game.phase === 'moving' ? 'Die aktive Gruppe wählt ihr Feld. Die anderen feuern an.' : game.phase === 'reading' ? 'Frage und Professor-Tipp abspielen oder vorlesen. Dann die Antwortzeit starten.' : 'Passende Ansage abspielen, dann mit dem großen Knopf weiter.';
+  const direction = !game ? '' : game.phase === 'finished' ? 'Der Endpunktestand bleibt am Beamer sichtbar. Feiert alle Kinder!' : game.phase === 'scene' ? 'Die Szene läuft zehn Sekunden. Danach vorlesen und den Antwort-Countdown starten.' : game.phase === 'locked' ? 'Helfer prüfen die Felder. Danach alle Kinder zurückholen. Noch nicht auflösen.' : game.phase === 'returning' ? 'Erst weiterklicken, wenn alle Kinder wieder bei ihrer Gruppe sind.' : game.phase === 'judging' ? 'Das gemeldete Ergebnis wählen. Damit erscheint die Auflösung am Beamer.' : game.phase === 'moving' ? 'Die aktive Gruppe wählt ihr Feld. Die anderen feuern an.' : game.phase === 'reading' ? 'Frage und Antworten abspielen oder vorlesen. Dann die Antwortzeit starten.' : 'Passende Ansage abspielen, dann mit dem großen Knopf weiter.';
   const selectTab = (next: Tab) => {
     setTab(next);
     if (desktop) {
@@ -85,13 +82,14 @@ export function KidsControlPage() {
         <div class="kids-remote-main">
         {(desktop || tab === 'flow') && <section key="flow" id="kids-panel-flow" class="kids-remote-panel kids-remote-flow" role={desktop ? 'region' : 'tabpanel'} aria-labelledby={desktop ? 'kids-flow-title' : 'kids-tab-flow'} tabIndex={desktop ? -1 : 0}>
           {desktop && <div class="kids-remote-column-title"><h2 id="kids-flow-title">Spiel steuern</h2></div>}
-          {game.phase !== 'finished' && <div class="kids-remote-question"><span>{game.index === 9 ? 'SUPERBLUFF' : `Kapitel ${Math.floor(game.index / 3) + 1}: ${KIDS_CHAPTERS[Math.min(2, Math.floor(game.index / 3))]}`}</span><h2>{round.question.prompt}</h2>{desktop && renderAnswers(true)}{desktop && kidsClaimPhase(game.phase) && <div class="kids-audio-claim"><b>Professor-Tipp · selbst vorlesen</b><p>{professorSays(game)}</p></div>}{!desktop && kidsClaimPhase(game.phase) && <details class="kids-audio-claim"><summary>Professor-Tipp anzeigen</summary><p>Mit Professor-Stimme vorlesen:</p><p>{professorSays(game)}</p></details>}{game.index === 9 && <p>Finale: Kinderteam 20 / 10 / 0 Punkte · Professor Bluff +0</p>}</div>}
-          <section class="kids-remote-step" aria-labelledby="kids-next-step"><h2 id="kids-next-step">{!desktop && <span>1</span>} {desktop ? 'Nächster Schritt' : 'Jetzt steuern'}</h2><p>{direction}</p>
+          {game.phase !== 'finished' && <div class="kids-remote-question"><span>{game.index === 9 ? 'SUPERBLUFF' : `Kapitel ${Math.floor(game.index / 3) + 1}: ${KIDS_CHAPTERS[Math.min(2, Math.floor(game.index / 3))]}`}</span><h2>{round.question.prompt}</h2>{desktop && renderAnswers(true)}{desktop && kidsClaimPhase(game.phase) && <div class="kids-audio-claim"><b>Professor-Tipp · selbst vorlesen</b><p>{professorSays(game)}</p></div>}{game.index === 9 && <p>Finale: Kinderteam 20 / 10 / 0 Punkte · Professor Bluff +0</p>}</div>}
+          {!desktop && <KidsRegie game={game} disabled={disabled} send={remote.send}/>}
+          {desktop && <section class="kids-remote-step" aria-labelledby="kids-next-step"><h2 id="kids-next-step">{!desktop && <span>1</span>} {desktop ? 'Nächster Schritt' : 'Jetzt steuern'}</h2><p>{direction}</p>
             <KidsIntroControls game={game} disabled={disabled} act={action => { void remote.send(action); }}/>
-            {desktop ? actions : <KidsMobileAudio game={game} disabled={disabled || !!game.introVideo} send={remote.send} sceneStep={sceneSteps[game.index] ?? 'scene'} onSceneStep={step => setSceneSteps(previous => ({ ...previous, [game.index]: step }))}>{actions}</KidsMobileAudio>}
+            {actions}
             {game.phase === 'revealed' && lastScored >= 0 && <button type="button" class="kids-remote-correct-link" onClick={() => selectTab('tools')}>Letzte Wertung ändern</button>}
-          </section>
-          {game.phase !== 'finished' && <details class="kids-remote-direction kids-remote-guide" key={`${game.phase}:${game.index}`} open={!desktop && (game.phase === 'locked' || game.phase === 'judging')}><summary>{desktop ? 'Regiehinweis' : 'Antworten & Regiehinweis · nur für Helfer'}</summary>
+          </section>}
+          {game.phase !== 'finished' && <details class="kids-remote-direction kids-remote-guide" key={`${game.phase}:${game.index}`} open={false}><summary>{desktop ? 'Regiehinweis' : 'Antworten & Regiehinweis · nur für Helfer'}</summary>
             <p><KidsGroupText text={round.question.direction}/></p>
             {game.phase === 'welcome' && <p>Mehrheit richtig = 10, mindestens ein Kind richtig = 5, keiner richtig = 0. Professor +{KIDS_PROFESSOR_POINTS} je regulärer Aufgabe. Finale: Kinder 20 / 10 / 0, Professor +0. Niemand scheidet aus.</p>}
             {!desktop && renderAnswers()}

@@ -1,3 +1,4 @@
+import { selectKidsRegie } from './kids-regie';
 import { openKidsAudioSituation } from './kids-audio-menu';
 import { showKidsOperator } from './kids-operator';
 import { expect, test } from '@playwright/test';
@@ -73,6 +74,7 @@ test('Kids: Smartphone beendet Sprache und offene Dialoge beim Finalsprung; beid
   await page.reload();await phone.reload();
   await expect(page.getByRole('heading',{name:'Knackt den Superbluff!',exact:true})).toBeVisible();
   await expect(page.getByTestId('team-score')).toHaveText('15');
+  await selectKidsRegie(phone, 'chapter');
   await expect(phone.getByRole('button',{name:'Gemeinsam ins Finale',exact:true})).toBeVisible();
   await expect(phone.getByRole('button',{name:'Direkt ins Finale',exact:false})).toHaveCount(0);
   expect((await counts()).starts).toBe(0);

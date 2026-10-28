@@ -1,3 +1,4 @@
+import { runKidsRegie } from './kids-regie';
 import { expect, test } from '@playwright/test';
 import { createKidsGame } from '../src/shared/kids-game';
 import { packKidsGame } from '../src/shared/kids-remote';
@@ -39,7 +40,7 @@ test('Smartphone: Start des Countdowns spielt die Startansage am Beamer, nicht a
   const phone = await context.newPage(), phoneAudio: string[] = [];
   phone.on('request', r => { if (r.url().includes('/professor-bluff/')) phoneAudio.push(r.url()); });
   await phone.goto(`/kids/steuerung#id=${remote.id}&key=${remote.remoteToken}`);
-  await phone.getByRole('button', { name: '30 Sekunden starten', exact: true }).click();
+  await runKidsRegie(phone, 'countdown', '30 Sekunden starten');
   await expect.poll(async () => (await professorAudio(page)).played).toEqual(['interjection-signal-go']);
   expect(phoneAudio).toEqual([]);
   await context.close();

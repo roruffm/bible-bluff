@@ -1,3 +1,4 @@
+import { runKidsRegie } from './kids-regie';
 import { openKidsAudioSituation } from './kids-audio-menu';
 import { showKidsOperator } from './kids-operator';
 import { expect, test } from '@playwright/test';
@@ -103,7 +104,7 @@ test('Smartphone: Forscher-Aufruf, vorgemerkter Countdown, Pause und Jesus-Absch
   await phone.getByRole('button',{name:'Forscher aufrufen am Beamer abspielen',exact:true}).click();
   await expect.poll(async()=>(await observed()).starts.length).toBe(1);
   expect((await professorAudio(page)).played.at(-1)).toBe('interjection-call-forscher');
-  await phone.getByRole('button',{name:'30 Sekunden starten',exact:true}).click();
+  await runKidsRegie(phone, 'countdown', '30 Sekunden starten');
   await expect.poll(async()=>(await observed()).starts.length).toBe(2);
   expect((await professorAudio(page)).played.at(-1)).toBe('interjection-signal-go');
   await phone.getByRole('button',{name:'Countdown für letzte 5 Sekunden vormerken',exact:true}).click();
@@ -149,7 +150,7 @@ test('Smartphone: Wertungsansagen stehen bei der Auflösung und erklingen am Bea
   const context=await browser.newContext({viewport:{width:390,height:844},locale:'de-DE'});
   const phone=await context.newPage();
   await phone.goto(`/kids/steuerung#id=${remote.id}&key=${remote.remoteToken}`);
-  const phaseAudio=phone.getByRole('region',{name:'Audio zur aktuellen Spielphase'});
+  const phaseAudio=phone.getByRole('region',{name:'Nächste Aktion'});
   await expect(phaseAudio.getByRole('button',{name:'Jemand richtig +5 am Beamer abspielen',exact:true})).toBeVisible();
   await expect(phaseAudio.getByRole('button',{name:'Mehrheit richtig +10 am Beamer abspielen',exact:true})).toHaveCount(0);
   await openKidsAudioSituation(phone, 'Punkte verkünden');

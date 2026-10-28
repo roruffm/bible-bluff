@@ -1,3 +1,4 @@
+import { runKidsRegie, selectKidsRegie } from './kids-regie';
 import { expect, test } from '@playwright/test';
 import { createKidsGame } from '../src/shared/kids-game';
 import { packKidsGame } from '../src/shared/kids-remote';
@@ -31,9 +32,10 @@ test('Kids: Jona-Einheiten bleiben bei Wiederherstellung, Fernbedienung und Aufl
       await expect(control.locator('.kids-remote-answers li').nth(1)).toContainText('40 Tage');
       await expect(control.locator('.kids-remote-answers li').nth(2)).toContainText('3 Tage');
     }
+    await selectKidsRegie(control, 'countdown');
     await control.getByRole('button', { name: 'Countdown überspringen', exact: true }).click();
-    await control.getByRole('button', { name: 'Zurück in die Gruppen', exact: true }).click();
-    await control.getByRole('button', { name: 'Alle sind zurück', exact: true }).click();
+    await runKidsRegie(control, 'recall', 'Zurück in die Gruppen');
+    await runKidsRegie(control, 'back', 'Alle sind zurück');
     await control.getByRole('button', { name: 'Mehrheit richtig · +10', exact: true }).click();
     await expect(page.locator('.kids-reveal-answer .kids-answer-text')).toHaveText('3 Tage');
     await expect(page.getByTestId('team-score')).toHaveText('20');

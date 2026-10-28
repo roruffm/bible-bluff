@@ -1,3 +1,4 @@
+import { runKidsRegie, selectKidsRegie } from './kids-regie';
 import { openKidsAudioSituation } from './kids-audio-menu';
 import { expect, test } from '@playwright/test';
 import { createKidsGame } from '../src/shared/kids-game';
@@ -32,6 +33,7 @@ test('Fernbedienung: Desktop priorisiert Aufgabe und Audios, klappt Extras auf u
     await expect(control.locator('.kids-remote-question .kids-remote-answers li')).toHaveCount(3);
     await expect(control.locator('.kids-remote-question .kids-audio-claim')).toBeVisible();
     await expect(control.locator('.kids-phase-audio .kids-audio-claim')).toHaveCount(0);
+    await selectKidsRegie(control, 'countdown');
     await expect(control.getByRole('button', { name: '30 Sekunden starten', exact: true })).toBeVisible();
     await expect(control.getByRole('searchbox', { name: 'Ansage suchen', exact: true })).toHaveCount(0);
     await expect(control.getByRole('button', { name: 'Richtig knifflig am Beamer abspielen', exact: true })).toBeVisible();
@@ -54,7 +56,7 @@ test('Fernbedienung: Desktop priorisiert Aufgabe und Audios, klappt Extras auf u
     await control.screenshot({ path: info.outputPath('desktop-remote.png'), fullPage: true });
     await control.locator('.kids-phase-audio').getByRole('button', { name: 'Leuchtsterne aufrufen am Beamer abspielen', exact: true }).click();
     await expect.poll(async () => (await professorAudio(page)).played.at(-1)).toBe('interjection-call-mittis');
-    await control.getByRole('button', { name: '30 Sekunden starten', exact: true }).click();
+    await runKidsRegie(control, 'countdown', '30 Sekunden starten');
     await expect(page.locator('.kids-clock-left')).toBeVisible();
     await control.getByRole('button', { name: 'Ⅱ Pause', exact: true }).click();
     await expect(control.locator('.kids-remote-live strong')).toHaveText('Pause');
@@ -71,8 +73,8 @@ test('Fernbedienung: Desktop priorisiert Aufgabe und Audios, klappt Extras auf u
     await expect(control.getByRole('searchbox', { name: 'Ansage suchen', exact: true })).toHaveCount(0);
     expect((await professorAudio(page)).starts).toBe(audioBeforeResize);
     await control.getByRole('button', { name: 'Countdown überspringen', exact: true }).click();
-    await control.getByRole('button', { name: 'Zurück in die Gruppen', exact: true }).click();
-    await control.getByRole('button', { name: 'Alle sind zurück', exact: true }).click();
+    await runKidsRegie(control, 'recall', 'Zurück in die Gruppen');
+    await runKidsRegie(control, 'back', 'Alle sind zurück');
     await control.getByRole('button', { name: 'Mehrheit richtig · +10', exact: true }).click();
     await expect(page.getByTestId('team-score')).toHaveText('20');
     await expect(control.locator('.kids-phase-audio').getByRole('button', { name: 'Jemand richtig +5 am Beamer abspielen', exact: true })).toHaveCount(0);
@@ -93,10 +95,10 @@ test('Fernbedienung: Desktop priorisiert Aufgabe und Audios, klappt Extras auf u
     await expect(control.getByRole('button', { name: 'Professor-Audio stoppen', exact: false })).toBeInViewport();
     await control.getByRole('button', { name: 'Direkt ins Finale', exact: true }).click();
     await expect(control.locator('.kids-remote-more')).not.toHaveAttribute('open', '');
-    await control.getByRole('button', { name: 'Gemeinsam ins Finale', exact: true }).click();
+    await runKidsRegie(control, 'chapter', 'Gemeinsam ins Finale');
     await control.getByRole('button', { name: 'Countdown überspringen', exact: true }).click();
-    await control.getByRole('button', { name: 'Zurück in die Gruppen', exact: true }).click();
-    await control.getByRole('button', { name: 'Alle sind zurück', exact: true }).click();
+    await runKidsRegie(control, 'recall', 'Zurück in die Gruppen');
+    await runKidsRegie(control, 'back', 'Alle sind zurück');
     await control.getByRole('button', { name: 'Mehrheit richtig · +20', exact: true }).click();
     await expect(page.getByTestId('team-score')).toHaveText('35');
     await expect(control.locator('.kids-phase-audio').getByRole('button', { name: 'Finale: Mehrheit richtig +20 am Beamer abspielen', exact: true })).toBeVisible();
