@@ -1,7 +1,7 @@
 import type { KidsAction, KidsGame } from './kids-game';
 import { professorInterjectionForRound, type ProfessorInterjectionId } from './professor-interjections';
 
-export const KIDS_REGIE_IDS = ['welcome', 'chapter', 'call', 'parents', 'invite', 'scene', 'question', 'answers', 'countdown', 'check', 'recall', 'back', 'result', 'announce', 'next', 'closing'] as const;
+export const KIDS_REGIE_IDS = ['welcome', 'chapter', 'call', 'parents', 'invite', 'scene', 'question', 'answers', 'countdown', 'stop', 'check', 'recall', 'back', 'result', 'announce', 'next', 'closing'] as const;
 export type KidsRegieId = typeof KIDS_REGIE_IDS[number];
 export type KidsRegieStatus = 'open' | 'done' | 'skipped';
 export interface KidsRegieRound { index: number; steps: Partial<Record<KidsRegieId, KidsRegieStatus>>; selected?: KidsRegieId }
@@ -59,6 +59,7 @@ export function kidsRegieSteps(game: KidsGame): KidsRegieStep[] {
   ];
   if (['reading', 'scene', 'moving', 'paused'].includes(game.phase)) return prep(game);
   if (CLOSING.includes(game.phase)) return [
+    { id: 'stop', short: 'Stopp', title: 'Stopp auf den Antwortfeldern', description: 'Die Antwortzeit ist vorbei. Die Kinder bleiben auf ihrem Feld, während die Helfer zählen.', label: 'Stopp · Helfer prüfen', action: 'interjection:signal-stop', audio: true, optional: true },
     { id: 'check', short: 'Prüfen', title: 'Die Felder prüfen lassen', description: 'Die Helfer zählen die Kinder. Noch nicht auflösen.', label: 'Helfer sind fertig' },
     { id: 'recall', short: 'Rückruf', title: 'Die Kinder zurückholen', description: 'Erst nach dem Zählen zurück zur Gruppe.', label: 'Zurück zur Gruppe', action: game.phase === 'locked' ? 'return' : 'interjection:return', audio: true, optional: true },
     { id: 'back', short: 'Zurück', title: 'Sind alle wieder da?', description: 'Kurz prüfen, ob alle bei ihrer Gruppe sind.', label: 'Alle sind zurück', action: 'ready' },
@@ -72,7 +73,7 @@ export function kidsRegieStatus(game: KidsGame, id: KidsRegieId): KidsRegieStatu
   if (stored) return stored;
   if (id === 'result' && game.results[game.index] !== null) return 'done';
   // Alte Spielstände haben keine Audiohistorie: verlassene Schritte werden nicht als abgespielt ausgegeben.
-  if ((['moving', 'paused', ...CLOSING, 'finished'].includes(game.phase) && prep(game).some(s => s.id === id)) || (['returning', 'judging', 'revealed'].includes(game.phase) && id === 'check') || (['judging', 'revealed'].includes(game.phase) && ['recall', 'back'].includes(id))) return 'skipped';
+  if ((['moving', 'paused', ...CLOSING, 'finished'].includes(game.phase) && prep(game).some(s => s.id === id)) || (['returning', 'judging', 'revealed'].includes(game.phase) && ['stop', 'check'].includes(id)) || (['judging', 'revealed'].includes(game.phase) && ['recall', 'back'].includes(id))) return 'skipped';
   return 'open';
 }
 export function kidsRegieCanUse(game: KidsGame, id: KidsRegieId): boolean {
@@ -81,7 +82,7 @@ export function kidsRegieCanUse(game: KidsGame, id: KidsRegieId): boolean {
   if (game.phase === 'chapter' || game.phase === 'superbluff') return ['call', 'parents', 'chapter'].includes(id) && kidsRegieSteps(game).some(s => s.id === id);
   if (game.phase === 'reading') return prep(game).some(s => s.id === id);
   if (game.phase === 'scene') return id === 'scene';
-  if (game.phase === 'locked') return id === 'check' || id === 'recall';
+  if (game.phase === 'locked') return id === 'stop' || id === 'check' || id === 'recall';
   if (game.phase === 'returning') return id === 'recall' || id === 'back';
   if (game.phase === 'judging') return id === 'result';
   if (game.phase === 'revealed') return id === 'announce' || id === 'next';
@@ -108,14 +109,14 @@ export function applyKidsRegieAction(game: KidsGame, action: KidsRegieAction, ap
     const advanced = step.id === 'countdown' ? apply(stopped, 'skip-countdown') : step.id === 'recall' && game.phase === 'locked' ? apply(stopped, 'return') : stopped;
     return write(advanced, step.id, kidsRegieStatus(game, step.id) === 'done' ? 'done' : 'skipped');
   }
-  if (step.id === 'check') return write(game, step.id, 'done');
-  if (!step.action) return game;
+  if (!step.action && step.id !== 'check') return game;
   let prepared = game;
   for (const earlier of kidsRegieSteps(game)) {
     if (earlier.id === step.id) break;
     if (earlier.optional && kidsRegieStatus(prepared, earlier.id) === 'open') prepared = write(prepared, earlier.id, 'skipped');
   }
-  const next = apply(prepared, step.action);
+  if (step.id === 'check') return write(prepared, step.id, 'done');
+  const next = apply(prepared, step.action!);
   // Rückweg und Ansage starten mit einem Tastendruck, weitere Ansagen ausschließlich manuell.
   return step.id === 'recall' && game.phase === 'locked' && next !== game ? apply(next, 'interjection:return') : next;
 }
@@ -126,6 +127,7 @@ function audioStep(game: KidsGame): KidsRegieId | null {
   if (game.voiceClip === `call-${game.rounds[game.index].question.group}`) return 'call';
   if (game.voiceClip === 'scene-invite' && game.rounds[game.index].question.group === 'minis' && game.rounds[game.index].question.scene) return 'invite';
   if (game.voiceClip === 'finale-parents' && game.index === 9) return 'parents';
+  if (game.voiceClip === 'signal-stop' && game.phase === 'locked') return 'stop';
   if (game.voiceClip === 'return' && game.phase === 'returning') return 'recall';
   if (game.voiceClip === 'closing-jesus') return 'closing';
   if (game.phase === 'revealed' && game.voiceClip === professorInterjectionForRound(`result-${game.results[game.index]}`, game.index)?.id) return 'announce';
@@ -161,3 +163,4 @@ export function kidsRegieAfterAction(before: KidsGame, after: KidsGame, action: 
   }
   return next;
 }
+

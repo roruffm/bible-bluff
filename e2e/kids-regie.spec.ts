@@ -43,6 +43,11 @@ test('Smartphone-Regie: Wiedergabe, Stopp, Wiederherstellung und vollständiger 
   await runKidsRegie(page, 'countdown', '30 Sekunden starten');
   await page.getByRole('button', { name: 'Countdown überspringen', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Mehrheit richtig · +10', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'Stopp auf den Antwortfeldern', exact: true })).toBeVisible();
+  await expect(step('stop')).toHaveAttribute('aria-current', 'step');
+  await page.getByRole('button', { name: 'Stopp · Helfer prüfen am Beamer abspielen', exact: true }).click();
+  await acknowledge();
+  await expect(step('stop')).toHaveAttribute('aria-label', 'Stopp, erledigt');
   await expect(page.getByRole('heading', { name: 'Die Felder prüfen lassen', exact: true })).toBeVisible();
   await runKidsRegie(page, 'recall', 'Zurück in die Gruppen');
   await acknowledge();
@@ -60,3 +65,4 @@ test('Smartphone-Regie: Wiedergabe, Stopp, Wiederherstellung und vollständiger 
   await selectKidsRegie(page, 'answers');
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
+

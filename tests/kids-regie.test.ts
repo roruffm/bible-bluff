@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { createKidsGame, kidsResumeGame, kidsScores, updateKidsGame, type KidsAction, type KidsGame } from '../src/shared/kids-game';
-import { kidsRegieAction, kidsRegieCurrent, kidsRegieStatus, kidsRegieSteps, parseKidsRegie } from '../src/shared/kids-regie';
+import { kidsRegieAction, kidsRegieCanUse, kidsRegieCurrent, kidsRegieStatus, kidsRegieSteps, parseKidsRegie } from '../src/shared/kids-regie';
 import { packKidsGame, unpackKidsGame } from '../src/shared/kids-remote';
 
 const reading = (): KidsGame => ({ ...createKidsGame(), phase: 'reading' });
@@ -62,8 +62,14 @@ describe('Gespeicherte Smartphone-Regie', () => {
     expect(game.phase).toBe('moving');
     expect(kidsRegieStatus(game, 'countdown')).toBe('done');
     game = act(game, 'tick', game.deadline!);
-    expect(kidsRegieCurrent(game).id).toBe('check');
+    expect(kidsRegieCurrent(game)).toMatchObject({ id: 'stop', action: 'interjection:signal-stop' });
     expect(act(game, 'regie:do:result')).toBe(game);
+    game = act(game, 'regie:do:stop');
+    expect(game).toMatchObject({ phase: 'locked', voicePlaying: true, voiceClip: 'signal-stop' });
+    expect(kidsRegieStatus(game, 'stop')).toBe('open');
+    game = ended(game);
+    expect(kidsRegieStatus(game, 'stop')).toBe('done');
+    expect(kidsRegieCurrent(game).id).toBe('check');
     game = act(game, 'regie:do:check');
     expect(kidsRegieCurrent(game).id).toBe('recall');
     game = act(game, 'regie:do:recall');
@@ -100,4 +106,35 @@ describe('Gespeicherte Smartphone-Regie', () => {
     expect(kidsRegieCurrent(final).action).toBe('interjection:result-final-correct');
     expect(kidsRegieStatus({ ...game, phase: 'judging' }, 'question')).toBe('skipped');
   });
+  it('bietet Stopp auch nach übersprungenem Countdown und nach Wiederherstellung an, ausschließlich auf den Feldern', () => {
+    for (const index of [0, 1, 9]) {
+      const initial = reading();
+      const skipped = act({ ...initial, index, results: initial.results.map((result, i) => i < index ? 'correct' : result) }, 'skip-countdown');
+      expect(kidsRegieSteps(skipped).map(s => s.id)).toEqual(['stop', 'check', 'recall', 'back', 'result', 'announce']);
+      expect(kidsRegieCurrent(skipped).id).toBe('stop');
+      expect(skipped.voicePlaying).toBe(false);
+      const requested = act(skipped, 'regie:do:stop');
+      const stopped = act(requested, 'stop-speech');
+      expect(kidsRegieStatus(stopped, 'stop')).toBe('open');
+      expect(kidsRegieStatus(act(requested, `voice-status:${requested.voiceSeq!}:failed`), 'stop')).toBe('open');
+      const restored = kidsResumeGame(unpackKidsGame(packKidsGame(requested, 100), 200)!, 200);
+      expect(kidsRegieCurrent(restored).id).toBe('stop');
+      expect(restored.voicePlaying).toBe(false);
+      const complete = ended(act(restored, 'regie:do:stop'));
+      const saved = unpackKidsGame(packKidsGame(complete, 200), 300)!;
+      expect(kidsRegieCurrent(saved).id).toBe('check');
+      expect(kidsRegieStatus(act(skipped, 'regie:skip:stop'), 'stop')).toBe('skipped');
+      const checked = act(skipped, 'regie:do:check');
+      expect(kidsRegieStatus(checked, 'stop')).toBe('skipped');
+      expect(kidsRegieCurrent(checked).id).toBe('recall');
+      expect(kidsScores(checked)).toEqual(kidsScores(skipped));
+    }
+    for (const phase of ['reading', 'moving', 'paused', 'returning', 'judging', 'revealed', 'finished'] as const) {
+      const game = { ...reading(), phase };
+      expect(kidsRegieCanUse(game, 'stop')).toBe(false);
+      expect(act(game, 'regie:do:stop')).toBe(game);
+    }
+    expect(kidsRegieStatus({ ...reading(), phase: 'returning' }, 'stop')).toBe('skipped');
+  });
 });
+
