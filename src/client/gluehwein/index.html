@@ -35,6 +35,7 @@
   <section class="stage" id="stage" aria-label="Weihnachtsmarkt mit drei Glühweintresen">
     <canvas id="game" aria-label="Halte eine Tasse oder einen Tresen gedrückt und lass los. Die Ladung bestimmt die Gleitstrecke. Auch die Tasten 1, 2 und 3 funktionieren mit Halten und Loslassen."></canvas>
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <div id="arcade-status" class="arcade-status" role="status" aria-live="polite" hidden>5 Treffer in Folge = Lichterfieber ×2</div>
     <div id="scene-note" class="scene-note">Frankfurt · Pixel-Wintermarkt</div>
   </section>
 
@@ -51,6 +52,7 @@
       <h1 id="welcome-title">Glühwein-<br><em>Slide.</em></h1>
       <p class="intro-copy">Tasse halten, aufladen und loslassen.<br>Die Ladung bestimmt die Gleitstrecke.</p>
       <div class="intro-facts"><span>◷ 60 Sekunden</span><span>♥ 3 Chancen</span></div>
+      <p class="arcade-tip">Punktlandung: +25 Bonuspunkte.<br>5er-Serie: 8 Sekunden doppelte Punkte!</p>
       <button id="start" class="primary">Eine Runde spielen</button>
       <button id="story-start" class="text-btn story-open" aria-haspopup="dialog" aria-controls="story">Die Geschichte dahinter</button>
       <p class="rules">3 Gäste ohne Glühwein = Game Over.</p><p class="fine-print">Mit Finger, Maus oder Tastatur · ♫ Weihnachts-Groove<br><a class="biblebluff-back" href="/">Zurück zu Biblebluff</a></p>
@@ -69,6 +71,7 @@
         <div><strong id="result-served">0</strong><span>Becher serviert</span></div>
         <div><strong id="result-lights">0</strong><span>Lichter entzündet</span></div>
       </div>
+      <p id="result-bonus" class="result-bonus"></p>
       <p id="best" class="best">Dein Rekord: 0 Punkte</p>
       <div class="result-buttons">
         <button id="again" class="primary">Noch eine Runde</button>

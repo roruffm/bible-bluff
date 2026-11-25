@@ -8,7 +8,7 @@ import { GameEngine, ROUND_SECONDS, MAX_LIGHTS, MAX_MISSES } from '../../src/cli
 // Exercise actual application handlers against a small DOM, without a browser.
 // Canvas calls are stubbed: these checks do not make claims about rendered layout.
 function app(width,height){
-  let active,raf,clipboard='',time=0,music;
+  let active,raf,clipboard='',time=0,music,engine;
   class MusicStub{constructor(){music=this;this.enabled=true;this.playing=false;}start(){this.playing=this.enabled;}stop(){this.playing=false;}setEnabled(v){this.enabled=v;if(!v)this.stop();}effect(){}}
   const ctx=new Proxy({createLinearGradient:()=>({addColorStop(){}}),createRadialGradient:()=>({addColorStop(){}})},
     {get:(target,key)=>key in target?target[key]:()=>{},set:(target,key,value)=>(target[key]=value,true)});
@@ -39,14 +39,14 @@ function app(width,height){
   }
   doc.getElementById=id=>doc.querySelector('#'+id);doc.createElement=tag=>new Element(tag);
   Object.defineProperty(doc,'activeElement',{get:()=>active});
-  const storage=new Map();const sandbox={PixelRenderer:class extends PixelRenderer{constructor(canvas,options){super(canvas,{...options,createCanvas:()=>doc.createElement('canvas')});}},GameEngine,ROUND_SECONDS,MAX_LIGHTS,MAX_MISSES,WinterMusic:MusicStub,document:doc,devicePixelRatio:1,
+  const storage=new Map();const sandbox={PixelRenderer:class extends PixelRenderer{constructor(canvas,options){super(canvas,{...options,createCanvas:()=>doc.createElement('canvas')});}},GameEngine:class extends GameEngine{constructor(options){super({...options,random:()=>.5});engine=this;}},ROUND_SECONDS,MAX_LIGHTS,MAX_MISSES,WinterMusic:MusicStub,document:doc,devicePixelRatio:1,
     requestAnimationFrame:fn=>raf=fn,ResizeObserver:class{constructor(cb){this.cb=cb}observe(){this.cb()}},
     matchMedia:()=>({matches:true}),localStorage:{getItem:k=>storage.get(k),setItem:(k,v)=>storage.set(k,v)},
     navigator:{clipboard:{writeText:async value=>clipboard=value}},location:{href:'https://example.test/gluehwein/'},
     URL,Math,console,setTimeout:()=>{},window:{prompt(){}},Promise};
   const code=fs.readFileSync(new URL('../../src/client/gluehwein/app.js',import.meta.url),'utf8').replace(/^import[^\n]+\n/gm,'');
   vm.runInNewContext(code,sandbox,{filename:'app.js'});
-  return {doc,get:id=>doc.getElementById(id),clipboard:()=>clipboard,music:()=>music,
+  return {doc,engine:()=>engine,get:id=>doc.getElementById(id),clipboard:()=>clipboard,music:()=>music,
     step(seconds,hz=60){for(let i=0;i<Math.ceil(seconds*hz);i++){time+=1000/hz;raf(time);}}};
 }
 
@@ -99,4 +99,38 @@ for(const [width,height] of [[390,480],[1100,600]])test(`Optional story preserve
  assert.equal(get('score').textContent,score);assert.equal(get('time').textContent,time);assert.equal(a.music().playing,false);
  await get('story-close').click();assert.equal(get('story').open,false);assert.equal(get('results').hidden,false);
  assert.equal(a.doc.activeElement,get('story-result'));assert.equal(a.music().playing,false);
+});
+
+
+test('Five real keyboard throws update the fever HUD and freeze its countdown during pause',async()=>{
+  const a=app(390,480);await a.get('start').click();
+  const game=a.engine();game.guests=[];game.spawnIn=999;
+  for(let i=0;i<5;i++){
+    const guest=game.spawn(0,600);guest.speed=0;guest.kind='regular';
+    await a.doc.dispatchEvent({type:'keydown',key:'1',code:'Digit1',repeat:false});a.step(.77);
+    await a.doc.dispatchEvent({type:'keyup',key:'1',code:'Digit1'});a.step(1.2);
+  }
+  assert.equal(game.served,5);assert.equal(game.bestCombo,5);
+  assert.match(a.get('arcade-status').textContent,/LICHTERFIEBER ×2/);
+  assert.equal(a.get('arcade-status').hidden,false);assert.equal(a.get('stage').classes.has('fever'),true);
+  await a.get('pause').click();const left=a.get('arcade-status').textContent;
+  a.step(4);assert.equal(a.get('arcade-status').textContent,left);
+  await a.get('resume').click();a.step(9);
+  assert.doesNotMatch(a.get('arcade-status').textContent,/LICHTERFIEBER/);
+  assert.equal(a.get('stage').classes.has('fever'),false);
+  a.step(61);assert.equal(a.get('arcade-status').hidden,true);
+  assert.match(a.get('result-bonus').textContent,/Beste Serie: 5/);
+  await a.get('again').click();assert.match(a.get('arcade-status').textContent,/5 Treffer in Folge/);
+});
+
+test('A precise throw shows the bonus and includes it in the round result',async()=>{
+  const a=app(390,480);await a.get('start').click();
+  const game=a.engine();game.guests=[];game.spawnIn=999;
+  const guest=game.spawn(0,600);guest.speed=0;guest.kind='santa';
+  await a.doc.dispatchEvent({type:'keydown',key:'1',code:'Digit1',repeat:false});a.step(.67);
+  await a.doc.dispatchEvent({type:'keyup',key:'1',code:'Digit1'});a.step(1.2);
+  assert.match(a.get('toast').textContent,/Perfekte Punktlandung/);assert.equal(game.perfectServed,1);
+  assert.equal(game.specialServed,1);a.step(61);
+  assert.match(a.get('result-bonus').textContent,/1 Punktlandung/);
+  assert.match(a.get('result-bonus').textContent,/1 besonderer Gast/);
 });

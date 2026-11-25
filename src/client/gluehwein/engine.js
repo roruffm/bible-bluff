@@ -3,6 +3,11 @@ export const MAX_LIGHTS = 18;
 export const LANES = 3;
 export const MAX_MISSES = 3;
 export const CHARGE_SECONDS = 1.4;
+export const PERFECT_BONUS = 25;
+export const PERFECT_WINDOW = 18;
+export const FEVER_STREAK = 5;
+export const FEVER_SECONDS = 8;
+export const SPECIAL_GUESTS = ['santa', 'snowman', 'grump'];
 export const SLIDE_FRICTION = 700;
 export const slideDistance = power => 45 + 855 * Math.max(0, Math.min(1, power));
 
@@ -24,6 +29,12 @@ export class GameEngine {
     this.lostCustomers = 0;
     this.endReason = null;
     this.combo = 0;
+    this.bestCombo = 0;
+    this.perfectServed = 0;
+    this.specialServed = 0;
+    this.feverRemaining = 0;
+    this.feverCount = 0;
+    this.spawnCount = 0;
     this.lights = 0;
     this.cups = [];
     this.charge = null;
@@ -42,14 +53,21 @@ export class GameEngine {
     if (this.state !== 'playing') return;
     this.cancelCharge();
     this.state = 'finished';
+    this.feverRemaining = 0;
     this.endReason = reason;
     this.emit('finish', { reason, score: this.score, served: this.served, lights: this.lights, lostCustomers: this.lostCustomers });
   }
 
   spawn(lane, x = 930) {
-    this.guests.push({ id: this.nextId++, lane, x, speed: 21 + this.random() * 12 + this.elapsed * .16,
+    const ordinal = this.spawnCount++;
+    // One in four arrivals is a festive visitor. The cycle guarantees variety
+    // without changing anyone's speed or the timing of the three service lanes.
+    const kind = ordinal % 4 === 3 ? SPECIAL_GUESTS[Math.floor(ordinal / 4) % SPECIAL_GUESTS.length] : 'regular';
+    const guest = { id: this.nextId++, lane, x, kind, speed: 21 + this.random() * 12 + this.elapsed * .16,
       color: Math.floor(this.random() * 6), skin: Math.floor(this.random() * 4), hat: this.random() > .4,
-      phase: this.random() * Math.PI * 2, served: false, leaveIn: 0 });
+      phase: this.random() * Math.PI * 2, served: false, leaveIn: 0 };
+    this.guests.push(guest);
+    return guest;
   }
 
   beginCharge(lane) {
@@ -78,14 +96,30 @@ export class GameEngine {
   }
 
   catchCup(cup, guest) {
+    // Predict the physical stop, including the guest's movement until that
+    // instant. A fast cup passing a guest cannot earn a precision bonus.
+    const stoppingTime = cup.vx / SLIDE_FRICTION;
+    const stopX = cup.x + cup.vx * stoppingTime / 2;
+    const guestStopX = guest.x - guest.speed * stoppingTime;
+    const perfect = Number.isFinite(stopX) && Number.isFinite(guestStopX) && Math.abs(stopX - guestStopX) <= PERFECT_WINDOW;
     guest.served = true;
+    guest.perfect = perfect;
     guest.leaveIn = .88;
     this.served++;
     this.combo++;
-    const points = 10 + Math.min(20, Math.floor(this.combo / 3) * 2);
+    this.bestCombo = Math.max(this.bestCombo, this.combo);
+    if (perfect) this.perfectServed++;
+    if (SPECIAL_GUESTS.includes(guest.kind)) this.specialServed++;
+    const startFever = this.combo % FEVER_STREAK === 0 && this.feverRemaining <= 0;
+    if (startFever) { this.feverRemaining = FEVER_SECONDS; this.feverCount++; }
+    const basePoints = 10 + Math.min(20, Math.floor(this.combo / 3) * 2);
+    const multiplier = this.feverRemaining > 0 ? 2 : 1;
+    const points = (basePoints + (perfect ? PERFECT_BONUS : 0)) * multiplier;
     this.score += points;
     this.lights = Math.min(MAX_LIGHTS, this.served);
-    this.emit('catch', { lane: guest.lane, x: guest.x, points, combo: this.combo });
+    this.emit('catch', { lane: guest.lane, x: guest.x, points, combo: this.combo, perfect,
+      guestKind: guest.kind || 'regular', multiplier });
+    if (startFever) this.emit('fever-start', { duration: FEVER_SECONDS });
     if (this.served === MAX_LIGHTS) this.emit('all-lit');
   }
 
@@ -94,6 +128,10 @@ export class GameEngine {
     const dt = Math.min(rawDt, .1, this.remaining);
     this.remaining = Math.max(0, this.remaining - dt);
     this.elapsed = ROUND_SECONDS - this.remaining;
+    if (this.feverRemaining > 0) {
+      this.feverRemaining = Math.max(0, this.feverRemaining - dt);
+      if (this.feverRemaining < 1e-7) { this.feverRemaining = 0; this.emit('fever-end'); }
+    }
     if (this.charge) {
       this.charge.elapsed += dt;
       this.charge.power = Math.min(1, this.charge.elapsed / CHARGE_SECONDS);

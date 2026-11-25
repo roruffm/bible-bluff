@@ -53,11 +53,20 @@ function handleEvent(event) {
   if(event.type==='catch'){
     const y=laneY(event.lane);
     ripple.push({x:event.x,lane:event.lane,life:.65});
-    particles.push({kind:'text',text:'+'+event.points,x:event.x,y:y-155*personScale(),vx:0,vy:-24,life:1.25});
+    particles.push({kind:'text',text:(event.perfect?'PERFEKT! +':'+')+event.points,x:Math.min(790,Math.max(210,event.x)),y:y-215*personScale(),vx:0,vy:-24,life:1.25});
     if(!reducedMotion)for(let i=0;i<8;i++)particles.push({x:event.x,y:y-30,vx:(Math.random()-.5)*80,vy:-35-Math.random()*70,size:2+Math.random()*2,color:i%2?'#e5c27d':'#e0e8cc',life:.6+Math.random()*.5});
-    tone(660,.13,'sine',.04);
-    if(event.combo===5)toast('Fünf am Stück. Das wird eine gute Runde!');
-    if(event.combo===10)toast('Zehn Treffer in Folge. Stark serviert!');
+    if(event.perfect){
+      toast(`Perfekte Punktlandung! +${event.points} Punkte`,2.2,true);
+      if(soundOn)[880,1175,1568].forEach((f,i)=>music.effect(f,.14,'triangle',.035,i*.065));
+    }else{
+      tone(660,.13,'sine',.04);
+      const reaction={santa:'Nikolaus: „Ho ho ho! Genau richtig!“',snowman:'Schneemann: „Endlich warme Hände!“',grump:'Weihnachtsmuffel: „Na gut. Schmeckt.“'}[event.guestKind];
+      if(reaction)toast(reaction,2.5,true);
+    }
+  }
+  if(event.type==='fever-start'){
+    toast('Lichterketten-Fieber! 8 Sekunden doppelte Punkte!',3,true);
+    if(soundOn)[523,659,784,1047].forEach((f,i)=>music.effect(f,.2,'triangle',.035,i*.09));
   }
   if(event.type==='all-lit'){
     toast('Alle 18 Lichter leuchten. Stark gespielt!',3.5,true);
@@ -80,7 +89,7 @@ function tone(frequency,duration,type='sine',volume=.035){
 }
 
 function syncHUD(){
-  const t=Math.ceil(engine.remaining),lives=MAX_MISSES-engine.lostCustomers,key=[engine.score,t,engine.lights,lives,engine.state].join(':');
+  const t=Math.ceil(engine.remaining),lives=MAX_MISSES-engine.lostCustomers,key=[engine.score,t,engine.lights,lives,engine.state,engine.combo,Math.ceil(engine.feverRemaining)].join(':');
   if(key!==cachedHUD){
     $('score').textContent=engine.score;$('time').textContent=t;$('lives').textContent=lives;
     $('lives').classList.toggle('last-life',lives<=1);
@@ -91,6 +100,12 @@ function syncHUD(){
     $('pause').disabled=!['playing','paused'].includes(engine.state);
     $('pause').setAttribute('aria-label',engine.state==='paused'?'Spiel fortsetzen':'Spiel pausieren');
     laneButtons.forEach(b=>b.disabled=engine.state!=='playing');
+    const fever=engine.feverRemaining>0;
+    $('stage').classList.toggle('fever',fever);
+    $('arcade-status').hidden=['ready','finished'].includes(engine.state);
+    $('arcade-status').classList.toggle('fever',fever);
+    $('arcade-status').textContent=fever?`LICHTERFIEBER ×2 · ${Math.ceil(engine.feverRemaining)} s`:
+      engine.combo?`SERIE ${engine.combo} · noch ${5-engine.combo%5} bis ×2`:'5 Treffer in Folge = Lichterfieber ×2';
     cachedHUD=key;
   }
   const power=engine.charge?.power||0,percent=Math.round(power*100);
@@ -123,6 +138,7 @@ function finishRound(){
   music.stop();
   const gameOver=engine.endReason==='customers';
   $('result-score').textContent=engine.score;$('result-served').textContent=engine.served;$('result-lights').textContent=engine.lights;
+  $('result-bonus').textContent=`${engine.perfectServed} ${engine.perfectServed===1?'Punktlandung':'Punktlandungen'} · Beste Serie: ${engine.bestCombo} · ${engine.specialServed} ${engine.specialServed===1?'besonderer Gast':'besondere Gäste'}`;
   const isRecord=engine.score>bestScore;bestScore=Math.max(bestScore,engine.score);
   try{localStorage.setItem('gluehwein-slide-best',String(bestScore));}catch{}
   $('best').textContent=(isRecord?'Neuer persönlicher Rekord: ':'Dein Rekord: ')+bestScore+' Punkte';

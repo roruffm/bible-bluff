@@ -27,7 +27,7 @@ test('The physical stop distance follows the released charge',()=>{
 
 test('Right strength serves a guest; excessive strength slides past',()=>{
   function attempt(power){const game=emptyGame();game.spawn(0,600);game.guests[0].speed=0;game.fire(0,power);advance(game,2);return game;}
-  const hit=attempt(.5);assert.equal(hit.served,1);assert.equal(hit.score,10);assert.equal(hit.lights,1);
+  const hit=attempt(.55);assert.equal(hit.served,1);assert.equal(hit.score,10);assert.equal(hit.lights,1);
   const over=attempt(1);assert.equal(over.served,0);assert.equal(over.score,0);assert.ok(over.missed>0);
 });
 

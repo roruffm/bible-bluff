@@ -1,5 +1,6 @@
 import marketUrl from './assets/market.png';
 import guestsUrl from './assets/guests.png';
+import specialGuestsUrl from './assets/special-guests.png';
 
 // Game positions remain in the engine's 1000-unit coordinate space. Only the
 // renderer uses a deliberately low resolution, so sprites stay sharp on phones.
@@ -35,6 +36,7 @@ export class PixelRenderer {
     this.background = createCanvas();
     this.market = this.load(marketUrl);
     this.guests = this.load(guestsUrl);
+    this.specialGuests = this.load(specialGuestsUrl);
   }
 
   load(url) {
@@ -144,9 +146,13 @@ export class PixelRenderer {
     const bob = this.reducedMotion ? 0 : Math.floor(Math.sin(time * 3 + guest.phase) * 2);
     c.save();
     if (guest.served) c.globalAlpha = Math.min(1, guest.leaveIn * 2);
-    if (this.guests?.complete && this.guests.naturalWidth) {
-      const iw = this.guests.naturalWidth, ih = this.guests.naturalHeight, cell = iw / 4;
-      c.drawImage(this.guests, (guest.id % 4) * cell, ih * .13, cell, ih * .8,
+    const specialIndex = { santa: 0, snowman: 1, grump: 2 }[guest.kind];
+    const specialReady = specialIndex !== undefined && this.specialGuests?.complete && this.specialGuests.naturalWidth;
+    const image = specialReady ? this.specialGuests : this.guests;
+    if (image?.complete && image.naturalWidth) {
+      const iw = image.naturalWidth, ih = image.naturalHeight, cell = iw / (specialReady ? 3 : 4);
+      const index = specialReady ? specialIndex : guest.id % 4;
+      c.drawImage(image, index * cell, ih * .13, cell, ih * .8,
         Math.round(guest.x - w / 2), Math.round(y - h + bob + 10), Math.round(w), Math.round(h));
     } else {
       box(c, guest.x - w * .4, y - h * .58, w * .8, h * .6, '#354c67');
@@ -156,7 +162,8 @@ export class PixelRenderer {
       box(c, guest.x + 8, y - h * .72, 6, 6, INK);
     }
     if (guest.served) {
-      text(c, 'TOP!', guest.x, y - h - 8, 29, GOLD);
+      const reaction = { santa: 'HO HO HO!', snowman: 'SCHÖN WARM!', grump: 'NA GUT.' }[guest.kind];
+      text(c, reaction || 'TOP!', guest.x, y - h - 8, 29, GOLD);
       this.mug(c, guest.x + w * .2, y - h * .12, .6 * this.personScale(), false, time);
     }
     c.restore();
@@ -186,17 +193,18 @@ export class PixelRenderer {
     c.clearRect(0, 0, canvas.width, canvas.height);
     c.drawImage(this.background, 0, 0);
     c.setTransform(scale, 0, 0, scale, 0, 0);
+    const fever = engine.feverRemaining > 0;
     const bulbY = Math.max(20, h * .033);
     for (let i = 0; i < 18; i++) {
       const x = 20 + i * 56.3, y = bulbY + Math.round(Math.sin(i / 17 * Math.PI) * 21);
       box(c, x, y - 6, 5, 10, '#3b4d58');
-      box(c, x - 3, y + 3, 11, 12, i < engine.lights ? GOLD : '#5b7393');
-      if (i < engine.lights) box(c, x, y + 5, 5, 6, '#fff8c1');
+      box(c, x - 3, y + 3, 11, 12, fever ? [GOLD, '#ff788b', '#7ce5d8'][i % 3] : i < engine.lights ? GOLD : '#5b7393');
+      if (fever || i < engine.lights) box(c, x, y + 5, 5, 6, '#fff8c1');
     }
     for (let lane = 0; lane < 3; lane++) {
       const active = engine.charge?.lane === lane, y = this.laneY(lane);
       for (const guest of engine.guests.filter(g => g.lane === lane).sort((a,b) => a.x - b.x)) this.person(c, guest, time);
-      this.counter(c, lane, active);
+      this.counter(c, lane, active || fever);
       this.mug(c, 148, y, this.personScale() * .94, active, time);
       for (const cup of engine.cups.filter(p => p.lane === lane)) {
         // Square speed streaks carry the motion without blurring the sprites.
@@ -220,6 +228,10 @@ export class PixelRenderer {
       box(c, r.x + d, this.laneY(r.lane) - 40, 5, 12, GOLD);
     }
     c.globalAlpha = 1;
+    if (fever) {
+      box(c, 0, 0, 5, h, GOLD);
+      box(c, 995, 0, 5, h, GOLD);
+    }
     if (!this.reducedMotion) for (let i = 0; i < 42; i++) {
       const x = (i * 197.3 + Math.sin(time + i) * 8) % 1000;
       const y = (i * 113 + time * (11 + i % 6 * 2)) % (h + 15);

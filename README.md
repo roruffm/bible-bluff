@@ -532,3 +532,17 @@ bleiben unabhängig davon bei 1000 Einheiten. `assets/market.png` ist die statis
 `assets/guests.png` enthält vier transparente Gäste-Sprites in einer Reihe. Beide Grafiken sind
 für dieses Spiel erzeugt; ihre Motive stammen aus dem ausgewählten ursprünglichen Pixel-Arcade-Entwurf.
 Die lokal ausgelieferte Schrift Pixelify Sans ist über Fontsource eingebunden.
+
+### Arcade-Boni
+
+Eine Tasse, deren vorhergesagter Stopp höchstens 18 Spieleinheiten vom Gast entfernt liegt,
+verdient 25 Bonuspunkte. Die Bewegung des Gastes bis zum Stopp fließt in die Berechnung ein.
+Fünf Treffer in Folge starten acht Sekunden Lichterketten-Fieber: Alle Punkte einschließlich
+Punktlandungsbonus zählen doppelt. Weitere Fünfer-Meilensteine verlängern einen laufenden Bonus
+nicht. Bei Pause bleibt auch diese Zeit stehen. Nach Ablauf kann eine neue Fünfer-Serie den Bonus
+wieder starten. Ein Fehlwurf setzt die Serie zurück; ein bereits verdienter Zeitbonus läuft weiter.
+
+Jeder vierte neu ankommende Gast ist abwechselnd Nikolaus, Schneemann oder Weihnachtsmuffel.
+Sie verwenden eigene Pixel-Sprites aus `assets/special-guests.png`, reagieren auf gelungene Würfe
+und bewegen sich nach denselben Regeln wie andere Gäste. Ergebnisse zeigen Punktlandungen,
+beste Serie und bediente besondere Gäste. Die Tests simulieren dafür auch echte Tassenbewegungen.
