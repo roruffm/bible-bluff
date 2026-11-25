@@ -18,7 +18,7 @@ function framed(c, x, y, w, h, color = '#112348', edge = GOLD, border = 4) {
   box(c, x + border * 2, y + border * 2, w - border * 4, h - border * 4, color);
 }
 function text(c, value, x, y, size, color = CREAM, align = 'center') {
-  c.font = `700 ${size}px "Pixelify Sans", monospace`;
+  c.font = `700 ${size}px "Figtree", system-ui, sans-serif`;
   c.textAlign = align;
   c.fillStyle = INK;
   c.fillText(value, Math.round(x + 3), Math.round(y + 3));

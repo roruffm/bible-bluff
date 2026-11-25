@@ -2,10 +2,9 @@ import { Highscores } from './highscores.js';
 import { GameEngine, ROUND_SECONDS, MAX_LIGHTS, MAX_MISSES } from './engine.js';
 import { WinterMusic } from './music.js';
 import { PixelRenderer } from './pixel-renderer.js';
-import '@fontsource/pixelify-sans/latin-400.css';
-import '@fontsource/pixelify-sans/latin-700.css';
 import '@fontsource/figtree/latin-400.css';
 import '@fontsource/figtree/latin-600.css';
+import '@fontsource/figtree/latin-700.css';
 
 const $ = id => document.getElementById(id);
 const canvas = $('game');
