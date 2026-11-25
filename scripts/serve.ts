@@ -57,7 +57,14 @@ const server = http.createServer(async (req, res) => {
       return res.end(code ? invitePreview(html, code, origin, lang) : homePreview(html, origin, lang));
     }
     let file = normalize(join(ROOT, decodeURIComponent(url.pathname)));
-    if (!file.startsWith(ROOT) || !existsSync(file) || statSync(file).isDirectory()) {
+    const insideRoot = file === ROOT || file.startsWith(`${ROOT}/`);
+    if (insideRoot && existsSync(file) && statSync(file).isDirectory() && existsSync(join(file, 'index.html'))) {
+      if (!url.pathname.endsWith('/')) {
+        res.writeHead(308, { location: `${url.pathname}/${url.search}` });
+        return res.end();
+      }
+      file = join(file, 'index.html'); // Eigenständige Unterseite, z. B. Glühwein-Slide
+    } else if (!insideRoot || !existsSync(file) || statSync(file).isDirectory()) {
       file = join(ROOT, 'index.html'); // Single-Page-App
     }
     const type = TYPES[extname(file)] ?? 'application/octet-stream';

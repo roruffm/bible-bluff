@@ -4,6 +4,9 @@
 // Ein Test prüft, dass jeder verwendete Text hier steht und jeder Eintrag noch verwendet wird.
 
 export const EN: Record<string, string> = {
+  'Winterspiel': 'Winter game',
+  '60 Sekunden · mit Glühwein und Fingerspitzengefühl': '60 seconds · a festive game of skill',
+
   'Die Fernbedienungs-Anfrage ist ungültig.': 'The remote control request is invalid.',
   'Bitte versuche es noch einmal.': 'Please try again.',
   'Diese Fernbedienung gibt es nicht mehr.': 'This remote control is no longer available.',

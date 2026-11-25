@@ -165,13 +165,20 @@ export function DatenschutzEn({ address, email, updated }: { address: ComponentC
         Digital Services Data Protection Act, TDDDG). You can delete the data at any time in your browser settings.
       </p>
 
+      <p>
+        The additional winter game Glühwein-Slide stores your personal high score only on your device
+        (key: <code>gluehwein-slide-best</code>). It is not sent to the server.
+        You can also delete this entry in your browser settings.
+      </p>
+
       <h2>Font</h2>
       <p>The font is served from our own server. No connection is made to Google or any other provider.</p>
 
       <h2>Links to other sites</h2>
       <p>
         The “Curious about Jesus?” page links to bibleserver.com. Only when you tap one of these links does your browser
-        connect to the other site; that site’s privacy policy then applies.
+        connect to the other site; that site’s privacy policy then applies. The optional “Anne fragen” link
+        in the story behind Glühwein-Slide opens WhatsApp (wa.me) in the same way.
       </p>
 
       <h2>Your rights</h2>

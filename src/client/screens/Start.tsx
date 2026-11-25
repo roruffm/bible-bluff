@@ -133,6 +133,17 @@ export function Home() {
         </details>
       </section>
 
+      <a class="card home-winter" href="/gluehwein/">
+        <svg class="home-winter-cup" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M10 19h25l-2 20H12Z" /><path d="M35 22h3a6 6 0 0 1 0 12h-4M18 13c-4-4 4-5 0-9M27 13c-4-4 4-5 0-9" />
+        </svg>
+        <span class="home-winter-copy">
+          <small>{t('Winterspiel')}</small>
+          <strong>Glühwein-Slide</strong>
+          <span>{t('60 Sekunden · mit Glühwein und Fingerspitzengefühl')}</span>
+        </span>
+      </a>
+
       <nav class="home-tools" aria-label={t('Anleitung und Einstellungen')}>
         <button type="button" aria-expanded={showGuide} aria-controls="home-guide" onClick={() => setShowGuide(!showGuide)}>{t('So geht’s')}</button>
         <button type="button" onClick={() => navigate('/jakob')}>{t('Spiel anpassen')}</button>

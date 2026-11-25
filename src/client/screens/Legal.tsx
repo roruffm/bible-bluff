@@ -15,7 +15,7 @@ const ANBIETER = {
 };
 
 /** Stand der Datenschutzerklärung (Monat, ab 0 gezählt) */
-const STAND = new Date(2026, 9, 1);
+const STAND = new Date(2026, 10, 1);
 
 function stand(): string {
   return new Intl.DateTimeFormat(locale(), { month: 'long', year: 'numeric' }).format(STAND);
@@ -255,13 +255,20 @@ export function DatenschutzPage() {
         kannst die Daten jederzeit über die Einstellungen deines Browsers löschen.
       </p>
 
+      <p>
+        Das zusätzliche Winterspiel Glühwein-Slide speichert deinen persönlichen Punkterekord ausschließlich
+        auf deinem Gerät (Schlüssel: <code>gluehwein-slide-best</code>). Er wird nicht an den Server übertragen.
+        Auch diesen Eintrag kannst du in den Einstellungen deines Browsers löschen.
+      </p>
+
       <h2>Schrift</h2>
       <p>Die Schrift liegt auf dem eigenen Server. Es wird keine Verbindung zu Google oder anderen Anbietern aufgebaut.</p>
 
       <h2>Links zu anderen Seiten</h2>
       <p>
         Die Seite „Neugierig auf Jesus?“ verlinkt auf bibleserver.com. Erst wenn du einen solchen Link antippst, verbindet
-        sich dein Browser mit der anderen Seite; dort gilt deren Datenschutzerklärung.
+        sich dein Browser mit der anderen Seite; dort gilt deren Datenschutzerklärung. Der freiwillige Link „Anne fragen“
+        in der Hintergrundgeschichte von Glühwein-Slide öffnet auf dieselbe Weise WhatsApp (wa.me).
       </p>
 
       <h2>Deine Rechte</h2>

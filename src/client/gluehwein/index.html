@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#102e34">
+  <meta name="description" content="Glühwein-Slide: Halten lädt die Tasse auf. Loslassen bestimmt den Schwung. Serviere in 60 Sekunden so viele Gäste wie möglich.">
+  <meta property="og:site_name" content="Biblebluff">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Glühwein-Slide">
+  <meta property="og:description" content="Halten, aufladen, loslassen! Triff die Gäste mit dem richtigen Schwung und knacke deinen Rekord.">
+  <meta property="og:url" content="https://biblebluff.de/gluehwein/">
+  <link rel="canonical" href="https://biblebluff.de/gluehwein/">
+  <title>Glühwein-Slide · Biblebluff</title>
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="game-shell">
+  <header class="topbar">
+    <a class="brand" href="./" aria-label="Glühwein-Slide, Startseite"><svg viewBox="0 0 32 38" aria-hidden="true"><path d="M12 6V4a4 4 0 0 1 8 0v2M6 11h20l-3 22H9L6 11Zm-2 0 5-5h14l5 5M8 33h16"/><path class="flame" d="M16 15c5 6 5 10 0 13-5-3-5-7 0-13Z"/></svg><span>Glühwein<strong>-Slide</strong></span></a>
+    <div class="toolbar"><a class="biblebluff-home" href="/" aria-label="Zurück zu Biblebluff"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7v10H3Z"/><path d="M9 20v-7h6v7"/></svg><span>Biblebluff</span></a><button id="sound" class="icon-btn" aria-pressed="true" aria-label="Musik und Klänge ausschalten"><span aria-hidden="true">♫</span><span id="sound-label">Musik an</span></button><button id="pause" class="icon-btn" aria-label="Spiel pausieren" disabled><span aria-hidden="true">Ⅱ</span><span>Pause</span></button></div>
+  </header>
+
+  <section class="scorebar" aria-label="Spielstand">
+    <div class="score-cell"><span class="score-label">PUNKTE</span><strong id="score">0</strong></div>
+    <div class="timer"><svg viewBox="0 0 64 64" aria-hidden="true"><circle class="timer-track" cx="32" cy="32" r="28"/><circle id="timer-ring" cx="32" cy="32" r="28"/></svg><strong id="time">60</strong><span>Sek.</span></div>
+    <div class="score-cell right"><span class="score-label">CHANCEN</span><strong><span id="lives">3</span><small> / 3</small></strong></div>
+  </section>
+
+  <section class="stage" id="stage" aria-label="Weihnachtsmarkt mit drei Glühweintresen">
+    <canvas id="game" aria-label="Halte eine Tasse oder einen Tresen gedrückt und lass los. Die Ladung bestimmt die Gleitstrecke. Auch die Tasten 1, 2 und 3 funktionieren mit Halten und Loslassen."></canvas>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <div id="scene-note" class="scene-note">Frankfurt · Ein kleiner Winterabend</div>
+  </section>
+
+  <footer class="controls">
+    <div class="lane-buttons" aria-label="Becher losschicken"><button class="lane-btn" data-lane="0" disabled><span class="cup-icon">♨</span><span>Tresen 1</span><kbd>1</kbd></button><button class="lane-btn" data-lane="1" disabled><span class="cup-icon">♨</span><span>Tresen 2</span><kbd>2</kbd></button><button class="lane-btn" data-lane="2" disabled><span class="cup-icon">♨</span><span>Tresen 3</span><kbd>3</kbd></button></div>
+    <div id="charge-strip" class="charge-strip"><span>Schwung</span><div id="charge-meter" class="charge-meter" role="progressbar" aria-label="Aufgeladener Schwung" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="charge-fill"></span></div><strong id="charge-value">0 %</strong></div><div class="footer-line"><span id="control-hint">Tasse halten · aufladen · loslassen</span></div>
+  </footer>
+
+  <div id="intro" class="veil">
+    <section class="welcome panel" aria-labelledby="welcome-title">
+      <div class="eyebrow"><span class="tiny-star">✦</span> EIN KLEINES WINTERSPIEL</div>
+      <div class="hero-cup" aria-hidden="true"><i></i><i></i><i></i><svg viewBox="0 0 120 110"><ellipse cx="52" cy="93" rx="47" ry="8" fill="#092027" opacity=".3"/><path d="M83 34h11c27 0 27 38 0 38h-9" fill="none" stroke="#d8b777" stroke-width="9"/><path d="M17 25h69l-6 63c-18 9-39 9-57 0Z" fill="#9e423c"/><path d="m20 25 6 59c14 6 33 7 50 1" fill="none" stroke="#cc7160" stroke-width="3"/><ellipse cx="52" cy="25" rx="35" ry="9" fill="#d8b777"/><ellipse cx="52" cy="25" rx="29" ry="6" fill="#572c32"/><path d="m52 44 4 10 11 1-8 7 2 11-9-6-10 6 3-11-8-7 11-1Z" fill="#e6c88e"/></svg></div>
+      <h1 id="welcome-title">Glühwein-<br><em>Slide.</em></h1>
+      <p class="intro-copy">Halte eine Tasse gedrückt und lass los.<br>Je länger du hältst, desto weiter gleitet sie.<br>Triff die Gäste mit dem richtigen Schwung!</p>
+      <div class="intro-facts"><span>◷ 60 Sekunden</span><span>♥ 3 Chancen</span></div>
+      <button id="start" class="primary">Eine Runde spielen <span aria-hidden="true">✦</span></button>
+      <button id="story-start" class="text-btn story-open" aria-haspopup="dialog" aria-controls="story">Die Geschichte dahinter</button>
+      <p class="rules">3 Gäste ohne Glühwein = Game Over.</p><p class="fine-print">Mit Finger, Maus oder Tastatur · ♫ Weihnachts-Groove<br><a class="biblebluff-back" href="/">Zurück zu Biblebluff</a></p>
+    </section>
+  </div>
+
+  <div id="pause-overlay" class="veil" hidden><section class="panel compact" aria-labelledby="pause-title"><span class="eyebrow">KURZ DURCHATMEN</span><h2 id="pause-title">Der Glühwein<br>bleibt warm.</h2><p>Die Zeit steht still. Dein Markt wartet auf dich.</p><button id="resume" class="primary">Weiterspielen</button></section></div>
+
+  <div id="results" class="veil" hidden><section class="panel results-panel" aria-labelledby="result-title"><div id="result-eyebrow" class="eyebrow">DEINE RUNDE IST GESCHAFFT</div><h2 id="result-title">Runde geschafft.<br><em>Prost!</em></h2><p id="result-comment">Wie viele Becher schaffst du in 60 Sekunden?</p><div class="result-stats"><div><strong id="result-score">0</strong><span>Punkte</span></div><div><strong id="result-served">0</strong><span>Becher serviert</span></div><div><strong id="result-lights">0</strong><span>Lichter entzündet</span></div></div><p id="best" class="best">Dein Rekord: 0 Punkte</p><button id="story-result" class="text-btn story-open" aria-haspopup="dialog" aria-controls="story">Die Geschichte dahinter</button><div class="result-buttons"><button id="again" class="primary">Noch eine Runde</button><button id="share" class="secondary">Spiel teilen</button></div><p class="fine-print">Mit dem richtigen Schwung wird jeder Tresen zur Punktelandung.<br><a class="biblebluff-back" href="/">Zurück zu Biblebluff</a></p></section></div>
+</main>
+<dialog id="story" class="story-dialog" aria-labelledby="story-title" aria-describedby="story-intro">
+  <button id="story-close" class="close" aria-label="Geschichte schließen">×</button>
+  <div class="eyebrow">PERSÖNLICH VON ANNE</div>
+  <h2 id="story-title">Warum ausgerechnet<br><em>Glühwein?</em></h2>
+  <div class="story-price" aria-hidden="true"><strong>5 €</strong><span>Ein Becher.<br>Ein Gedanke.</span></div>
+  <div class="story-letter">
+    <p id="story-intro">Ein Becher Glühwein kostet in Frankfurt rund 5 €. Dieser Vergleich brachte mich auf die Spielidee.</p>
+    <p>Ich kenne eine Familie in den USA persönlich, die mir sehr am Herzen liegt. Der Vater sitzt im Gefängnis. Seine Familie ist überzeugt, dass er unschuldig verurteilt wurde.</p>
+    <details class="story-details"><summary>Was die Familie über den Fall berichtet</summary><p>Nach ihrer Darstellung wollte der Vater einen gewalttätigen Streit zwischen einer Mutter und ihrem Sohn schlichten. Er bat den Jungen, sich hinzusetzen und durchzuatmen, und legte ihm dabei eine Hand auf den oberen Rücken. Mehr als ein Jahr später wurde er wegen Würgens angeklagt und anschließend verurteilt. Die Familie hält die Verurteilung für falsch.</p></details>
+    <p>Ein Anwalt möchte eine vorzeitige Entlassung auf Bewährung anstreben. Dafür benötigt die Familie <strong>6.000 US-Dollar als Anwaltshonorar</strong>.</p>
+    <p class="story-message">Der Gegenwert eines Glühweins bringt ihn noch nicht nach Hause. Aber eine Beteiligung kann der Familie zeigen: Menschen denken an euch. Ihr steht das nicht allein durch.</p>
+    <p class="story-signature">— Anne</p>
+  </div>
+  <p class="story-privacy">Zum Schutz der Kinder bleibt die Familie öffentlich anonym. Bei Fragen zum Fall, zum aktuellen Stand oder zur Unterstützung kannst du Anne persönlich ansprechen.</p>
+  <div class="story-actions">
+    <a id="story-contact" class="primary" href="https://wa.me/?text=Hallo%20Anne%2C%20ich%20habe%20die%20Geschichte%20hinter%20Gl%C3%BChwein-Slide%20gelesen%20und%20m%C3%B6chte%20mehr%20%C3%BCber%20die%20Familie%20und%20die%20Unterst%C3%BCtzung%20erfahren." target="_blank" rel="noopener noreferrer">Anne fragen</a>
+    <button id="story-return" class="secondary">Zurück zum Spiel</button>
+  </div>
+  <p class="story-contact-note">„Anne fragen“ öffnet WhatsApp. Wähle dort Anne in deinen Kontakten.<br>Das Spiel bleibt kostenlos. Eine Unterstützung ist freiwillig.</p>
+</dialog>
+<script type="module" src="app.js"></script>
+</body>
+</html>

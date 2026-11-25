@@ -510,3 +510,16 @@ Aktionen ohne eigenen Fehlerbereich zeigen bei Fehlern einen bleibenden Hinweis 
 Nach „Show vorbereiten“ zeigt die Fernbedienung im Bereich „Ablauf“ den lila Knopf „Erklärvideo am Beamer abspielen“. Auf dem Desktop steht er unter „Nächster Schritt“. Bild und Ton laufen nur am Beamer. Pause, Fortsetzen, Neustart und Beenden stehen derselben Spielleitung zur Verfügung. Nach dem Film erscheint wieder die Begrüßung; „Mission starten“ beginnt anschließend das Spiel. In der Mausbedienung (H) stehen dieselben Videoknöpfe. Während des Films warten die Spielschritte und die Professor-Audios.
 
 Die Vorbereitung nimmt die Videodatei in die Offline-Kopie auf; die Smartphone-Fernbedienung benötigt weiterhin Internet.
+
+## Glühwein-Slide
+
+Das eigenständige Winterspiel ist unter `/gluehwein/` erreichbar; die Startseite verlinkt darauf.
+Vite baut dafür eine zweite HTML-Seite aus `src/client/gluehwein/index.html`. Die Spieloberfläche
+ist vom Preact-Spiel getrennt. Der Rückweg führt zur Biblebluff-Startseite.
+
+Tasse oder Tresen mit Finger, Maus oder Taste 1–3 halten und loslassen: Die Ladung bestimmt die
+Gleitstrecke. Eine Runde dauert höchstens 60 Sekunden und endet sofort nach drei unversorgten Gästen.
+Musik und Klänge entstehen lokal per Web Audio. Die optionale Hintergrundgeschichte ist von Anne.
+Der Punkterekord bleibt im lokalen Browser-Speicher; das Spiel verwendet keine Raum-API oder Datenbank.
+
+`npm run check` prüft auch Spiellogik, Steuerung, Musik und Hintergrunddialog des Winterspiels.

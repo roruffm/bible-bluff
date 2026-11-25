@@ -50,6 +50,12 @@ export default defineConfig({
     outDir: '../../dist/client',
     emptyOutDir: true,
     target: 'es2020',
+    rolldownOptions: {
+      input: {
+        main: fileURLToPath(new URL('./src/client/index.html', import.meta.url)),
+        gluehwein: fileURLToPath(new URL('./src/client/gluehwein/index.html', import.meta.url)),
+      },
+    },
   },
   plugins: [preact(), apiDevPlugin()],
   server: { host: true, port: 5173, allowedHosts: ['terminal.local'] },

@@ -928,6 +928,25 @@ textarea {
   padding: 0 0 20px;
 }
 
+/* Ein eigener Spieleinstieg ohne Einfluss auf die laufenden Bibelrunden. */
+.home-winter {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 20px 24px;
+  color: var(--ink);
+  text-decoration: none;
+  background: var(--gold-soft);
+  border-color: var(--line-strong);
+}
+.home-winter:hover { border-color: var(--gold); }
+.home-winter:focus-visible { outline: 3px solid var(--primary); outline-offset: 4px; }
+.home-winter-cup { width: 42px; height: 48px; flex: 0 0 42px; color: var(--primary); }
+.home-winter-copy { display: grid; gap: 3px; }
+.home-winter-copy small { color: var(--ink-2); font-size: .72rem; text-transform: uppercase; letter-spacing: .12em; }
+.home-winter-copy strong { font-size: 1.2rem; }
+.home-winter-copy > span { color: var(--ink-2); font-size: .84rem; }
+
 .home-tools {
   display: flex;
   justify-content: space-between;
