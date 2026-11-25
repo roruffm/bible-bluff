@@ -523,3 +523,12 @@ Musik und Klänge entstehen lokal per Web Audio. Die optionale Hintergrundgeschi
 Der Punkterekord bleibt im lokalen Browser-Speicher; das Spiel verwendet keine Raum-API oder Datenbank.
 
 `npm run check` prüft auch Spiellogik, Steuerung, Musik und Hintergrunddialog des Winterspiels.
+
+### Pixel-Arcade-Gestaltung
+
+Die Darstellung des Winterspiels liegt in `pixel-renderer.js`: eine bewusst niedrig aufgelöste
+Canvas-Fläche zeichnet die bewegten Gäste, Tassen, Tresen und Ladeanzeigen. Spielkoordinaten
+bleiben unabhängig davon bei 1000 Einheiten. `assets/market.png` ist die statische Pixel-Kulisse,
+`assets/guests.png` enthält vier transparente Gäste-Sprites in einer Reihe. Beide Grafiken sind
+für dieses Spiel erzeugt; ihre Motive stammen aus dem ausgewählten ursprünglichen Pixel-Arcade-Entwurf.
+Die lokal ausgelieferte Schrift Pixelify Sans ist über Fontsource eingebunden.

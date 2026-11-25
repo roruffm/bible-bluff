@@ -2,6 +2,7 @@ import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
+import { PixelRenderer } from '../../src/client/gluehwein/pixel-renderer.js';
 import { GameEngine, ROUND_SECONDS, MAX_LIGHTS, MAX_MISSES } from '../../src/client/gluehwein/engine.js';
 
 // Exercise actual application handlers against a small DOM, without a browser.
@@ -38,7 +39,7 @@ function app(width,height){
   }
   doc.getElementById=id=>doc.querySelector('#'+id);doc.createElement=tag=>new Element(tag);
   Object.defineProperty(doc,'activeElement',{get:()=>active});
-  const storage=new Map();const sandbox={GameEngine,ROUND_SECONDS,MAX_LIGHTS,MAX_MISSES,WinterMusic:MusicStub,document:doc,devicePixelRatio:1,
+  const storage=new Map();const sandbox={PixelRenderer:class extends PixelRenderer{constructor(canvas,options){super(canvas,{...options,createCanvas:()=>doc.createElement('canvas')});}},GameEngine,ROUND_SECONDS,MAX_LIGHTS,MAX_MISSES,WinterMusic:MusicStub,document:doc,devicePixelRatio:1,
     requestAnimationFrame:fn=>raf=fn,ResizeObserver:class{constructor(cb){this.cb=cb}observe(){this.cb()}},
     matchMedia:()=>({matches:true}),localStorage:{getItem:k=>storage.get(k),setItem:(k,v)=>storage.set(k,v)},
     navigator:{clipboard:{writeText:async value=>clipboard=value}},location:{href:'https://example.test/gluehwein/'},
@@ -54,7 +55,7 @@ for(const [width,height] of [[390,480],[1100,600]])test(`Hold, release, cancella
   assert.equal(get('intro').hidden,false);await get('start').click();assert.equal(get('intro').hidden,true);assert.equal(a.music().playing,true);assert.equal(get('lives').textContent,3);
   assert.equal(a.doc.querySelectorAll('[data-lane]')[0].disabled,false);
   assert.equal(get('family'),null);
-  const y=height*.34;
+  const y=height*.43;
   await get('game').dispatchEvent({type:'pointerdown',pointerId:1,clientX:width*.14,clientY:y});
   a.step(.9);assert.ok(Number.parseInt(get('charge-value').textContent)>55,'holding fills the meter');
   assert.equal(get('score').textContent,0,'holding alone does not fire');
