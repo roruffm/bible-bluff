@@ -247,3 +247,46 @@ dialog p { font-size: 16px; line-height: 1.75; color: #d7e3f3; }
   .toolbar { gap: 5px; }
   .primary { padding-left: 9px; padding-right: 9px; font-size: 17px; }
 }
+
+/* Freiwillige Unterstützung nach einer Runde und in Annes Geschichte. */
+.donation-card {
+  margin: 20px 0 8px;
+  padding: 16px;
+  text-align: left;
+  border: 2px solid #8c7949;
+  background: #071831;
+}
+.donation-card h3 {
+  margin: 0 0 8px;
+  font: 700 25px/1.15 var(--pixel);
+  color: var(--gold);
+}
+.donation-card p { margin: 0 0 14px; font-size: 16px; line-height: 1.5; color: #d7e3f3; }
+.donation-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  width: 100%;
+  padding: 12px;
+  border: 3px solid #fff0a0;
+  box-shadow: inset 3px 3px #ffeaa0, inset -3px -3px #c3892b, 0 4px #030a1e;
+  background: var(--gold);
+  color: #102348;
+  text-decoration: none;
+  text-align: center;
+  font: 700 20px/1.25 var(--pixel);
+}
+.donation-btn:hover { background: #ffe385; }
+.donation-note, .donation-card .donation-note {
+  margin: 11px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #b8cbe0;
+}
+.story-donation { margin: 22px 0; }
+.story-donation .donation-note { text-align: center; }
+@media (max-width: 360px) {
+  .donation-card { padding: 13px; }
+  .donation-btn { font-size: 18px; }
+}

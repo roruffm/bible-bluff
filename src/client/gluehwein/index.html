@@ -59,7 +59,31 @@
 
   <div id="pause-overlay" class="veil" hidden><section class="panel compact" aria-labelledby="pause-title"><span class="eyebrow">KURZ DURCHATMEN</span><h2 id="pause-title">Der Glühwein<br>bleibt warm.</h2><p>Die Zeit steht still. Dein Markt wartet auf dich.</p><button id="resume" class="primary">Weiterspielen</button></section></div>
 
-  <div id="results" class="veil" hidden><section class="panel results-panel" aria-labelledby="result-title"><div id="result-eyebrow" class="eyebrow">DEINE RUNDE IST GESCHAFFT</div><h2 id="result-title">Runde geschafft.<br><em>Prost!</em></h2><p id="result-comment">Wie viele Becher schaffst du in 60 Sekunden?</p><div class="result-stats"><div><strong id="result-score">0</strong><span>Punkte</span></div><div><strong id="result-served">0</strong><span>Becher serviert</span></div><div><strong id="result-lights">0</strong><span>Lichter entzündet</span></div></div><p id="best" class="best">Dein Rekord: 0 Punkte</p><button id="story-result" class="text-btn story-open" aria-haspopup="dialog" aria-controls="story">Die Geschichte dahinter</button><div class="result-buttons"><button id="again" class="primary">Noch eine Runde</button><button id="share" class="secondary">Spiel teilen</button></div><p class="fine-print">Mit dem richtigen Schwung wird jeder Tresen zur Punktelandung.<br><a class="biblebluff-back" href="/">Zurück zu Biblebluff</a></p></section></div>
+  <div id="results" class="veil" hidden>
+    <section class="panel results-panel" aria-labelledby="result-title">
+      <div id="result-eyebrow" class="eyebrow">DEINE RUNDE IST GESCHAFFT</div>
+      <h2 id="result-title">Runde geschafft.<br><em>Prost!</em></h2>
+      <p id="result-comment">Wie viele Becher schaffst du in 60 Sekunden?</p>
+      <div class="result-stats">
+        <div><strong id="result-score">0</strong><span>Punkte</span></div>
+        <div><strong id="result-served">0</strong><span>Becher serviert</span></div>
+        <div><strong id="result-lights">0</strong><span>Lichter entzündet</span></div>
+      </div>
+      <p id="best" class="best">Dein Rekord: 0 Punkte</p>
+      <div class="result-buttons">
+        <button id="again" class="primary">Noch eine Runde</button>
+        <button id="share" class="secondary">Spiel teilen</button>
+      </div>
+      <section class="donation-card" aria-labelledby="donation-title">
+        <h3 id="donation-title">Gefällt dir das Spiel?</h3>
+        <p>Spendier der betroffenen Familie einen Glühwein: Mit 5 € unterstützt du ihre Anwaltskosten.</p>
+        <a id="donate-result" class="donation-btn" href="https://www.paypal.com/pool/9uEcziqnBE" target="_blank" rel="noopener noreferrer">Glühwein spendieren · 5 €</a>
+        <p class="donation-note">Freiwillig · 5 € als Richtwert. Der Pool ist in US-Dollar; den Betrag wählst du bei PayPal.</p>
+      </section>
+      <button id="story-result" class="text-btn story-open" aria-haspopup="dialog" aria-controls="story">Die Geschichte dahinter</button>
+      <p class="fine-print">Mit dem richtigen Schwung wird jeder Tresen zur Punktelandung.<br><a class="biblebluff-back" href="/">Zurück zu Biblebluff</a></p>
+    </section>
+  </div>
 </main>
 <dialog id="story" class="story-dialog" aria-labelledby="story-title" aria-describedby="story-intro">
   <button id="story-close" class="close" aria-label="Geschichte schließen">×</button>
@@ -75,8 +99,12 @@
     <p class="story-signature">— Anne</p>
   </div>
   <p class="story-privacy">Zum Schutz der Kinder bleibt die Familie öffentlich anonym. Bei Fragen zum Fall, zum aktuellen Stand oder zur Unterstützung kannst du Anne persönlich ansprechen.</p>
+  <div class="story-donation">
+    <a id="donate-story" class="donation-btn" href="https://www.paypal.com/pool/9uEcziqnBE" target="_blank" rel="noopener noreferrer">Glühwein spendieren · 5 €</a>
+    <p class="donation-note">Freiwillig · 5 € als Richtwert. Der Pool ist in US-Dollar; den Betrag wählst du bei PayPal.</p>
+  </div>
   <div class="story-actions">
-    <a id="story-contact" class="primary" href="https://wa.me/?text=Hallo%20Anne%2C%20ich%20habe%20die%20Geschichte%20hinter%20Gl%C3%BChwein-Slide%20gelesen%20und%20m%C3%B6chte%20mehr%20%C3%BCber%20die%20Familie%20und%20die%20Unterst%C3%BCtzung%20erfahren." target="_blank" rel="noopener noreferrer">Anne fragen</a>
+    <a id="story-contact" class="secondary" href="https://wa.me/?text=Hallo%20Anne%2C%20ich%20habe%20die%20Geschichte%20hinter%20Gl%C3%BChwein-Slide%20gelesen%20und%20m%C3%B6chte%20mehr%20%C3%BCber%20die%20Familie%20und%20die%20Unterst%C3%BCtzung%20erfahren." target="_blank" rel="noopener noreferrer">Anne fragen</a>
     <button id="story-return" class="secondary">Zurück zum Spiel</button>
   </div>
   <p class="story-contact-note">„Anne fragen“ öffnet WhatsApp. Wähle dort Anne in deinen Kontakten.<br>Das Spiel bleibt kostenlos. Eine Unterstützung ist freiwillig.</p>

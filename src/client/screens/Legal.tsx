@@ -268,7 +268,8 @@ export function DatenschutzPage() {
       <p>
         Die Seite „Neugierig auf Jesus?“ verlinkt auf bibleserver.com. Erst wenn du einen solchen Link antippst, verbindet
         sich dein Browser mit der anderen Seite; dort gilt deren Datenschutzerklärung. Der freiwillige Link „Anne fragen“
-        in der Hintergrundgeschichte von Glühwein-Slide öffnet auf dieselbe Weise WhatsApp (wa.me).
+        in der Hintergrundgeschichte von Glühwein-Slide öffnet auf dieselbe Weise WhatsApp (wa.me). Die freiwilligen
+        Unterstützungsbuttons im Winterspiel führen zu PayPal (paypal.com); auch dort gilt die Datenschutzerklärung des Anbieters.
       </p>
 
       <h2>Deine Rechte</h2>

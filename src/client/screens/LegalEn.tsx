@@ -178,7 +178,8 @@ export function DatenschutzEn({ address, email, updated }: { address: ComponentC
       <p>
         The “Curious about Jesus?” page links to bibleserver.com. Only when you tap one of these links does your browser
         connect to the other site; that site’s privacy policy then applies. The optional “Anne fragen” link
-        in the story behind Glühwein-Slide opens WhatsApp (wa.me) in the same way.
+        in the story behind Glühwein-Slide opens WhatsApp (wa.me) in the same way. The optional support buttons
+        in the winter game lead to PayPal (paypal.com), where the provider’s privacy policy applies.
       </p>
 
       <h2>Your rights</h2>
