@@ -1,3 +1,4 @@
+import { Highscores } from './highscores.js';
 import { GameEngine, ROUND_SECONDS, MAX_LIGHTS, MAX_MISSES } from './engine.js';
 import { WinterMusic } from './music.js';
 import { PixelRenderer } from './pixel-renderer.js';
@@ -18,7 +19,9 @@ const music = new WinterMusic();
 let cachedHUD = '', bestScore = 0;
 try { bestScore = Number(localStorage.getItem('gluehwein-slide-best')) || 0; } catch {}
 
-const engine = new GameEngine({ onEvent: handleEvent });
+const highscores = new Highscores();
+let starting = false;
+const engine = new GameEngine({ onEvent: handleEvent, record: true });
 const renderer = new PixelRenderer(canvas, { reducedMotion });
 const laneY = lane => renderer.laneY(lane);
 const personScale = () => renderer.personScale();
@@ -115,9 +118,18 @@ function syncHUD(){
   laneButtons.forEach((button,lane)=>{button.classList.toggle('charging',engine.charge?.lane===lane);button.style.setProperty('--charge',engine.charge?.lane===lane?percent+'%':'0%');});
 }
 
-function startRound(){
+async function startRound(){
+  if(starting || highscores.busy)return;
+  starting=true;
+  $('start').disabled=true;$('again').disabled=true;
+  const startButton=$('intro').hidden?$('again'):$('start');
+  const label=startButton.textContent;startButton.textContent='Startet …';
+  music.start({restart:true});
+  const seed=await highscores.beginRound();
+  starting=false;$('start').disabled=false;$('again').disabled=false;
+  startButton.textContent=label;
   $('intro').hidden=true;$('results').hidden=true;$('pause-overlay').hidden=true;$('scene-note').hidden=true;
-  input=null;engine.start();particles=[];ripple=[];lastJoke=-99;cachedHUD='';
+  input=null;engine.start(seed);particles=[];ripple=[];lastJoke=-99;cachedHUD='';
   music.start({restart:true});
   toast('Tasse halten. Schwung aufladen. Loslassen!',4,true);
   tone(523,.12,'sine',.035);syncHUD();$('pause').focus({preventScroll:true});
@@ -136,6 +148,7 @@ function resumeRound(){
 
 function finishRound(){
   music.stop();
+  highscores.finishRound({score:engine.score,history:engine.history});
   const gameOver=engine.endReason==='customers';
   $('result-score').textContent=engine.score;$('result-served').textContent=engine.served;$('result-lights').textContent=engine.lights;
   $('result-bonus').textContent=`${engine.perfectServed} ${engine.perfectServed===1?'Punktlandung':'Punktlandungen'} · Beste Serie: ${engine.bestCombo} · ${engine.specialServed} ${engine.specialServed===1?'besonderer Gast':'besondere Gäste'}`;
@@ -147,7 +160,7 @@ function finishRound(){
   $('result-title').innerHTML=gameOver?'Game Over.<br><em>Noch eine Runde?</em>':engine.lights===18?'Stark serviert.<br><em>Prost!</em>':'Runde geschafft.<br><em>Prost!</em>';
   $('result-comment').textContent=gameOver?'Drei Gäste haben das Tresenende ohne Glühwein erreicht. Versuch es noch einmal!':`${engine.served} Becher serviert. Wie viele schaffst du beim nächsten Mal?`;
   $('results').hidden=false;$('pause-overlay').hidden=true;
-  $('results').querySelector('.primary').focus({preventScroll:true});
+  $('again').focus({preventScroll:true});
   if(soundOn)(gameOver?[392,330,262]:[523,659,784]).forEach((hz,i)=>music.effect(hz,.22,'sine',.06,i*.14));
 }
 
@@ -156,7 +169,7 @@ function locationOnCanvas(event){
 }
 
 function openStory(){
-  if($('story').open)return;
+  if(starting||$('story').open||$('leaderboard').open)return;
   storyReturnFocus=document.activeElement;
   resumeAfterStory=engine.state==='playing';
   if(resumeAfterStory){input=null;engine.pause();}
@@ -205,6 +218,20 @@ $('story').addEventListener('click',e=>{
   const r=$('story').getBoundingClientRect();
   if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)$('story').close();
 });
+let leaderboardReturnFocus=null, resumeAfterLeaderboard=false;
+document.querySelectorAll('.leaderboard-open').forEach(button=>button.addEventListener('click',()=>{
+  if(starting||$('leaderboard').open)return;
+  leaderboardReturnFocus=document.activeElement;resumeAfterLeaderboard=engine.state==='playing';
+  if(resumeAfterLeaderboard){input=null;engine.pause();}
+  music.stop();syncHUD();$('leaderboard').showModal();$('leaderboard-close').focus({preventScroll:true});
+  highscores.load();
+}));
+$('leaderboard-close').addEventListener('click',()=>$('leaderboard').close());
+$('leaderboard-return').addEventListener('click',()=>$('leaderboard').close());
+$('leaderboard').addEventListener('close',()=>{
+  if(resumeAfterLeaderboard&&engine.state==='paused')resumeRound();
+  resumeAfterLeaderboard=false;leaderboardReturnFocus?.focus({preventScroll:true});
+});
 $('pause').addEventListener('click',pauseRound);$('resume').addEventListener('click',resumeRound);
 $('sound').addEventListener('click',()=>{
   soundOn=!soundOn;music.setEnabled(soundOn);
@@ -213,11 +240,11 @@ $('sound').addEventListener('click',()=>{
   if(soundOn&&engine.state==='playing')music.start();
 });
 document.addEventListener('keydown',e=>{
-  if($('story').open)return;
+  if(starting||$('story').open||$('leaderboard').open)return;
   if(['1','2','3'].includes(e.key)&&engine.state==='playing'){
     e.preventDefault();if(!e.repeat&&!input&&engine.beginCharge(Number(e.key)-1))input={type:'key',key:e.key};
   }
-  if(e.key==='Escape'||(e.code==='Space'&&!['BUTTON','A'].includes(document.activeElement?.tagName))){
+  if(e.key==='Escape'||(e.code==='Space'&&!['BUTTON','A','INPUT'].includes(document.activeElement?.tagName))){
     if(['playing','paused'].includes(engine.state)){e.preventDefault();pauseRound();}
   }
 });

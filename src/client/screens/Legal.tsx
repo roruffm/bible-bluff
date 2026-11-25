@@ -256,9 +256,15 @@ export function DatenschutzPage() {
       </p>
 
       <p>
-        Das zusätzliche Winterspiel Glühwein-Slide speichert deinen persönlichen Punkterekord ausschließlich
-        auf deinem Gerät (Schlüssel: <code>gluehwein-slide-best</code>). Er wird nicht an den Server übertragen.
-        Auch diesen Eintrag kannst du in den Einstellungen deines Browsers löschen.
+        Glühwein-Slide speichert deinen persönlichen Punkterekord (<code>gluehwein-slide-best</code>) und den
+        zuletzt eingetragenen Spitznamen (<code>gluehwein-slide-name</code>) auf deinem Gerät. Diese Einträge
+        kannst du in den Einstellungen deines Browsers löschen. Für die gemeinsame Rangliste wird beim Start
+        eine zufällige Rundennummer gespeichert. Sie läuft nach 24 Stunden ab und wird beim nächsten Rundenstart bereinigt. Erst wenn du nach der Runde
+        „Eintragen“ wählst, werden dein Spitzname, Punktestand, die Zahl servierter Becher und der Zeitpunkt
+        dauerhaft auf unserem Server gespeichert. Spitzname und Punkte sind öffentlich sichtbar. Die dafür
+        übermittelte Spielaufzeichnung wird nur zur Prüfung verwendet und nicht dauerhaft gespeichert.
+        Nutze bitte einen Spitznamen statt deines vollständigen Namens. Zur Löschung eines veröffentlichten
+        Eintrags kannst du dich mit Spitzname, Punktestand und ungefährem Spielzeitpunkt an uns wenden.
       </p>
 
       <h2>Schrift</h2>

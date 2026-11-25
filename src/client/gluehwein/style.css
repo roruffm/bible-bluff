@@ -312,3 +312,39 @@ dialog p { font-size: 16px; line-height: 1.75; color: #d7e3f3; }
 .arcade-tip { margin: 0 0 17px; color: #ffdc89; font: 400 16px/1.4 var(--pixel); }
 .results-panel .result-bonus { margin: 12px 0 0; color: #ffdc89; font-size: 14px; line-height: 1.5; }
 @media (max-width: 360px) { .arcade-status { font-size: 14px; padding: 5px 7px; } }
+
+/* Gemeinsame Bestenliste im gleichen Pixel-Arcade-Stil. */
+.leaderboard-open { width: 100%; margin-top: 12px; color: var(--gold); }
+.highscore-entry { margin: 18px 0 12px; padding: 16px; border: 2px solid #557597; background: #071831; text-align: left; }
+.highscore-entry h3 { margin: 0 0 14px; color: var(--gold); font: 700 25px/1.15 var(--pixel); }
+.highscore-entry label { display: block; margin-bottom: 7px; font-size: 15px; color: #dce7f5; }
+.highscore-fields { display: flex; gap: 9px; }
+.highscore-fields input { width: 100%; min-width: 0; border: 2px solid #6685a5; border-radius: 0; background: #102348; color: var(--cream); padding: 10px; font: 400 16px "Figtree", system-ui, sans-serif; }
+.highscore-fields input::placeholder { color: #a0b7d1; }
+.highscore-fields input:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+.highscore-fields .primary { width: auto; flex: 0 0 auto; }
+#highscore-privacy { margin: 12px 0 0; font-size: 13px; line-height: 1.5; color: #b8cbe0; }
+#highscore-status { margin: 0; font-size: 15px; line-height: 1.5; color: #ffe194; }
+#highscore-status:not(:empty) { margin-top: 12px; }
+#leaderboard-close { position: sticky; top: -10px; float: right; margin: -17px -17px 0 0; }
+.leaderboard-dialog .eyebrow { padding-right: 30px; }
+.leaderboard-dialog h2 { font-size: 43px; margin-bottom: 10px; }
+.leaderboard-dialog .leaderboard-caption { margin-top: 0; font-size: 14px; color: #b8cbe0; }
+#leaderboard-table { width: 100%; border-collapse: collapse; margin: 20px 0; font-variant-numeric: tabular-nums; }
+#leaderboard-table th { padding: 10px 8px; text-align: left; color: #b8cbe0; font: 400 17px var(--pixel); border-bottom: 2px solid #6685a5; }
+#leaderboard-table td { padding: 12px 8px; border-bottom: 1px solid #324c6c; overflow-wrap: anywhere; }
+#leaderboard-table th:first-child, #leaderboard-table td:first-child { width: 52px; color: var(--gold); font-family: var(--pixel); font-size: 22px; }
+#leaderboard-table th:last-child, #leaderboard-table td:last-child { text-align: right; white-space: nowrap; }
+#leaderboard-table td:last-child { color: var(--gold); font: 700 24px var(--pixel); }
+#leaderboard-table tbody tr:first-child { background: #ffce4b12; }
+#leaderboard-table .your-score { background: #264c54; }
+.leaderboard-dialog .leaderboard-note { font-size: 13px; line-height: 1.6; color: #b8cbe0; }
+.leaderboard-actions { display: flex; gap: 10px; margin-top: 20px; }
+.leaderboard-actions > * { flex: 1; width: auto; }
+.primary:disabled, .secondary:disabled { opacity: .6; }
+@media (max-width: 420px) {
+  .highscore-fields { flex-direction: column; }
+  .highscore-fields .primary { width: 100%; }
+  .leaderboard-actions { flex-direction: column; }
+  .leaderboard-dialog h2 { font-size: 36px; }
+}

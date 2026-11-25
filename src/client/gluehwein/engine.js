@@ -11,15 +11,28 @@ export const SPECIAL_GUESTS = ['santa', 'snowman', 'grump'];
 export const SLIDE_FRICTION = 700;
 export const slideDistance = power => 45 + 855 * Math.max(0, Math.min(1, power));
 
+// One seed lets the server replay exactly the same round before ranking it.
+export function seededRandom(seed) {
+  let state = seed >>> 0;
+  return () => {
+    state = (state + 0x6D2B79F5) | 0;
+    let t = Math.imul(state ^ state >>> 15, 1 | state);
+    t ^= t + Math.imul(t ^ t >>> 7, 61 | t);
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
 export class GameEngine {
-  constructor({ random = Math.random, onEvent = () => {} } = {}) {
+  constructor({ random = Math.random, onEvent = () => {}, record = false } = {}) {
     this.random = random;
+    this.record = record;
     this.onEvent = onEvent;
     this.nextId = 0;
     this.reset();
   }
 
   reset() {
+    this.history = [];
     this.state = 'ready';
     this.remaining = ROUND_SECONDS;
     this.elapsed = 0;
@@ -44,7 +57,7 @@ export class GameEngine {
     for (let lane = 0; lane < LANES; lane++) this.spawn(lane, 730 + lane * 55);
   }
 
-  start() { this.reset(); this.state = 'playing'; }
+  start(seed) { if (Number.isInteger(seed)) this.random = seededRandom(seed); this.reset(); this.state = 'playing'; }
   pause() { if (this.state === 'playing') { this.cancelCharge(); this.state = 'paused'; } }
   resume() { if (this.state === 'paused') this.state = 'playing'; }
   emit(type, data = {}) { this.onEvent({ type, ...data }); }
@@ -73,13 +86,15 @@ export class GameEngine {
   beginCharge(lane) {
     if (this.state !== 'playing' || this.charge || !Number.isInteger(lane) || lane < 0 || lane >= LANES || this.cooldowns[lane] > 0) return false;
     this.charge = { lane, elapsed: 0, power: 0 };
+    if (this.record) this.history.push(['b', lane]);
     return true;
   }
 
-  cancelCharge() { this.charge = null; }
+  cancelCharge() { if (this.record && this.charge) this.history.push(['c']); this.charge = null; }
 
   releaseCharge() {
     if (!this.charge) return false;
+    if (this.record) this.history.push(['r']);
     const { lane, power } = this.charge;
     this.charge = null;
     return this.fire(lane, power);
@@ -126,6 +141,7 @@ export class GameEngine {
   update(rawDt) {
     if (this.state !== 'playing' || !Number.isFinite(rawDt) || rawDt <= 0) return;
     const dt = Math.min(rawDt, .1, this.remaining);
+    if (this.record) this.history.push(dt);
     this.remaining = Math.max(0, this.remaining - dt);
     this.elapsed = ROUND_SECONDS - this.remaining;
     if (this.feverRemaining > 0) {

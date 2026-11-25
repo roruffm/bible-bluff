@@ -1,3 +1,4 @@
+import { D1GlühweinStore } from './server/gluehwein-store';
 // Cloudflare Worker: API unter /api/*, Einladungslinks /r/CODE mit eigener Link-Vorschau, englische Links
 // (?lang=en) mit englischer Vorschau, alles andere liefert die statische App aus.
 
@@ -20,7 +21,12 @@ export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
     if (url.pathname.startsWith('/api/')) {
-      handleApi ??= createApi({ store: new D1Store(env.DB), kidsRemoteStore: new D1KidsRemoteStore(env.DB), adminKey: env.ADMIN_KEY || undefined });
+      handleApi ??= createApi({
+        store: new D1Store(env.DB),
+        gluehweinStore: new D1GlühweinStore(env.DB),
+        kidsRemoteStore: new D1KidsRemoteStore(env.DB),
+        adminKey: env.ADMIN_KEY || undefined,
+      });
       return handleApi(request);
     }
     if (request.method === 'GET' || request.method === 'HEAD') {

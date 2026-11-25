@@ -54,6 +54,7 @@
       <div class="intro-facts"><span>◷ 60 Sekunden</span><span>♥ 3 Chancen</span></div>
       <p class="arcade-tip">Punktlandung: +25 Bonuspunkte.<br>5er-Serie: 8 Sekunden doppelte Punkte!</p>
       <button id="start" class="primary">Eine Runde spielen</button>
+      <button class="secondary leaderboard-open" aria-haspopup="dialog" aria-controls="leaderboard">★ Rangliste ansehen</button>
       <button id="story-start" class="text-btn story-open" aria-haspopup="dialog" aria-controls="story">Die Geschichte dahinter</button>
       <p class="rules">3 Gäste ohne Glühwein = Game Over.</p><p class="fine-print">Mit Finger, Maus oder Tastatur · ♫ Weihnachts-Groove<br><a class="biblebluff-back" href="/">Zurück zu Biblebluff</a></p>
     </section>
@@ -73,6 +74,16 @@
       </div>
       <p id="result-bonus" class="result-bonus"></p>
       <p id="best" class="best">Dein Rekord: 0 Punkte</p>
+      <section id="highscore-entry" class="highscore-entry" aria-labelledby="highscore-title" hidden>
+        <h3 id="highscore-title">Dein Platz in der Rangliste</h3>
+        <form id="highscore-form">
+          <label for="highscore-name">Dein Spitzname</label>
+          <div class="highscore-fields"><input id="highscore-name" name="nickname" type="text" minlength="2" maxlength="20" autocomplete="nickname" placeholder="z. B. Glühweinprofi" required aria-describedby="highscore-privacy"><button id="highscore-save" class="primary" type="submit">Eintragen</button></div>
+          <p id="highscore-privacy">Freiwillig · Dein Spitzname und Punktestand erscheinen öffentlich. Nutze bitte keinen vollständigen Namen.</p>
+        </form>
+        <p id="highscore-status" role="status" aria-live="polite"></p>
+      </section>
+      <button class="secondary leaderboard-open" aria-haspopup="dialog" aria-controls="leaderboard">★ Rangliste ansehen</button>
       <div class="result-buttons">
         <button id="again" class="primary">Noch eine Runde</button>
         <button id="share" class="secondary">Spiel teilen</button>
@@ -88,6 +99,16 @@
     </section>
   </div>
 </main>
+<dialog id="leaderboard" class="leaderboard-dialog" aria-labelledby="leaderboard-title">
+  <button id="leaderboard-close" class="close" aria-label="Rangliste schließen">×</button>
+  <div class="eyebrow">GLÜHWEIN-SLIDE · HIGHSCORES</div>
+  <h2 id="leaderboard-title">Die besten<br><em>am Tresen.</em></h2>
+  <p class="leaderboard-caption">Die 20 besten Runden · Alle Spieler</p>
+  <p id="leaderboard-status" role="status" aria-live="polite"></p>
+  <table id="leaderboard-table" hidden><caption class="sr-only">Die 20 besten Glühwein-Slide-Runden</caption><thead><tr><th scope="col">Platz</th><th scope="col">Name</th><th scope="col">Punkte</th></tr></thead><tbody id="leaderboard-list"></tbody></table>
+  <p class="leaderboard-note">Nach deiner Runde kannst du dich mit einem Spitznamen eintragen. Bei Punktegleichstand zählen zuerst die servierten Becher, dann der frühere Eintrag.</p>
+  <div class="leaderboard-actions"><button id="leaderboard-refresh" class="secondary">Aktualisieren</button><button id="leaderboard-return" class="primary">Zurück zum Spiel</button></div>
+</dialog>
 <dialog id="story" class="story-dialog" aria-labelledby="story-title" aria-describedby="story-intro">
   <button id="story-close" class="close" aria-label="Geschichte schließen">×</button>
   <div class="eyebrow">PERSÖNLICH VON ANNE</div>

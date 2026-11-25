@@ -166,9 +166,13 @@ export function DatenschutzEn({ address, email, updated }: { address: ComponentC
       </p>
 
       <p>
-        The additional winter game Glühwein-Slide stores your personal high score only on your device
-        (key: <code>gluehwein-slide-best</code>). It is not sent to the server.
-        You can also delete this entry in your browser settings.
+        Glühwein-Slide stores your personal best (<code>gluehwein-slide-best</code>) and last submitted nickname
+        (<code>gluehwein-slide-name</code>) on your device. You can delete these in your browser settings.
+        A random round identifier is stored when a round starts. It expires after 24 hours and is removed when a new round is started. Only when you choose
+        “Eintragen” after playing do we permanently store your nickname, score, number of drinks served and
+        submission time on our server. Nicknames and scores are public. The submitted replay is used only
+        for verification and is not permanently stored. Please use a nickname rather than your full name.
+        Contact us with your nickname, score and approximate playing time to request deletion of a published entry.
       </p>
 
       <h2>Font</h2>

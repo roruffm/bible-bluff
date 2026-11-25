@@ -1,3 +1,5 @@
+import { createGlühweinApi } from './gluehwein-api';
+import { MemoryGlühweinStore, type GlühweinStore } from './gluehwein-store';
 // HTTP-API (Web-Standard Request/Response) – läuft im Cloudflare Worker und im lokalen Node-Server.
 //
 //   POST /api/rooms                  Raum eröffnen
@@ -45,6 +47,7 @@ import { versesFor } from '../shared/verses';
 import { buildView, publicRoom } from './view';
 
 export interface ApiDeps {
+  gluehweinStore?: GlühweinStore;
   store: RoomStore;
   now?: () => number;
   rng?: () => number;
@@ -150,6 +153,7 @@ export function createApi(deps: ApiDeps) {
   const now = deps.now ?? (() => Date.now());
   const rng = deps.rng ?? cryptoRng;
   const { store } = deps;
+  const gluehwein = createGlühweinApi(deps.gluehweinStore ?? new MemoryGlühweinStore(), now);
   const kidsRemote = createKidsRemoteApi(deps.kidsRemoteStore ?? new MemoryKidsRemoteStore(), now);
 
   const makeCtx = (presence: Record<string, number>, extraBluffs?: Record<string, string[]>): Ctx => ({
@@ -510,6 +514,7 @@ export function createApi(deps: ApiDeps) {
     try {
       if (parts[0] !== 'api') throw new GameError('not_found', 'Nicht gefunden.', 404);
       const method = request.method.toUpperCase();
+      if (parts[1] === 'gluehwein') return await gluehwein(request, parts);
       if (parts[1] === 'kids-remotes') return await kidsRemote(request, parts);
 
       if (parts.length === 2 && parts[1] === 'health' && method === 'GET') return json({ ok: true });

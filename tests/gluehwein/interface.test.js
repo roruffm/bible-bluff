@@ -39,7 +39,7 @@ function app(width,height){
   }
   doc.getElementById=id=>doc.querySelector('#'+id);doc.createElement=tag=>new Element(tag);
   Object.defineProperty(doc,'activeElement',{get:()=>active});
-  const storage=new Map();const sandbox={PixelRenderer:class extends PixelRenderer{constructor(canvas,options){super(canvas,{...options,createCanvas:()=>doc.createElement('canvas')});}},GameEngine:class extends GameEngine{constructor(options){super({...options,random:()=>.5});engine=this;}},ROUND_SECONDS,MAX_LIGHTS,MAX_MISSES,WinterMusic:MusicStub,document:doc,devicePixelRatio:1,
+  const storage=new Map();const sandbox={Highscores:class{async beginRound(){}finishRound(){}load(){}},PixelRenderer:class extends PixelRenderer{constructor(canvas,options){super(canvas,{...options,createCanvas:()=>doc.createElement('canvas')});}},GameEngine:class extends GameEngine{constructor(options){super({...options,random:()=>.5});engine=this;}},ROUND_SECONDS,MAX_LIGHTS,MAX_MISSES,WinterMusic:MusicStub,document:doc,devicePixelRatio:1,
     requestAnimationFrame:fn=>raf=fn,ResizeObserver:class{constructor(cb){this.cb=cb}observe(){this.cb()}},
     matchMedia:()=>({matches:true}),localStorage:{getItem:k=>storage.get(k),setItem:(k,v)=>storage.set(k,v)},
     navigator:{clipboard:{writeText:async value=>clipboard=value}},location:{href:'https://example.test/gluehwein/'},
