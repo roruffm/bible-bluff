@@ -1,6 +1,8 @@
 import marketUrl from './assets/market.png';
 import guestsUrl from './assets/guests.png';
 import specialGuestsUrl from './assets/special-guests.png';
+import moreGuestsUrl from './assets/more-guests.png';
+import { NEW_GUEST_COLUMNS, NEW_GUEST_ROWS, REGULAR_GUESTS } from './guest-roster.js';
 
 // Game positions remain in the engine's 1000-unit coordinate space. Only the
 // renderer uses a deliberately low resolution, so sprites stay sharp on phones.
@@ -40,6 +42,7 @@ export class PixelRenderer {
     this.market = this.load(marketUrl);
     this.guests = this.load(guestsUrl);
     this.specialGuests = this.load(specialGuestsUrl);
+    this.moreGuests = this.load(moreGuestsUrl);
   }
 
   load(url) {
@@ -166,12 +169,22 @@ export class PixelRenderer {
     if (guest.served) c.globalAlpha = Math.min(1, guest.leaveIn * 2);
     const specialIndex = { santa: 0, snowman: 1, grump: 2 }[guest.kind];
     const specialReady = specialIndex !== undefined && this.specialGuests?.complete && this.specialGuests.naturalWidth;
-    const image = specialReady ? this.specialGuests : this.guests;
+    const look = REGULAR_GUESTS[guest.appearance ?? guest.id % REGULAR_GUESTS.length];
+    const moreReady = specialIndex === undefined && look?.atlas === 'new' && this.moreGuests?.complete && this.moreGuests.naturalWidth;
+    const image = specialReady ? this.specialGuests : moreReady ? this.moreGuests : this.guests;
     if (image?.complete && image.naturalWidth) {
-      const iw = image.naturalWidth, ih = image.naturalHeight, cell = iw / (specialReady ? 3 : 4);
-      const index = specialReady ? specialIndex : guest.id % 4;
-      c.drawImage(image, index * cell, ih * .13, cell, ih * .8,
-        Math.round(guest.x - w / 2), Math.round(y - h + bob + 10), Math.round(w), Math.round(h));
+      const iw = image.naturalWidth, ih = image.naturalHeight;
+      if (moreReady) {
+        const cellWidth = iw / NEW_GUEST_COLUMNS, cellHeight = ih / NEW_GUEST_ROWS;
+        c.drawImage(image, (look.cell % NEW_GUEST_COLUMNS) * cellWidth,
+          Math.floor(look.cell / NEW_GUEST_COLUMNS) * cellHeight, cellWidth, cellHeight,
+          Math.round(guest.x - w / 2), Math.round(y - h + bob + 10), Math.round(w), Math.round(h));
+      } else {
+        const cell = iw / (specialReady ? 3 : 4);
+        const index = specialReady ? specialIndex : look?.atlas === 'original' ? look.cell : guest.id % 4;
+        c.drawImage(image, index * cell, ih * .13, cell, ih * .8,
+          Math.round(guest.x - w / 2), Math.round(y - h + bob + 10), Math.round(w), Math.round(h));
+      }
     } else {
       box(c, guest.x - w * .4, y - h * .58, w * .8, h * .6, '#354c67');
       box(c, guest.x - w * .29, y - h * .9, w * .58, h * .45, '#efb58b');
@@ -181,7 +194,7 @@ export class PixelRenderer {
     }
     if (guest.served) {
       const reaction = { santa: 'HO HO HO!', snowman: 'SCHÖN WARM!', grump: 'NA GUT.' }[guest.kind];
-      text(c, reaction || 'TOP!', guest.x, y - h - 8, 29, GOLD);
+      text(c, reaction || look?.reaction || 'TOP!', guest.x, y - h - 8, 29, GOLD);
       this.mug(c, guest.x + w * .2, y - h * .12, .6 * this.personScale(), false, time, guest.drink);
     }
     c.restore();

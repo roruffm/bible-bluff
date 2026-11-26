@@ -1,6 +1,7 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import { GameEngine, SLIDE_FRICTION, slideDistance } from '../../src/client/gluehwein/engine.js';
+import { REGULAR_GUESTS } from '../../src/client/gluehwein/guest-roster.js';
 
 function gameWithEvents() {
   const events = [], game = new GameEngine({random:()=>.5,onEvent:e=>events.push(e)});
@@ -97,6 +98,18 @@ test('Festive guests appear in a rotating mix without changing walking speed',()
   assert.ok(game.guests.every(g=>g.speed===27));
   const {game:scoring,events}=gameWithEvents();serve(scoring,.55,0,'snowman');
   assert.equal(scoring.specialServed,1);assert.equal(events.find(e=>e.type==='catch').guestKind,'snowman');
+});
+
+test('All ten new people and the four original people appear before the regular roster repeats',()=>{
+  for (const seed of [0, 1, 42, 2026]) {
+    const game = new GameEngine({ orders: true }); game.start(seed);
+    for(let i=0;i<18;i++)game.spawn(i%3);
+    const regular = game.guests.filter(guest=>guest.kind==='regular').slice(0,14);
+    const looks = regular.map(guest=>REGULAR_GUESTS[guest.appearance]);
+    assert.equal(new Set(looks.map(look=>look.id)).size,14);
+    assert.deepEqual(looks.filter(look=>look.atlas==='new').map(look=>look.cell).sort((a,b)=>a-b),[0,1,2,3,4,5,6,7,8,9]);
+    assert.equal(looks.filter(look=>look.atlas==='original').length,4);
+  }
 });
 
 test('A fresh round clears bonuses and restores the festive guest rotation',()=>{

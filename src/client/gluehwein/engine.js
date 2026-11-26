@@ -1,3 +1,5 @@
+import { REGULAR_GUESTS } from './guest-roster.js';
+
 export const ROUND_SECONDS = 60;
 export const MAX_LIGHTS = 18;
 export const LANES = 3;
@@ -30,6 +32,7 @@ export class GameEngine {
     this.orders = orders;
     this.onEvent = onEvent;
     this.nextId = 0;
+    this.appearanceOffset = 0;
     this.reset();
   }
 
@@ -60,7 +63,14 @@ export class GameEngine {
     for (let lane = 0; lane < LANES; lane++) this.spawn(lane, 730 + lane * 55);
   }
 
-  start(seed) { if (Number.isInteger(seed)) this.random = seededRandom(seed); this.reset(); this.state = 'playing'; }
+  start(seed) {
+    if (Number.isInteger(seed)) {
+      this.random = seededRandom(seed);
+      this.appearanceOffset = (seed >>> 0) % REGULAR_GUESTS.length;
+    }
+    this.reset();
+    this.state = 'playing';
+  }
   pause() { if (this.state === 'playing') { this.cancelCharge(); this.state = 'paused'; } }
   resume() { if (this.state === 'paused') this.state = 'playing'; }
   emit(type, data = {}) { this.onEvent({ type, ...data }); }
@@ -79,7 +89,9 @@ export class GameEngine {
     // One in four arrivals is a festive visitor. The cycle guarantees variety
     // without changing anyone's speed or the timing of the three service lanes.
     const kind = ordinal % 4 === 3 ? SPECIAL_GUESTS[Math.floor(ordinal / 4) % SPECIAL_GUESTS.length] : 'regular';
-    const guest = { id: this.nextId++, lane, x, kind, speed: 21 + this.random() * 12 + this.elapsed * .16,
+    const regularOrdinal = ordinal - Math.floor(ordinal / 4);
+    const appearance = (this.appearanceOffset + regularOrdinal) % REGULAR_GUESTS.length;
+    const guest = { id: this.nextId++, lane, x, kind, appearance, speed: 21 + this.random() * 12 + this.elapsed * .16,
       color: Math.floor(this.random() * 6), skin: Math.floor(this.random() * 4), hat: this.random() > .4,
       phase: this.random() * Math.PI * 2, served: false, leaveIn: 0 };
     if (this.orders) {

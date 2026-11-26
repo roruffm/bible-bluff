@@ -546,3 +546,16 @@ Jeder vierte neu ankommende Gast ist abwechselnd Nikolaus, Schneemann oder Weihn
 Sie verwenden eigene Pixel-Sprites aus `assets/special-guests.png`, reagieren auf gelungene Würfe
 und bewegen sich nach denselben Regeln wie andere Gäste. Ergebnisse zeigen Punktlandungen,
 beste Serie und bediente besondere Gäste. Die Tests simulieren dafür auch echte Tassenbewegungen.
+
+### Weitere Weihnachtsmarkt-Gäste
+
+Zehn zusätzliche erwachsene Gäste ergänzen die vier ursprünglichen Personen: eine Oma mit Baskenmütze,
+ein Mann mit gelber Wollmütze, eine Frau mit türkisfarbenem Kopftuch, eine Skifahrerin, ein Mann mit
+roten Ohrenschützern, ein Bäcker, eine Paketbotin, ein Rocker, eine Frau mit rosa Ohrenschützern und
+ein Opa mit Schiebermütze. Die transparenten Figuren liegen in `assets/more-guests.png` als fünf
+Spalten und zwei Zeilen. `guest-roster.js` beschreibt die Bildzellen und kurzen Reaktionen.
+
+Alle 14 normalen Erscheinungsbilder wechseln ohne Wiederholung durch; die Runde bestimmt den
+Startpunkt. Dafür werden keine zusätzlichen Zufallswerte verbraucht. Laufgeschwindigkeit,
+Bestellungen und die Wiederholung für die Rangliste bleiben damit kompatibel. Nikolaus,
+Schneemann und Weihnachtsmuffel behalten ihre eigenen Auftritte.
