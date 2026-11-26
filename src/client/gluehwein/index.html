@@ -47,16 +47,31 @@
 
   <div id="intro" class="veil">
     <section class="welcome panel" aria-labelledby="welcome-title">
-      <div class="eyebrow"><span class="tiny-star">✦</span> PIXEL ARCADE · WINTEREDITION</div>
-      <div class="hero-cup" aria-hidden="true"><svg class="pixel-cup" viewBox="0 0 32 36" aria-hidden="true"><path fill="#061128" d="M3 10h21v3h7v16h-7v5H3z"/><path fill="#f56564" d="M23 15h5v11h-5z"/><path fill="#061128" d="M24 18h2v5h-2z"/><path fill="#bd243d" d="M5 12h17v19H5z"/><path fill="#ff8070" d="M5 13h3v16H5z"/><path fill="#fff1c1" d="M4 10h19v3H4zM12 17h3v11h-3zM8 21h11v3H8zM9 18h2v2H9zM16 18h2v2h-2zM9 25h2v2H9zM16 25h2v2h-2zM11 1h3v3h-3zM14 4h3v3h-3zM11 7h3v2h-3z"/></svg></div>
-      <h1 id="welcome-title">Glühwein-<br><em>Slide.</em></h1>
-      <p class="intro-copy">Tasse halten, aufladen und loslassen.<br>Die Ladung bestimmt die Gleitstrecke.</p>
-      <div class="intro-facts"><span>◷ 60 Sekunden</span><span>♥ 3 Chancen</span></div>
-      <p class="arcade-tip">Punktlandung: +25 Bonuspunkte.<br>5er-Serie: 8 Sekunden doppelte Punkte!</p>
-      <button id="start" class="primary">Eine Runde spielen</button>
-      <button class="secondary leaderboard-open" aria-haspopup="dialog" aria-controls="leaderboard">★ Rangliste ansehen</button>
-      <button id="story-start" class="text-btn story-open" aria-haspopup="dialog" aria-controls="story">Die Geschichte dahinter</button>
-      <p class="rules">3 Gäste ohne Glühwein = Game Over.</p><p class="fine-print">Mit Finger, Maus oder Tastatur · ♫ Weihnachts-Groove<br><a class="biblebluff-back" href="/">Zurück zu Biblebluff</a></p>
+      <div class="welcome-heading">
+        <div class="hero-cup" aria-hidden="true"><svg class="pixel-cup" viewBox="0 0 32 36" aria-hidden="true"><path fill="#061128" d="M3 10h21v3h7v16h-7v5H3z"/><path fill="#f56564" d="M23 15h5v11h-5z"/><path fill="#061128" d="M24 18h2v5h-2z"/><path fill="#bd243d" d="M5 12h17v19H5z"/><path fill="#ff8070" d="M5 13h3v16H5z"/><path fill="#fff1c1" d="M4 10h19v3H4zM12 17h3v11h-3zM8 21h11v3H8zM9 18h2v2H9zM16 18h2v2h-2zM9 25h2v2H9zM16 25h2v2h-2zM11 1h3v3h-3zM14 4h3v3h-3zM11 7h3v2h-3z"/></svg></div>
+        <h1 id="welcome-title">Glühwein-<br><em>Slide.</em></h1>
+      </div>
+      <p class="intro-copy">Tasse halten, aufladen und loslassen.<br>Wie viele Gäste schaffst du?</p>
+      <div class="intro-facts"><span>60 Sekunden</span><span>3 Chancen</span></div>
+      <button id="start" class="primary">Jetzt spielen</button>
+
+      <section class="welcome-support" aria-label="Unterstützung für die Familie">
+        <p>Ich kenne die Familie persönlich. Deine Spende hilft bei den Anwaltskosten. <span class="welcome-signature">— Anne</span></p>
+        <a id="donate-start" class="donation-btn" href="https://www.paypal.com/pool/9uEcziqnBE" target="_blank" rel="noopener noreferrer" aria-describedby="donate-start-note">Glühwein spendieren · 5&nbsp;€</a>
+        <p id="donate-start-note" class="donation-note">Freiwillig · 5 € als Richtwert.<br>PayPal-Pool in US-Dollar, Betrag frei wählbar.</p>
+      </section>
+
+      <div class="welcome-links">
+        <button id="story-start" class="text-btn story-open" aria-haspopup="dialog" aria-controls="story">Die Geschichte dahinter</button>
+        <button class="text-btn leaderboard-open" aria-haspopup="dialog" aria-controls="leaderboard">Rangliste</button>
+      </div>
+      <details class="welcome-rules">
+        <summary>Spielregeln &amp; Boni</summary>
+        <p>Je länger du die Tasse hältst, desto weiter gleitet sie. Bediene die Gäste, bevor sie das Tresenende erreichen. 3 Gäste ohne Glühwein = Game Over.</p>
+        <p>Eine Punktlandung bringt 25 Bonuspunkte. Nach 5 Treffern in Folge gibt es 8 Sekunden doppelte Punkte.</p>
+        <p>Spiele mit Finger oder Maus. Mit der Tastatur hältst du die Tasten 1, 2 oder 3 gedrückt und lässt sie los.</p>
+      </details>
+      <a class="biblebluff-back welcome-back" href="/">Zurück zu Biblebluff</a>
     </section>
   </div>
 
