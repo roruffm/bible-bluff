@@ -414,3 +414,25 @@ dialog p { font-size: 16px; line-height: 1.75; color: #d7e3f3; }
   .welcome-heading { margin-bottom: 13px; }
   .welcome-support { margin-top: 19px; padding-top: 17px; }
 }
+
+/* Getränk und Motiv stimmen mit der Tasse in der Sprechblase überein. */
+.lane-btn .punch-mark { display: none; }
+.lane-btn.punch .cup-body { fill: #288c54; }
+.lane-btn.punch .cup-handle,
+.lane-btn.punch .cup-highlight { fill: #a8f09e; }
+.lane-btn.punch .wine-mark { display: none; }
+.lane-btn.punch .punch-mark { display: block; }
+.lane-btn.punch { border-color: #9cdd9e; }
+.lane-caption { display: flex; flex-direction: column; gap: 3px; }
+.lane-caption > span { font-size: 13px; font-weight: 400; color: #ffe2ab; }
+.drink-label { font-size: 16px; line-height: 1.2; }
+@media (max-width: 600px) {
+  .lane-caption { gap: 1px; }
+  .lane-caption > span { font-size: 12px; }
+  .drink-label { font-size: 14px; }
+  .lane-btn { min-height: 86px; }
+  .footer-line { font-size: 14px; }
+}
+@media (max-height: 740px) {
+  .lane-btn { min-height: 76px; }
+}

@@ -3,6 +3,7 @@ export const MAX_LIGHTS = 18;
 export const LANES = 3;
 export const MAX_MISSES = 3;
 export const CHARGE_SECONDS = 1.4;
+export const TAP_SECONDS = .22;
 export const PERFECT_BONUS = 25;
 export const PERFECT_WINDOW = 18;
 export const FEVER_STREAK = 5;
@@ -23,9 +24,10 @@ export function seededRandom(seed) {
 }
 
 export class GameEngine {
-  constructor({ random = Math.random, onEvent = () => {}, record = false } = {}) {
+  constructor({ random = Math.random, onEvent = () => {}, record = false, orders = false } = {}) {
     this.random = random;
     this.record = record;
+    this.orders = orders;
     this.onEvent = onEvent;
     this.nextId = 0;
     this.reset();
@@ -53,6 +55,7 @@ export class GameEngine {
     this.charge = null;
     this.guests = [];
     this.cooldowns = [0, 0, 0];
+    this.selectedDrinks = ['wine', 'wine', 'wine'];
     this.spawnIn = 1.2;
     for (let lane = 0; lane < LANES; lane++) this.spawn(lane, 730 + lane * 55);
   }
@@ -79,6 +82,11 @@ export class GameEngine {
     const guest = { id: this.nextId++, lane, x, kind, speed: 21 + this.random() * 12 + this.elapsed * .16,
       color: Math.floor(this.random() * 6), skin: Math.floor(this.random() * 4), hat: this.random() > .4,
       phase: this.random() * Math.PI * 2, served: false, leaveIn: 0 };
+    if (this.orders) {
+      // The first three guests introduce both drinks; later orders vary.
+      guest.drink = ordinal === 1 || (ordinal > 2 && this.random() < .35) ? 'punch' : 'wine';
+      guest.rejection = 0;
+    }
     this.guests.push(guest);
     return guest;
   }
@@ -95,8 +103,13 @@ export class GameEngine {
   releaseCharge() {
     if (!this.charge) return false;
     if (this.record) this.history.push(['r']);
-    const { lane, power } = this.charge;
+    const { lane, power, elapsed } = this.charge;
     this.charge = null;
+    if (this.orders && elapsed < TAP_SECONDS) {
+      this.selectedDrinks[lane] = this.selectedDrinks[lane] === 'wine' ? 'punch' : 'wine';
+      this.emit('drink-change', { lane, drink: this.selectedDrinks[lane] });
+      return true;
+    }
     return this.fire(lane, power);
   }
 
@@ -104,7 +117,7 @@ export class GameEngine {
     if (this.state !== 'playing' || !Number.isInteger(lane) || lane < 0 || lane >= LANES) return false;
     if (this.cooldowns[lane] > 0) return false;
     const strength = Number.isFinite(power) ? Math.max(0, Math.min(1, power)) : .5;
-    this.cups.push({ id: this.nextId++, lane, x: 140, vx: Math.sqrt(2 * SLIDE_FRICTION * slideDistance(strength)), age: 0, stopped: 0, tooFast: false });
+    this.cups.push({ id: this.nextId++, lane, x: 140, vx: Math.sqrt(2 * SLIDE_FRICTION * slideDistance(strength)), age: 0, stopped: 0, tooFast: false, drink: this.selectedDrinks[lane] });
     this.cooldowns[lane] = .28;
     this.emit('throw', { lane });
     return true;
@@ -163,6 +176,7 @@ export class GameEngine {
       this.spawnIn = Math.max(.78, 1.45 - this.elapsed * .008) + this.random() * .45;
     }
     for (const guest of this.guests) {
+      if (guest.rejection > 0) guest.rejection = Math.max(0, guest.rejection - dt);
       if (guest.served) guest.leaveIn -= dt;
       else guest.x -= guest.speed * dt;
     }
@@ -179,7 +193,14 @@ export class GameEngine {
       if (crossed && !guest) cup.tooFast = true;
       if (guest) {
         cup.done = true;
-        this.catchCup(cup, guest);
+        if (this.orders && cup.drink !== guest.drink) {
+          this.combo = 0;
+          this.missed++;
+          guest.rejection = 1.2;
+          this.emit('wrong-drink', { lane: guest.lane, drink: guest.drink });
+        } else {
+          this.catchCup(cup, guest);
+        }
       } else if (cup.x > 1015 || cup.stopped > .55 || cup.age > 4) {
         cup.done = true;
         this.combo = 0;

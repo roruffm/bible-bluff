@@ -36,7 +36,7 @@ export class Highscores {
     $('highscore-form').hidden = false;
     $('highscore-status').textContent = '';
     $('highscore-save').disabled = false;
-    try { this.run = await request('runs', {}); return this.run.seed; } catch { return undefined; }
+    try { this.run = await request('runs', { rulesVersion: 2 }); return this.run.seed; } catch { return undefined; }
   }
 
   finishRound({ score, history }) {

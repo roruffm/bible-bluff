@@ -40,7 +40,11 @@ export function createGlühweinApi(store: GlühweinStore, now: () => number) {
       const origin = request.headers.get('Origin');
       if (origin && origin !== url.origin) throw new RequestError('Bitte direkt im Spiel eintragen.', 403);
       if (parts[2] === 'runs') {
-        const createdAt = now(), id = crypto.randomUUID(), token = crypto.randomUUID() + crypto.randomUUID();
+        const options = await body(request);
+        if (options.rulesVersion !== undefined && options.rulesVersion !== 2) throw new RequestError('Bitte lade das Spiel neu.');
+        // Prefixes keep already-open classic rounds replayable after deployment.
+        const id = (options.rulesVersion === 2 ? 'p2_' : '') + crypto.randomUUID();
+        const createdAt = now(), token = crypto.randomUUID() + crypto.randomUUID();
         const seed = crypto.getRandomValues(new Uint32Array(1))[0];
         await store.cleanup(createdAt);
         await store.createRun({ id, tokenHash: await hash(token), seed, createdAt, expiresAt: createdAt + 86_400_000 });
@@ -56,7 +60,7 @@ export function createGlühweinApi(store: GlühweinStore, now: () => number) {
       const existing = await store.entry(run.id);
       if (existing) return json({ entry: existing, rank: await store.rank(existing), entries: await store.top() });
       if (!Array.isArray(data.history) || data.history.length === 0 || data.history.length > 20_000) throw new RequestError('Die Spielaufzeichnung fehlt oder ist zu lang.');
-      const game = new GameEngine(); game.start(run.seed);
+      const game = new GameEngine({ orders: run.id.startsWith('p2_') }); game.start(run.seed);
       for (const step of data.history) {
         if (typeof step === 'number') {
           if (!Number.isFinite(step) || step <= 0 || step > .1 || game.state !== 'playing') throw new RequestError('Die Spielaufzeichnung ist ungültig.');

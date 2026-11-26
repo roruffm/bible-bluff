@@ -8,6 +8,7 @@ export const lanePosition = (height, lane) => height * (.43 + lane * .22);
 export const spriteHeight = height => Math.max(125, Math.min(235, height * .185));
 
 const INK = '#061128', GOLD = '#ffce4b', CREAM = '#fff0bd';
+const PUNCH_STAR = ['0001000', '0001000', '1111111', '0111110', '0011100', '0110110', '1100011'];
 function box(c, x, y, w, h, color) {
   c.fillStyle = color;
   c.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h));
@@ -27,10 +28,12 @@ function text(c, value, x, y, size, color = CREAM, align = 'center') {
 }
 
 export class PixelRenderer {
-  constructor(canvas, { reducedMotion = false, createCanvas = () => document.createElement('canvas') } = {}) {
+  constructor(canvas, { reducedMotion = false, orders = false, createCanvas = () => document.createElement('canvas') } = {}) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
     this.reducedMotion = reducedMotion;
+    this.orders = orders;
+    this.orderScale = .45;
     this.width = 1000;
     this.height = 1000;
     this.background = createCanvas();
@@ -49,6 +52,8 @@ export class PixelRenderer {
 
   resize(width, height) {
     this.height = Math.max(1, height) / Math.max(1, width) * 1000;
+    const bubbleWidth = Math.min(38, Math.max(26, height * .075));
+    this.orderScale = bubbleWidth * 1000 / (86 * Math.max(1, width));
     this.canvas.width = width < 650 ? 400 : 640;
     this.canvas.height = Math.round(this.height * this.canvas.width / 1000);
     this.scale = this.canvas.width / 1000;
@@ -56,7 +61,11 @@ export class PixelRenderer {
   }
 
   laneY(lane) { return lanePosition(this.height, lane); }
-  personScale() { return spriteHeight(this.height) / 160; }
+  personHeight() {
+    if (!this.orders) return spriteHeight(this.height);
+    return Math.max(50, Math.min(spriteHeight(this.height), this.height * .22 - 94 * this.orderScale));
+  }
+  personScale() { return this.personHeight() / 160; }
 
   makeScenery() {
     const { background, canvas, height: h } = this;
@@ -111,9 +120,10 @@ export class PixelRenderer {
     }
   }
 
-  mug(c, x, y, size = 1, selected = false, time = 0) {
+  mug(c, x, y, size = 1, selected = false, time = 0, drink = 'wine') {
+    const punch = drink === 'punch';
     c.save(); c.translate(Math.round(x), Math.round(y)); c.scale(size, size);
-    // Shadow, hard outline, handle and a red enamel body.
+    // Shadow, hard outline, handle and the selected enamel colour.
     box(c, -25, 0, 58, 8, '#031027');
     if (selected) {
       box(c, -32, 7, 70, 4, GOLD);
@@ -121,19 +131,27 @@ export class PixelRenderer {
       box(c, 38, -3, 4, 10, GOLD);
     }
     box(c, 18, -39, 20, 30, INK);
-    box(c, 23, -34, 10, 19, '#f16960');
+    box(c, 23, -34, 10, 19, punch ? '#a8f09e' : '#f16960');
     box(c, 25, -29, 7, 10, INK);
     box(c, -25, -48, 49, 50, INK);
-    box(c, -21, -43, 41, 42, '#be2039');
-    box(c, -19, -40, 6, 35, '#ff6e64');
-    box(c, 12, -38, 6, 34, '#810d2d');
+    box(c, -21, -43, 41, 42, punch ? '#288c54' : '#be2039');
+    box(c, -19, -40, 6, 35, punch ? '#a8f09e' : '#ff6e64');
+    box(c, 12, -38, 6, 34, punch ? '#115431' : '#810d2d');
     box(c, -22, -48, 43, 6, CREAM);
     box(c, -16, -44, 32, 4, '#371633');
-    box(c, -16, -3, 32, 4, '#f75e57');
-    // Snowflake emblem made from square pixels.
-    box(c, -3, -34, 5, 23, '#fff6d7');
-    box(c, -12, -25, 23, 5, '#fff6d7');
-    for (const [px, py] of [[-10,-32],[6,-32],[-10,-16],[6,-16]]) box(c, px, py, 5, 5, '#fff6d7');
+    box(c, -16, -3, 32, 4, punch ? '#83d889' : '#f75e57');
+    // Distinct emblems make orders readable without relying on colour alone.
+    if (punch) {
+      for (let row = 0; row < PUNCH_STAR.length; row++) {
+        for (let col = 0; col < PUNCH_STAR[row].length; col++) {
+          if (PUNCH_STAR[row][col] === '1') box(c, -11 + col * 3, -33 + row * 3, 3, 3, '#fff6d7');
+        }
+      }
+    } else {
+      box(c, -3, -34, 5, 23, '#fff6d7');
+      box(c, -12, -25, 23, 5, '#fff6d7');
+      for (const [px, py] of [[-10,-32],[6,-32],[-10,-16],[6,-16]]) box(c, px, py, 5, 5, '#fff6d7');
+    }
     const steam = Math.floor(time * 3) % 3;
     for (let i = 0; i < 3; i++) {
       box(c, -9 + (i % 2) * 8 + steam * 2, -57 - i * 8, 6, 9, '#dcecff');
@@ -142,7 +160,7 @@ export class PixelRenderer {
   }
 
   person(c, guest, time) {
-    const h = spriteHeight(this.height), w = h * .84, y = this.laneY(guest.lane);
+    const h = this.personHeight(), w = h * .84, y = this.laneY(guest.lane);
     const bob = this.reducedMotion ? 0 : Math.floor(Math.sin(time * 3 + guest.phase) * 2);
     c.save();
     if (guest.served) c.globalAlpha = Math.min(1, guest.leaveIn * 2);
@@ -164,8 +182,25 @@ export class PixelRenderer {
     if (guest.served) {
       const reaction = { santa: 'HO HO HO!', snowman: 'SCHÖN WARM!', grump: 'NA GUT.' }[guest.kind];
       text(c, reaction || 'TOP!', guest.x, y - h - 8, 29, GOLD);
-      this.mug(c, guest.x + w * .2, y - h * .12, .6 * this.personScale(), false, time);
+      this.mug(c, guest.x + w * .2, y - h * .12, .6 * this.personScale(), false, time, guest.drink);
     }
+    c.restore();
+  }
+
+  orderBubble(c, guest) {
+    const size = this.orderScale;
+    const x = guest.x;
+    const y = this.laneY(guest.lane) - this.personHeight() - 88 * size;
+    c.save();
+    c.translate(Math.round(x), Math.round(y));
+    c.scale(size, size);
+    const edge = guest.rejection > 0 ? '#f65c65' : INK;
+    box(c, -43, 0, 86, 76, edge);
+    box(c, -39, 4, 78, 68, CREAM);
+    box(c, -11, 76, 18, 7, edge);
+    box(c, -7, 72, 10, 7, CREAM);
+    box(c, -7, 83, 10, 5, edge);
+    this.mug(c, -5, 65, .78, false, 0, guest.drink);
     c.restore();
   }
 
@@ -205,16 +240,21 @@ export class PixelRenderer {
       const active = engine.charge?.lane === lane, y = this.laneY(lane);
       for (const guest of engine.guests.filter(g => g.lane === lane).sort((a,b) => a.x - b.x)) this.person(c, guest, time);
       this.counter(c, lane, active || fever);
-      this.mug(c, 148, y, this.personScale() * .94, active, time);
+      this.mug(c, 148, y, this.personScale() * .94, active, time, engine.selectedDrinks[lane]);
       for (const cup of engine.cups.filter(p => p.lane === lane)) {
         // Square speed streaks carry the motion without blurring the sprites.
         if (!this.reducedMotion && cup.vx > 200) {
           box(c, cup.x - 58, y - 24, 30, 4, '#ffb875');
           box(c, cup.x - 76, y - 13, 44, 3, '#e87552');
         }
-        this.mug(c, cup.x, y, this.personScale() * .94, false, time);
+        this.mug(c, cup.x, y, this.personScale() * .94, false, time, cup.drink);
       }
       this.gauge(c, lane, active ? engine.charge.power : 0, active, time);
+    }
+    if (this.orders) {
+      for (const guest of engine.guests) {
+        if (!guest.served) this.orderBubble(c, guest);
+      }
     }
     for (const p of particles) {
       c.globalAlpha = Math.max(0, Math.min(1, p.life));

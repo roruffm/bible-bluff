@@ -20,8 +20,8 @@ try { bestScore = Number(localStorage.getItem('gluehwein-slide-best')) || 0; } c
 
 const highscores = new Highscores();
 let starting = false;
-const engine = new GameEngine({ onEvent: handleEvent, record: true });
-const renderer = new PixelRenderer(canvas, { reducedMotion });
+const engine = new GameEngine({ onEvent: handleEvent, record: true, orders: true });
+const renderer = new PixelRenderer(canvas, { reducedMotion, orders: true });
 const laneY = lane => renderer.laneY(lane);
 const personScale = () => renderer.personScale();
 
@@ -51,6 +51,16 @@ function handleEvent(event) {
   if(event.type==='throw'){
     laneButtons[event.lane].classList.add('pulse');setTimeout(()=>laneButtons[event.lane].classList.remove('pulse'),150);
     tone(240,.055,'triangle',.025);
+  }
+  if(event.type==='drink-change'){
+    const name=event.drink==='punch'?'Kinderpunsch':'Glühwein';
+    toast(`Tresen ${event.lane+1}: ${name}`,1.4,true);
+    tone(event.drink==='punch'?784:523,.08,'triangle',.025);
+  }
+  if(event.type==='wrong-drink'){
+    const name=event.drink==='punch'?'Kinderpunsch':'Glühwein';
+    toast(`Dieser Gast möchte ${name}. Zum Wechseln kurz tippen!`,2.5,true);
+    tone(220,.12,'triangle',.035);
   }
   if(event.type==='catch'){
     const y=laneY(event.lane);
@@ -91,7 +101,7 @@ function tone(frequency,duration,type='sine',volume=.035){
 }
 
 function syncHUD(){
-  const t=Math.ceil(engine.remaining),lives=MAX_MISSES-engine.lostCustomers,key=[engine.score,t,engine.lights,lives,engine.state,engine.combo,Math.ceil(engine.feverRemaining)].join(':');
+  const t=Math.ceil(engine.remaining),lives=MAX_MISSES-engine.lostCustomers,key=[engine.score,t,engine.lights,lives,engine.state,engine.combo,Math.ceil(engine.feverRemaining),...engine.selectedDrinks].join(':');
   if(key!==cachedHUD){
     $('score').textContent=engine.score;$('time').textContent=t;$('lives').textContent=lives;
     $('lives').classList.toggle('last-life',lives<=1);
@@ -101,7 +111,13 @@ function syncHUD(){
     document.querySelector('.timer').classList.toggle('urgent',t<=10);
     $('pause').disabled=!['playing','paused'].includes(engine.state);
     $('pause').setAttribute('aria-label',engine.state==='paused'?'Spiel fortsetzen':'Spiel pausieren');
-    laneButtons.forEach(b=>b.disabled=engine.state!=='playing');
+    laneButtons.forEach((button,lane)=>{
+      const punch=engine.selectedDrinks[lane]==='punch';
+      button.disabled=engine.state!=='playing';
+      button.classList.toggle('punch',punch);
+      button.querySelector('.drink-label').textContent=punch?'Punsch':'Glühwein';
+      button.setAttribute('aria-label',`Tresen ${lane+1}: ${punch?'Kinderpunsch':'Glühwein'}. Kurz tippen zum Wechseln, halten und loslassen zum Servieren.`);
+    });
     const fever=engine.feverRemaining>0;
     $('stage').classList.toggle('fever',fever);
     $('arcade-status').hidden=['ready','finished'].includes(engine.state);
@@ -130,7 +146,7 @@ async function startRound(){
   $('intro').hidden=true;$('results').hidden=true;$('pause-overlay').hidden=true;$('scene-note').hidden=true;
   input=null;engine.start(seed);particles=[];ripple=[];lastJoke=-99;cachedHUD='';
   music.start({restart:true});
-  toast('Tasse halten. Schwung aufladen. Loslassen!',4,true);
+  toast('Sprechblase beachten! Kurz tippen wechselt das Getränk.',4,true);
   tone(523,.12,'sine',.035);syncHUD();$('pause').focus({preventScroll:true});
 }
 

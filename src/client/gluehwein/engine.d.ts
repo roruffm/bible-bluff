@@ -1,6 +1,6 @@
 export type ReplayStep = number | ['b', number] | ['r'] | ['c'];
 export class GameEngine {
-  constructor(options?: { random?: () => number; onEvent?: (event: Record<string, unknown>) => void; record?: boolean });
+  constructor(options?: { random?: () => number; onEvent?: (event: Record<string, unknown>) => void; record?: boolean; orders?: boolean });
   state: 'ready' | 'playing' | 'paused' | 'finished';
   score: number;
   served: number;

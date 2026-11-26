@@ -134,3 +134,35 @@ test('A precise throw shows the bonus and includes it in the round result',async
   assert.match(a.get('result-bonus').textContent,/1 Punktlandung/);
   assert.match(a.get('result-bonus').textContent,/1 besonderer Gast/);
 });
+
+for (const [width, height] of [[390, 480], [1100, 600]]) test(`Pointer taps and keyboard taps change the drink on one counter (${width}px)`, async () => {
+  const a = app(width, height); await a.get('start').click();
+  const buttons = a.doc.querySelectorAll('[data-lane]');
+  await buttons[1].dispatchEvent({ type: 'pointerdown', pointerId: 10 });
+  a.step(.08);
+  await buttons[1].dispatchEvent({ type: 'pointerup', pointerId: 10 });
+  assert.equal(buttons[1].querySelector('.drink-label').textContent, 'Punsch');
+  assert.ok(buttons[1].classes.has('punch'));
+  assert.equal(buttons[0].querySelector('.drink-label').textContent, 'Glühwein');
+  assert.equal(a.engine().cups.length, 0);
+  assert.match(buttons[1].attrs['aria-label'], /Kinderpunsch/);
+  await a.doc.dispatchEvent({ type: 'keydown', key: '2', code: 'Digit2', repeat: false });
+  a.step(.08);
+  await a.doc.dispatchEvent({ type: 'keyup', key: '2', code: 'Digit2' });
+  assert.equal(buttons[1].querySelector('.drink-label').textContent, 'Glühwein');
+  assert.equal(a.engine().cups.length, 0);
+  await buttons[1].dispatchEvent({ type: 'pointerdown', pointerId: 11 });
+  a.step(.08);
+  await buttons[1].dispatchEvent({ type: 'pointercancel', pointerId: 11 });
+  assert.equal(buttons[1].querySelector('.drink-label').textContent, 'Glühwein');
+  await buttons[1].dispatchEvent({ type: 'pointerdown', pointerId: 12 });
+  a.step(.08);
+  await buttons[1].dispatchEvent({ type: 'pointerup', pointerId: 12 });
+  await buttons[1].dispatchEvent({ type: 'pointerdown', pointerId: 13 });
+  a.step(.9);
+  await buttons[1].dispatchEvent({ type: 'pointerup', pointerId: 13 });
+  assert.equal(a.engine().cups.length, 1);
+  assert.equal(a.engine().cups[0].drink, 'punch');
+  a.step(1.6);
+  assert.ok(Number(a.get('score').textContent) > 0, 'the selected Kinderpunsch serves the guest who ordered it');
+});

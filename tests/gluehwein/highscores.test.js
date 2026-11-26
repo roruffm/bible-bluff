@@ -88,6 +88,27 @@ describe('Gemeinsame Glühwein-Rangliste', () => {
     const run = (await t.call('runs', {})).data;
     expect((await t.call('highscores', { runId: run.id, token: run.token, name: 'Fast', history: play(run.seed).history })).status).toBe(400);
   });
+  it('prüft neue Runden mit Kinderpunsch und akzeptiert weiterhin laufende klassische Runden', async () => {
+    const t = setup();
+    const run = (await t.call('runs', { rulesVersion: 2 })).data;
+    expect(run.id).toMatch(/^p2_/);
+    const game = new GameEngine({ orders: true, record: true }); game.start(run.seed);
+    game.beginCharge(1); game.update(.08); game.releaseCharge();
+    game.beginCharge(1);
+    for (let i = 0; i < 45; i++) game.update(.02);
+    game.releaseCharge();
+    while (game.state === 'playing') game.update(.02);
+    expect(game.score).toBeGreaterThan(0);
+    t.advance(65_000);
+    const result = await t.call('highscores', { runId: run.id, token: run.token, name: 'Punschprofi', history: game.history });
+    expect(result.status).toBe(201);
+    expect(result.data.entry.score).toBe(game.score);
+    expect((await t.call('highscores', await completed(t, 'Klassiker'))).status).toBe(201);
+  });
+  it('weist unbekannte Spielversionen zurück', async () => {
+    const t = setup();
+    expect((await t.call('runs', { rulesVersion: 99 })).status).toBe(400);
+  });
   it('kann dieselbe Aufzeichnung mit variablem dt und Ladungsabbruch exakt wiederholen', () => {
     const original = new GameEngine({ record: true }); original.start(42);
     original.beginCharge(2); original.update(.013); original.cancelCharge();

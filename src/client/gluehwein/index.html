@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#07142f">
-  <meta name="description" content="Glühwein-Slide: Halten lädt die Tasse auf. Loslassen bestimmt den Schwung. Serviere in 60 Sekunden so viele Gäste wie möglich.">
+  <meta name="description" content="Glühwein-Slide: Halten lädt die Tasse auf. Loslassen bestimmt den Schwung. Serviere Glühwein und Kinderpunsch passend zur Bestellung in der Sprechblase.">
   <meta property="og:site_name" content="Biblebluff">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Glühwein-Slide">
@@ -33,7 +33,7 @@
   </section>
 
   <section class="stage" id="stage" aria-label="Weihnachtsmarkt mit drei Glühweintresen">
-    <canvas id="game" aria-label="Halte eine Tasse oder einen Tresen gedrückt und lass los. Die Ladung bestimmt die Gleitstrecke. Auch die Tasten 1, 2 und 3 funktionieren mit Halten und Loslassen."></canvas>
+    <canvas id="game" aria-label="Die Tasse in der Sprechblase zeigt die Bestellung. Tippe kurz auf einen Tresen, um zwischen Glühwein und Kinderpunsch zu wechseln. Halten lädt auf, Loslassen serviert. Auch die Tasten 1, 2 und 3 funktionieren so."></canvas>
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
     <div id="arcade-status" class="arcade-status" role="status" aria-live="polite" hidden>5 Treffer in Folge = Lichterfieber ×2</div>
     <div id="scene-note" class="scene-note">Frankfurt · Pixel-Wintermarkt</div>
@@ -41,8 +41,8 @@
 
   <footer class="controls">
     <div id="charge-strip" class="charge-strip"><span>SCHWUNG</span><div id="charge-meter" class="charge-meter" role="progressbar" aria-label="Aufgeladener Schwung" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="charge-fill"></span></div><strong id="charge-value">0 %</strong></div>
-    <div class="lane-buttons" aria-label="Becher losschicken"><button class="lane-btn" data-lane="0" aria-label="Tresen 1: halten und loslassen" disabled><svg class="pixel-cup" viewBox="0 0 32 36" aria-hidden="true"><path fill="#061128" d="M3 10h21v3h7v16h-7v5H3z"/><path fill="#f56564" d="M23 15h5v11h-5z"/><path fill="#061128" d="M24 18h2v5h-2z"/><path fill="#bd243d" d="M5 12h17v19H5z"/><path fill="#ff8070" d="M5 13h3v16H5z"/><path fill="#fff1c1" d="M4 10h19v3H4zM12 17h3v11h-3zM8 21h11v3H8zM9 18h2v2H9zM16 18h2v2h-2zM9 25h2v2H9zM16 25h2v2h-2zM11 1h3v3h-3zM14 4h3v3h-3zM11 7h3v2h-3z"/></svg><span>Tresen 1</span><kbd>1</kbd></button><button class="lane-btn" data-lane="1" aria-label="Tresen 2: halten und loslassen" disabled><svg class="pixel-cup" viewBox="0 0 32 36" aria-hidden="true"><path fill="#061128" d="M3 10h21v3h7v16h-7v5H3z"/><path fill="#f56564" d="M23 15h5v11h-5z"/><path fill="#061128" d="M24 18h2v5h-2z"/><path fill="#bd243d" d="M5 12h17v19H5z"/><path fill="#ff8070" d="M5 13h3v16H5z"/><path fill="#fff1c1" d="M4 10h19v3H4zM12 17h3v11h-3zM8 21h11v3H8zM9 18h2v2H9zM16 18h2v2h-2zM9 25h2v2H9zM16 25h2v2h-2zM11 1h3v3h-3zM14 4h3v3h-3zM11 7h3v2h-3z"/></svg><span>Tresen 2</span><kbd>2</kbd></button><button class="lane-btn" data-lane="2" aria-label="Tresen 3: halten und loslassen" disabled><svg class="pixel-cup" viewBox="0 0 32 36" aria-hidden="true"><path fill="#061128" d="M3 10h21v3h7v16h-7v5H3z"/><path fill="#f56564" d="M23 15h5v11h-5z"/><path fill="#061128" d="M24 18h2v5h-2z"/><path fill="#bd243d" d="M5 12h17v19H5z"/><path fill="#ff8070" d="M5 13h3v16H5z"/><path fill="#fff1c1" d="M4 10h19v3H4zM12 17h3v11h-3zM8 21h11v3H8zM9 18h2v2H9zM16 18h2v2h-2zM9 25h2v2H9zM16 25h2v2h-2zM11 1h3v3h-3zM14 4h3v3h-3zM11 7h3v2h-3z"/></svg><span>Tresen 3</span><kbd>3</kbd></button></div>
-    <div class="footer-line"><span id="control-hint">Halten · aufladen · loslassen</span></div>
+    <div class="lane-buttons" aria-label="Becher losschicken"><button class="lane-btn" data-lane="0" aria-label="Tresen 1: Glühwein. Kurz tippen zum Wechseln, halten und loslassen zum Servieren." disabled><svg class="pixel-cup" viewBox="0 0 32 36" aria-hidden="true"><path fill="#061128" d="M3 10h21v3h7v16h-7v5H3z"/><path class="cup-handle" fill="#f56564" d="M23 15h5v11h-5z"/><path fill="#061128" d="M24 18h2v5h-2z"/><path class="cup-body" fill="#bd243d" d="M5 12h17v19H5z"/><path class="cup-highlight" fill="#ff8070" d="M5 13h3v16H5z"/><path fill="#fff1c1" d="M4 10h19v3H4zM11 1h3v3h-3zM14 4h3v3h-3zM11 7h3v2h-3z"/><path class="wine-mark" fill="#fff1c1" d="M12 17h3v11h-3zM8 21h11v3H8zM9 18h2v2H9zM16 18h2v2h-2zM9 25h2v2H9zM16 25h2v2h-2z"/><path class="punch-mark" fill="#fff1c1" d="M13 16l2 5h5l-4 3 2 5-5-3-4 3 2-5-4-3h5z"/></svg><span class="lane-caption"><span>Tresen 1</span><strong class="drink-label">Glühwein</strong></span><kbd>1</kbd></button><button class="lane-btn" data-lane="1" aria-label="Tresen 2: Glühwein. Kurz tippen zum Wechseln, halten und loslassen zum Servieren." disabled><svg class="pixel-cup" viewBox="0 0 32 36" aria-hidden="true"><path fill="#061128" d="M3 10h21v3h7v16h-7v5H3z"/><path class="cup-handle" fill="#f56564" d="M23 15h5v11h-5z"/><path fill="#061128" d="M24 18h2v5h-2z"/><path class="cup-body" fill="#bd243d" d="M5 12h17v19H5z"/><path class="cup-highlight" fill="#ff8070" d="M5 13h3v16H5z"/><path fill="#fff1c1" d="M4 10h19v3H4zM11 1h3v3h-3zM14 4h3v3h-3zM11 7h3v2h-3z"/><path class="wine-mark" fill="#fff1c1" d="M12 17h3v11h-3zM8 21h11v3H8zM9 18h2v2H9zM16 18h2v2h-2zM9 25h2v2H9zM16 25h2v2h-2z"/><path class="punch-mark" fill="#fff1c1" d="M13 16l2 5h5l-4 3 2 5-5-3-4 3 2-5-4-3h5z"/></svg><span class="lane-caption"><span>Tresen 2</span><strong class="drink-label">Glühwein</strong></span><kbd>2</kbd></button><button class="lane-btn" data-lane="2" aria-label="Tresen 3: Glühwein. Kurz tippen zum Wechseln, halten und loslassen zum Servieren." disabled><svg class="pixel-cup" viewBox="0 0 32 36" aria-hidden="true"><path fill="#061128" d="M3 10h21v3h7v16h-7v5H3z"/><path class="cup-handle" fill="#f56564" d="M23 15h5v11h-5z"/><path fill="#061128" d="M24 18h2v5h-2z"/><path class="cup-body" fill="#bd243d" d="M5 12h17v19H5z"/><path class="cup-highlight" fill="#ff8070" d="M5 13h3v16H5z"/><path fill="#fff1c1" d="M4 10h19v3H4zM11 1h3v3h-3zM14 4h3v3h-3zM11 7h3v2h-3z"/><path class="wine-mark" fill="#fff1c1" d="M12 17h3v11h-3zM8 21h11v3H8zM9 18h2v2H9zM16 18h2v2h-2zM9 25h2v2H9zM16 25h2v2h-2z"/><path class="punch-mark" fill="#fff1c1" d="M13 16l2 5h5l-4 3 2 5-5-3-4 3 2-5-4-3h5z"/></svg><span class="lane-caption"><span>Tresen 3</span><strong class="drink-label">Glühwein</strong></span><kbd>3</kbd></button></div>
+    <div class="footer-line"><span id="control-hint">Tippen: wechseln · Halten: aufladen</span></div>
   </footer>
 
   <div id="intro" class="veil">
@@ -51,7 +51,7 @@
         <div class="hero-cup" aria-hidden="true"><svg class="pixel-cup" viewBox="0 0 32 36" aria-hidden="true"><path fill="#061128" d="M3 10h21v3h7v16h-7v5H3z"/><path fill="#f56564" d="M23 15h5v11h-5z"/><path fill="#061128" d="M24 18h2v5h-2z"/><path fill="#bd243d" d="M5 12h17v19H5z"/><path fill="#ff8070" d="M5 13h3v16H5z"/><path fill="#fff1c1" d="M4 10h19v3H4zM12 17h3v11h-3zM8 21h11v3H8zM9 18h2v2H9zM16 18h2v2h-2zM9 25h2v2H9zM16 25h2v2h-2zM11 1h3v3h-3zM14 4h3v3h-3zM11 7h3v2h-3z"/></svg></div>
         <h1 id="welcome-title">Glühwein-<br><em>Slide.</em></h1>
       </div>
-      <p class="intro-copy">Tasse halten, aufladen und loslassen.<br>Wie viele Gäste schaffst du?</p>
+      <p class="intro-copy">Kurz tippen wechselt das Getränk.<br>Halten, aufladen und loslassen.</p>
       <div class="intro-facts"><span>60 Sekunden</span><span>3 Chancen</span></div>
       <button id="start" class="primary">Jetzt spielen</button>
 
@@ -67,9 +67,10 @@
       </div>
       <details class="welcome-rules">
         <summary>Spielregeln &amp; Boni</summary>
+        <p>Die Tasse in der Sprechblase zeigt die Bestellung. Rot mit Schneeflocke bedeutet Glühwein, grün mit Stern bedeutet Kinderpunsch. Tippe den jeweiligen Tresen kurz an, um das Getränk zu wechseln. Ein falsches Getränk wird nicht angenommen.</p>
         <p>Je länger du die Tasse hältst, desto weiter gleitet sie. Bediene die Gäste, bevor sie das Tresenende erreichen. 3 Gäste ohne Glühwein = Game Over.</p>
         <p>Eine Punktlandung bringt 25 Bonuspunkte. Nach 5 Treffern in Folge gibt es 8 Sekunden doppelte Punkte.</p>
-        <p>Spiele mit Finger oder Maus. Mit der Tastatur hältst du die Tasten 1, 2 oder 3 gedrückt und lässt sie los.</p>
+        <p>Spiele mit Finger oder Maus. Auch mit den Tasten 1, 2 oder 3 kannst du kurz antippen zum Wechseln oder halten und loslassen zum Servieren.</p>
       </details>
       <a class="biblebluff-back welcome-back" href="/">Zurück zu Biblebluff</a>
     </section>
